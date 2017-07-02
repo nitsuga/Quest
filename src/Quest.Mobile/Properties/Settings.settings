@@ -1,0 +1,55 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Quest.Mobile.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Queue" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Quest.Mobile</Value>
+    </Setting>
+    <Setting Name="DownFlag" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="DownMessage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">The system has been taken offline for maintenance.</Value>
+    </Setting>
+    <Setting Name="TestFlag" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TestMessage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Test Version (not real data)</Value>
+    </Setting>
+    <Setting Name="Stage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Development</Value>
+    </Setting>
+    <Setting Name="Wms" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EmbeddedJobManager" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ElasticUrls" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost:9200</Value>
+    </Setting>
+    <Setting Name="Args" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Parts" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Quest.Lib.ServiceBus.ActiveMqClient&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="AutoStartJobs" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;#EisecServer&lt;/string&gt;
+  &lt;string&gt;#EisecSimulator&lt;/string&gt;
+  &lt;string&gt;#DeviceTracker&lt;/string&gt;
+  &lt;string&gt;#XReplayPlayer&lt;/string&gt;
+  &lt;string&gt;#RoutingManager&lt;/string&gt;
+  &lt;string&gt;#VisualsManager&lt;/string&gt;
+  &lt;string&gt;#TwitterTracker&lt;/string&gt;
+  &lt;string&gt;#MapMatcherMsgHandler&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

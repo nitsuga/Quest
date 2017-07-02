@@ -1,0 +1,140 @@
+﻿@model Quest.Mobile.Models.JobsViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jobs")
+    @Styles.Render("~/Content/core")
+}
+
+<style>
+    table, td, th {
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+</style>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <div class="navbar-icon-container">
+                <a href="#" class="navbar-icon pull-right visible-xs" id="nav-btn"><i class="fa fa-bars fa-lg white"></i></a>
+            </div>
+            <a class="navbar-brand" href="/">Quest</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+
+                <li class="dropdown">
+                    <a id="toolsDrop3" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-clipboard white"></i>&nbsp;&nbsp;Jobs<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+
+                        <li><a href="~/Job/Index"><i class="fa fa-spinner"></i>&nbsp;&nbsp;Jobs</a></li>
+                        <li><a href="#" data-toggle="collapse" data-target=".navbar-collapse.in" id="do-submit-dlg"><i class="fa fa-ambulance"></i>&nbsp;&nbsp;SubmitJob</a></li>
+
+                    </ul>
+                </li>
+
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a id="toolsDrop2" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog white"></i>&nbsp;&nbsp;Options<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="~/Settings/Index"><span class="glyphicon glyphicon-cog"></span>&nbsp;&nbsp;Settings</a></li>
+                        <li><a href="~/Account/Logout"><span class="glyphicon glyphicon-off"></span>&nbsp;&nbsp;Sign Out</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div><!--/.navbar-collapse -->
+    </div>
+</div>
+
+
+<div class="container" style="height: 100%; overflow: auto;">
+    <h2>Job Control</h2>
+    <section id="jobtemplateform">
+        <h4>Use this form to manage jobs.</h4>
+        <hr />
+        <div class="form-group">
+            <div class="">
+                @foreach (var item in Model.Templates)
+                {
+                    <button data-id="@item.Template.JobTemplateId" class="template-btn">@item.Template.Name</button>
+                }
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="submit-dlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color:#282828; color:white">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Start Job</h4>
+                </div>
+                <div class="modal-body">
+                    <table style="font-size:10pt">
+                        <tr>
+                            <td>
+                                <label>Task:</label>
+                            </td>
+                            <td>
+                                <input type="text" id="job-task" style="color: black;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Parameters:</label>
+                            </td>
+                            <td>
+                                <input type="text" id="job-parameters" style="color: black;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Class:</label>
+                            </td>
+                            <td>
+                                <input type="text" id="job-class" style="color: black;" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button id="job-submit" type="button" class="btn" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <label for="realtime-flag">Auto update</label>
+    <input id="realtime-flag" type="checkbox" data-toggle="toggle" data-size="small">
+
+    <div class="form-group1">
+        <table id="jobs" class="form-group">
+            <thead><tr><td>Id</td><td>Status</td><td>Task</td><td>Description</td><td>Success</td><td>Message</td><td>Created</td><td>Scheduled</td><td>Started</td><td>Stopped</td></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <ul class="pager">
+        <li><a id="prev" href="#">Previous</a></li>
+        <li><a id="next" href="#">Next</a></li>
+    </ul>
+
+</div>
+

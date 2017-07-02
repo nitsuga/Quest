@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EisecConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- NOT USED ANYMORE 
+  <LogonPoll>1000</LogonPoll>
+  -->
+
+  <IpList>
+    <IpDetails>
+      <!-- how often to send a poll - set to 0 to disable or more than either of the two timeouts below-->
+      <SendPollSeconds>10</SendPollSeconds>
+
+      <!-- How long EISEC waits for a heartbeat before disconnecting MUST BE MORE THAN SendPollSeconds-->
+      <RemotePollTimeoutSeconds>15</RemotePollTimeoutSeconds>
+
+      <!-- how long to wait for a response before disconnecting -->
+      <LocalPollTimeoutSeconds>15</LocalPollTimeoutSeconds>
+      <addr>127.0.0.1</addr>
+      <port>5000</port>
+      <user>
+        <username>NHAMPOL1</username>
+        <password>9182AD1ED5D3</password>
+      </user>
+    </IpDetails>
+    <IpDetails>
+      <!-- how often to send a poll - set to 0 to disable or more than either of the two timeouts below-->
+      <SendPollSeconds>10</SendPollSeconds>
+
+      <!-- How long EISEC waits for a heartbeat before disconnecting MUST BE MORE THAN SendPollSeconds-->
+      <RemotePollTimeoutSeconds>15</RemotePollTimeoutSeconds>
+
+      <!-- how long to wait for a response before disconnecting -->
+      <LocalPollTimeoutSeconds>15</LocalPollTimeoutSeconds>
+      <addr>127.0.0.1</addr>
+      <port>5010</port>
+      <user>
+        <username>NHAMPOL2</username>
+        <password>9182AD1ED5D3</password>
+      </user>
+    </IpDetails>
+  </IpList>
+</EisecConfig>

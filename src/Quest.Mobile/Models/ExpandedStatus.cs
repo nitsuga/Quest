@@ -1,0 +1,4 @@
+﻿namespace Quest.Mobile.Models
+{
+
+}

@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  quest.webcore:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+

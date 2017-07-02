@@ -1,0 +1,331 @@
+﻿@model Quest.Mobile.Models.TestMessage
+
+@{
+    
+    ViewBag.Title = "Device Test Console";
+}
+
+<div>
+    <h3 style="float: left; width: 180px"><span class="glyphicon glyphicon-signal"></span>Manage Device</h3>
+
+    <h4>API Reference</h4>
+    <p>The Quest 1.0.0 API reference can be found <a href="/apidoc/html">here</a></p>
+    
+    <div class="btn-group" style="margin-top: 15px">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Options<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a data-toggle="modal" href="#login">Login</a></li>
+            <li><a data-toggle="modal" href="#logout">Logout</a></li>
+            <li><a data-toggle="modal" href="#callsign">Callsign Change</a></li>
+            <li><a data-toggle="modal" href="#assignevent">Get Assigned Event</a></li>
+            <li><a data-toggle="modal" href="#ack">AckAssignedEventRequest</a></li>            
+            <li><a data-toggle="modal" href="#pos">Set Position</a></li>
+            <li><a data-toggle="modal" href="#qstatus">Set Quick Status</a></li>
+            <li><a data-toggle="modal" href="#getstatuscodes">Get Status Codes Request</a></li>            
+            <li><a data-toggle="modal" href="#obs">Make Patient Observation</a></li>
+            <li><a data-toggle="modal" href="#details">Find Patient Details</a></li>
+            <li><a data-toggle="modal" href="#getentities">Get Entity Types</a></li>
+            <li><a data-toggle="modal" href="#nearests">Nearest</a></li>
+            <li><a data-toggle="modal" href="#gethistory">GetHistory</a></li>
+        </ul>
+    </div>
+</div>
+
+<hr style="border: 1px solid #000033" />
+
+@Html.TextBoxFor(m => m.Request, new { @class = "form-control" })
+
+<hr style="border: 1px solid #000033" />
+
+@Html.TextBoxFor(m => m.Result, new { @class = "form-control" })
+
+<div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Login</h4>
+                @using (Html.BeginForm("Login", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.LoginRequest.Username, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.Username, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.Username)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.Password, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.Password, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.Password)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.QuestApi, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.QuestApi, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.QuestApi)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.Locale, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.Locale, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.Locale)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.DeviceIdentity, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.DeviceIdentity, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.DeviceIdentity)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.NotificationId, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.NotificationId, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.NotificationId)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.NotificationTypeId, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.NotificationTypeId, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.NotificationTypeId)
+                        </div>
+                        @Html.LabelFor(m => m.LoginRequest.DeviceIdentity, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.LoginRequest.DeviceIdentity, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.LoginRequest.DeviceIdentity)
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="logout" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Logout</h4>
+                @using (Html.BeginForm("Logout", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="callsign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Callsign Change</h4>
+                @using (Html.BeginForm("CallsignChange", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.CallsignChangeRequest.Callsign, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.CallsignChangeRequest.Callsign, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.CallsignChangeRequest.Callsign)
+                        </div>
+                    </div>                    
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="assignevent" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">ge Assigned event</h4>
+                @using (Html.BeginForm("GetAssignedEvent", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ack" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Callsign Change</h4>
+                @using (Html.BeginForm("AckAssignedEvent", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AckAssignedEventRequest.Accept, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.CheckBoxFor(m => m.AckAssignedEventRequest.Accept, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AckAssignedEventRequest.Accept)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AckAssignedEventRequest.Reason, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AckAssignedEventRequest.Reason, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AckAssignedEventRequest.Reason)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AckAssignedEventRequest.EventId, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AckAssignedEventRequest.EventId, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AckAssignedEventRequest.EventId)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Position Report</h4>
+                @using (Html.BeginForm("PositionUpdate", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.PositionUpdateRequest.Latitude, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.PositionUpdateRequest.Latitude, new { @class = "form-control", type="number", min="0", max="180" } )
+                            @Html.ValidationMessageFor(m => m.PositionUpdateRequest.Latitude)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.PositionUpdateRequest.Longitude, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.PositionUpdateRequest.Longitude, new { @class = "form-control", type = "number", min = "0", max = "180" })
+                            @Html.ValidationMessageFor(m => m.PositionUpdateRequest.Longitude)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="qstatus" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Set Quick Status</h4>
+                @using (Html.BeginForm("SetStatusGroup", "Test", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AuthToken, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.AuthToken, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.AuthToken)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.SetStatusGroupRequest.StatusGroup, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.EnumDropDownListFor(m => m.SetStatusGroupRequest.StatusGroup, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.SetStatusGroupRequest.StatusGroup)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Send" class="btn btn-default" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /.modal-dialog -->
+@section Scripts {
+    @Styles.Render("~/Content/core")
+    @Scripts.Render("~/bundles/jquery")
+}
+

@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="Quest.Processor" Label="Quest.Processor" Category="Project" />
+    <Node Id="EnterpriseLibrary.Common 6.0.1304.0" Label="EnterpriseLibrary.Common 6.0.1304.0" Category="Package" />
+    <Node Id="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Label="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Category="Package" />
+    <Node Id="EnterpriseLibrary.Logging 6.0.1304.0" Label="EnterpriseLibrary.Logging 6.0.1304.0" Category="Package" />
+    <Node Id="EntityFramework 6.1.1" Label="EntityFramework 6.1.1" Category="Package" />
+    <Node Id="RabbitMQ.Client 3.4.0" Label="RabbitMQ.Client 3.4.0" Category="Package" />
+    <Node Id="Quest.Mobile" Label="Quest.Mobile" Category="Project" />
+    <Node Id="Antlr 3.5.0.2" Label="Antlr 3.5.0.2" Category="Package" />
+    <Node Id="EnterpriseLibrary.Common 6.0.1304.0" Label="EnterpriseLibrary.Common 6.0.1304.0" Category="Package" />
+    <Node Id="EnterpriseLibrary.Logging 6.0.1304.0" Label="EnterpriseLibrary.Logging 6.0.1304.0" Category="Package" />
+    <Node Id="EntityFramework 6.1.1" Label="EntityFramework 6.1.1" Category="Package" />
+    <Node Id="FluentValidationNA 1.2.16" Label="FluentValidationNA 1.2.16" Category="Package" />
+    <Node Id="jQuery 2.1.1" Label="jQuery 2.1.1" Category="Package" />
+    <Node Id="jquery.mobile 1.4.2" Label="jquery.mobile 1.4.2" Category="Package" />
+    <Node Id="jQuery.UI.Combined 1.11.2" Label="jQuery.UI.Combined 1.11.2" Category="Package" />
+    <Node Id="jQuery.Validation 1.13.1" Label="jQuery.Validation 1.13.1" Category="Package" />
+    <Node Id="leaflet 0.7.3" Label="leaflet 0.7.3" Category="Package" />
+    <Node Id="Microsoft.AspNet.Identity.Core 2.1.0" Label="Microsoft.AspNet.Identity.Core 2.1.0" Category="Package" />
+    <Node Id="Microsoft.AspNet.Identity.EntityFramework 2.1.0" Label="Microsoft.AspNet.Identity.EntityFramework 2.1.0" Category="Package" />
+    <Node Id="Microsoft.AspNet.Identity.Owin 2.1.0" Label="Microsoft.AspNet.Identity.Owin 2.1.0" Category="Package" />
+    <Node Id="Microsoft.AspNet.Mvc 5.2.2" Label="Microsoft.AspNet.Mvc 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.Razor 3.2.2" Label="Microsoft.AspNet.Razor 3.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.SignalR 2.1.2" Label="Microsoft.AspNet.SignalR 2.1.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.SignalR.Core 2.1.2" Label="Microsoft.AspNet.SignalR.Core 2.1.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.SignalR.JS 2.1.2" Label="Microsoft.AspNet.SignalR.JS 2.1.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.SignalR.SystemWeb 2.1.2" Label="Microsoft.AspNet.SignalR.SystemWeb 2.1.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.Web.Optimization 1.1.3" Label="Microsoft.AspNet.Web.Optimization 1.1.3" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebApi 5.2.2" Label="Microsoft.AspNet.WebApi 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebApi.Client 5.2.2" Label="Microsoft.AspNet.WebApi.Client 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebApi.Core 5.2.2" Label="Microsoft.AspNet.WebApi.Core 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebApi.Owin 5.2.2" Label="Microsoft.AspNet.WebApi.Owin 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebApi.WebHost 5.2.2" Label="Microsoft.AspNet.WebApi.WebHost 5.2.2" Category="Package" />
+    <Node Id="Microsoft.AspNet.WebPages 3.2.2" Label="Microsoft.AspNet.WebPages 3.2.2" Category="Package" />
+    <Node Id="Microsoft.jQuery.Unobtrusive.Ajax 3.2.2" Label="Microsoft.jQuery.Unobtrusive.Ajax 3.2.2" Category="Package" />
+    <Node Id="Microsoft.jQuery.Unobtrusive.Validation 3.2.2" Label="Microsoft.jQuery.Unobtrusive.Validation 3.2.2" Category="Package" />
+    <Node Id="Microsoft.Owin 3.0.0" Label="Microsoft.Owin 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Host.SystemWeb 3.0.0" Label="Microsoft.Owin.Host.SystemWeb 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security 3.0.0" Label="Microsoft.Owin.Security 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security.Cookies 3.0.0" Label="Microsoft.Owin.Security.Cookies 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security.Facebook 3.0.0" Label="Microsoft.Owin.Security.Facebook 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security.Google 3.0.0" Label="Microsoft.Owin.Security.Google 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Label="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Category="Package" />
+    <Node Id="Microsoft.Owin.Security.OAuth 3.0.0" Label="Microsoft.Owin.Security.OAuth 3.0.0" Category="Package" />
+    <Node Id="Microsoft.SqlServer.Types 11.0.1" Label="Microsoft.SqlServer.Types 11.0.1" Category="Package" />
+    <Node Id="Microsoft.Web.Infrastructure 1.0.0.0" Label="Microsoft.Web.Infrastructure 1.0.0.0" Category="Package" />
+    <Node Id="Modernizr 2.8.3" Label="Modernizr 2.8.3" Category="Package" />
+    <Node Id="Newtonsoft.Json 6.0.6" Label="Newtonsoft.Json 6.0.6" Category="Package" />
+    <Node Id="Owin 1.0" Label="Owin 1.0" Category="Package" />
+    <Node Id="RabbitMQ.Client 3.4.0" Label="RabbitMQ.Client 3.4.0" Category="Package" />
+    <Node Id="System.Linq.Dynamic.Library 1.1.13" Label="System.Linq.Dynamic.Library 1.1.13" Category="Package" />
+    <Node Id="WebGrease 1.6.0" Label="WebGrease 1.6.0" Category="Package" />
+    <Node Id="Quest.Lib" Label="Quest.Lib" Category="Project" />
+    <Node Id="EnterpriseLibrary.Common 6.0.1304.0" Label="EnterpriseLibrary.Common 6.0.1304.0" Category="Package" />
+    <Node Id="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Label="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Category="Package" />
+    <Node Id="EnterpriseLibrary.Logging 6.0.1304.0" Label="EnterpriseLibrary.Logging 6.0.1304.0" Category="Package" />
+    <Node Id="EntityFramework 6.1.1" Label="EntityFramework 6.1.1" Category="Package" />
+    <Node Id="GeoAPI 1.7.3.1" Label="GeoAPI 1.7.3.1" Category="Package" />
+    <Node Id="Microsoft.Bcl 1.1.9" Label="Microsoft.Bcl 1.1.9" Category="Package" />
+    <Node Id="Microsoft.Bcl.Build 1.0.21" Label="Microsoft.Bcl.Build 1.0.21" Category="Package" />
+    <Node Id="Microsoft.Net.Http 2.2.28" Label="Microsoft.Net.Http 2.2.28" Category="Package" />
+    <Node Id="NetTopologySuite 1.13.3.2" Label="NetTopologySuite 1.13.3.2" Category="Package" />
+    <Node Id="Newtonsoft.Json 6.0.6" Label="Newtonsoft.Json 6.0.6" Category="Package" />
+    <Node Id="PushSharp 2.2.1.0" Label="PushSharp 2.2.1.0" Category="Package" />
+    <Node Id="QuickGraph 3.6.61119.7" Label="QuickGraph 3.6.61119.7" Category="Package" />
+    <Node Id="RabbitMQ.Client 3.4.0" Label="RabbitMQ.Client 3.4.0" Category="Package" />
+  </Nodes>
+  <Links>
+    <Link Source="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Target="EnterpriseLibrary.Common 6.0.1304.0" Category="Package Dependency" />
+    <Link Source="EnterpriseLibrary.Logging 6.0.1304.0" Target="EnterpriseLibrary.Common 6.0.1304.0" Category="Package Dependency" />
+    <Link Source="Quest.Processor" Target="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Category="Installed Package" />
+    <Link Source="Quest.Processor" Target="EnterpriseLibrary.Logging 6.0.1304.0" Category="Installed Package" />
+    <Link Source="Quest.Processor" Target="EntityFramework 6.1.1" Category="Installed Package" />
+    <Link Source="Quest.Processor" Target="RabbitMQ.Client 3.4.0" Category="Installed Package" />
+    <Link Source="EnterpriseLibrary.Logging 6.0.1304.0" Target="EnterpriseLibrary.Common 6.0.1304.0" Category="Package Dependency" />
+    <Link Source="jquery.mobile 1.4.2" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="jQuery.UI.Combined 1.11.2" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="jQuery.Validation 1.13.1" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.EntityFramework 2.1.0" Target="Microsoft.AspNet.Identity.Core 2.1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.EntityFramework 2.1.0" Target="EntityFramework 6.1.1" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.Owin 2.1.0" Target="Microsoft.AspNet.Identity.Core 2.1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.Owin 2.1.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.Owin 2.1.0" Target="Microsoft.Owin.Security.Cookies 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Identity.Owin 2.1.0" Target="Microsoft.Owin.Security.OAuth 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Mvc 5.2.2" Target="Microsoft.AspNet.WebPages 3.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Mvc 5.2.2" Target="Microsoft.AspNet.Razor 3.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR 2.1.2" Target="Microsoft.AspNet.SignalR.JS 2.1.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR 2.1.2" Target="Microsoft.AspNet.SignalR.SystemWeb 2.1.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.Core 2.1.2" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.Core 2.1.2" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.Core 2.1.2" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.Core 2.1.2" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.JS 2.1.2" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.SystemWeb 2.1.2" Target="Microsoft.AspNet.SignalR.Core 2.1.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.SignalR.SystemWeb 2.1.2" Target="Microsoft.Owin.Host.SystemWeb 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Web.Optimization 1.1.3" Target="Microsoft.Web.Infrastructure 1.0.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.Web.Optimization 1.1.3" Target="WebGrease 1.6.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi 5.2.2" Target="Microsoft.AspNet.WebApi.WebHost 5.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Client 5.2.2" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Client 5.2.2" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Core 5.2.2" Target="Microsoft.AspNet.WebApi.Client 5.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Owin 5.2.2" Target="Microsoft.AspNet.WebApi.Core 5.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Owin 5.2.2" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.Owin 5.2.2" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebApi.WebHost 5.2.2" Target="Microsoft.AspNet.WebApi.Core 5.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebPages 3.2.2" Target="Microsoft.Web.Infrastructure 1.0.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.AspNet.WebPages 3.2.2" Target="Microsoft.AspNet.Razor 3.2.2" Category="Package Dependency" />
+    <Link Source="Microsoft.jQuery.Unobtrusive.Ajax 3.2.2" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="Microsoft.jQuery.Unobtrusive.Validation 3.2.2" Target="jQuery 2.1.1" Category="Package Dependency" />
+    <Link Source="Microsoft.jQuery.Unobtrusive.Validation 3.2.2" Target="jQuery.Validation 1.13.1" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Host.SystemWeb 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Host.SystemWeb 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Cookies 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Cookies 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Cookies 3.0.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Facebook 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Facebook 3.0.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Facebook 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Facebook 3.0.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Google 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Google 3.0.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Google 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.Google 3.0.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.OAuth 3.0.0" Target="Owin 1.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.OAuth 3.0.0" Target="Microsoft.Owin 3.0.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.OAuth 3.0.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Microsoft.Owin.Security.OAuth 3.0.0" Target="Microsoft.Owin.Security 3.0.0" Category="Package Dependency" />
+    <Link Source="System.Linq.Dynamic.Library 1.1.13" Target="FluentValidationNA 1.2.16" Category="Package Dependency" />
+    <Link Source="WebGrease 1.6.0" Target="Antlr 3.5.0.2" Category="Package Dependency" />
+    <Link Source="WebGrease 1.6.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="Quest.Mobile" Target="EnterpriseLibrary.Logging 6.0.1304.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="jquery.mobile 1.4.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="jQuery.UI.Combined 1.11.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="leaflet 0.7.3" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.Identity.EntityFramework 2.1.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.Identity.Owin 2.1.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.Mvc 5.2.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.SignalR 2.1.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.Web.Optimization 1.1.3" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.WebApi 5.2.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.AspNet.WebApi.Owin 5.2.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.jQuery.Unobtrusive.Ajax 3.2.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.jQuery.Unobtrusive.Validation 3.2.2" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.Owin.Security.Facebook 3.0.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.Owin.Security.Google 3.0.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.Owin.Security.MicrosoftAccount 3.0.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Microsoft.SqlServer.Types 11.0.1" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="Modernizr 2.8.3" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="RabbitMQ.Client 3.4.0" Category="Installed Package" />
+    <Link Source="Quest.Mobile" Target="System.Linq.Dynamic.Library 1.1.13" Category="Installed Package" />
+    <Link Source="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Target="EnterpriseLibrary.Common 6.0.1304.0" Category="Package Dependency" />
+    <Link Source="EnterpriseLibrary.Logging 6.0.1304.0" Target="EnterpriseLibrary.Common 6.0.1304.0" Category="Package Dependency" />
+    <Link Source="Microsoft.Bcl 1.1.9" Target="Microsoft.Bcl.Build 1.0.21" Category="Package Dependency" />
+    <Link Source="Microsoft.Net.Http 2.2.28" Target="Microsoft.Bcl 1.1.9" Category="Package Dependency" />
+    <Link Source="Microsoft.Net.Http 2.2.28" Target="Microsoft.Bcl.Build 1.0.21" Category="Package Dependency" />
+    <Link Source="NetTopologySuite 1.13.3.2" Target="GeoAPI 1.7.3.1" Category="Package Dependency" />
+    <Link Source="PushSharp 2.2.1.0" Target="Newtonsoft.Json 6.0.6" Category="Package Dependency" />
+    <Link Source="PushSharp 2.2.1.0" Target="Microsoft.Net.Http 2.2.28" Category="Package Dependency" />
+    <Link Source="Quest.Lib" Target="EnterpriseLibrary.ExceptionHandling 6.0.1304.0" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="EnterpriseLibrary.Logging 6.0.1304.0" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="EntityFramework 6.1.1" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="NetTopologySuite 1.13.3.2" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="PushSharp 2.2.1.0" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="QuickGraph 3.6.61119.7" Category="Installed Package" />
+    <Link Source="Quest.Lib" Target="RabbitMQ.Client 3.4.0" Category="Installed Package" />
+  </Links>
+  <Categories>
+    <Category Id="Project" />
+    <Category Id="Package" />
+  </Categories>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Project" ValueLabel="True">
+      <Condition Expression="HasCategory('Project')" />
+      <Setter Property="Background" Value="Blue" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Package Dependency" ValueLabel="True">
+      <Condition Expression="HasCategory('Package Dependency')" />
+      <Setter Property="Background" Value="Yellow" />
+    </Style>
+  </Styles>
+</DirectedGraph>

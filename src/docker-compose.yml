@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  quest.webcore:
+    image: quest.webcore
+    build:
+      context: ./Quest.WebCore
+      dockerfile: Dockerfile
+
+  quest.cmd:
+    image: quest.cmd
+    build:
+      context: ./Quest.Cmd
+      dockerfile: Dockerfile

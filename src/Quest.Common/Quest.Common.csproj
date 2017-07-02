@@ -1,0 +1,239 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{68347B90-90B3-4730-AD25-9F58D3D5DF15}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Quest.Common</RootNamespace>
+    <AssemblyName>Quest.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Docker|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Docker\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Elasticsearch.Net, Version=5.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Elasticsearch.Net.5.4.0\lib\net46\Elasticsearch.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="GeoAPI, Version=1.7.4.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeoAPI.1.7.4\lib\net45\GeoAPI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GeoJSON.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeoJSON.Net.1.0.62\lib\net45\GeoJSON.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Nest, Version=5.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\NEST.5.4.0\lib\net46\Nest.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite, Version=1.14.0.0, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.1.14\lib\net45\NetTopologySuite.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PowerCollections, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2573bf8a1bdddcd5, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.1.14\lib\net45\PowerCollections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Primitives, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Primitives.4.3.0\lib\net46\System.Runtime.Serialization.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Messages\AckAssignedEventRequest.cs" />
+    <Compile Include="Messages\AckAssignedEventResponse.cs" />
+    <Compile Include="Messages\AssignDeviceRequest.cs" />
+    <Compile Include="Messages\AssignDeviceResponse.cs" />
+    <Compile Include="Messages\CallsignChangeRequest.cs" />
+    <Compile Include="Messages\CallsignChangeResponse.cs" />
+    <Compile Include="Messages\CallsignNotification.cs" />
+    <Compile Include="Messages\CancelDeviceRequest.cs" />
+    <Compile Include="Messages\CancelDeviceResponse.cs" />
+    <Compile Include="Messages\CancellationNotification.cs" />
+    <Compile Include="Messages\DeviceHistoryItem.cs" />
+    <Compile Include="Messages\EventMapItem.cs" />
+    <Compile Include="Messages\EventNotification.cs" />
+    <Compile Include="Messages\GetCoverageRequest.cs" />
+    <Compile Include="Messages\GetCoverageResponse.cs" />
+    <Compile Include="Messages\GetEntityTypesRequest.cs" />
+    <Compile Include="Messages\GetEntityTypesResponse.cs" />
+    <Compile Include="Messages\GetHistoryRequest.cs" />
+    <Compile Include="Messages\GetHistoryResponse.cs" />
+    <Compile Include="Messages\GetStatusCodesRequest.cs" />
+    <Compile Include="Messages\GetStatusCodesResponse.cs" />
+    <Compile Include="Messages\Heatmap.cs" />
+    <Compile Include="Messages\IDeviceNotification.cs" />
+    <Compile Include="Messages\IncidentAlarm.cs" />
+    <Compile Include="Messages\IndexGroup.cs" />
+    <Compile Include="Messages\AddressSearch.cs" />
+    <Compile Include="Messages\BeginDump.cs" />
+    <Compile Include="Messages\CloseIncident.cs" />
+    <Compile Include="Messages\CPEventStatusList.cs" />
+    <Compile Include="Messages\CustomCoverage.cs" />
+    <Compile Include="Messages\DeleteResource.cs" />
+    <Compile Include="Messages\EdgeWithOffset.cs" />
+    <Compile Include="Messages\Fix.cs" />
+    <Compile Include="Messages\IncidentUpdate.cs" />
+    <Compile Include="Messages\IndexRequest.cs" />
+    <Compile Include="Messages\IntelObservation.cs" />
+    <Compile Include="Messages\IRouteRequest.cs" />
+    <Compile Include="Messages\IRouteResult.cs" />
+    <Compile Include="Messages\LocationVector.cs" />
+    <Compile Include="Messages\LoginRequest.cs" />
+    <Compile Include="Messages\LoginResponse.cs" />
+    <Compile Include="Messages\LogoutRequest.cs" />
+    <Compile Include="Messages\LogoutResponse.cs" />
+    <Compile Include="Messages\MakePatientObservationRequest.cs" />
+    <Compile Include="Messages\MakePatientObservationResponse.cs" />
+    <Compile Include="Messages\MapItemsRequest.cs" />
+    <Compile Include="Messages\MapItemsResponse.cs" />
+    <Compile Include="Messages\MessageBody.cs" />
+    <Compile Include="Messages\MessageNotification.cs" />
+    <Compile Include="Messages\NavigateRequest.cs" />
+    <Compile Include="Messages\NavigateResponse.cs" />
+    <Compile Include="Messages\PatientDetailsRequest.cs" />
+    <Compile Include="Messages\PatientDetailsResponse.cs" />
+    <Compile Include="Messages\PatientObservation.cs" />
+    <Compile Include="Messages\PositionUpdateRequest.cs" />
+    <Compile Include="Messages\PositionUpdateResponse.cs" />
+    <Compile Include="Messages\QuestDestination.cs" />
+    <Compile Include="Messages\RefreshStateRequest.cs" />
+    <Compile Include="Messages\RefreshStateResponse.cs" />
+    <Compile Include="Messages\Request.cs" />
+    <Compile Include="Messages\ResourceAlarm.cs" />
+    <Compile Include="Messages\ResourceItem.cs" />
+    <Compile Include="Messages\Response.cs" />
+    <Compile Include="Messages\SendMessageRequest.cs" />
+    <Compile Include="Messages\SetStatusRequest.cs" />
+    <Compile Include="Messages\SetStatusResponse.cs" />
+    <Compile Include="Messages\StatusCode.cs" />
+    <Compile Include="Messages\StatusNotification.cs" />
+    <Compile Include="Simulation\AssignedResource.cs" />
+    <Compile Include="Simulation\AtDestination.cs" />
+    <Compile Include="Simulation\CalcCoverage.cs" />
+    <Compile Include="Simulation\CallsignUpdate.cs" />
+    <Compile Include="Simulation\CancelIncident.cs" />
+    <Compile Include="Simulation\DestType.cs" />
+    <Compile Include="Simulation\HospitalFinished.cs" />
+    <Compile Include="Simulation\Login.cs" />
+    <Compile Include="Simulation\Logout.cs" />
+    <Compile Include="Simulation\LowWaterIncidents.cs" />
+    <Compile Include="Simulation\LowWaterResources.cs" />
+    <Compile Include="Messages\QuestDevice.cs" />
+    <Compile Include="Messages\QuestIncident.cs" />
+    <Compile Include="Messages\QuestResource.cs" />
+    <Compile Include="ServiceBus\IServiceBusMessage.cs" />
+    <Compile Include="Messages\Job.cs" />
+    <Compile Include="Messages\Hems.cs" />
+    <Compile Include="Messages\MakeCall.cs" />
+    <Compile Include="Messages\MakeCallResult.cs" />
+    <Compile Include="Messages\MapMatcher.cs" />
+    <Compile Include="Messages\MDTMessage.cs" />
+    <Compile Include="Messages\MessageBase.cs" />
+    <Compile Include="Messages\MessageQueueItem.cs" />
+    <Compile Include="Messages\MotionVector.cs" />
+    <Compile Include="Messages\Processor.cs" />
+    <Compile Include="Messages\ResourceLogon.cs" />
+    <Compile Include="Messages\ResourceUpdate.cs" />
+    <Compile Include="Messages\RingbackStatus.cs" />
+    <Compile Include="Messages\RoadLinkEdge.cs" />
+    <Compile Include="Messages\RoadVector.cs" />
+    <Compile Include="Messages\RouteMatcherResponse.cs" />
+    <Compile Include="Messages\RouteRequestCoverage.cs" />
+    <Compile Include="Messages\RouteRequestMultiple.cs" />
+    <Compile Include="Messages\RoutingResult.cs" />
+    <Compile Include="Messages\Security.cs" />
+    <Compile Include="Messages\ServiceStatus.cs" />
+    <Compile Include="Messages\Telephony.cs" />
+    <Compile Include="Messages\TimedEvent.cs" />
+    <Compile Include="Messages\Visuals.cs" />
+    <Compile Include="Messages\XCinbound.cs" />
+    <Compile Include="Messages\XCOutbound.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceBus\IServiceBusClient.cs" />
+    <Compile Include="Simulation\MDTIncident.cs" />
+    <Compile Include="Simulation\NavigateTo.cs" />
+    <Compile Include="Simulation\NextNavigationEvent.cs" />
+    <Compile Include="Simulation\OnsceneComplete.cs" />
+    <Compile Include="Simulation\others.cs" />
+    <Compile Include="Simulation\ResMessage.cs" />
+    <Compile Include="Simulation\RespondToNewIncident.cs" />
+    <Compile Include="Simulation\RosterCheck.cs" />
+    <Compile Include="Simulation\SATNAVLocation.cs" />
+    <Compile Include="Simulation\SetStatus.cs" />
+    <Compile Include="Simulation\ShutdownMDT.cs" />
+    <Compile Include="Simulation\SimDestination.cs" />
+    <Compile Include="Simulation\SimIncident.cs" />
+    <Compile Include="Simulation\SimIncidentEvent.cs" />
+    <Compile Include="Simulation\SimResource.cs" />
+    <Compile Include="Simulation\SimulationStat.cs" />
+    <Compile Include="Simulation\SimVehicle.cs" />
+    <Compile Include="Simulation\SkillLevel.cs" />
+    <Compile Include="Simulation\StartMDT.cs" />
+    <Compile Include="Simulation\StatusChange.cs" />
+    <Compile Include="Simulation\UpdateAssignmentRecord.cs" />
+    <Compile Include="Simulation\UpdateIncident.cs" />
+    <Compile Include="Simulation\VehicleRoster.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

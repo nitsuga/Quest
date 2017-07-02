@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SystemConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CollabChannelConfig>
+    <Name>Collaborator</Name>
+    <Hostname>localhost</Hostname>
+    <Port>6024</Port>
+  </CollabChannelConfig>
+  <CTIChannelConfigs>
+    <CTIChannelConfig>
+      <Name>HQ CTI Primary</Name>
+      <Enabled>true</Enabled>
+      <Primary>true</Primary>
+      <CTIPortalServiceAddress>http://34ASPCES001:8170/Aspect.UnifiedIP.EDK.CTIPortalService</CTIPortalServiceAddress>
+      <ClientCallbackURL>http://localhost:8174/www.aspect.com/PublishEvents</ClientCallbackURL>
+      <TenantId>1</TenantId>
+      <HeatbeatTimeout>0</HeatbeatTimeout>
+      <StartupDelay>10</StartupDelay>
+      <UserName>collaboratortest</UserName>
+      <Password>Police999</Password>
+    </CTIChannelConfig>
+    <CTIChannelConfig>
+      <Name>HQ CTI Secondary</Name>
+      <Enabled>false</Enabled>
+      <Primary>false</Primary>
+      <CTIPortalServiceAddress>http://34ASPCES002:8170/Aspect.UnifiedIP.EDK.CTIPortalService</CTIPortalServiceAddress>
+      <ClientCallbackURL>http://localhost:8175/www.aspect.com/PublishEvents</ClientCallbackURL>
+      <TenantId>1</TenantId>
+      <HeatbeatTimeout>0</HeatbeatTimeout>
+      <StartupDelay>10</StartupDelay>
+      <UserName>collaboratortest</UserName>
+      <Password>Police999</Password>
+    </CTIChannelConfig>
+  </CTIChannelConfigs>
+</SystemConfig>

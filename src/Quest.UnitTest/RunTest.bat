@@ -1,0 +1,2 @@
+"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe" /testcontainer:"D:\SVN\QuestServer\Quest.UnitTest\bin\Debug\Quest.UnitTest.dll" /test:TestAddress /detail:stdout
+"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe" /testcontainer:"D:\SVN\QuestServer\Quest.UnitTest\bin\Debug\Quest.UnitTest.dll" /test:TestFuzzy /detail:stdout
