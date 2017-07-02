@@ -1,0 +1,80 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/testroutes")
+    @Styles.Render("~/Content/core")
+}
+
+<style>
+    table, td, th {
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+
+    tr {
+        width: 100%;
+        display: inline-table;
+        table-layout: fixed;
+    }
+
+    tbody{
+      overflow-y: scroll;      
+      height: 400px;            
+      width: 100%;
+      position: absolute;
+    }
+
+
+</style>
+
+<div class="container">
+    <h2>Batch Test</h2>
+    <section id="loginForm">
+        <h4>Use this form to test batches of routes. Enter each route onto a separate line and click the <b>Submit</b> button.</h4>
+        <P>Enter one or more lines. Each line should contained 6 or 7 columns seperated by commas in the following format:</P>
+        <p style="font-family:monospace">Source easting, source northing, destination easting, destination northing, vehicle type, hour of week [,actual seconds]</p>
+        <p>vehicle type can be AEU or FRU</p>
+        <hr />
+        <div class="form-group">
+            @Html.Label("Speed Calculator")
+            @Html.DropDownList("RoadSpeedCalculator", new []
+            {
+                new SelectListItem {Text= "VariableSpeedByEdge", Selected = true},
+                new SelectListItem { Text = "VariableSpeedCalculator" },
+                new SelectListItem { Text = "RoadTypeSpeedCalculator" },
+                new SelectListItem { Text = "ConstantSpeedCalculator" }
+            } )
+
+            @Html.Label("Routes")
+            @Html.TextArea("Routes", new { rows = 5, columns = 80, @class = "form-control" })
+            
+        </div>
+        <div class="form-group">
+            <div class="">
+                <input type="submit" value="Submit" class="btn btn-default" id="submit" />
+            </div>
+        </div>
+    </section>
+    <div id="jobid" class="form-group">
+    </div>
+    <div class="form-group">
+        <table id="results" class="form-group">
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+

@@ -1,0 +1,96 @@
+﻿amb,ambulance
+app,approach 
+ave,avenue
+ph,pub,public house
+apartment,flat
+bri,bridge
+bdwy,broadway 
+bldg,building
+bldg,buildings
+br,british rail
+center,centre
+cem,cemetery
+clo,cl,close
+cnr,corner
+ct,court
+cres,crescent
+x,cross 
+dri,dr,drive 
+e,east 
+est,estate 
+fc,football club
+gdns,gardens
+hq,headquarters
+la,lane 
+lt,lte
+mans,mansions 
+mkt,market 
+mt,mount 
+n,north 
+pde,parade 
+pk,park 
+pl,place 
+pol,police 
+rec,recreation 
+rd,road
+rbt,roundabout 
+st,saint 
+sch,school 
+s,south 
+sq,square 
+stn,station 
+st,street 
+gt,great 
+grn,green 
+gro,grove 
+hosp,hospital 
+hse,house 
+ter,terrace 
+tra,trading 
+ug,underground,tube,lt
+w,west
+&,and
+1st,first
+2nd,second
+3rd,third
+4th,fourth
+5th,fifth
+6th,sixth
+7th,seventh
+8th,eighth
+9th,ninth
+bldg,building
+ph,pub,public
+apartment,flat,unit
+1,one
+2,two
+3,three
+4,four
+5,five
+6,six
+7,seven
+8,eight
+9,nine
+10,ten
+11,eleven
+12,twelve
+13,thirteen
+14,fourteen
+15,fifteen
+16,sixteen
+17,seventeen
+18,eighteen
+19,nineteen
+20,twenty
+30,thirty
+40,forty
+gherkin, 30 st mary axe
+can of ham, 60 St Mary Axe
+cheesegrater,leadenhall building
+Pringle,lee valley velopark
+helter skelter, 2 dove road n1 3pl
+salt cellar,32 SE1 9SG
+stealth bomber,one new change
+walkie talkie,20 fenchurch street
+wobbly bridge,millennium bridge
+vet,veterinary

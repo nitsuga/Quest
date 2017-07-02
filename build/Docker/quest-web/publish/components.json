@@ -1,0 +1,78 @@
+{
+  "Name": "Search Service",
+  "defaultAssembly": "Quest.Lib",
+  "components": [
+    {
+      "type": "Quest.Mobile.Service.SecurityService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.ClientConnectionService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.IncidentService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.DestinationService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.ResourceService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.SearchService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.RouteService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.TelephonyService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Mobile.Service.VisualisationService, Quest.Mobile",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Lib.ServiceBus.MessageCache",
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Lib.ServiceBus.MessageHandler",
+      "injectProperties": true,
+      "instanceScope": "per-dependency"
+    },
+    {
+      "type": "Quest.Lib.ServiceBus.ActiveMqClient",
+      "services": [
+        {
+          "type": "Quest.Common.ServiceBus.IServiceBusClient,Quest.Common"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "per-dependency",
+      "properties": {
+        "server": "activemq:tcp://activemq:61616",
+        "format": "json",
+        "topic": "quest.common",
+        "TTL": 10,
+        "Persistent": false
+      }
+    }
+  ]
+}

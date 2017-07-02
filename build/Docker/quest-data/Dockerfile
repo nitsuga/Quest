@@ -1,0 +1,40 @@
+FROM microsoft/mssql-server-linux:latest
+
+ENV ACCEPT_EULA Y
+ENV SA_PASSWORD M3Gurdy*
+
+EXPOSE 1433
+
+RUN apt-get update && apt-get install -y vim
+
+
+# Create data directory
+#RUN mkdir -p /tmp/data1  && \
+#	mkdir -p /tmp/data2  && \
+#	mkdir -p /tmp/data3  && \
+#	mkdir -p /tmp/data4
+	
+#RUN	chown mssql /tmp/data1  && \
+#	chgrp mssql /tmp/data1  && \
+#	chown mssql /tmp/data1  && \
+#	chgrp mssql /tmp/data1  && \
+#	chown mssql /tmp/data1  && \
+#	chgrp mssql /tmp/data1  && \
+#	chown mssql /tmp/data1  && \
+#	chgrp mssql /tmp/data1
+
+
+# Create app directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Bundle app source
+COPY attach-data.sh /usr/src/app
+COPY setup.sql /usr/src/app
+COPY entrypoint.sh /usr/src/app
+
+# Grant permissions for the attach-data script to be executable
+RUN chmod +x /usr/src/app/attach-data.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
+
+CMD /bin/bash ./entrypoint.sh

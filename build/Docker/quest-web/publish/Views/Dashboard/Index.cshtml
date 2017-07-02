@@ -1,0 +1,238 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Styles.Render("~/Content/core")
+    @Scripts.Render("~/bundles/crossfilter")
+    @Scripts.Render("~/bundles/dashboard")
+    @Styles.Render("~/Content/dashboard")
+}
+
+
+
+<style type="text/css">
+    #inc {
+        width: 60px;
+        height: 35px;
+    }
+
+        #inc .toggle-group {
+            transition: left 0.1s;
+            -webkit-transition: left 0.1s;
+        }
+
+    #res {
+        width: 60px;
+        height: 35px;
+    }
+
+        #res .toggle-group {
+            transition: left 0.1s;
+            -webkit-transition: left 0.1s;
+        }
+
+    #perf {
+        width: 60px;
+        height: 35px;
+    }
+
+        #perf .toggle-group {
+            transition: left 0.1s;
+            -webkit-transition: left 0.1s;
+        }
+
+    #heldc {
+        width: 60px;
+        height: 35px;
+    }
+
+        #heldc .toggle-group {
+            transition: left 0.1s;
+            -webkit-transition: left 0.1s;
+        }
+
+
+    path.slice {
+        stroke-width: 2px;
+    }
+
+    polyline {
+        opacity: .3;
+        stroke: black;
+        stroke-width: 2px;
+        fill: none;
+    }
+
+    .bar {
+        fill: steelblue;
+    }
+
+    .axis text {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+
+    #tblToggles tr > td {
+        padding-bottom: 20px;
+    }
+</style>
+
+
+<div>
+    <h3 style="float: left; width: 180px"><span class="glyphicon glyphicon-signal"></span>Dashboard</h3>
+
+    <div class="btn-group" style="margin-top: 15px">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Settings <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a data-toggle="modal" href="#toggleCharts">Toggle Charts</a></li>
+            @*            <li class="divider"></li>
+                <li><a data-toggle="modal" href="#datePeriod">Date Period</a></li>
+                <li class="divider"></li>
+                <li><a data-toggle="modal" href="#resTypes">Resource Types</a></li>*@
+        </ul>
+    </div>
+</div>
+
+<hr style="border: 1px solid #000033" />
+
+<div style="clear: left">
+    <div id="dvNoData">
+        <br />
+        <h4>No charts have been selected.</h4>
+        <h5>Please select the items you wish to display from the Settings.</h5>
+
+    </div>
+    <div id="dvHeldCalls" style="display:none">
+        <h4 style="margin-left:10px">Held Calls Data</h4>
+        <br />
+
+        <!------AREA PIE---->
+        <h5 style="margin-left:10px"><b>By Area</b></h5>
+        <div style="margin-left:10px;margin-bottom:50px" id="heldbyarea"></div>
+
+        <!------------------->
+        <!-----PRIORITY PIE---->
+
+        <h5 style="margin-left:10px"><b>By Priority</b></h5>
+        <div style="margin-left:10px;margin-bottom:50px" id="heldbypriority"></div>
+        <!--------------------->
+        <br />
+        <h5 style="margin-left:10px"><b>Held Call History (past 1 Week by Hour)</b></h5>
+        <div id="heldhisto" class="col-sm-4"></div>
+        <br />
+        @* <b>
+                <h5>History By Area (Today)</h5>
+            </b>
+            <div id="heldhistotodayarea"></div>
+            <b>
+                <h5>History By Priority (Today)</h5>
+            </b>
+            <div id="heldhistotodaypriority"></div>*@
+    </div>
+
+</div>
+
+<!-- MODAL DIALOG FOR CHART TOGGLES -->
+<!-- Modal -->
+<div class="modal fade" id="toggleCharts" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Toggle Charts to Display</h4>
+            </div>
+            <div class="modal-body">
+
+                <table id="tblToggles">
+                    <tr>
+                        <td>
+                            <label style="margin-right: 10px">Incident Stats: </label>
+                        </td>
+                        <td>
+                            <div id="inc" class="toggle off btn btn-default" data-toggle="toggle">
+                                <input checked type="checkbox">
+                                <div class="toggle-group">
+                                    <label class="toggle-on btn btn-primary">On</label>
+                                    <label class="toggle-off btn btn-default">Off</label>
+                                    <span class="toggle-handle btn"></span>
+                                </div>
+                            </div>
+                            <label style="color:red;font-size:9pt">(disabled)</label>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <label style="margin-right: 10px">Resource Stats: </label>
+                        </td>
+                        <td>
+                            <div id="res" class="toggle off btn btn-default" data-toggle="toggle">
+                                <input checked type="checkbox">
+                                <div class="toggle-group">
+                                    <label class="toggle-on btn btn-primary">On</label>
+                                    <label class="toggle-off btn btn-default">Off</label>
+                                    <span class="toggle-handle btn"></span>
+                                </div>
+                            </div>
+                            <label style="color:red;font-size:9pt">(disabled)</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label style="margin-right: 10px">Held Calls Stats: </label>
+                        </td>
+                        <td>
+                            <div id="heldc" class="toggle off btn btn-default" data-toggle="toggle">
+                                <input checked type="checkbox" id="chkShowHeldCalls">
+                                <div class="toggle-group">
+                                    <label class="toggle-on btn btn-primary">On</label>
+                                    <label class="toggle-off btn btn-default">Off</label>
+                                    <span class="toggle-handle btn"></span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label style="margin-right: 10px">Performance Stats: </label>
+                        </td>
+                        <td>
+                            <div id="perf" class="toggle off btn btn-default" data-toggle="toggle">
+                                <input checked type="checkbox">
+                                <div class="toggle-group">
+                                    <label class="toggle-on btn btn-primary">On</label>
+                                    <label class="toggle-off btn btn-default">Off</label>
+                                    <span class="toggle-handle btn"></span>
+                                </div>
+                            </div>
+                            <label style="color:red;font-size:9pt">(disabled)</label>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                @* <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Apply</button>
+            </div>
+        </div>
+    </div>
+    <!-- /.modal-content -->
+</div>
+<!-- /.modal-dialog -->

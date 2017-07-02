@@ -1,0 +1,298 @@
+version: '2'
+
+
+services:
+
+ ### External components ###
+  database:
+    build: 
+      context: ./quest-data
+    image: gluteusmaximus/quest-database:latest
+    volumes:
+          - ./volume_data:/tmp/data1
+          - ./volume_os:/tmp/data2
+          - ./volume_research:/tmp/data3
+    expose:
+        - "1433"
+    ports:
+      - "999:1433"
+    environment:
+      -  ACCEPT_EULA=Y
+      -  SA_PASSWORD=M3Gurdy*
+# requires version 3      
+#    deploy:
+#        mode: global
+#        restart_policy:
+#            condition: on-failure
+#            delay: 5s
+#            max_attempts: 3
+#            window: 120s
+#            condition: on-failure
+            
+  activemq:
+    image: webcenter/activemq
+    expose:
+        - "61616"
+        - "8161"
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+
+  searchdatabase:
+    build: 
+      context: ./elasticsearch-phonetic
+    image: gluteusmaximus/quest-searchdatabase:latest
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./volume_search:/usr/share/elasticsearch/data
+
+
+  mapserver:
+    build: 
+      context: ./quest-mapserver
+    image: gluteusmaximus/quest-mapserver:latest
+    volumes:
+      - ./volume_map:/maps
+    ports: 
+      - "8090:80"
+
+#  quest.cmd:
+# #   build: 
+#       context: E:/data/questX/QuestServer/Quest.Cmd
+#    image: gluteusmaximus/quest.cmd
+
+  ########################################
+  q_web:
+# #   build: 
+#    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.web:latest
+    depends_on:
+      - "database"
+      - "activemq"
+      - "searchdatabase"
+      - "q_visuals"
+      - "q_security"
+      - "q_device"
+      - "q_search"
+      - "q_mapmatcher"
+      - "q_routing"
+      - "q_indexer"
+      
+    command: ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+    ports: 
+      - "8133:80"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    #volumes:
+    #  - ./volume_quest:/usr/Data
+
+  ########################################
+  q_search:
+# #   build: 
+#    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=SearchManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+     ########################################
+
+     ########################################
+  
+  q_visuals:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=VisualsManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+
+  
+  q_security:
+    build: 
+       context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=SecurityManager","-components=/usr/Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+
+      
+  ########################################
+  q_mapmatcher:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=MapMatcherManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+      
+  ########################################
+  q_indexer:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=IndexerManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+      
+      
+  ########################################
+  q_device:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=DeviceManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/usr/Data
+      
+      
+  ###  Telephony ###
+  q_eisec:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: ["-exec=EisecServer","-components=Data/components.json"]
+    depends_on:
+      - "activemq"
+      - "q_search"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+    volumes:
+      - ./volume_quest:/usr/Data
+
+  q_eisecsim:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: ["-exec=EisecSimulator","-components=Data/components.json"]
+    depends_on:
+      - "activemq"
+      - "q_eisec"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+    volumes:
+      - ./volume_quest:/usr/Data
+  
+  q_calltracker:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: [ "-exec=CallTracker","-components=Data/components.json" ]
+    volumes:
+      - ./volume_quest:/usr/Data
+    depends_on:
+      - "database"
+      - "activemq"
+      - "q_eisec"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      
+  q_aspectcti:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: [ "-exec=AspectServer","-components=Data/components.json" ]
+    volumes:
+      - ./volume_quest:/usr/Data
+    depends_on:
+      - "activemq"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+
+  q_stormtel:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: [ "-exec=StormTelephonyServer","-components=Data/components.json" ]
+    volumes:
+      - ./volume_quest:/usr/Data
+    depends_on:
+      - "database"
+      - "activemq"
+      - "q_eisec"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+
+
+  ### Simulation ###
+  q_simulation:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: [ "-exec=IncSimulator;ResSimulator;TimedEventManager;CadSimulator","-components=Data/components.json" ]
+    volumes:
+      - ./volume_quest:/usr/Data
+    depends_on:
+      - "database"
+      - "activemq"
+      - "q_routing"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+ 
+
+  ########################################
+  q_routing:
+ #   build: 
+    #   context: ./quest-cmd
+    image: gluteusmaximus/quest.cmd:latest
+    command: [ "-exec=RoutingManager","-components=Data/components.json" ]
+    volumes:
+      - ./volume_quest:/usr/Data
+    depends_on:
+      - "database"
+      - "activemq"
+      - "q_search"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      

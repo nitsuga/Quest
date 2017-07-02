@@ -1,0 +1,160 @@
+﻿@model Quest.Lib.DataModel.Device
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Styles.Render("~/Content/core")
+    @Styles.Render("~/Content/map")
+}
+
+
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Device</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.OwnerID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.OwnerID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AuthToken)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AuthToken)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DeviceIdentity)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DeviceIdentity)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NotificationTypeID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NotificationTypeID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NotificationID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NotificationID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LastUpdate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastUpdate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LastStatusUpdate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastStatusUpdate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Geometry)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Geometry)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PositionAccuracy)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PositionAccuracy)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.isEnabled)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.isEnabled)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SendNearby)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SendNearby)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NearbyDistance)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NearbyDistance)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LoggedOnTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LoggedOnTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LoggedOffTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LoggedOffTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DeviceRole.DeviceRoleName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DeviceRole.DeviceRoleName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Resource.ResourceType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Resource.ResourceType)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>
