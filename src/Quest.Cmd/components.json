@@ -147,7 +147,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/BikePoint?app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
+        "URL": "https://api.tfl.gov.uk/BikePoint?app_id={tfl_id}&app_key={tfl_key}"
       }
     },
     {
@@ -175,7 +175,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/StopPoint/Mode/{0}?page={1}&app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
+        "URL": "https://api.tfl.gov.uk/StopPoint/Mode/{0}?page={1}&app_id={tfl_id}&app_key={tfl_key}"
       }
     },
     {
@@ -189,7 +189,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/line/mode/tube/status?app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
+        "URL": "https://api.tfl.gov.uk/line/mode/tube/status?app_id={tfl_id}&app_key={tfl_key}"
       }
     },
     {

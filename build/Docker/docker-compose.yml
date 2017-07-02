@@ -18,7 +18,7 @@ services:
       - "999:1433"
     environment:
       -  ACCEPT_EULA=Y
-      -  SA_PASSWORD=M3Gurdy*
+      -  SA_PASSWORD=changeme
 # requires version 3      
 #    deploy:
 #        mode: global
