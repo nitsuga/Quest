@@ -3,3 +3,17 @@
 ################################################################################
 
 /src/packages
+/src/Quest.Cmd/bin/Debug
+/src/Quest.Cmd/obj/Debug
+/src/Quest.Common/bin/Debug
+/src/Quest.Common/obj/Debug
+/src/Quest.Lib/bin/Debug
+/src/Quest.Lib/obj/Debug
+/src/Quest.Lib.OS/bin/Debug
+/src/Quest.Lib.OS/obj/Debug
+/src/Quest.Mobile/bin
+/src/Quest.Mobile/obj/Debug
+/src/Quest.UnitTest/bin/Debug
+/src/Quest.UnitTest/obj/Debug
+/src/TfL.Api.Common/bin/Debug
+/src/TfL.Api.Common/obj/Debug
