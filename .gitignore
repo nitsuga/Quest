@@ -1,4 +1,4 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
@@ -17,3 +17,4 @@
 /src/Quest.UnitTest/obj/Debug
 /src/TfL.Api.Common/bin/Debug
 /src/TfL.Api.Common/obj/Debug
+src/Quest.Cmd/Quest.Cmd.csproj.user
