@@ -1,0 +1,628 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="QuestDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Activations">
+          <Key>
+            <PropertyRef Name="ActivationId" />
+          </Key>
+          <Property Name="ActivationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IncidentId" Type="bigint" Nullable="false" />
+          <Property Name="Dispatched" Type="datetime" />
+          <Property Name="Arrived" Type="datetime" />
+          <Property Name="Callsign" Type="char" MaxLength="8" />
+          <Property Name="VehicleId" Type="int" />
+          <Property Name="X" Type="int" />
+          <Property Name="Y" Type="int" />
+        </EntityType>
+        <EntityType Name="Avls">
+          <Key>
+            <PropertyRef Name="RawAvlsId" />
+          </Key>
+          <Property Name="RawAvlsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AvlsDateTime" Type="datetime" />
+          <Property Name="Status" Type="char" MaxLength="8" />
+          <Property Name="Speed" Type="smallint" />
+          <Property Name="Direction" Type="smallint" />
+          <Property Name="LocationX" Type="decimal" Precision="25" Scale="20" />
+          <Property Name="LocationY" Type="decimal" Precision="25" Scale="20" />
+          <Property Name="FleetNumber" Type="smallint" />
+          <Property Name="VehicleTypeId" Type="int" />
+          <Property Name="Callsign" Type="char" MaxLength="8" />
+          <Property Name="Scanned" Type="bit" Nullable="false" />
+          <Property Name="X" Type="int" />
+          <Property Name="Y" Type="int" />
+          <Property Name="Category" Type="char" MaxLength="1" />
+          <Property Name="IncidentId" Type="bigint" />
+          <Property Name="Process" Type="bit" Nullable="false" />
+          <Property Name="EstimatedSpeed" Type="real" />
+        </EntityType>
+        <EntityType Name="AvlsRoad">
+          <Key>
+            <PropertyRef Name="AvlsRoadId" />
+          </Key>
+          <Property Name="AvlsRoadId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AvlsId" Type="int" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="RoadTypeId" Type="int" Nullable="false" />
+          <Property Name="DistanceToRoad" Type="real" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentRouteEstimate">
+          <Key>
+            <PropertyRef Name="IncidentRouteEstimateId" />
+          </Key>
+          <Property Name="IncidentRouteEstimateId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoutingMethod" Type="int" Nullable="false" />
+          <Property Name="EdgeMethod" Type="int" Nullable="false" />
+          <Property Name="EstimatedDuration" Type="int" Nullable="false" />
+          <Property Name="IncidentRouteId" Type="int" Nullable="false" />
+          <Property Name="EstimateRoute" Type="geometry" />
+        </EntityType>
+        <EntityType Name="IncidentRouteRun">
+          <Key>
+            <PropertyRef Name="IncidentRouteRunId" />
+          </Key>
+          <Property Name="IncidentRouteRunId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Parameters" Type="varchar(max)" Nullable="false" />
+          <Property Name="Timestamp" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentRoutes">
+          <Key>
+            <PropertyRef Name="IncidentRouteID" />
+          </Key>
+          <Property Name="IncidentRouteID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Callsign" Type="char" MaxLength="8" />
+          <Property Name="IncidentId" Type="bigint" />
+          <Property Name="Scanned" Type="bit" Nullable="false" />
+          <Property Name="VehicleId" Type="int" />
+          <Property Name="StartTime" Type="datetime" />
+          <Property Name="EndTime" Type="datetime" />
+          <Property Name="ActualDuration" Type="int" />
+          <Property Name="IsBadGPS" Type="bit" />
+          <Property Name="ActualRoute" Type="geometry" />
+        </EntityType>
+        <EntityType Name="RoadSpeed">
+          <Key>
+            <PropertyRef Name="RoadSpeedId" />
+          </Key>
+          <Property Name="RoadSpeedId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SpeedAvg" Type="float" Nullable="false" />
+          <Property Name="SpeedStDev" Type="float" />
+          <Property Name="SpeedCount" Type="int" Nullable="false" />
+          <Property Name="HourOfWeek" Type="int" Nullable="false" />
+          <Property Name="VehicleId" Type="int" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestData.dbo.RoadSpeedItem' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="RoadSpeedItem">
+          <Key>
+            <PropertyRef Name="IncidentRouteRunId" />
+            <PropertyRef Name="IncidentRouteId" />
+            <PropertyRef Name="DateTime" />
+            <PropertyRef Name="Speed" />
+          </Key>
+          <Property Name="IncidentRouteRunId" Type="int" Nullable="false" />
+          <Property Name="IncidentRouteId" Type="int" Nullable="false" />
+          <Property Name="DateTime" Type="datetime" Nullable="false" />
+          <Property Name="Speed" Type="float" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="int" />
+        </EntityType>
+        <EntityType Name="RoadSpeedMatrixHoD">
+          <Key>
+            <PropertyRef Name="RoadSpeedMatrixId" />
+          </Key>
+          <Property Name="RoadSpeedMatrixId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HourOfDay" Type="int" Nullable="false" />
+          <Property Name="AvgSpeed" Type="real" Nullable="false" />
+          <Property Name="VehicleId" Type="int" Nullable="false" />
+          <Property Name="GridX" Type="int" Nullable="false" />
+          <Property Name="GridY" Type="int" Nullable="false" />
+          <Property Name="RoadTypeId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RoadSpeedMatrixHoW">
+          <Key>
+            <PropertyRef Name="RoadSpeedMatrixId" />
+          </Key>
+          <Property Name="RoadSpeedMatrixId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HourOfWeek" Type="int" Nullable="false" />
+          <Property Name="AvgSpeed" Type="real" Nullable="false" />
+          <Property Name="VehicleId" Type="int" Nullable="false" />
+          <Property Name="GridX" Type="int" Nullable="false" />
+          <Property Name="GridY" Type="int" Nullable="false" />
+          <Property Name="RoadTypeId" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestData.dbo.IncidentRouteView' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="IncidentRouteView">
+          <Key>
+            <PropertyRef Name="IncidentRouteID" />
+            <PropertyRef Name="Scanned" />
+          </Key>
+          <Property Name="IncidentRouteID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Callsign" Type="char" MaxLength="8" />
+          <Property Name="IncidentId" Type="bigint" />
+          <Property Name="Scanned" Type="bit" Nullable="false" />
+          <Property Name="VehicleId" Type="int" />
+          <Property Name="StartTime" Type="datetime" />
+          <Property Name="EndTime" Type="datetime" />
+          <Property Name="ActualDuration" Type="int" />
+          <Property Name="IsBadGPS" Type="bit" />
+        </EntityType>
+        <Association Name="FK_IncidentRouteEstimate_IncidentRoutes">
+          <End Role="IncidentRoutes" Type="Self.IncidentRoutes" Multiplicity="1" />
+          <End Role="IncidentRouteEstimate" Type="Self.IncidentRouteEstimate" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IncidentRoutes">
+              <PropertyRef Name="IncidentRouteID" />
+            </Principal>
+            <Dependent Role="IncidentRouteEstimate">
+              <PropertyRef Name="IncidentRouteId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RoadSpeedItem_IncidentRoutes1">
+          <End Role="IncidentRoutes" Type="Self.IncidentRoutes" Multiplicity="1" />
+          <End Role="RoadSpeedItem" Type="Self.RoadSpeedItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IncidentRoutes">
+              <PropertyRef Name="IncidentRouteID" />
+            </Principal>
+            <Dependent Role="RoadSpeedItem">
+              <PropertyRef Name="IncidentRouteId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="CalcRoadSpeeds" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="UpdateIncidentDuration" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="id" Type="int" Mode="In" />
+          <Parameter Name="StartTime" Type="datetime" Mode="In" />
+          <Parameter Name="EndTime" Type="datetime" Mode="In" />
+          <Parameter Name="Duration" Type="int" Mode="In" />
+        </Function>
+        <Function Name="UpdateIncidentEstimates" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="id" Type="int" Mode="In" />
+          <Parameter Name="RoutingMethod" Type="int" Mode="In" />
+          <Parameter Name="EdgeMethod" Type="int" Mode="In" />
+          <Parameter Name="StartTime" Type="datetime" Mode="In" />
+          <Parameter Name="EndTime" Type="datetime" Mode="In" />
+          <Parameter Name="EstimatedDuration" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="QuestDataModelStoreContainer">
+          <EntitySet Name="Activations" EntityType="Self.Activations" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Avls" EntityType="Self.Avls" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AvlsRoad" EntityType="Self.AvlsRoad" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IncidentRouteEstimate" EntityType="Self.IncidentRouteEstimate" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IncidentRouteRun" EntityType="Self.IncidentRouteRun" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IncidentRoutes" EntityType="Self.IncidentRoutes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RoadSpeed" EntityType="Self.RoadSpeed" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RoadSpeedMatrixHoD" EntityType="Self.RoadSpeedMatrixHoD" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RoadSpeedMatrixHoW" EntityType="Self.RoadSpeedMatrixHoW" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RoadSpeedItem" EntityType="Self.RoadSpeedItem" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RoadSpeedItem].[IncidentRouteRunId] AS [IncidentRouteRunId], 
+    [RoadSpeedItem].[IncidentRouteId] AS [IncidentRouteId], 
+    [RoadSpeedItem].[DateTime] AS [DateTime], 
+    [RoadSpeedItem].[Speed] AS [Speed], 
+    [RoadSpeedItem].[RoadLinkEdgeId] AS [RoadLinkEdgeId]
+    FROM [dbo].[RoadSpeedItem] AS [RoadSpeedItem]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="IncidentRouteView" EntityType="Self.IncidentRouteView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [IncidentRouteView].[IncidentRouteID] AS [IncidentRouteID], 
+    [IncidentRouteView].[Callsign] AS [Callsign], 
+    [IncidentRouteView].[IncidentId] AS [IncidentId], 
+    [IncidentRouteView].[Scanned] AS [Scanned], 
+    [IncidentRouteView].[VehicleId] AS [VehicleId], 
+    [IncidentRouteView].[StartTime] AS [StartTime], 
+    [IncidentRouteView].[EndTime] AS [EndTime], 
+    [IncidentRouteView].[ActualDuration] AS [ActualDuration], 
+    [IncidentRouteView].[IsBadGPS] AS [IsBadGPS]
+    FROM [dbo].[IncidentRouteView] AS [IncidentRouteView]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_IncidentRouteEstimate_IncidentRoutes" Association="Self.FK_IncidentRouteEstimate_IncidentRoutes">
+            <End Role="IncidentRoutes" EntitySet="IncidentRoutes" />
+            <End Role="IncidentRouteEstimate" EntitySet="IncidentRouteEstimate" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RoadSpeedItem_IncidentRoutes1" Association="Self.FK_RoadSpeedItem_IncidentRoutes1">
+            <End Role="IncidentRoutes" EntitySet="IncidentRoutes" />
+            <End Role="RoadSpeedItem" EntitySet="RoadSpeedItem" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="QuestDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="IncidentRouteEstimate">
+          <Key>
+            <PropertyRef Name="IncidentRouteEstimateId" />
+          </Key>
+          <Property Name="IncidentRouteEstimateId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EstimatedDuration" Type="Int32" Nullable="false" />
+          <Property Name="IncidentRouteId" Type="Int32" Nullable="false" />
+          <Property Name="EstimateRoute" Type="Geometry" />
+          <NavigationProperty Name="IncidentRoute" Relationship="QuestDataModel.FK_IncidentRouteEstimate_IncidentRoutes" FromRole="IncidentRouteEstimate" ToRole="IncidentRoute" />
+          <Property Name="RoutingMethod" Type="Int32" Nullable="false" />
+          <Property Name="EdgeMethod" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentRouteRun">
+          <Key>
+            <PropertyRef Name="IncidentRouteRunId" />
+          </Key>
+          <Property Name="IncidentRouteRunId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Parameters" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Timestamp" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityContainer Name="QuestResearchEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="IncidentRouteEstimates" EntityType="Self.IncidentRouteEstimate" />
+          <EntitySet Name="IncidentRouteRuns" EntityType="Self.IncidentRouteRun" />
+          <FunctionImport Name="UpdateIncidentEstimates">
+            <Parameter Name="id" Mode="In" Type="Int32" />
+            <Parameter Name="RoutingMethod" Mode="In" Type="Int32" />
+            <Parameter Name="EdgeMethod" Mode="In" Type="Int32" />
+            <Parameter Name="StartTime" Mode="In" Type="DateTime" />
+            <Parameter Name="EndTime" Mode="In" Type="DateTime" />
+            <Parameter Name="EstimatedDuration" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="CalcRoadSpeeds" />
+          <EntitySet Name="Avls" EntityType="QuestDataModel.Avl" />
+          <EntitySet Name="Activations" EntityType="QuestDataModel.Activation" />
+          <EntitySet Name="RoadSpeeds" EntityType="QuestDataModel.RoadSpeed" />
+          <EntitySet Name="RoadSpeedMatrixHoDs" EntityType="QuestDataModel.RoadSpeedMatrixHoD" />
+          <EntitySet Name="RoadSpeedMatrixHoWs" EntityType="QuestDataModel.RoadSpeedMatrixHoW" />
+          <EntitySet Name="IncidentRoutes" EntityType="QuestDataModel.IncidentRoute" />
+          <AssociationSet Name="FK_IncidentRouteEstimate_IncidentRoutes" Association="QuestDataModel.FK_IncidentRouteEstimate_IncidentRoutes">
+            <End Role="IncidentRoute" EntitySet="IncidentRoutes" />
+            <End Role="IncidentRouteEstimate" EntitySet="IncidentRouteEstimates" />
+          </AssociationSet>
+          <EntitySet Name="RoadSpeedItems" EntityType="QuestDataModel.RoadSpeedItem" />
+          <AssociationSet Name="FK_RoadSpeedItem_IncidentRoutes1" Association="QuestDataModel.FK_RoadSpeedItem_IncidentRoutes1">
+            <End Role="IncidentRoute" EntitySet="IncidentRoutes" />
+            <End Role="RoadSpeedItem" EntitySet="RoadSpeedItems" />
+          </AssociationSet>
+          <EntitySet Name="AvlsRoads" EntityType="QuestDataModel.AvlsRoad" />
+          <EntitySet Name="IncidentRouteViews" EntityType="QuestDataModel.IncidentRouteView" />
+          <FunctionImport Name="UpdateIncidentDuration">
+            <Parameter Name="id" Mode="In" Type="Int32" />
+            <Parameter Name="StartTime" Mode="In" Type="DateTime" />
+            <Parameter Name="EndTime" Mode="In" Type="DateTime" />
+            <Parameter Name="Duration" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <EntityType Name="Avl">
+          <Key>
+            <PropertyRef Name="RawAvlsId" />
+          </Key>
+          <Property Name="RawAvlsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AvlsDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="Speed" Type="Int16" />
+          <Property Name="Direction" Type="Int16" />
+          <Property Name="LocationX" Type="Decimal" Precision="25" Scale="20" />
+          <Property Name="LocationY" Type="Decimal" Precision="25" Scale="20" />
+          <Property Name="FleetNumber" Type="Int16" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+          <Property Name="Callsign" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="Scanned" Type="Boolean" Nullable="false" />
+          <Property Name="X" Type="Int32" />
+          <Property Name="Y" Type="Int32" />
+          <Property Name="Category" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="IncidentId" Type="Int64" />
+          <Property Name="Process" Type="Boolean" Nullable="false" />
+          <Property Name="EstimatedSpeed" Type="Single" />
+        </EntityType>
+        <EntityType Name="Activation">
+          <Key>
+            <PropertyRef Name="ActivationId" />
+          </Key>
+          <Property Name="ActivationId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IncidentId" Type="Int64" Nullable="false" />
+          <Property Name="Dispatched" Type="DateTime" Precision="3" />
+          <Property Name="Arrived" Type="DateTime" Precision="3" />
+          <Property Name="Callsign" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="VehicleId" Type="Int32" />
+          <Property Name="X" Type="Int32" />
+          <Property Name="Y" Type="Int32" />
+        </EntityType>
+        <EntityType Name="RoadSpeed">
+          <Key>
+            <PropertyRef Name="RoadSpeedId" />
+          </Key>
+          <Property Name="RoadSpeedId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SpeedAvg" Type="Double" Nullable="false" />
+          <Property Name="SpeedStDev" Type="Double" />
+          <Property Name="SpeedCount" Type="Int32" Nullable="false" />
+          <Property Name="HourOfWeek" Type="Int32" Nullable="false" />
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="RoadSpeedMatrixHoD">
+          <Key>
+            <PropertyRef Name="RoadSpeedMatrixId" />
+          </Key>
+          <Property Name="RoadSpeedMatrixId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HourOfDay" Type="Int32" Nullable="false" />
+          <Property Name="AvgSpeed" Type="Single" Nullable="false" />
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+          <Property Name="GridX" Type="Int32" Nullable="false" />
+          <Property Name="GridY" Type="Int32" Nullable="false" />
+          <Property Name="RoadTypeId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RoadSpeedMatrixHoW">
+          <Key>
+            <PropertyRef Name="RoadSpeedMatrixId" />
+          </Key>
+          <Property Name="RoadSpeedMatrixId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HourOfWeek" Type="Int32" Nullable="false" />
+          <Property Name="AvgSpeed" Type="Single" Nullable="false" />
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+          <Property Name="GridX" Type="Int32" Nullable="false" />
+          <Property Name="GridY" Type="Int32" Nullable="false" />
+          <Property Name="RoadTypeId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentRoute">
+          <Key>
+            <PropertyRef Name="IncidentRouteID" />
+          </Key>
+          <Property Name="IncidentRouteID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Callsign" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="IncidentId" Type="Int64" />
+          <Property Name="Scanned" Type="Boolean" Nullable="false" />
+          <Property Name="VehicleId" Type="Int32" />
+          <Property Name="StartTime" Type="DateTime" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Precision="3" />
+          <Property Name="ActualDuration" Type="Int32" />
+          <Property Name="IsBadGPS" Type="Boolean" />
+          <NavigationProperty Name="IncidentRouteEstimates" Relationship="QuestDataModel.FK_IncidentRouteEstimate_IncidentRoutes" FromRole="IncidentRoute" ToRole="IncidentRouteEstimate" />
+          <Property Name="ActualRoute" Type="Geometry" />
+          <NavigationProperty Name="RoadSpeedItems" Relationship="QuestDataModel.FK_RoadSpeedItem_IncidentRoutes1" FromRole="IncidentRoute" ToRole="RoadSpeedItem" />
+        </EntityType>
+        <Association Name="FK_IncidentRouteEstimate_IncidentRoutes">
+          <End Type="QuestDataModel.IncidentRoute" Role="IncidentRoute" Multiplicity="1" />
+          <End Type="QuestDataModel.IncidentRouteEstimate" Role="IncidentRouteEstimate" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IncidentRoute">
+              <PropertyRef Name="IncidentRouteID" />
+            </Principal>
+            <Dependent Role="IncidentRouteEstimate">
+              <PropertyRef Name="IncidentRouteId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="RoadSpeedItem">
+          <Key>
+            <PropertyRef Name="IncidentRouteRunId" />
+            <PropertyRef Name="IncidentRouteId" />
+            <PropertyRef Name="DateTime" />
+            <PropertyRef Name="Speed" />
+          </Key>
+          <Property Name="IncidentRouteRunId" Type="Int32" Nullable="false" />
+          <Property Name="IncidentRouteId" Type="Int32" Nullable="false" />
+          <Property Name="DateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Speed" Type="Double" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="Int32" />
+          <NavigationProperty Name="IncidentRoute" Relationship="QuestDataModel.FK_RoadSpeedItem_IncidentRoutes1" FromRole="RoadSpeedItem" ToRole="IncidentRoute" />
+        </EntityType>
+        <Association Name="FK_RoadSpeedItem_IncidentRoutes1">
+          <End Type="QuestDataModel.IncidentRoute" Role="IncidentRoute" Multiplicity="1" />
+          <End Type="QuestDataModel.RoadSpeedItem" Role="RoadSpeedItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IncidentRoute">
+              <PropertyRef Name="IncidentRouteID" />
+            </Principal>
+            <Dependent Role="RoadSpeedItem">
+              <PropertyRef Name="IncidentRouteId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="AvlsRoad">
+          <Key>
+            <PropertyRef Name="AvlsRoadId" />
+          </Key>
+          <Property Name="AvlsRoadId" Type="Int32" Nullable="false" />
+          <Property Name="AvlsId" Type="Int32" Nullable="false" />
+          <Property Name="RoadLinkEdgeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoadTypeId" Type="Int32" Nullable="false" />
+          <Property Name="DistanceToRoad" Type="Single" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentRouteView">
+          <Key>
+            <PropertyRef Name="IncidentRouteID" />
+            <PropertyRef Name="Scanned" />
+          </Key>
+          <Property Name="IncidentRouteID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Callsign" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="IncidentId" Type="Int64" />
+          <Property Name="Scanned" Type="Boolean" Nullable="false" />
+          <Property Name="VehicleId" Type="Int32" />
+          <Property Name="StartTime" Type="DateTime" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Precision="3" />
+          <Property Name="ActualDuration" Type="Int32" />
+          <Property Name="IsBadGPS" Type="Boolean" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="QuestDataModelStoreContainer" CdmEntityContainer="QuestResearchEntities">
+          <EntitySetMapping Name="IncidentRouteEstimates">
+            <EntityTypeMapping TypeName="QuestDataModel.IncidentRouteEstimate">
+              <MappingFragment StoreEntitySet="IncidentRouteEstimate">
+                <ScalarProperty Name="EdgeMethod" ColumnName="EdgeMethod" />
+                <ScalarProperty Name="RoutingMethod" ColumnName="RoutingMethod" />
+                <ScalarProperty Name="IncidentRouteEstimateId" ColumnName="IncidentRouteEstimateId" />
+                <ScalarProperty Name="EstimatedDuration" ColumnName="EstimatedDuration" />
+                <ScalarProperty Name="IncidentRouteId" ColumnName="IncidentRouteId" />
+                <ScalarProperty Name="EstimateRoute" ColumnName="EstimateRoute" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IncidentRouteRuns">
+            <EntityTypeMapping TypeName="QuestDataModel.IncidentRouteRun">
+              <MappingFragment StoreEntitySet="IncidentRouteRun">
+                <ScalarProperty Name="IncidentRouteRunId" ColumnName="IncidentRouteRunId" />
+                <ScalarProperty Name="Parameters" ColumnName="Parameters" />
+                <ScalarProperty Name="Timestamp" ColumnName="Timestamp" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="UpdateIncidentEstimates" FunctionName="QuestDataModel.Store.UpdateIncidentEstimates" />
+          <FunctionImportMapping FunctionImportName="CalcRoadSpeeds" FunctionName="QuestDataModel.Store.CalcRoadSpeeds" />
+          <EntitySetMapping Name="Avls">
+            <EntityTypeMapping TypeName="QuestDataModel.Avl">
+              <MappingFragment StoreEntitySet="Avls">
+                <ScalarProperty Name="EstimatedSpeed" ColumnName="EstimatedSpeed" />
+                <ScalarProperty Name="Process" ColumnName="Process" />
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="Y" ColumnName="Y" />
+                <ScalarProperty Name="X" ColumnName="X" />
+                <ScalarProperty Name="Scanned" ColumnName="Scanned" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="FleetNumber" ColumnName="FleetNumber" />
+                <ScalarProperty Name="LocationY" ColumnName="LocationY" />
+                <ScalarProperty Name="LocationX" ColumnName="LocationX" />
+                <ScalarProperty Name="Direction" ColumnName="Direction" />
+                <ScalarProperty Name="Speed" ColumnName="Speed" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="AvlsDateTime" ColumnName="AvlsDateTime" />
+                <ScalarProperty Name="RawAvlsId" ColumnName="RawAvlsId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Activations">
+            <EntityTypeMapping TypeName="QuestDataModel.Activation">
+              <MappingFragment StoreEntitySet="Activations">
+                <ScalarProperty Name="Y" ColumnName="Y" />
+                <ScalarProperty Name="X" ColumnName="X" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="Arrived" ColumnName="Arrived" />
+                <ScalarProperty Name="Dispatched" ColumnName="Dispatched" />
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="ActivationId" ColumnName="ActivationId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RoadSpeeds">
+            <EntityTypeMapping TypeName="QuestDataModel.RoadSpeed">
+              <MappingFragment StoreEntitySet="RoadSpeed">
+                <ScalarProperty Name="RoadLinkEdgeId" ColumnName="RoadLinkEdgeId" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="HourOfWeek" ColumnName="HourOfWeek" />
+                <ScalarProperty Name="SpeedCount" ColumnName="SpeedCount" />
+                <ScalarProperty Name="SpeedStDev" ColumnName="SpeedStDev" />
+                <ScalarProperty Name="SpeedAvg" ColumnName="SpeedAvg" />
+                <ScalarProperty Name="RoadSpeedId" ColumnName="RoadSpeedId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RoadSpeedMatrixHoDs">
+            <EntityTypeMapping TypeName="QuestDataModel.RoadSpeedMatrixHoD">
+              <MappingFragment StoreEntitySet="RoadSpeedMatrixHoD">
+                <ScalarProperty Name="RoadTypeId" ColumnName="RoadTypeId" />
+                <ScalarProperty Name="GridY" ColumnName="GridY" />
+                <ScalarProperty Name="GridX" ColumnName="GridX" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="AvgSpeed" ColumnName="AvgSpeed" />
+                <ScalarProperty Name="HourOfDay" ColumnName="HourOfDay" />
+                <ScalarProperty Name="RoadSpeedMatrixId" ColumnName="RoadSpeedMatrixId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RoadSpeedMatrixHoWs">
+            <EntityTypeMapping TypeName="QuestDataModel.RoadSpeedMatrixHoW">
+              <MappingFragment StoreEntitySet="RoadSpeedMatrixHoW">
+                <ScalarProperty Name="RoadTypeId" ColumnName="RoadTypeId" />
+                <ScalarProperty Name="GridY" ColumnName="GridY" />
+                <ScalarProperty Name="GridX" ColumnName="GridX" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="AvgSpeed" ColumnName="AvgSpeed" />
+                <ScalarProperty Name="HourOfWeek" ColumnName="HourOfWeek" />
+                <ScalarProperty Name="RoadSpeedMatrixId" ColumnName="RoadSpeedMatrixId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IncidentRoutes">
+            <EntityTypeMapping TypeName="QuestDataModel.IncidentRoute">
+              <MappingFragment StoreEntitySet="IncidentRoutes">
+                <ScalarProperty Name="ActualRoute" ColumnName="ActualRoute" />
+                <ScalarProperty Name="IsBadGPS" ColumnName="IsBadGPS" />
+                <ScalarProperty Name="ActualDuration" ColumnName="ActualDuration" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="Scanned" ColumnName="Scanned" />
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="IncidentRouteID" ColumnName="IncidentRouteID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RoadSpeedItems">
+            <EntityTypeMapping TypeName="QuestDataModel.RoadSpeedItem">
+              <MappingFragment StoreEntitySet="RoadSpeedItem">
+                <ScalarProperty Name="RoadLinkEdgeId" ColumnName="RoadLinkEdgeId" />
+                <ScalarProperty Name="Speed" ColumnName="Speed" />
+                <ScalarProperty Name="DateTime" ColumnName="DateTime" />
+                <ScalarProperty Name="IncidentRouteId" ColumnName="IncidentRouteId" />
+                <ScalarProperty Name="IncidentRouteRunId" ColumnName="IncidentRouteRunId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AvlsRoads">
+            <EntityTypeMapping TypeName="QuestDataModel.AvlsRoad">
+              <MappingFragment StoreEntitySet="AvlsRoad">
+                <ScalarProperty Name="DistanceToRoad" ColumnName="DistanceToRoad" />
+                <ScalarProperty Name="RoadTypeId" ColumnName="RoadTypeId" />
+                <ScalarProperty Name="RoadLinkEdgeId" ColumnName="RoadLinkEdgeId" />
+                <ScalarProperty Name="AvlsId" ColumnName="AvlsId" />
+                <ScalarProperty Name="AvlsRoadId" ColumnName="AvlsRoadId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IncidentRouteViews">
+            <EntityTypeMapping TypeName="QuestDataModel.IncidentRouteView">
+              <MappingFragment StoreEntitySet="IncidentRouteView">
+                <ScalarProperty Name="IsBadGPS" ColumnName="IsBadGPS" />
+                <ScalarProperty Name="ActualDuration" ColumnName="ActualDuration" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="Scanned" ColumnName="Scanned" />
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="IncidentRouteID" ColumnName="IncidentRouteID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="UpdateIncidentDuration" FunctionName="QuestDataModel.Store.UpdateIncidentDuration" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

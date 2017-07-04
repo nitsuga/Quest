@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EisecConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <IpList>
+    <IpDetails>
+      <Addr>q_eisecsim</Addr>
+      <Port>5000</Port>
+      <User>
+        <Username>TEST</Username>
+        <Password>PASSWORD</Password>
+        <Datechanged>0001-01-01T00:00:00</Datechanged>
+      </User>
+      <LocalPollTimeoutSeconds>45</LocalPollTimeoutSeconds>
+      <RemotePollTimeoutSeconds>45</RemotePollTimeoutSeconds>
+      <SendPollSeconds>30</SendPollSeconds>
+    </IpDetails>
+  </IpList>
+</EisecConfig>

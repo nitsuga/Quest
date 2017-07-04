@@ -7,23 +7,6 @@ EXPOSE 1433
 
 RUN apt-get update && apt-get install -y vim
 
-
-# Create data directory
-#RUN mkdir -p /tmp/data1  && \
-#	mkdir -p /tmp/data2  && \
-#	mkdir -p /tmp/data3  && \
-#	mkdir -p /tmp/data4
-	
-#RUN	chown mssql /tmp/data1  && \
-#	chgrp mssql /tmp/data1  && \
-#	chown mssql /tmp/data1  && \
-#	chgrp mssql /tmp/data1  && \
-#	chown mssql /tmp/data1  && \
-#	chgrp mssql /tmp/data1  && \
-#	chown mssql /tmp/data1  && \
-#	chgrp mssql /tmp/data1
-
-
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

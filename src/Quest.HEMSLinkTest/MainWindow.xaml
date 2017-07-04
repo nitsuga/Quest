@@ -1,0 +1,110 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Quest.HEMSLinkTest" x:Class="Quest.HEMSLinkTest.MainWindow"
+        Title="HEMS Link Test Harness" Height="506" Width="525" >
+    <Grid Margin="0,-2,0,2">
+        <DockPanel>
+            <CheckBox DockPanel.Dock="Top" Content="Enable Server " HorizontalAlignment="Left" Margin="15"  VerticalAlignment="Top" Width="191" Checked="ServerCheckBox_Checked" Unchecked="ServerUnchecked"/>
+            <CheckBox DockPanel.Dock="Top" Content="Enable Client" HorizontalAlignment="Left" Margin="15,15,0,15"  VerticalAlignment="Top" Width="191" Checked="ClientCheckBox_Checked" Unchecked="ClientUnchecked"/>
+
+            <Expander DockPanel.Dock="Top" Header="Send Event Update (Server to Client)">
+                <StackPanel>
+                    <TextBlock TextWrapping="WrapWithOverflow" Height="38" FontSize="10" FontStyle="Italic">This makes a ResourceUpdate packet and sends to via TCP as a JSON packet to the connected client. It Does not use the HEMS LInk Server as its more of a low level TCP test</TextBlock>
+                    <Button DockPanel.Dock="Top" Content="Send Event" HorizontalAlignment="Left"  VerticalAlignment="Top" Margin="5,5,0,5" Width="75" Click="Button_Click"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Event" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="EventId" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="L2013081500012" />
+                        <Label Content="Callsign" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Callsign" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="DA77" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Age" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Age" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="Child" />
+                        <Label Content="Sex" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Sex" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="M" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Address" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Address" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="28 London Bridge Street, Southwark" />
+                        <Label Content="AZ Map Ref" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="AZ" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Easting" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Easting" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text=" 532820" />
+                        <Label Content="Northing" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Northing" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="180198" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Latitude" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Latitude" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="51.505115" />
+                        <Label Content="Longitude" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Longitude" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="-0.087674" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Determinant" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Determinant" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="15D4L " />
+                        <Label Content="Call Origin" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Origin" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="15 July 2013 16:00" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Dispatched" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Dispatched" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="15 July 2013 16:01" />
+                        <Label Content="Updated" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="Updated" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="15 July 2013 16:01" />
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+            <Expander DockPanel.Dock="Top" Header="Logon details">
+                <StackPanel DockPanel.Dock="Top" >
+                    <TextBlock TextWrapping="WrapWithOverflow" Height="38" FontSize="10" FontStyle="Italic">This makes a Logon packet and sends to via TCP as a JSON packet to the connected server. It Does not use the HEMS LInk Server as its more of a low level TCP test</TextBlock>
+                    <Button DockPanel.Dock="Top" x:Name="DoLogon" Content="Send Logon"  VerticalAlignment="Top" Margin="5,5,0,5" Click="DoLogon_Click" Width="100" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="AppId" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="AppId" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" Text="LASLAA" />
+                        <Label Content="MaxEvents" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="MaxEvents" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="10" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Last Update" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="LastUpdate" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="136" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="CAllsign" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="100"/>
+                        <TextBox x:Name="LogonCallsign" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="136" >DA77</TextBox>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+            <Expander DockPanel.Dock="Top" Header="Send Raw JSON">
+                <StackPanel DockPanel.Dock="Top" >
+                    <StackPanel Orientation="Horizontal" >
+                        <Button DockPanel.Dock="Top" x:Name="DoServerJSON" Content="Send to Client"  VerticalAlignment="Top" Margin="5" Click="DoServerJSON_Click"/>
+                        <Button DockPanel.Dock="Top" x:Name="DoClientJSON" Content="Send to Server"  VerticalAlignment="Top" Margin="5" Click="DoClientJSON_Click"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="JSON" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top"  Width="100"/>
+                        <TextBox  x:Name="JSON" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Text="" />
+                        <TextBlock TextWrapping="Wrap" Text="TextBlock" Width="348" ScrollViewer.CanContentScroll="True" Height="60"/>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+            <Expander DockPanel.Dock="Top" Header="Send Resource update">
+                <StackPanel DockPanel.Dock="Top" >
+                    <StackPanel Orientation="Horizontal" >
+                        <Button DockPanel.Dock="Top"  Content="Send"  VerticalAlignment="Top" Margin="5" Click="SendResUpdate"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Callsign" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top"  Width="60"/>
+                        <TextBox  x:Name="RU_Callsign" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Text="DA77" Width="50" />
+                        <Label Content="Status" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top"  Width="60"/>
+                        <TextBox  x:Name="RU_Status" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Text="DSP" Width="50" />
+                        <Label Content="Inc." HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top"  Width="60"/>
+                        <TextBox  x:Name="RU_Inc" HorizontalAlignment="Left" Height="23" Margin="5" TextWrapping="Wrap" VerticalAlignment="Top" Text="L131213000174" Width="103" />
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+            <TextBox DockPanel.Dock="Bottom" x:Name="Log" ></TextBox>
+        </DockPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="cd48af86a93846dea28da6200b85883f" Name="Diagram1" ZoomLevel="97">
+        <EntityTypeShape EntityType="QuestDataModel.IncidentRouteEstimate" Width="1.5" PointX="3" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuestDataModel.IncidentRouteRun" Width="1.5" PointX="2.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuestDataModel.Avl" Width="1.5" PointX="4.75" PointY="4.75" />
+        <EntityTypeShape EntityType="QuestDataModel.Activation" Width="1.5" PointX="5.75" PointY="0.75" />
+        <EntityTypeShape EntityType="QuestDataModel.RoadSpeed" Width="1.5" PointX="6.75" PointY="4.75" />
+        <EntityTypeShape EntityType="QuestDataModel.RoadSpeedMatrixHoD" Width="1.5" PointX="0.75" PointY="7.75" />
+        <EntityTypeShape EntityType="QuestDataModel.RoadSpeedMatrixHoW" Width="1.5" PointX="8.75" PointY="4.75" />
+        <EntityTypeShape EntityType="QuestDataModel.IncidentRoute" Width="1.5" PointX="0.75" PointY="1" />
+        <AssociationConnector Association="QuestDataModel.FK_IncidentRouteEstimate_IncidentRoutes" />
+        <EntityTypeShape EntityType="QuestDataModel.RoadSpeedItem" Width="1.5" PointX="3" PointY="10.625" />
+        <AssociationConnector Association="QuestDataModel.FK_RoadSpeedItem_IncidentRoutes1" />
+        <EntityTypeShape EntityType="QuestDataModel.AvlsRoad" Width="1.5" PointX="7.375" PointY="8.75" />
+        <EntityTypeShape EntityType="QuestDataModel.IncidentRouteView" Width="1.5" PointX="8.375" PointY="0.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

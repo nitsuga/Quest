@@ -281,7 +281,9 @@
     </Content>
     <None Include="Dockerfile" />
     <None Include="packages.config" />
-    <None Include="simulation.json" />
+    <None Include="simulation.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wait-for-it.sh" />
   </ItemGroup>
   <ItemGroup>
@@ -293,9 +295,21 @@
       <Project>{ddf9baa7-cfa9-406a-9781-05a79760bc48}</Project>
       <Name>Quest.Lib.OS</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Quest.Lib.Research\Quest.Lib.Research.csproj">
+      <Project>{7161038A-DD63-4732-A0E4-E44FFF57E39D}</Project>
+      <Name>Quest.Lib.Research</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Quest.Lib.Simulation\Quest.Lib.Simulation.csproj">
+      <Project>{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}</Project>
+      <Name>Quest.Lib.Simulation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj">
       <Project>{68e95b32-4b37-48f3-8560-9e063f527b13}</Project>
       <Name>Quest.Lib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TfL.Api.Common\Tfl.Api.Common.csproj">
+      <Project>{e7ba1765-e4b7-41a0-90fb-9b6b3aa22976}</Project>
+      <Name>Tfl.Api.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

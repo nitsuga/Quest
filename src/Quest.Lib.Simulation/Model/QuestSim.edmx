@@ -1,0 +1,1686 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="QuestSimModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="AMPDScodes">
+          <Key>
+            <PropertyRef Name="ampdsKey" />
+          </Key>
+          <Property Name="ampdsKey" Type="smallint" Nullable="false" />
+          <Property Name="ampdscode" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="chiefcomplaint" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="chiefcomplaintcode" Type="tinyint" />
+          <Property Name="description" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="startdate" Type="datetime" Nullable="false" />
+          <Property Name="enddate" Type="datetime" Nullable="false" />
+          <Property Name="version" Type="tinyint" />
+          <Property Name="category" Type="char" MaxLength="2" />
+          <Property Name="DefaultLASCategory" Type="char" MaxLength="2" />
+          <Property Name="DefaultLASCategoryFull" Type="varchar" MaxLength="10" />
+          <Property Name="DefaultDohCategory" Type="char" MaxLength="1" />
+          <Property Name="DefaultDohSubcategory" Type="char" MaxLength="2" />
+          <Property Name="DefaultDohSubcategoryFull" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="CadLinkIncidents">
+          <Key>
+            <PropertyRef Name="CadLinkId" />
+          </Key>
+          <Property Name="CadLinkId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="XmlData" Type="xml" Nullable="false" />
+          <Property Name="timestamp" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Coverage">
+          <Key>
+            <PropertyRef Name="CoverageId" />
+          </Key>
+          <Property Name="CoverageId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="VehicleTypeId" Type="int" Nullable="false" />
+          <Property Name="DestinationId" Type="int" Nullable="false" />
+          <Property Name="CoverageMap" Type="varbinary(max)" Nullable="false" />
+          <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="OffsetX" Type="bigint" Nullable="false" />
+          <Property Name="OffsetY" Type="bigint" Nullable="false" />
+          <Property Name="BlockSize" Type="bigint" Nullable="false" />
+          <Property Name="Rows" Type="bigint" Nullable="false" />
+          <Property Name="Columns" Type="bigint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Destinations">
+          <Key>
+            <PropertyRef Name="DestinationId" />
+          </Key>
+          <Property Name="DestinationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Destination" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Position" Type="geometry" />
+          <Property Name="IsHospital" Type="bit" Nullable="false" />
+          <Property Name="IsStandby" Type="bit" Nullable="false" />
+          <Property Name="IsStation" Type="bit" Nullable="false" />
+          <Property Name="IsRoad" Type="bit" Nullable="false" />
+          <Property Name="IsPolice" Type="bit" />
+          <Property Name="e" Type="float" Nullable="false" />
+          <Property Name="n" Type="float" Nullable="false" />
+          <Property Name="GroupId" Type="int" />
+        </EntityType>
+        <EntityType Name="Determinants">
+          <Key>
+            <PropertyRef Name="DeterminantId" />
+          </Key>
+          <Property Name="DeterminantId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="determinant" Type="varchar" MaxLength="50" />
+          <Property Name="ambulances" Type="varchar" MaxLength="50" />
+          <Property Name="paramedics" Type="varchar" MaxLength="50" />
+          <Property Name="all_responders" Type="varchar" MaxLength="50" />
+          <Property Name="ecps" Type="varchar" MaxLength="50" />
+          <Property Name="comresp" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.freda_determinants' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="freda_determinants">
+          <Property Name="determinant" Type="varchar" MaxLength="50" />
+          <Property Name="ambulances" Type="int" />
+          <Property Name="paramedics" Type="int" />
+          <Property Name="all_responders" Type="int" />
+          <Property Name="ecps" Type="int" />
+          <Property Name="comresp" Type="int" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.IncidentType' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="IncidentType">
+          <Key>
+            <PropertyRef Name="incidentcode" />
+            <PropertyRef Name="incidenttype" />
+          </Key>
+          <Property Name="incidentcode" Type="tinyint" Nullable="false" />
+          <Property Name="incidenttype" Type="varchar" MaxLength="30" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.OnsceneStats' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="OnsceneStats">
+          <Key>
+            <PropertyRef Name="CdfId" />
+          </Key>
+          <Property Name="CdfId" Type="int" Nullable="false" />
+          <Property Name="cdfType" Type="int" />
+          <Property Name="hour" Type="int" />
+          <Property Name="vehicleType" Type="varchar" MaxLength="20" />
+          <Property Name="cdf" Type="xml" />
+          <Property Name="ampds" Type="nvarchar" MaxLength="10" />
+          <Property Name="mean" Type="float" />
+          <Property Name="stddev" Type="float" />
+          <Property Name="count" Type="int" />
+          <Property Name="VehicleTypeId" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.Personnel' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="Personnel">
+          <Property Name="AGENCY_CODE" Type="nvarchar" MaxLength="255" />
+          <Property Name="UNIT" Type="nvarchar" MaxLength="255" />
+          <Property Name="P_UNIT_TYPE1" Type="nvarchar" MaxLength="255" />
+          <Property Name="MDT_CODE" Type="nvarchar" MaxLength="255" />
+          <Property Name="OFFICER_BADGE1" Type="nvarchar" MaxLength="255" />
+          <Property Name="OFFICER_PERS_ID1" Type="float" />
+          <Property Name="OFFICER_LNAME1" Type="nvarchar" MaxLength="255" />
+          <Property Name="DATE_IN" Type="nvarchar" MaxLength="255" />
+          <Property Name="TIME_IN" Type="nvarchar" MaxLength="255" />
+          <Property Name="DATE_OUT" Type="nvarchar" MaxLength="255" />
+          <Property Name="TIME_OUT" Type="nvarchar" MaxLength="255" />
+          <Property Name="LONGITUDE" Type="float" />
+          <Property Name="LATITUDE" Type="float" />
+          <Property Name="AVAILABLE" Type="float" />
+          <Property Name="PRIMARY_DP_ZONE" Type="nvarchar" MaxLength="255" />
+          <Property Name="CURRENT_DP_ZONE" Type="nvarchar" MaxLength="255" />
+          <Property Name="LEVEL5" Type="nvarchar" MaxLength="255" />
+          <Property Name="OFF_RANK1" Type="nvarchar" MaxLength="255" />
+          <Property Name="EMPLOYEE_NO" Type="nvarchar" MaxLength="255" />
+          <Property Name="BADGE_NO" Type="nvarchar" MaxLength="255" />
+          <Property Name="FAMILY_NAME" Type="nvarchar" MaxLength="255" />
+          <Property Name="FIRST_NAME" Type="nvarchar" MaxLength="255" />
+          <Property Name="P_RANK" Type="nvarchar" MaxLength="255" />
+          <Property Name="P_DEPARTMENT" Type="nvarchar" MaxLength="255" />
+          <Property Name="Easting" Type="int" />
+          <Property Name="Northing" Type="int" />
+        </EntityType>-->
+        <EntityType Name="Profile">
+          <Key>
+            <PropertyRef Name="ProfileId" />
+          </Key>
+          <Property Name="ProfileId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProfileName" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="ProfileParameter">
+          <Key>
+            <PropertyRef Name="ProfileParameterId" />
+          </Key>
+          <Property Name="ProfileParameterId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProfileId" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ProfileParameterTypeId" Type="int" />
+        </EntityType>
+        <EntityType Name="ProfileParameterType">
+          <Key>
+            <PropertyRef Name="ProfileParameterTypeId" />
+          </Key>
+          <Property Name="ProfileParameterTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.ResponseProfiles' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="ResponseProfiles">
+          <Property Name="Chief Complaint / Determinant Descriptor" Type="nvarchar" MaxLength="255" />
+          <Property Name="Determinant Description" Type="nvarchar" MaxLength="255" />
+          <Property Name="LAS Priority (NOT DH REPORTING)" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="CRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="MRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="HART LORRY" Type="nvarchar" MaxLength="255" />
+          <Property Name="FRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="PARAMEDIC" Type="nvarchar" MaxLength="255" />
+          <Property Name="AES1" Type="nvarchar" MaxLength="255" />
+          <Property Name="AES2" Type="nvarchar" MaxLength="255" />
+          <Property Name="DSO" Type="nvarchar" MaxLength="255" />
+          <Property Name="FPOS Intermediate" Type="nvarchar" MaxLength="255" />
+          <Property Name="FPOS   Basic" Type="nvarchar" MaxLength="255" />
+          <Property Name="CPOL" Type="nvarchar" MaxLength="255" />
+          <Property Name="AEU" Type="nvarchar" MaxLength="255" />
+          <Property Name="PLATO" Type="nvarchar" MaxLength="255" />
+          <Property Name="AUTO DISPATCH" Type="nvarchar" MaxLength="255" />
+          <Property Name="F19" Type="nvarchar" MaxLength="255" />
+        </EntityType>-->
+        <EntityType Name="Rosters">
+          <Key>
+            <PropertyRef Name="RosterId" />
+          </Key>
+          <Property Name="RosterId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RosterPattern" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SimulationAssignments">
+          <Key>
+            <PropertyRef Name="SimulationAssignments" />
+          </Key>
+          <Property Name="SimulationAssignments" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SimulationRunId" Type="int" />
+          <Property Name="tstamp" Type="datetime" />
+          <Property Name="Callsign" Type="nvarchar" MaxLength="150" />
+          <Property Name="Incident" Type="nvarchar" MaxLength="150" />
+          <Property Name="Action" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="SimulationIncidents">
+          <Key>
+            <PropertyRef Name="IncidentId" />
+          </Key>
+          <Property Name="IncidentId" Type="bigint" Nullable="false" />
+          <Property Name="CallStart" Type="datetime" Nullable="false" />
+          <Property Name="AMPDSTime" Type="datetime" Nullable="false" />
+          <Property Name="Easting" Type="int" />
+          <Property Name="Northing" Type="int" />
+          <Property Name="AMPDSCode" Type="varchar" MaxLength="10" />
+          <Property Name="Category" Type="int" />
+          <Property Name="WasConveyed" Type="bit" />
+          <Property Name="WasDispatched" Type="bit" />
+          <Property Name="OutsideLAS" Type="bit" />
+        </EntityType>
+        <EntityType Name="SimulationOrcon">
+          <Key>
+            <PropertyRef Name="SimulationOrconId" />
+          </Key>
+          <Property Name="SimulationOrconId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SimulationRunId" Type="int" />
+          <Property Name="HourOrdinal" Type="int" />
+          <Property Name="catAOutside" Type="int" />
+          <Property Name="CatAInside" Type="int" />
+          <Property Name="CatBOutside" Type="int" />
+          <Property Name="CatBInside" Type="int" />
+          <Property Name="Performance" Type="real" />
+          <Property Name="PerfA" Type="real" />
+          <Property Name="PerfB" Type="real" />
+        </EntityType>
+        <EntityType Name="SimulationResults">
+          <Key>
+            <PropertyRef Name="SimulationResultId" />
+          </Key>
+          <Property Name="SimulationResultId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Incidentid" Type="bigint" />
+          <Property Name="FRDelay" Type="int" />
+          <Property Name="FRResourceId" Type="int" />
+          <Property Name="AmbDelay" Type="int" />
+          <Property Name="TurnAround" Type="int" />
+          <Property Name="AmbResourceId" Type="int" />
+          <Property Name="OnScene" Type="int" />
+          <Property Name="SimulationRunId" Type="int" Nullable="false" />
+          <Property Name="Closed" Type="datetime" />
+          <Property Name="HospitalDelay" Type="int" Nullable="false" />
+          <Property Name="CallStart" Type="datetime" />
+          <Property Name="Category" Type="int" />
+          <Property Name="HourOrdinal" Type="int" />
+          <Property Name="Inside" Type="bit" />
+        </EntityType>
+        <EntityType Name="SimulationRun">
+          <Key>
+            <PropertyRef Name="SimulationRunId" />
+          </Key>
+          <Property Name="SimulationRunId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Notes" Type="nvarchar" MaxLength="250" />
+          <Property Name="Constants" Type="nvarchar" MaxLength="250" />
+          <Property Name="Performance" Type="real" />
+          <Property Name="Started" Type="datetime" />
+          <Property Name="Stopped" Type="datetime" />
+        </EntityType>
+        <EntityType Name="SimulationStats">
+          <Key>
+            <PropertyRef Name="SimulationStatsId" />
+          </Key>
+          <Property Name="SimulationStatsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SimulationRunId" Type="int" />
+          <Property Name="Timestamp" Type="datetime" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" />
+          <Property Name="Quantity" Type="int" />
+          <Property Name="VehicleTypeId" Type="int" />
+        </EntityType>
+        <EntityType Name="StationCatchment">
+          <Key>
+            <PropertyRef Name="StationCatchmentid" />
+          </Key>
+          <Property Name="StationCatchmentid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FID" Type="varchar" MaxLength="50" />
+          <Property Name="code" Type="varchar" MaxLength="50" />
+          <Property Name="StationName" Type="varchar" MaxLength="50" />
+          <Property Name="Complex" Type="varchar" MaxLength="50" />
+          <Property Name="Area" Type="varchar" MaxLength="50" />
+          <Property Name="Shape" Type="geometry" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.VehicleRoster' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="VehicleRoster">
+          <Key>
+            <PropertyRef Name="callsign" />
+          </Key>
+          <Property Name="Period" Type="datetime" />
+          <Property Name="minutesactual" Type="int" />
+          <Property Name="callsign" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="easting" Type="int" />
+          <Property Name="northing" Type="int" />
+          <Property Name="stationID" Type="char" MaxLength="2" />
+          <Property Name="VehicleTypeId" Type="int" />
+        </EntityType>
+        <EntityType Name="Vehicles">
+          <Key>
+            <PropertyRef Name="VehicleId" />
+          </Key>
+          <Property Name="VehicleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="VehicleTypeId" Type="int" Nullable="false" />
+          <Property Name="SkillLevel" Type="int" />
+          <Property Name="MPCName" Type="nvarchar" MaxLength="50" />
+          <Property Name="Easting" Type="int" />
+          <Property Name="Northing" Type="int" />
+          <Property Name="Callsign" Type="nvarchar" MaxLength="50" />
+          <Property Name="FleetId" Type="int" />
+          <Property Name="DefaultDestinationId" Type="int" />
+          <Property Name="GroupId" Type="int" />
+        </EntityType>
+        <EntityType Name="VehicleTypes">
+          <Key>
+            <PropertyRef Name="VehicleTypeId" />
+          </Key>
+          <Property Name="VehicleTypeId" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.ActualAndSimPerformance' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="ActualAndSimPerformance">
+          <Property Name="thedate" Type="datetime" />
+          <Property Name="Outside" Type="int" />
+          <Property Name="Inside" Type="int" />
+          <Property Name="ActualPerformance" Type="decimal" Precision="29" Scale="11" />
+          <Property Name="SimulatedPerformance" Type="real" />
+          <Property Name="CatACount" Type="int" />
+          <Property Name="SimulationRunId" Type="int" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.ActualPerformanceView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="ActualPerformanceView">
+          <Property Name="thedate" Type="datetime" />
+          <Property Name="Outside" Type="int" />
+          <Property Name="Inside" Type="int" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.DestinationsView' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="DestinationsView">
+          <Key>
+            <PropertyRef Name="DestinationId" />
+            <PropertyRef Name="Destination" />
+            <PropertyRef Name="IsHospital" />
+            <PropertyRef Name="IsStandby" />
+            <PropertyRef Name="IsStation" />
+            <PropertyRef Name="IsRoad" />
+            <PropertyRef Name="e" />
+            <PropertyRef Name="n" />
+          </Key>
+          <Property Name="DestinationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Destination" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="IsHospital" Type="bit" Nullable="false" />
+          <Property Name="IsStandby" Type="bit" Nullable="false" />
+          <Property Name="IsStation" Type="bit" Nullable="false" />
+          <Property Name="IsRoad" Type="bit" Nullable="false" />
+          <Property Name="e" Type="float" Nullable="false" />
+          <Property Name="n" Type="float" Nullable="false" />
+          <Property Name="IsPolice" Type="bit" />
+          <Property Name="GroupId" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.HighLevelList' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="HighLevelList">
+          <Key>
+            <PropertyRef Name="CallStart" />
+            <PropertyRef Name="ampdscode" />
+          </Key>
+          <Property Name="CallStart" Type="datetime" Nullable="false" />
+          <Property Name="FRDelay" Type="int" />
+          <Property Name="AmbDelay" Type="int" />
+          <Property Name="TurnAround" Type="int" />
+          <Property Name="OnScene" Type="int" />
+          <Property Name="category" Type="char" MaxLength="2" />
+          <Property Name="ampdscode" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="version" Type="tinyint" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.HighLevelPerformance' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="HighLevelPerformance">
+          <Property Name="FRDelay" Type="int" />
+          <Property Name="AmbDelay" Type="int" />
+          <Property Name="Turnaround" Type="int" />
+          <Property Name="OnScene" Type="int" />
+          <Property Name="category" Type="char" MaxLength="2" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.ResponseProfileView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="ResponseProfileView">
+          <Property Name="AMPDSCode" Type="nvarchar" MaxLength="255" />
+          <Property Name="Priority" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="CRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="MRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="HART" Type="nvarchar" MaxLength="255" />
+          <Property Name="FRU" Type="nvarchar" MaxLength="255" />
+          <Property Name="AEU" Type="nvarchar" MaxLength="255" />
+          <Property Name="AutoDispatch" Type="nvarchar" MaxLength="255" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'QuestSim.dbo.SimulationOrconView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="SimulationOrconView">
+          <Property Name="Notes" Type="nvarchar" MaxLength="250" />
+          <Property Name="Performance" Type="real" />
+          <Property Name="CatBInside" Type="int" />
+          <Property Name="CatBOutside" Type="int" />
+          <Property Name="CatAInside" Type="int" />
+          <Property Name="catAOutside" Type="int" />
+          <Property Name="SimulationRunId" Type="int" />
+          <Property Name="HourOrdinal" Type="int" />
+          <Property Name="Constants" Type="nvarchar" MaxLength="250" />
+          <Property Name="PerfA" Type="real" />
+          <Property Name="PerfB" Type="real" />
+        </EntityType>-->
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.VehicleRosterView' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="VehicleRosterView">
+          <Key>
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Period" Type="datetime" />
+          <Property Name="VehicleTypeId" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'QuestSim.dbo.VehicleView' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="VehicleView">
+          <Key>
+            <PropertyRef Name="VehicleId" />
+            <PropertyRef Name="VehicleType" />
+            <PropertyRef Name="VehicleTypeId" />
+          </Key>
+          <Property Name="VehicleId" Type="int" Nullable="false" />
+          <Property Name="SkillLevel" Type="int" />
+          <Property Name="VehicleType" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="VehicleTypeId" Type="int" Nullable="false" />
+          <Property Name="MPCName" Type="nvarchar" MaxLength="50" />
+          <Property Name="Northing" Type="int" />
+          <Property Name="Easting" Type="int" />
+          <Property Name="Callsign" Type="nvarchar" MaxLength="50" />
+          <Property Name="FleetId" Type="int" />
+          <Property Name="DefaultDestinationId" Type="int" />
+          <Property Name="GroupId" Type="int" />
+        </EntityType>
+        <Association Name="FK_ProfileParameter_Profile">
+          <End Role="Profile" Type="Self.Profile" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProfileParameter" Type="Self.ProfileParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Profile">
+              <PropertyRef Name="ProfileId" />
+            </Principal>
+            <Dependent Role="ProfileParameter">
+              <PropertyRef Name="ProfileId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProfileParameter_ProfileParameterType">
+          <End Role="ProfileParameterType" Type="Self.ProfileParameterType" Multiplicity="0..1" />
+          <End Role="ProfileParameter" Type="Self.ProfileParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ProfileParameterType">
+              <PropertyRef Name="ProfileParameterTypeId" />
+            </Principal>
+            <Dependent Role="ProfileParameter">
+              <PropertyRef Name="ProfileParameterTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationAssignments_SimulationRun">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationAssignments" Type="Self.SimulationAssignments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationAssignments">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationOrcon_SimulationRun1">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationOrcon" Type="Self.SimulationOrcon" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationOrcon">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_SimulationIncidents">
+          <End Role="SimulationIncidents" Type="Self.SimulationIncidents" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationIncidents">
+              <PropertyRef Name="IncidentId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="Incidentid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_SimulationRun1">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationResults" Type="Self.SimulationResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_Vehicles">
+          <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicles">
+              <PropertyRef Name="VehicleId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="FRResourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_Vehicles1">
+          <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResults" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicles">
+              <PropertyRef Name="VehicleId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="AmbResourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationStats_SimulationRun">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationStats" Type="Self.SimulationStats" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationStats">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Vehicles_Destinations">
+          <End Role="Destinations" Type="Self.Destinations" Multiplicity="0..1" />
+          <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Destinations">
+              <PropertyRef Name="DestinationId" />
+            </Principal>
+            <Dependent Role="Vehicles">
+              <PropertyRef Name="DefaultDestinationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="ClearRunData" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="CloneProfile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="SourceId" Type="int" Mode="In" />
+          <Parameter Name="Description" Type="nvarchar" Mode="In" />
+        </Function>
+        <Function Name="ImportIncidents" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="ImportVehicleRoster" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="LoadDestinations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="MinuteClean" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="ShowStatus" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="UpdateOrcon" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="SimulationRunId" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="QuestSimModelStoreContainer">
+          <EntitySet Name="AMPDScodes" EntityType="Self.AMPDScodes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CadLinkIncidents" EntityType="Self.CadLinkIncidents" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Coverage" EntityType="Self.Coverage" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Destinations" EntityType="Self.Destinations" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Determinants" EntityType="Self.Determinants" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Profile" EntityType="Self.Profile" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProfileParameter" EntityType="Self.ProfileParameter" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProfileParameterType" EntityType="Self.ProfileParameterType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Rosters" EntityType="Self.Rosters" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationAssignments" EntityType="Self.SimulationAssignments" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationIncidents" EntityType="Self.SimulationIncidents" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationOrcon" EntityType="Self.SimulationOrcon" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationResults" EntityType="Self.SimulationResults" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationRun" EntityType="Self.SimulationRun" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimulationStats" EntityType="Self.SimulationStats" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="StationCatchment" EntityType="Self.StationCatchment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Vehicles" EntityType="Self.Vehicles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="VehicleTypes" EntityType="Self.VehicleTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IncidentType" EntityType="Self.IncidentType" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [IncidentType].[incidentcode] AS [incidentcode], 
+    [IncidentType].[incidenttype] AS [incidenttype]
+    FROM [dbo].[IncidentType] AS [IncidentType]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="OnsceneStats" EntityType="Self.OnsceneStats" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [OnsceneStats].[CdfId] AS [CdfId], 
+    [OnsceneStats].[cdfType] AS [cdfType], 
+    [OnsceneStats].[hour] AS [hour], 
+    [OnsceneStats].[vehicleType] AS [vehicleType], 
+    [OnsceneStats].[cdf] AS [cdf], 
+    [OnsceneStats].[ampds] AS [ampds], 
+    [OnsceneStats].[mean] AS [mean], 
+    [OnsceneStats].[stddev] AS [stddev], 
+    [OnsceneStats].[count] AS [count], 
+    [OnsceneStats].[VehicleTypeId] AS [VehicleTypeId]
+    FROM [dbo].[OnsceneStats] AS [OnsceneStats]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="VehicleRoster" EntityType="Self.VehicleRoster" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [VehicleRoster].[Period] AS [Period], 
+    [VehicleRoster].[minutesactual] AS [minutesactual], 
+    [VehicleRoster].[callsign] AS [callsign], 
+    [VehicleRoster].[easting] AS [easting], 
+    [VehicleRoster].[northing] AS [northing], 
+    [VehicleRoster].[stationID] AS [stationID], 
+    [VehicleRoster].[VehicleTypeId] AS [VehicleTypeId]
+    FROM [dbo].[VehicleRoster] AS [VehicleRoster]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="DestinationsView" EntityType="Self.DestinationsView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [DestinationsView].[DestinationId] AS [DestinationId], 
+    [DestinationsView].[Destination] AS [Destination], 
+    [DestinationsView].[IsHospital] AS [IsHospital], 
+    [DestinationsView].[IsStandby] AS [IsStandby], 
+    [DestinationsView].[IsStation] AS [IsStation], 
+    [DestinationsView].[IsRoad] AS [IsRoad], 
+    [DestinationsView].[e] AS [e], 
+    [DestinationsView].[n] AS [n], 
+    [DestinationsView].[IsPolice] AS [IsPolice], 
+    [DestinationsView].[GroupId] AS [GroupId]
+    FROM [dbo].[DestinationsView] AS [DestinationsView]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="HighLevelList" EntityType="Self.HighLevelList" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [HighLevelList].[CallStart] AS [CallStart], 
+    [HighLevelList].[FRDelay] AS [FRDelay], 
+    [HighLevelList].[AmbDelay] AS [AmbDelay], 
+    [HighLevelList].[TurnAround] AS [TurnAround], 
+    [HighLevelList].[OnScene] AS [OnScene], 
+    [HighLevelList].[category] AS [category], 
+    [HighLevelList].[ampdscode] AS [ampdscode], 
+    [HighLevelList].[version] AS [version]
+    FROM [dbo].[HighLevelList] AS [HighLevelList]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="VehicleRosterView" EntityType="Self.VehicleRosterView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [VehicleRosterView].[Name] AS [Name], 
+    [VehicleRosterView].[Period] AS [Period], 
+    [VehicleRosterView].[VehicleTypeId] AS [VehicleTypeId]
+    FROM [dbo].[VehicleRosterView] AS [VehicleRosterView]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="VehicleView" EntityType="Self.VehicleView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [VehicleView].[VehicleId] AS [VehicleId], 
+    [VehicleView].[SkillLevel] AS [SkillLevel], 
+    [VehicleView].[VehicleType] AS [VehicleType], 
+    [VehicleView].[VehicleTypeId] AS [VehicleTypeId], 
+    [VehicleView].[MPCName] AS [MPCName], 
+    [VehicleView].[Northing] AS [Northing], 
+    [VehicleView].[Easting] AS [Easting], 
+    [VehicleView].[Callsign] AS [Callsign], 
+    [VehicleView].[FleetId] AS [FleetId], 
+    [VehicleView].[DefaultDestinationId] AS [DefaultDestinationId], 
+    [VehicleView].[GroupId] AS [GroupId]
+    FROM [dbo].[VehicleView] AS [VehicleView]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_ProfileParameter_Profile" Association="Self.FK_ProfileParameter_Profile">
+            <End Role="Profile" EntitySet="Profile" />
+            <End Role="ProfileParameter" EntitySet="ProfileParameter" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProfileParameter_ProfileParameterType" Association="Self.FK_ProfileParameter_ProfileParameterType">
+            <End Role="ProfileParameterType" EntitySet="ProfileParameterType" />
+            <End Role="ProfileParameter" EntitySet="ProfileParameter" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationAssignments_SimulationRun" Association="Self.FK_SimulationAssignments_SimulationRun">
+            <End Role="SimulationRun" EntitySet="SimulationRun" />
+            <End Role="SimulationAssignments" EntitySet="SimulationAssignments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationOrcon_SimulationRun1" Association="Self.FK_SimulationOrcon_SimulationRun1">
+            <End Role="SimulationRun" EntitySet="SimulationRun" />
+            <End Role="SimulationOrcon" EntitySet="SimulationOrcon" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_SimulationIncidents" Association="Self.FK_SimulationResults_SimulationIncidents">
+            <End Role="SimulationIncidents" EntitySet="SimulationIncidents" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_SimulationRun1" Association="Self.FK_SimulationResults_SimulationRun1">
+            <End Role="SimulationRun" EntitySet="SimulationRun" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_Vehicles" Association="Self.FK_SimulationResults_Vehicles">
+            <End Role="Vehicles" EntitySet="Vehicles" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_Vehicles1" Association="Self.FK_SimulationResults_Vehicles1">
+            <End Role="Vehicles" EntitySet="Vehicles" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationStats_SimulationRun" Association="Self.FK_SimulationStats_SimulationRun">
+            <End Role="SimulationRun" EntitySet="SimulationRun" />
+            <End Role="SimulationStats" EntitySet="SimulationStats" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Vehicles_Destinations" Association="Self.FK_Vehicles_Destinations">
+            <End Role="Destinations" EntitySet="Destinations" />
+            <End Role="Vehicles" EntitySet="Vehicles" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="QuestSimModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="AMPDScode">
+          <Key>
+            <PropertyRef Name="ampdsKey" />
+          </Key>
+          <Property Name="ampdsKey" Type="Int16" Nullable="false" />
+          <Property Name="ampdscode1" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="chiefcomplaint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="chiefcomplaintcode" Type="Byte" />
+          <Property Name="description" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="startdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="enddate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="version" Type="Byte" />
+          <Property Name="category" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="DefaultLASCategory" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="DefaultLASCategoryFull" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="DefaultDohCategory" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="DefaultDohSubcategory" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="DefaultDohSubcategoryFull" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="CadLinkIncident">
+          <Key>
+            <PropertyRef Name="CadLinkId" />
+          </Key>
+          <Property Name="CadLinkId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="XmlData" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="timestamp" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="Coverage">
+          <Key>
+            <PropertyRef Name="CoverageId" />
+          </Key>
+          <Property Name="CoverageId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="VehicleTypeId" Type="Int32" Nullable="false" />
+          <Property Name="DestinationId" Type="Int32" Nullable="false" />
+          <Property Name="CoverageMap" Type="Binary" MaxLength="Max" FixedLength="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="OffsetX" Type="Int64" Nullable="false" />
+          <Property Name="OffsetY" Type="Int64" Nullable="false" />
+          <Property Name="BlockSize" Type="Int64" Nullable="false" />
+          <Property Name="Rows" Type="Int64" Nullable="false" />
+          <Property Name="Columns" Type="Int64" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Destination">
+          <Key>
+            <PropertyRef Name="DestinationId" />
+          </Key>
+          <Property Name="DestinationId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Destination1" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Position" Type="Geometry" />
+          <Property Name="IsHospital" Type="Boolean" Nullable="false" />
+          <Property Name="IsStandby" Type="Boolean" Nullable="false" />
+          <Property Name="IsStation" Type="Boolean" Nullable="false" />
+          <Property Name="IsRoad" Type="Boolean" Nullable="false" />
+          <Property Name="IsPolice" Type="Boolean" />
+          <Property Name="e" Type="Double" Nullable="false" />
+          <Property Name="n" Type="Double" Nullable="false" />
+          <Property Name="GroupId" Type="Int32" />
+          <NavigationProperty Name="Vehicles" Relationship="Self.FK_Vehicles_Destinations" FromRole="Destinations" ToRole="Vehicles" />
+        </EntityType>
+        <EntityType Name="Determinant">
+          <Key>
+            <PropertyRef Name="DeterminantId" />
+          </Key>
+          <Property Name="DeterminantId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="determinant1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ambulances" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="paramedics" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="all_responders" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ecps" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="comresp" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Profile">
+          <Key>
+            <PropertyRef Name="ProfileId" />
+          </Key>
+          <Property Name="ProfileId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProfileName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ProfileParameters" Relationship="Self.FK_ProfileParameter_Profile" FromRole="Profile" ToRole="ProfileParameter" />
+        </EntityType>
+        <EntityType Name="ProfileParameter">
+          <Key>
+            <PropertyRef Name="ProfileParameterId" />
+          </Key>
+          <Property Name="ProfileParameterId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProfileId" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Value" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ProfileParameterTypeId" Type="Int32" />
+          <NavigationProperty Name="Profile" Relationship="Self.FK_ProfileParameter_Profile" FromRole="ProfileParameter" ToRole="Profile" />
+          <NavigationProperty Name="ProfileParameterType" Relationship="Self.FK_ProfileParameter_ProfileParameterType" FromRole="ProfileParameter" ToRole="ProfileParameterType" />
+        </EntityType>
+        <EntityType Name="ProfileParameterType">
+          <Key>
+            <PropertyRef Name="ProfileParameterTypeId" />
+          </Key>
+          <Property Name="ProfileParameterTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ProfileParameters" Relationship="Self.FK_ProfileParameter_ProfileParameterType" FromRole="ProfileParameterType" ToRole="ProfileParameter" />
+        </EntityType>
+        <EntityType Name="Roster">
+          <Key>
+            <PropertyRef Name="RosterId" />
+          </Key>
+          <Property Name="RosterId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RosterPattern" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SimulationAssignment">
+          <Key>
+            <PropertyRef Name="SimulationAssignments" />
+          </Key>
+          <Property Name="SimulationAssignments" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SimulationRunId" Type="Int32" />
+          <Property Name="tstamp" Type="DateTime" Precision="3" />
+          <Property Name="Callsign" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Incident" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Action" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="SimulationRun" Relationship="Self.FK_SimulationAssignments_SimulationRun" FromRole="SimulationAssignments" ToRole="SimulationRun" />
+        </EntityType>
+        <EntityType Name="SimulationIncident">
+          <Key>
+            <PropertyRef Name="IncidentId" />
+          </Key>
+          <Property Name="IncidentId" Type="Int64" Nullable="false" />
+          <Property Name="CallStart" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="AMPDSTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Easting" Type="Int32" />
+          <Property Name="Northing" Type="Int32" />
+          <Property Name="AMPDSCode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Category" Type="Int32" />
+          <Property Name="WasConveyed" Type="Boolean" />
+          <Property Name="WasDispatched" Type="Boolean" />
+          <Property Name="OutsideLAS" Type="Boolean" />
+          <NavigationProperty Name="SimulationResults" Relationship="Self.FK_SimulationResults_SimulationIncidents" FromRole="SimulationIncidents" ToRole="SimulationResults" />
+        </EntityType>
+        <EntityType Name="SimulationOrcon">
+          <Key>
+            <PropertyRef Name="SimulationOrconId" />
+          </Key>
+          <Property Name="SimulationOrconId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SimulationRunId" Type="Int32" />
+          <Property Name="HourOrdinal" Type="Int32" />
+          <Property Name="catAOutside" Type="Int32" />
+          <Property Name="CatAInside" Type="Int32" />
+          <Property Name="CatBOutside" Type="Int32" />
+          <Property Name="CatBInside" Type="Int32" />
+          <Property Name="Performance" Type="Single" />
+          <Property Name="PerfA" Type="Single" />
+          <Property Name="PerfB" Type="Single" />
+          <NavigationProperty Name="SimulationRun" Relationship="Self.FK_SimulationOrcon_SimulationRun1" FromRole="SimulationOrcon" ToRole="SimulationRun" />
+        </EntityType>
+        <EntityType Name="SimulationResult">
+          <Key>
+            <PropertyRef Name="SimulationResultId" />
+          </Key>
+          <Property Name="SimulationResultId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Incidentid" Type="Int64" />
+          <Property Name="FRDelay" Type="Int32" />
+          <Property Name="FRResourceId" Type="Int32" />
+          <Property Name="AmbDelay" Type="Int32" />
+          <Property Name="TurnAround" Type="Int32" />
+          <Property Name="AmbResourceId" Type="Int32" />
+          <Property Name="OnScene" Type="Int32" />
+          <Property Name="SimulationRunId" Type="Int32" Nullable="false" />
+          <Property Name="Closed" Type="DateTime" Precision="3" />
+          <Property Name="HospitalDelay" Type="Int32" Nullable="false" />
+          <Property Name="CallStart" Type="DateTime" Precision="3" />
+          <Property Name="Category" Type="Int32" />
+          <Property Name="HourOrdinal" Type="Int32" />
+          <Property Name="Inside" Type="Boolean" />
+          <NavigationProperty Name="SimulationIncident" Relationship="Self.FK_SimulationResults_SimulationIncidents" FromRole="SimulationResults" ToRole="SimulationIncidents" />
+          <NavigationProperty Name="SimulationRun" Relationship="Self.FK_SimulationResults_SimulationRun1" FromRole="SimulationResults" ToRole="SimulationRun" />
+          <NavigationProperty Name="Vehicle" Relationship="Self.FK_SimulationResults_Vehicles" FromRole="SimulationResults" ToRole="Vehicles" />
+          <NavigationProperty Name="Vehicle1" Relationship="Self.FK_SimulationResults_Vehicles1" FromRole="SimulationResults" ToRole="Vehicles" />
+        </EntityType>
+        <EntityType Name="SimulationRun">
+          <Key>
+            <PropertyRef Name="SimulationRunId" />
+          </Key>
+          <Property Name="SimulationRunId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Notes" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="Constants" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="Performance" Type="Single" />
+          <Property Name="Started" Type="DateTime" Precision="3" />
+          <Property Name="Stopped" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="SimulationAssignments" Relationship="Self.FK_SimulationAssignments_SimulationRun" FromRole="SimulationRun" ToRole="SimulationAssignments" />
+          <NavigationProperty Name="SimulationOrcons" Relationship="Self.FK_SimulationOrcon_SimulationRun1" FromRole="SimulationRun" ToRole="SimulationOrcon" />
+          <NavigationProperty Name="SimulationResults" Relationship="Self.FK_SimulationResults_SimulationRun1" FromRole="SimulationRun" ToRole="SimulationResults" />
+          <NavigationProperty Name="SimulationStats" Relationship="Self.FK_SimulationStats_SimulationRun" FromRole="SimulationRun" ToRole="SimulationStats" />
+        </EntityType>
+        <EntityType Name="SimulationStat">
+          <Key>
+            <PropertyRef Name="SimulationStatsId" />
+          </Key>
+          <Property Name="SimulationStatsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SimulationRunId" Type="Int32" />
+          <Property Name="Timestamp" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Quantity" Type="Int32" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+          <NavigationProperty Name="SimulationRun" Relationship="Self.FK_SimulationStats_SimulationRun" FromRole="SimulationStats" ToRole="SimulationRun" />
+        </EntityType>
+        <EntityType Name="StationCatchment">
+          <Key>
+            <PropertyRef Name="StationCatchmentid" />
+          </Key>
+          <Property Name="StationCatchmentid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="StationName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Complex" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Area" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Shape" Type="Geometry" />
+        </EntityType>
+        <EntityType Name="Vehicle">
+          <Key>
+            <PropertyRef Name="VehicleId" />
+          </Key>
+          <Property Name="VehicleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="VehicleTypeId" Type="Int32" Nullable="false" />
+          <Property Name="SkillLevel" Type="Int32" />
+          <Property Name="MPCName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Easting" Type="Int32" />
+          <Property Name="Northing" Type="Int32" />
+          <Property Name="Callsign" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="FleetId" Type="Int32" />
+          <Property Name="DefaultDestinationId" Type="Int32" />
+          <Property Name="GroupId" Type="Int32" />
+          <NavigationProperty Name="Destination" Relationship="Self.FK_Vehicles_Destinations" FromRole="Vehicles" ToRole="Destinations" />
+          <NavigationProperty Name="SimulationResults" Relationship="Self.FK_SimulationResults_Vehicles" FromRole="Vehicles" ToRole="SimulationResults" />
+          <NavigationProperty Name="SimulationResults1" Relationship="Self.FK_SimulationResults_Vehicles1" FromRole="Vehicles" ToRole="SimulationResults" />
+        </EntityType>
+        <EntityType Name="VehicleType">
+          <Key>
+            <PropertyRef Name="VehicleTypeId" />
+          </Key>
+          <Property Name="VehicleTypeId" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="IncidentType">
+          <Key>
+            <PropertyRef Name="incidentcode" />
+            <PropertyRef Name="incidenttype1" />
+          </Key>
+          <Property Name="incidentcode" Type="Byte" Nullable="false" />
+          <Property Name="incidenttype1" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OnsceneStat">
+          <Key>
+            <PropertyRef Name="CdfId" />
+          </Key>
+          <Property Name="CdfId" Type="Int32" Nullable="false" />
+          <Property Name="cdfType" Type="Int32" />
+          <Property Name="hour" Type="Int32" />
+          <Property Name="vehicleType" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="cdf" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ampds" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="mean" Type="Double" />
+          <Property Name="stddev" Type="Double" />
+          <Property Name="count" Type="Int32" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="VehicleRoster">
+          <Key>
+            <PropertyRef Name="callsign" />
+          </Key>
+          <Property Name="Period" Type="DateTime" Precision="3" />
+          <Property Name="minutesactual" Type="Int32" />
+          <Property Name="callsign" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="easting" Type="Int32" />
+          <Property Name="northing" Type="Int32" />
+          <Property Name="stationID" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="DestinationsView">
+          <Key>
+            <PropertyRef Name="DestinationId" />
+            <PropertyRef Name="Destination" />
+            <PropertyRef Name="IsHospital" />
+            <PropertyRef Name="IsStandby" />
+            <PropertyRef Name="IsStation" />
+            <PropertyRef Name="IsRoad" />
+            <PropertyRef Name="e" />
+            <PropertyRef Name="n" />
+          </Key>
+          <Property Name="DestinationId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Destination" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsHospital" Type="Boolean" Nullable="false" />
+          <Property Name="IsStandby" Type="Boolean" Nullable="false" />
+          <Property Name="IsStation" Type="Boolean" Nullable="false" />
+          <Property Name="IsRoad" Type="Boolean" Nullable="false" />
+          <Property Name="e" Type="Double" Nullable="false" />
+          <Property Name="n" Type="Double" Nullable="false" />
+          <Property Name="IsPolice" Type="Boolean" />
+          <Property Name="GroupId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="HighLevelList">
+          <Key>
+            <PropertyRef Name="CallStart" />
+            <PropertyRef Name="ampdscode" />
+          </Key>
+          <Property Name="CallStart" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FRDelay" Type="Int32" />
+          <Property Name="AmbDelay" Type="Int32" />
+          <Property Name="TurnAround" Type="Int32" />
+          <Property Name="OnScene" Type="Int32" />
+          <Property Name="category" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="ampdscode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="version" Type="Byte" />
+        </EntityType>
+        <EntityType Name="VehicleRosterView">
+          <Key>
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Period" Type="DateTime" Precision="3" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="VehicleView">
+          <Key>
+            <PropertyRef Name="VehicleId" />
+            <PropertyRef Name="VehicleType" />
+            <PropertyRef Name="VehicleTypeId" />
+          </Key>
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+          <Property Name="SkillLevel" Type="Int32" />
+          <Property Name="VehicleType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="VehicleTypeId" Type="Int32" Nullable="false" />
+          <Property Name="MPCName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Northing" Type="Int32" />
+          <Property Name="Easting" Type="Int32" />
+          <Property Name="Callsign" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="FleetId" Type="Int32" />
+          <Property Name="DefaultDestinationId" Type="Int32" />
+          <Property Name="GroupId" Type="Int32" />
+        </EntityType>
+        <Association Name="FK_Vehicles_Destinations">
+          <End Role="Destinations" Type="Self.Destination" Multiplicity="0..1" />
+          <End Role="Vehicles" Type="Self.Vehicle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Destinations">
+              <PropertyRef Name="DestinationId" />
+            </Principal>
+            <Dependent Role="Vehicles">
+              <PropertyRef Name="DefaultDestinationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProfileParameter_Profile">
+          <End Role="Profile" Type="Self.Profile" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProfileParameter" Type="Self.ProfileParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Profile">
+              <PropertyRef Name="ProfileId" />
+            </Principal>
+            <Dependent Role="ProfileParameter">
+              <PropertyRef Name="ProfileId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProfileParameter_ProfileParameterType">
+          <End Role="ProfileParameterType" Type="Self.ProfileParameterType" Multiplicity="0..1" />
+          <End Role="ProfileParameter" Type="Self.ProfileParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ProfileParameterType">
+              <PropertyRef Name="ProfileParameterTypeId" />
+            </Principal>
+            <Dependent Role="ProfileParameter">
+              <PropertyRef Name="ProfileParameterTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationAssignments_SimulationRun">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationAssignments" Type="Self.SimulationAssignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationAssignments">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_SimulationIncidents">
+          <End Role="SimulationIncidents" Type="Self.SimulationIncident" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationIncidents">
+              <PropertyRef Name="IncidentId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="Incidentid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationOrcon_SimulationRun1">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationOrcon" Type="Self.SimulationOrcon" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationOrcon">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_SimulationRun1">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationResults" Type="Self.SimulationResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_Vehicles">
+          <End Role="Vehicles" Type="Self.Vehicle" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicles">
+              <PropertyRef Name="VehicleId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="FRResourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationResults_Vehicles1">
+          <End Role="Vehicles" Type="Self.Vehicle" Multiplicity="0..1" />
+          <End Role="SimulationResults" Type="Self.SimulationResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicles">
+              <PropertyRef Name="VehicleId" />
+            </Principal>
+            <Dependent Role="SimulationResults">
+              <PropertyRef Name="AmbResourceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SimulationStats_SimulationRun">
+          <End Role="SimulationRun" Type="Self.SimulationRun" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="SimulationStats" Type="Self.SimulationStat" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SimulationRun">
+              <PropertyRef Name="SimulationRunId" />
+            </Principal>
+            <Dependent Role="SimulationStats">
+              <PropertyRef Name="SimulationRunId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="QuestSimEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="AMPDScodes" EntityType="Self.AMPDScode" />
+          <EntitySet Name="CadLinkIncidents" EntityType="Self.CadLinkIncident" />
+          <EntitySet Name="Coverages" EntityType="Self.Coverage" />
+          <EntitySet Name="Destinations" EntityType="Self.Destination" />
+          <EntitySet Name="Determinants" EntityType="Self.Determinant" />
+          <EntitySet Name="Profiles" EntityType="Self.Profile" />
+          <EntitySet Name="ProfileParameters" EntityType="Self.ProfileParameter" />
+          <EntitySet Name="ProfileParameterTypes" EntityType="Self.ProfileParameterType" />
+          <EntitySet Name="Rosters" EntityType="Self.Roster" />
+          <EntitySet Name="SimulationAssignments" EntityType="Self.SimulationAssignment" />
+          <EntitySet Name="SimulationIncidents" EntityType="Self.SimulationIncident" />
+          <EntitySet Name="SimulationOrcons" EntityType="Self.SimulationOrcon" />
+          <EntitySet Name="SimulationResults" EntityType="Self.SimulationResult" />
+          <EntitySet Name="SimulationRuns" EntityType="Self.SimulationRun" />
+          <EntitySet Name="SimulationStats" EntityType="Self.SimulationStat" />
+          <EntitySet Name="StationCatchments" EntityType="Self.StationCatchment" />
+          <EntitySet Name="Vehicles" EntityType="Self.Vehicle" />
+          <EntitySet Name="VehicleTypes" EntityType="Self.VehicleType" />
+          <EntitySet Name="IncidentTypes" EntityType="Self.IncidentType" />
+          <EntitySet Name="OnsceneStats" EntityType="Self.OnsceneStat" />
+          <EntitySet Name="VehicleRosters" EntityType="Self.VehicleRoster" />
+          <EntitySet Name="DestinationsViews" EntityType="Self.DestinationsView" />
+          <EntitySet Name="HighLevelLists" EntityType="Self.HighLevelList" />
+          <EntitySet Name="VehicleRosterViews" EntityType="Self.VehicleRosterView" />
+          <EntitySet Name="VehicleViews" EntityType="Self.VehicleView" />
+          <AssociationSet Name="FK_Vehicles_Destinations" Association="Self.FK_Vehicles_Destinations">
+            <End Role="Destinations" EntitySet="Destinations" />
+            <End Role="Vehicles" EntitySet="Vehicles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProfileParameter_Profile" Association="Self.FK_ProfileParameter_Profile">
+            <End Role="Profile" EntitySet="Profiles" />
+            <End Role="ProfileParameter" EntitySet="ProfileParameters" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProfileParameter_ProfileParameterType" Association="Self.FK_ProfileParameter_ProfileParameterType">
+            <End Role="ProfileParameterType" EntitySet="ProfileParameterTypes" />
+            <End Role="ProfileParameter" EntitySet="ProfileParameters" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationAssignments_SimulationRun" Association="Self.FK_SimulationAssignments_SimulationRun">
+            <End Role="SimulationRun" EntitySet="SimulationRuns" />
+            <End Role="SimulationAssignments" EntitySet="SimulationAssignments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_SimulationIncidents" Association="Self.FK_SimulationResults_SimulationIncidents">
+            <End Role="SimulationIncidents" EntitySet="SimulationIncidents" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationOrcon_SimulationRun1" Association="Self.FK_SimulationOrcon_SimulationRun1">
+            <End Role="SimulationRun" EntitySet="SimulationRuns" />
+            <End Role="SimulationOrcon" EntitySet="SimulationOrcons" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_SimulationRun1" Association="Self.FK_SimulationResults_SimulationRun1">
+            <End Role="SimulationRun" EntitySet="SimulationRuns" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_Vehicles" Association="Self.FK_SimulationResults_Vehicles">
+            <End Role="Vehicles" EntitySet="Vehicles" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationResults_Vehicles1" Association="Self.FK_SimulationResults_Vehicles1">
+            <End Role="Vehicles" EntitySet="Vehicles" />
+            <End Role="SimulationResults" EntitySet="SimulationResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimulationStats_SimulationRun" Association="Self.FK_SimulationStats_SimulationRun">
+            <End Role="SimulationRun" EntitySet="SimulationRuns" />
+            <End Role="SimulationStats" EntitySet="SimulationStats" />
+          </AssociationSet>
+          <FunctionImport Name="ClearRunData" />
+          <FunctionImport Name="CloneProfile">
+            <Parameter Name="SourceId" Mode="In" Type="Int32" />
+            <Parameter Name="Description" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="ImportIncidents" />
+          <FunctionImport Name="ImportVehicleRoster" />
+          <FunctionImport Name="LoadDestinations" />
+          <FunctionImport Name="MinuteClean" />
+          <FunctionImport Name="ShowStatus" ReturnType="Collection(QuestSimModel.ShowStatus_Result)" />
+          <FunctionImport Name="UpdateOrcon">
+            <Parameter Name="SimulationRunId" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="ShowStatus_Result">
+          <Property Type="Int32" Name="SimulationRunId" Nullable="false" />
+          <Property Type="String" Name="Constants" Nullable="true" MaxLength="250" />
+          <Property Type="Int32" Name="HourOrdinal" Nullable="true" />
+          <Property Type="Int32" Name="catAOutside" Nullable="true" />
+          <Property Type="Int32" Name="CatAInside" Nullable="true" />
+          <Property Type="Int32" Name="CatBOutside" Nullable="true" />
+          <Property Type="Int32" Name="CatBInside" Nullable="true" />
+          <Property Type="Single" Name="Expr2" Nullable="true" />
+          <Property Type="DateTime" Name="Started" Nullable="true" Precision="23" />
+          <Property Type="DateTime" Name="Stopped" Nullable="true" Precision="23" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="QuestSimModelStoreContainer" CdmEntityContainer="QuestSimEntities">
+          <EntitySetMapping Name="AMPDScodes">
+            <EntityTypeMapping TypeName="QuestSimModel.AMPDScode">
+              <MappingFragment StoreEntitySet="AMPDScodes">
+                <ScalarProperty Name="ampdsKey" ColumnName="ampdsKey" />
+                <ScalarProperty Name="ampdscode1" ColumnName="ampdscode" />
+                <ScalarProperty Name="chiefcomplaint" ColumnName="chiefcomplaint" />
+                <ScalarProperty Name="chiefcomplaintcode" ColumnName="chiefcomplaintcode" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="startdate" ColumnName="startdate" />
+                <ScalarProperty Name="enddate" ColumnName="enddate" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="DefaultLASCategory" ColumnName="DefaultLASCategory" />
+                <ScalarProperty Name="DefaultLASCategoryFull" ColumnName="DefaultLASCategoryFull" />
+                <ScalarProperty Name="DefaultDohCategory" ColumnName="DefaultDohCategory" />
+                <ScalarProperty Name="DefaultDohSubcategory" ColumnName="DefaultDohSubcategory" />
+                <ScalarProperty Name="DefaultDohSubcategoryFull" ColumnName="DefaultDohSubcategoryFull" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CadLinkIncidents">
+            <EntityTypeMapping TypeName="QuestSimModel.CadLinkIncident">
+              <MappingFragment StoreEntitySet="CadLinkIncidents">
+                <ScalarProperty Name="CadLinkId" ColumnName="CadLinkId" />
+                <ScalarProperty Name="XmlData" ColumnName="XmlData" />
+                <ScalarProperty Name="timestamp" ColumnName="timestamp" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Coverages">
+            <EntityTypeMapping TypeName="QuestSimModel.Coverage">
+              <MappingFragment StoreEntitySet="Coverage">
+                <ScalarProperty Name="CoverageId" ColumnName="CoverageId" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="DestinationId" ColumnName="DestinationId" />
+                <ScalarProperty Name="CoverageMap" ColumnName="CoverageMap" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="OffsetX" ColumnName="OffsetX" />
+                <ScalarProperty Name="OffsetY" ColumnName="OffsetY" />
+                <ScalarProperty Name="BlockSize" ColumnName="BlockSize" />
+                <ScalarProperty Name="Rows" ColumnName="Rows" />
+                <ScalarProperty Name="Columns" ColumnName="Columns" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Destinations">
+            <EntityTypeMapping TypeName="QuestSimModel.Destination">
+              <MappingFragment StoreEntitySet="Destinations">
+                <ScalarProperty Name="DestinationId" ColumnName="DestinationId" />
+                <ScalarProperty Name="Destination1" ColumnName="Destination" />
+                <ScalarProperty Name="Position" ColumnName="Position" />
+                <ScalarProperty Name="IsHospital" ColumnName="IsHospital" />
+                <ScalarProperty Name="IsStandby" ColumnName="IsStandby" />
+                <ScalarProperty Name="IsStation" ColumnName="IsStation" />
+                <ScalarProperty Name="IsRoad" ColumnName="IsRoad" />
+                <ScalarProperty Name="IsPolice" ColumnName="IsPolice" />
+                <ScalarProperty Name="e" ColumnName="e" />
+                <ScalarProperty Name="n" ColumnName="n" />
+                <ScalarProperty Name="GroupId" ColumnName="GroupId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Determinants">
+            <EntityTypeMapping TypeName="QuestSimModel.Determinant">
+              <MappingFragment StoreEntitySet="Determinants">
+                <ScalarProperty Name="DeterminantId" ColumnName="DeterminantId" />
+                <ScalarProperty Name="determinant1" ColumnName="determinant" />
+                <ScalarProperty Name="ambulances" ColumnName="ambulances" />
+                <ScalarProperty Name="paramedics" ColumnName="paramedics" />
+                <ScalarProperty Name="all_responders" ColumnName="all_responders" />
+                <ScalarProperty Name="ecps" ColumnName="ecps" />
+                <ScalarProperty Name="comresp" ColumnName="comresp" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Profiles">
+            <EntityTypeMapping TypeName="QuestSimModel.Profile">
+              <MappingFragment StoreEntitySet="Profile">
+                <ScalarProperty Name="ProfileId" ColumnName="ProfileId" />
+                <ScalarProperty Name="ProfileName" ColumnName="ProfileName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProfileParameters">
+            <EntityTypeMapping TypeName="QuestSimModel.ProfileParameter">
+              <MappingFragment StoreEntitySet="ProfileParameter">
+                <ScalarProperty Name="ProfileParameterId" ColumnName="ProfileParameterId" />
+                <ScalarProperty Name="ProfileId" ColumnName="ProfileId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="ProfileParameterTypeId" ColumnName="ProfileParameterTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProfileParameterTypes">
+            <EntityTypeMapping TypeName="QuestSimModel.ProfileParameterType">
+              <MappingFragment StoreEntitySet="ProfileParameterType">
+                <ScalarProperty Name="ProfileParameterTypeId" ColumnName="ProfileParameterTypeId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Rosters">
+            <EntityTypeMapping TypeName="QuestSimModel.Roster">
+              <MappingFragment StoreEntitySet="Rosters">
+                <ScalarProperty Name="RosterId" ColumnName="RosterId" />
+                <ScalarProperty Name="RosterPattern" ColumnName="RosterPattern" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationAssignments">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationAssignment">
+              <MappingFragment StoreEntitySet="SimulationAssignments">
+                <ScalarProperty Name="SimulationAssignments" ColumnName="SimulationAssignments" />
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="tstamp" ColumnName="tstamp" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="Incident" ColumnName="Incident" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationIncidents">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationIncident">
+              <MappingFragment StoreEntitySet="SimulationIncidents">
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="CallStart" ColumnName="CallStart" />
+                <ScalarProperty Name="AMPDSTime" ColumnName="AMPDSTime" />
+                <ScalarProperty Name="Easting" ColumnName="Easting" />
+                <ScalarProperty Name="Northing" ColumnName="Northing" />
+                <ScalarProperty Name="AMPDSCode" ColumnName="AMPDSCode" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="WasConveyed" ColumnName="WasConveyed" />
+                <ScalarProperty Name="WasDispatched" ColumnName="WasDispatched" />
+                <ScalarProperty Name="OutsideLAS" ColumnName="OutsideLAS" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationOrcons">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationOrcon">
+              <MappingFragment StoreEntitySet="SimulationOrcon">
+                <ScalarProperty Name="SimulationOrconId" ColumnName="SimulationOrconId" />
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="HourOrdinal" ColumnName="HourOrdinal" />
+                <ScalarProperty Name="catAOutside" ColumnName="catAOutside" />
+                <ScalarProperty Name="CatAInside" ColumnName="CatAInside" />
+                <ScalarProperty Name="CatBOutside" ColumnName="CatBOutside" />
+                <ScalarProperty Name="CatBInside" ColumnName="CatBInside" />
+                <ScalarProperty Name="Performance" ColumnName="Performance" />
+                <ScalarProperty Name="PerfA" ColumnName="PerfA" />
+                <ScalarProperty Name="PerfB" ColumnName="PerfB" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationResults">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationResult">
+              <MappingFragment StoreEntitySet="SimulationResults">
+                <ScalarProperty Name="SimulationResultId" ColumnName="SimulationResultId" />
+                <ScalarProperty Name="Incidentid" ColumnName="Incidentid" />
+                <ScalarProperty Name="FRDelay" ColumnName="FRDelay" />
+                <ScalarProperty Name="FRResourceId" ColumnName="FRResourceId" />
+                <ScalarProperty Name="AmbDelay" ColumnName="AmbDelay" />
+                <ScalarProperty Name="TurnAround" ColumnName="TurnAround" />
+                <ScalarProperty Name="AmbResourceId" ColumnName="AmbResourceId" />
+                <ScalarProperty Name="OnScene" ColumnName="OnScene" />
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="Closed" ColumnName="Closed" />
+                <ScalarProperty Name="HospitalDelay" ColumnName="HospitalDelay" />
+                <ScalarProperty Name="CallStart" ColumnName="CallStart" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="HourOrdinal" ColumnName="HourOrdinal" />
+                <ScalarProperty Name="Inside" ColumnName="Inside" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationRuns">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationRun">
+              <MappingFragment StoreEntitySet="SimulationRun">
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="Constants" ColumnName="Constants" />
+                <ScalarProperty Name="Performance" ColumnName="Performance" />
+                <ScalarProperty Name="Started" ColumnName="Started" />
+                <ScalarProperty Name="Stopped" ColumnName="Stopped" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimulationStats">
+            <EntityTypeMapping TypeName="QuestSimModel.SimulationStat">
+              <MappingFragment StoreEntitySet="SimulationStats">
+                <ScalarProperty Name="SimulationStatsId" ColumnName="SimulationStatsId" />
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="Timestamp" ColumnName="Timestamp" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="StationCatchments">
+            <EntityTypeMapping TypeName="QuestSimModel.StationCatchment">
+              <MappingFragment StoreEntitySet="StationCatchment">
+                <ScalarProperty Name="StationCatchmentid" ColumnName="StationCatchmentid" />
+                <ScalarProperty Name="FID" ColumnName="FID" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="StationName" ColumnName="StationName" />
+                <ScalarProperty Name="Complex" ColumnName="Complex" />
+                <ScalarProperty Name="Area" ColumnName="Area" />
+                <ScalarProperty Name="Shape" ColumnName="Shape" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Vehicles">
+            <EntityTypeMapping TypeName="QuestSimModel.Vehicle">
+              <MappingFragment StoreEntitySet="Vehicles">
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="SkillLevel" ColumnName="SkillLevel" />
+                <ScalarProperty Name="MPCName" ColumnName="MPCName" />
+                <ScalarProperty Name="Easting" ColumnName="Easting" />
+                <ScalarProperty Name="Northing" ColumnName="Northing" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="FleetId" ColumnName="FleetId" />
+                <ScalarProperty Name="DefaultDestinationId" ColumnName="DefaultDestinationId" />
+                <ScalarProperty Name="GroupId" ColumnName="GroupId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VehicleTypes">
+            <EntityTypeMapping TypeName="QuestSimModel.VehicleType">
+              <MappingFragment StoreEntitySet="VehicleTypes">
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IncidentTypes">
+            <EntityTypeMapping TypeName="QuestSimModel.IncidentType">
+              <MappingFragment StoreEntitySet="IncidentType">
+                <ScalarProperty Name="incidentcode" ColumnName="incidentcode" />
+                <ScalarProperty Name="incidenttype1" ColumnName="incidenttype" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OnsceneStats">
+            <EntityTypeMapping TypeName="QuestSimModel.OnsceneStat">
+              <MappingFragment StoreEntitySet="OnsceneStats">
+                <ScalarProperty Name="CdfId" ColumnName="CdfId" />
+                <ScalarProperty Name="cdfType" ColumnName="cdfType" />
+                <ScalarProperty Name="hour" ColumnName="hour" />
+                <ScalarProperty Name="vehicleType" ColumnName="vehicleType" />
+                <ScalarProperty Name="cdf" ColumnName="cdf" />
+                <ScalarProperty Name="ampds" ColumnName="ampds" />
+                <ScalarProperty Name="mean" ColumnName="mean" />
+                <ScalarProperty Name="stddev" ColumnName="stddev" />
+                <ScalarProperty Name="count" ColumnName="count" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VehicleRosters">
+            <EntityTypeMapping TypeName="QuestSimModel.VehicleRoster">
+              <MappingFragment StoreEntitySet="VehicleRoster">
+                <ScalarProperty Name="Period" ColumnName="Period" />
+                <ScalarProperty Name="minutesactual" ColumnName="minutesactual" />
+                <ScalarProperty Name="callsign" ColumnName="callsign" />
+                <ScalarProperty Name="easting" ColumnName="easting" />
+                <ScalarProperty Name="northing" ColumnName="northing" />
+                <ScalarProperty Name="stationID" ColumnName="stationID" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DestinationsViews">
+            <EntityTypeMapping TypeName="QuestSimModel.DestinationsView">
+              <MappingFragment StoreEntitySet="DestinationsView">
+                <ScalarProperty Name="DestinationId" ColumnName="DestinationId" />
+                <ScalarProperty Name="Destination" ColumnName="Destination" />
+                <ScalarProperty Name="IsHospital" ColumnName="IsHospital" />
+                <ScalarProperty Name="IsStandby" ColumnName="IsStandby" />
+                <ScalarProperty Name="IsStation" ColumnName="IsStation" />
+                <ScalarProperty Name="IsRoad" ColumnName="IsRoad" />
+                <ScalarProperty Name="e" ColumnName="e" />
+                <ScalarProperty Name="n" ColumnName="n" />
+                <ScalarProperty Name="IsPolice" ColumnName="IsPolice" />
+                <ScalarProperty Name="GroupId" ColumnName="GroupId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="HighLevelLists">
+            <EntityTypeMapping TypeName="QuestSimModel.HighLevelList">
+              <MappingFragment StoreEntitySet="HighLevelList">
+                <ScalarProperty Name="CallStart" ColumnName="CallStart" />
+                <ScalarProperty Name="FRDelay" ColumnName="FRDelay" />
+                <ScalarProperty Name="AmbDelay" ColumnName="AmbDelay" />
+                <ScalarProperty Name="TurnAround" ColumnName="TurnAround" />
+                <ScalarProperty Name="OnScene" ColumnName="OnScene" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="ampdscode" ColumnName="ampdscode" />
+                <ScalarProperty Name="version" ColumnName="version" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VehicleRosterViews">
+            <EntityTypeMapping TypeName="QuestSimModel.VehicleRosterView">
+              <MappingFragment StoreEntitySet="VehicleRosterView">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Period" ColumnName="Period" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VehicleViews">
+            <EntityTypeMapping TypeName="QuestSimModel.VehicleView">
+              <MappingFragment StoreEntitySet="VehicleView">
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+                <ScalarProperty Name="SkillLevel" ColumnName="SkillLevel" />
+                <ScalarProperty Name="VehicleType" ColumnName="VehicleType" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="MPCName" ColumnName="MPCName" />
+                <ScalarProperty Name="Northing" ColumnName="Northing" />
+                <ScalarProperty Name="Easting" ColumnName="Easting" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="FleetId" ColumnName="FleetId" />
+                <ScalarProperty Name="DefaultDestinationId" ColumnName="DefaultDestinationId" />
+                <ScalarProperty Name="GroupId" ColumnName="GroupId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="ClearRunData" FunctionName="QuestSimModel.Store.ClearRunData" />
+          <FunctionImportMapping FunctionImportName="CloneProfile" FunctionName="QuestSimModel.Store.CloneProfile" />
+          <FunctionImportMapping FunctionImportName="ImportIncidents" FunctionName="QuestSimModel.Store.ImportIncidents" />
+          <FunctionImportMapping FunctionImportName="ImportVehicleRoster" FunctionName="QuestSimModel.Store.ImportVehicleRoster" />
+          <FunctionImportMapping FunctionImportName="LoadDestinations" FunctionName="QuestSimModel.Store.LoadDestinations" />
+          <FunctionImportMapping FunctionImportName="MinuteClean" FunctionName="QuestSimModel.Store.MinuteClean" />
+          <FunctionImportMapping FunctionImportName="ShowStatus" FunctionName="QuestSimModel.Store.ShowStatus">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="QuestSimModel.ShowStatus_Result">
+                <ScalarProperty Name="SimulationRunId" ColumnName="SimulationRunId" />
+                <ScalarProperty Name="Constants" ColumnName="Constants" />
+                <ScalarProperty Name="HourOrdinal" ColumnName="HourOrdinal" />
+                <ScalarProperty Name="catAOutside" ColumnName="catAOutside" />
+                <ScalarProperty Name="CatAInside" ColumnName="CatAInside" />
+                <ScalarProperty Name="CatBOutside" ColumnName="CatBOutside" />
+                <ScalarProperty Name="CatBInside" ColumnName="CatBInside" />
+                <ScalarProperty Name="Expr2" ColumnName="Expr2" />
+                <ScalarProperty Name="Started" ColumnName="Started" />
+                <ScalarProperty Name="Stopped" ColumnName="Stopped" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="UpdateOrcon" FunctionName="QuestSimModel.Store.UpdateOrcon" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

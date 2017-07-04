@@ -107,7 +107,7 @@ namespace Quest.Lib.Processor
 
         protected virtual void SetStatus(ProcessorStatusCode status)
         {
-            LogMessage($"Status is {Status}");
+            LogMessage($"Status is {status}");
             Status = status;
         }
 

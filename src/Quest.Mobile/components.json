@@ -67,7 +67,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "server": "activemq:tcp://activemq:61616",
+        "server": "activemq:tcp://localhost:61616",
         "format": "json",
         "topic": "quest.common",
         "TTL": 10,

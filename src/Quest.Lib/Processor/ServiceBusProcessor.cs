@@ -50,8 +50,6 @@ namespace Quest.Lib.Processor
         /// <returns></returns>
         public override void Prepare(ProcessingUnitId id, IConfiguration config)
         {
-            base.Prepare(id, config);
-
             // get subclass name and start up mesage queue
             Queue = $"{id.Name}_{id.Session}_{id.Instance}";
 
@@ -59,6 +57,8 @@ namespace Quest.Lib.Processor
 
             ServiceBusClient.Initialise(Queue);
             ServiceBusClient.NewMessage += (s, e) => MsgHandler.ProcessMessage(ServiceBusClient, e);
+
+            base.Prepare(id, config);
 
             MsgHandler.SetReply(Queue);
             MsgHandler.AddHandler<StopProcessingRequest>(StopProcessorHandler);

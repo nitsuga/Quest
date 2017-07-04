@@ -5,7 +5,9 @@ using Autofac.Features.ResolveAnything;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quest.Lib.Processor;
+using Quest.Lib.Research.Job;
 using Quest.Lib.Search.Elastic;
+using Quest.Lib.Simulation.Incidents;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
@@ -32,8 +34,13 @@ namespace Quest.Cmd
                 {"-args", "args" },
             };
 
+        // to run the simulator
         // -components=simulation.json -exec=RosterSimulator
+
+        // to run the full stack
         // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcher;VisualsManager
+
+        // for research, use these
         // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100
         // -exec=MapMatcherWorker -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 /taskid=0 /runid=69 /startrouteid=1254133 /endrouteid=1254136
 
@@ -60,6 +67,9 @@ namespace Quest.Cmd
                 Logger.Write($"-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the", TraceEventType.Information, "Quest.Cmd");
                 Logger.Write($"-- GNU General Public License for more details.", TraceEventType.Information, "Quest.Cmd");
                 Logger.Write($"-----------------------------------------", TraceEventType.Information, "Quest.Cmd");
+
+                //var inc = new IncSimulator();
+                //var inc = new MapMatcherProcessor();
 
                 // load settings file 
                 var configFile = Parameters.GetParameter(args, "-config", null);

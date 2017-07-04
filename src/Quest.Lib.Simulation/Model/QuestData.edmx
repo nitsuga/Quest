@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="QuestDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Avls">
+          <Key>
+            <PropertyRef Name="RawAvlsId" />
+          </Key>
+          <Property Name="RawAvlsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AvlsDateTime" Type="datetime" />
+          <Property Name="Status" Type="char" MaxLength="8" />
+          <Property Name="Speed" Type="smallint" />
+          <Property Name="Direction" Type="smallint" />
+          <Property Name="LocationX" Type="decimal" Precision="25" Scale="20" />
+          <Property Name="LocationY" Type="decimal" Precision="25" Scale="20" />
+          <Property Name="FleetNumber" Type="smallint" />
+          <Property Name="VehicleTypeId" Type="int" />
+          <Property Name="Callsign" Type="char" MaxLength="8" />
+          <Property Name="Scanned" Type="bit" Nullable="false" />
+          <Property Name="X" Type="int" />
+          <Property Name="Y" Type="int" />
+          <Property Name="Category" Type="char" MaxLength="1" />
+          <Property Name="IncidentId" Type="bigint" />
+          <Property Name="Process" Type="bit" Nullable="false" />
+          <Property Name="EstimatedSpeed" Type="real" />
+        </EntityType>
+        <EntityType Name="Incidents">
+          <Key>
+            <PropertyRef Name="cadref" />
+          </Key>
+          <Property Name="IncidentDate" Type="datetime" />
+          <Property Name="cadref" Type="bigint" Nullable="false" />
+          <Property Name="dohcategory" Type="varchar" MaxLength="1" />
+          <Property Name="dohsubcat" Type="varchar" MaxLength="2" />
+          <Property Name="lascat" Type="varchar" MaxLength="2" />
+          <Property Name="callstart" Type="datetime" />
+          <Property Name="T0" Type="int" />
+          <Property Name="T1" Type="int" />
+          <Property Name="T2" Type="int" />
+          <Property Name="T3" Type="int" />
+          <Property Name="area" Type="varchar" MaxLength="255" />
+          <Property Name="postcode" Type="varchar" MaxLength="255" />
+          <Property Name="complaint" Type="varchar" MaxLength="255" />
+          <Property Name="AMPDS" Type="varchar" MaxLength="16" />
+          <Property Name="firstdispatch" Type="datetime" />
+          <Property Name="firstarrival" Type="datetime" />
+          <Property Name="duration" Type="int" />
+          <Property Name="athospital" Type="datetime" />
+          <Property Name="hospital" Type="varchar" MaxLength="255" />
+          <Property Name="X" Type="int" />
+          <Property Name="Y" Type="int" />
+        </EntityType>
+        <EntityContainer Name="QuestDataModelStoreContainer">
+          <EntitySet Name="Avls" EntityType="Self.Avls" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Incidents" EntityType="Self.Incidents" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="QuestDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="QuestDataEntities" annotation:LazyLoadingEnabled="true" >
+          <EntitySet Name="Incidents" EntityType="QuestDataModel.Incident" />
+          <EntitySet Name="Avls" EntityType="QuestDataModel.Avl" />
+        </EntityContainer>
+        <EntityType Name="Incident">
+          <Key>
+            <PropertyRef Name="cadref" />
+          </Key>
+          <Property Name="IncidentDate" Type="DateTime" Precision="3" />
+          <Property Name="cadref" Type="Int64" Nullable="false" />
+          <Property Name="dohcategory" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="dohsubcat" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="lascat" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="callstart" Type="DateTime" Precision="3" />
+          <Property Name="T0" Type="Int32" />
+          <Property Name="T1" Type="Int32" />
+          <Property Name="T2" Type="Int32" />
+          <Property Name="T3" Type="Int32" />
+          <Property Name="area" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="postcode" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="complaint" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="AMPDS" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="firstdispatch" Type="DateTime" Precision="3" />
+          <Property Name="firstarrival" Type="DateTime" Precision="3" />
+          <Property Name="duration" Type="Int32" />
+          <Property Name="athospital" Type="DateTime" Precision="3" />
+          <Property Name="hospital" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="X" Type="Int32" />
+          <Property Name="Y" Type="Int32" />
+        </EntityType>
+        <EntityType Name="Avl">
+          <Key>
+            <PropertyRef Name="RawAvlsId" />
+          </Key>
+          <Property Name="RawAvlsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AvlsDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="Speed" Type="Int16" />
+          <Property Name="Direction" Type="Int16" />
+          <Property Name="LocationX" Type="Decimal" Precision="25" Scale="20" />
+          <Property Name="LocationY" Type="Decimal" Precision="25" Scale="20" />
+          <Property Name="FleetNumber" Type="Int16" />
+          <Property Name="VehicleTypeId" Type="Int32" />
+          <Property Name="Callsign" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="Scanned" Type="Boolean" Nullable="false" />
+          <Property Name="X" Type="Int32" />
+          <Property Name="Y" Type="Int32" />
+          <Property Name="Category" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="IncidentId" Type="Int64" />
+          <Property Name="Process" Type="Boolean" Nullable="false" />
+          <Property Name="EstimatedSpeed" Type="Single" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="QuestDataModelStoreContainer" CdmEntityContainer="QuestDataEntities" >
+          <EntitySetMapping Name="Incidents">
+            <EntityTypeMapping TypeName="QuestDataModel.Incident">
+              <MappingFragment StoreEntitySet="Incidents">
+                <ScalarProperty Name="Y" ColumnName="Y" />
+                <ScalarProperty Name="X" ColumnName="X" />
+                <ScalarProperty Name="hospital" ColumnName="hospital" />
+                <ScalarProperty Name="athospital" ColumnName="athospital" />
+                <ScalarProperty Name="duration" ColumnName="duration" />
+                <ScalarProperty Name="firstarrival" ColumnName="firstarrival" />
+                <ScalarProperty Name="firstdispatch" ColumnName="firstdispatch" />
+                <ScalarProperty Name="AMPDS" ColumnName="AMPDS" />
+                <ScalarProperty Name="complaint" ColumnName="complaint" />
+                <ScalarProperty Name="postcode" ColumnName="postcode" />
+                <ScalarProperty Name="area" ColumnName="area" />
+                <ScalarProperty Name="T3" ColumnName="T3" />
+                <ScalarProperty Name="T2" ColumnName="T2" />
+                <ScalarProperty Name="T1" ColumnName="T1" />
+                <ScalarProperty Name="T0" ColumnName="T0" />
+                <ScalarProperty Name="callstart" ColumnName="callstart" />
+                <ScalarProperty Name="lascat" ColumnName="lascat" />
+                <ScalarProperty Name="dohsubcat" ColumnName="dohsubcat" />
+                <ScalarProperty Name="dohcategory" ColumnName="dohcategory" />
+                <ScalarProperty Name="cadref" ColumnName="cadref" />
+                <ScalarProperty Name="IncidentDate" ColumnName="IncidentDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Avls">
+            <EntityTypeMapping TypeName="QuestDataModel.Avl">
+              <MappingFragment StoreEntitySet="Avls">
+                <ScalarProperty Name="EstimatedSpeed" ColumnName="EstimatedSpeed" />
+                <ScalarProperty Name="Process" ColumnName="Process" />
+                <ScalarProperty Name="IncidentId" ColumnName="IncidentId" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="Y" ColumnName="Y" />
+                <ScalarProperty Name="X" ColumnName="X" />
+                <ScalarProperty Name="Scanned" ColumnName="Scanned" />
+                <ScalarProperty Name="Callsign" ColumnName="Callsign" />
+                <ScalarProperty Name="VehicleTypeId" ColumnName="VehicleTypeId" />
+                <ScalarProperty Name="FleetNumber" ColumnName="FleetNumber" />
+                <ScalarProperty Name="LocationY" ColumnName="LocationY" />
+                <ScalarProperty Name="LocationX" ColumnName="LocationX" />
+                <ScalarProperty Name="Direction" ColumnName="Direction" />
+                <ScalarProperty Name="Speed" ColumnName="Speed" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="AvlsDateTime" ColumnName="AvlsDateTime" />
+                <ScalarProperty Name="RawAvlsId" ColumnName="RawAvlsId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

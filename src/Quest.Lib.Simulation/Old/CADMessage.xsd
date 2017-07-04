@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<xs:schema id="CADMessage" version="1.1" targetNamespace="http://tempuri.org/CADMessage.xsd"
+           elementFormDefault="unqualified" xmlns="http://tempuri.org/CADMessage.xsd"
+           xmlns:mstns="http://tempuri.org/CADMessage.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           attributeFormDefault="unqualified">
+  <xs:element name="CADmessage">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element name="CallsignChange" type="CallsignChange" />
+        <xs:element name="IncidentAllocation" type="IncidentAllocation" />
+        <xs:element name="StatusChange" type="StatusChange" />
+        <xs:element name="IncidentCancel" type="IncidentCancel" />
+        <xs:element name="SdsSend" type="SdsSend" />
+        <xs:element name="NewFleetNo" type="NewFleetNo" />
+        <xs:element name="ChangeCallSignRequest" type="ChangeCallSignRequest" />
+        <xs:element name="ChangeStatusRequest" type="ChangeStatusRequest" />
+        <xs:element name="CreateLogEntryRequest" type="CreateLogEntryRequest" />
+        <xs:element name="ProcessEmergencyRequest" type="ProcessEmergencyRequest" />
+        <xs:element name="FleetCatalogueRequest" type="FleetCatalogueRequest" />
+        <xs:element name="FleetCatalogueResponse" type="FleetCatalogueResponse" />
+        <xs:element name="DeleteUser" type="DeleteUser" />
+        <xs:element name="CallSignFleet" type="CallsignFleet" />
+        <xs:element name="AvlsChange" type="AvlsChange" />
+        <xs:element name="StandbyPointRequest" type="StandbyPointRequest" />
+        <xs:element name="StandbyPointResponse" type="StandbyPointResponse" />
+        <xs:element name="IncidentCatalogueRequest" type="IncidentCatalogueRequest" />
+        <xs:element name="IncidentCatalogueResponse" type="IncidentCatalogueResponse" />
+        <xs:element name="IncidentDelete" type="IncidentDelete" />
+        <xs:element name="NagivateTo" type="NavigateTo" />
+        <xs:element name="AssignVehicle" type="AssignVehicle" />
+        <xs:element name="DynDepRefresh" type="DynDepRefresh" />
+        <xs:element name="SkillChange" type="SkillChange" />
+        <xs:element name="Heartbeat" type="Heartbeat" />
+      </xs:choice>
+      <xs:attribute name="Urn" type="xs:int" />
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="CreateResourceLogRequest">
+    <xs:sequence>
+      <xs:element name="FleetNum" type="xs:int" />
+      <xs:element name="Message" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:attributeGroup name="EISECResponse">
+    <xs:attribute name="EISECResponseCode" type="xs:int" />
+    <xs:attribute name="Message" type="xs:string" />
+    <xs:attribute name="Urn" type="xs:string" />
+  </xs:attributeGroup>
+  <xs:complexType name="CreateResourceLogEISECResponse">
+    <xs:sequence />
+    <xs:attributeGroup ref="EISECResponse" />
+  </xs:complexType>
+  <xs:attributeGroup name="CallsignFleetNo">
+    <xs:attribute name="cs" type="xs:string" />
+    <xs:attribute name="fl" type="xs:int" use="required" />
+    <xs:attribute name="type" type="xs:int" />
+    <xs:attribute name="isXray" type="xs:boolean" />
+    <xs:attribute name="eLoc" type="xs:long" />
+    <xs:attribute name="nLoc" type="xs:long" />
+    <xs:attribute name="shiftStart" type="xs:long" />
+    <xs:attribute name="shiftEnd" type="xs:long" />
+    <xs:attribute name="status" type="xs:int" />
+    <xs:attribute name="attn1" type="xs:string" />
+    <xs:attribute name="attn2" type="xs:string" />
+    <xs:attribute name="attn3" type="xs:string" />
+  </xs:attributeGroup>
+  <xs:complexType name="CallsignChange">
+    <xs:sequence>
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+    <xs:attributeGroup ref="CallsignFleetNo" />
+  </xs:complexType>
+  <xs:complexType name="ChangeCallSignRequest">
+    <xs:sequence>
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+    <xs:attributeGroup ref="CallsignFleetNo" />
+  </xs:complexType>
+  <xs:complexType name="IncidentAllocation">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="Location" type="xs:string" />
+      <xs:element name="ChiefComplaintDesc" type="xs:string" />
+      <xs:element name="Determinant" type="xs:string" />
+      <xs:element name="DeterminantDesc" type="xs:string" />
+      <xs:element name="Priority" type="xs:int" />
+      <xs:element name="Age" type="xs:string" />
+      <xs:element name="Sex" type="xs:string" />
+      <xs:element name="IncidentDate" type="xs:int" />
+      <xs:element name="IncidentNo" type="xs:int" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StatusChange">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="StatusID" type="xs:int" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IncidentCancel">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="CancelMessage" type="xs:string" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SdsSend">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="Priority" type="xs:int" />
+      <xs:element name="Message" type="xs:string" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="NewFleetNo">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="MdtName" type="xs:string" />
+      <xs:element name="RgTypeID" type="xs:int" />
+      <xs:element name="ActionType" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ChangeStatusRequest">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="StatusID" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreateLogEntryRequest">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="RecordType" type="xs:int" />
+      <xs:element name="LogMessage" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ProcessEmergencyRequest">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="Eastings" type="xs:int" />
+      <xs:element name="Northings" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="FleetCatalogueRequest">
+    <xs:sequence>
+      <xs:element name="URN" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="FleetCatalogueResponse">
+    <xs:sequence>
+      <xs:element name="URN" type="xs:int" maxOccurs="1" minOccurs="1" />
+      <xs:element name="CallsignFleets" type="CallsignFleets" minOccurs="1" maxOccurs="1">
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CallsignFleet">
+    <xs:sequence />
+    <xs:attributeGroup ref="ResourceCatalogue" />
+  </xs:complexType>
+  <xs:complexType name="CallsignFleets">
+    <xs:sequence>
+      <xs:element name="CallsignFleet" type="CallsignFleet" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DeleteUser">
+    <xs:sequence>
+      <xs:element name="username" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:attributeGroup name="ResourceCatalogue">
+    <xs:attribute name="cs" type="xs:string" />
+    <xs:attribute name="fl" type="xs:int" use="required" />
+    <xs:attribute name="type" type="xs:int" />
+    <xs:attribute name="isXray" type="xs:boolean" />
+    <xs:attribute name="eLoc" type="xs:long" />
+    <xs:attribute name="nLoc" type="xs:long" />
+    <xs:attribute name="shiftStart" type="xs:long" />
+    <xs:attribute name="shiftEnd" type="xs:long" />
+    <xs:attribute name="status" type="xs:int" />
+    <xs:attribute name="attn1" type="xs:string" />
+    <xs:attribute name="attn2" type="xs:string" />
+    <xs:attribute name="attn3" type="xs:string" />
+    <xs:attribute name="TimeStamp" type="xs:dateTime" />
+    <xs:attribute name="Speed" type="xs:int" />
+    <xs:attribute name="Direction" type="xs:int" />
+  </xs:attributeGroup>
+  <xs:complexType name="AvlsChange">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="GrEast" type="xs:long" />
+      <xs:element name="GrNorth" type="xs:long" />
+      <xs:element name="Speed" type="xs:int" />
+      <xs:element name="Direction" type="xs:int" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:attributeGroup name="IncidentCatalogueAtts">
+    <xs:attribute name="IncidentDate" type="xs:long" />
+    <xs:attribute name="IncidentNo" type="xs:long" />
+    <xs:attribute name="Status" type="xs:string" />
+    <xs:attribute name="JobType" type="xs:int" />
+    <xs:attribute name="Location" type="xs:string" />
+    <xs:attribute name="eLoc" type="xs:long" />
+    <xs:attribute name="nLoc" type="xs:long" />
+    <xs:attribute name="Sector" type="xs:string" />
+    <xs:attribute name="Determinant" type="xs:string" />
+    <xs:attribute name="Priority" type="xs:int" />
+  </xs:attributeGroup>
+  <xs:complexType name="IncidentCatalogue">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attributeGroup ref="IncidentCatalogueAtts" />
+  </xs:complexType>
+  <xs:complexType name="IncidentCatalogues">
+    <xs:sequence>
+      <xs:element name="IncidentCatalogue" type="IncidentCatalogue" maxOccurs="unbounded" minOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StandbyPoints">
+    <xs:sequence>
+      <xs:element name="StandbyPoint" type="StandbyPoint" maxOccurs="unbounded" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StandbyPoint">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="Name" type="xs:string" />
+    <xs:attribute name="eLoc" type="xs:long" />
+    <xs:attribute name="nLoc" type="xs:long" />
+    <xs:attribute name="Location" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="IncidentCatalogueRequest">
+    <xs:sequence>
+      <xs:element name="URN" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IncidentCatalogueResponse">
+    <xs:sequence>
+      <xs:element name="IncidentCatalogues" type="IncidentCatalogues" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StandbyPointResponse">
+    <xs:sequence>
+      <xs:element name="StandbyPoints" type="StandbyPoints" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IncidentDelete">
+    <xs:sequence />
+    <xs:attribute name="IncidentDate" type="xs:long" />
+    <xs:attribute name="IncidentNo" type="xs:long" />
+  </xs:complexType>
+  <xs:complexType name="StandbyPointRequest">
+    <xs:sequence />
+  </xs:complexType>
+  <xs:complexType name="NavigateTo">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="Eastings" type="xs:int" />
+      <xs:element name="Northings" type="xs:int" />
+      <xs:element name="Message" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AssignVehicle">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="IncidentNum" type="xs:int" />
+      <xs:element name="IncidentDate" type="xs:date" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DynDepRefresh">
+    <xs:sequence>
+      <xs:element name="IntervalMinutes" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SkillChange">
+    <xs:sequence>
+      <xs:element name="FleetNo" type="xs:int" />
+      <xs:element name="SkillCode" type="xs:string" />
+      <xs:element name="TimeStamp" type="xs:dateTime" />
+      <xs:element name="Callsign" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Heartbeat">
+    <xs:sequence>
+      <xs:element name="Frequency" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
