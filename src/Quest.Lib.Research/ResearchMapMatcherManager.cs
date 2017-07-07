@@ -38,7 +38,7 @@ namespace Quest.Lib.Research
                     Name = (string)parms.Track
                 };
 
-                var response = MapMatcherManager.MapMatcherMatchSingle(scope, mmrequest);
+                var response = MapMatcherUtil.MapMatcherMatchSingle(scope, mmrequest);
 
                 return response;
             }

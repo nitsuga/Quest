@@ -229,7 +229,7 @@ namespace Quest.Lib.ServiceBus
                     }
                 }
             }
-            catch(Exception ex)
+            catch
             {
                 _senderFailed.Set();
             }

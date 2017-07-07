@@ -716,6 +716,7 @@
     <Compile Include="Incident\IncidentStore.cs" />
     <Compile Include="Incident\IncidentManager.cs" />
     <Compile Include="Incident\IncidentHandler.cs" />
+    <Compile Include="MapMatching\MapMatcherProcessor.cs" />
     <Compile Include="Processor\BasicProcessor.cs" />
     <Compile Include="Resource\IResourceStore.cs" />
     <Compile Include="Resource\ResourceHandler.cs" />
@@ -747,7 +748,7 @@
     <Compile Include="MapMatching\RouteMatcher\IMapMatcher.cs" />
     <Compile Include="Maths\Distributions.cs" />
     <Compile Include="MapMatching\ParticleFilter\IParticleEngine.cs" />
-    <Compile Include="MapMatching\MapMatcherManager.cs" />
+    <Compile Include="MapMatching\MapMatcherUtil.cs" />
     <Compile Include="MapMatching\ParticleFilter\ParticleStepRequest.cs" />
     <Compile Include="MapMatching\MotionParticle.cs" />
     <Compile Include="MapMatching\ParticleFilter\IParticle.cs" />

@@ -26,7 +26,9 @@ namespace Quest.Lib.Research.Utils
         /// </summary>
         public MapMatching.Track GetTrack(string urn, int skip = 0)
         {
-            return BuildFromKml(urn);
+            var track = BuildFromKml(urn);
+            track.Fixes = track.Fixes.Skip(skip).ToList();
+            return track;
         }
 
         public MapMatching.Track BuildFromKml(string filename)

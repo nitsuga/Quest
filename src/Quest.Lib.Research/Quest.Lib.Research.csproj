@@ -270,7 +270,6 @@
     <Compile Include="Job\AnalyseEdgeCosts.cs" />
     <Compile Include="Job\FindNearestRoads.cs" />
     <Compile Include="Job\MapMatcherUtil.cs" />
-    <Compile Include="Job\MapMatcherProcessor.cs" />
     <Compile Include="Job\MapMatcherAll.cs" />
     <Compile Include="Job\MapMatcherWorker.cs" />
     <Compile Include="Loader\CsvLoader.cs" />

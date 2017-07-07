@@ -213,7 +213,7 @@ namespace Quest.Lib.Research.Job
                 Parameters = parameters
             };
 
-            var result = MapMatcherManager.MapMatcherMatchSingle(_scope, request);
+            var result = MapMatching.MapMatcherUtil.MapMatcherMatchSingle(_scope, request);
 
             if (!result.Success)
                 return;
