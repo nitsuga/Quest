@@ -73,8 +73,8 @@ namespace Quest.Cmd
         {
             var queue = $"ProcessRunner_{settings.session}";
             Logger.Write($"{settings.session}:ProcessRunner: Attaching to queue {queue}", GetType().Name);
-            IServiceBusClient serviceBusClient = container.GetService<IServiceBusClient>();
-            serviceBusClient.Initialise(queue);
+            //IServiceBusClient serviceBusClient = container.GetService<IServiceBusClient>();
+            //serviceBusClient.Initialise(queue);
 
             foreach (var proc in settings.modules)
             {

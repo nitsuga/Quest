@@ -704,6 +704,14 @@
     <Compile Include="EISEC\ReturnCode.cs" />
     <Compile Include="EISEC\User.cs" />
     <Compile Include="Geo\LatLongCenter.cs" />
+    <Compile Include="Google\DistanceApi.cs" />
+    <Compile Include="Google\DistanceMatrix\Model.cs" />
+    <Compile Include="Google\IWebClient.cs" />
+    <Compile Include="Google\IWebClientFactory.cs" />
+    <Compile Include="Google\SystemWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Google\WebClientFactory.cs" />
     <Compile Include="HEMS\HEMSEventArgs.cs" />
     <Compile Include="HEMS\HEMSLinkServer.cs" />
     <Compile Include="HEMS\LogonRecord.cs" />
