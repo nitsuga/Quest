@@ -1,14 +1,7 @@
 ﻿#pragma warning disable 0169,649
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.ServiceModel;
-using System.Threading;
 using System.Web.Mvc;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
 using Newtonsoft.Json;
 using Quest.Mobile.Attributes;
-using Quest.Common.Messages;
 using Quest.Mobile.Service;
 
 namespace Quest.Mobile.Controllers

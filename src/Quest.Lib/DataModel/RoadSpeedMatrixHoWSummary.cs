@@ -10,8 +10,7 @@
 namespace Quest.Lib.DataModel
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class RoadSpeedMatrixHoWSummary
     {
         public long Id { get; set; }

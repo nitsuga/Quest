@@ -1,5 +1,4 @@
-﻿using Quest.Lib.HEMS;
-using Quest.Lib.HEMS.Message;
+﻿using Quest.Lib.HEMS.Message;
 using System;
 
 

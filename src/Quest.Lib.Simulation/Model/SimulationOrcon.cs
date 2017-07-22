@@ -10,8 +10,7 @@
 namespace Quest.Lib.Simulation.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class SimulationOrcon
     {
         public int SimulationOrconId { get; set; }

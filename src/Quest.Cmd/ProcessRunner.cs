@@ -1,10 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Quest.Common.Messages;
-using Quest.Common.ServiceBus;
 using Quest.Lib.Processor;
-using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;

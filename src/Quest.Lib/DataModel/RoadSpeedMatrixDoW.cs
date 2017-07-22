@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.DataModel
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class RoadSpeedMatrixDoW
     {
         public int RoadSpeedMatrixDoWId { get; set; }

@@ -9,10 +9,9 @@
 
 namespace Quest.Lib.OS.Model
 {
-    using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    
+
     public partial class QuestNLPGEntities : DbContext
     {
         public QuestNLPGEntities()

@@ -5,7 +5,6 @@ using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Processor;
 using Quest.Lib.Trace;
-using Quest.Lib.DependencyInjection;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;

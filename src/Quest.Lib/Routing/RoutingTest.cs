@@ -1,19 +1,7 @@
 ﻿#pragma warning disable 0169,649
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Quest.Common.Messages;
-using Quest.Lib.DataModel;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
-using Quest.Lib.Trace;
-using Autofac;
-using Quest.Common.ServiceBus;
 
 namespace Quest.Lib.Routing
 {

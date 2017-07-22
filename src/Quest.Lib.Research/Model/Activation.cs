@@ -10,8 +10,7 @@
 namespace Quest.Lib.Research.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class Activation
     {
         public int ActivationId { get; set; }

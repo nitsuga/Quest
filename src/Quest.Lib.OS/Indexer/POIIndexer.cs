@@ -9,7 +9,6 @@ using Nest;
 using NetTopologySuite.IO;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
-using System.Linq;
 
 namespace Quest.Lib.OS.Indexer
 {

@@ -9,8 +9,7 @@
 
 namespace Quest.Lib.DataModel
 {
-    using System;
-    
+
     public partial class GetClaims_Result
     {
         public string SecuredItemName { get; set; }

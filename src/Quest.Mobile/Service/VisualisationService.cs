@@ -2,10 +2,7 @@
 //#define CALLVMDIRECT
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using Quest.Lib.ServiceBus;
 using Quest.Common.Messages;
-using Quest.Lib.Visuals;
 using System;
 
 namespace Quest.Mobile.Service
@@ -13,7 +10,7 @@ namespace Quest.Mobile.Service
     /// <summary>
     /// VisualsManager needs to be running for this to work.
     /// </summary>
-    
+
     public class VisualisationService
     {
 

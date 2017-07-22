@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using Apache.NMS;
 using Quest.Lib.Trace;
 using Quest.Common.Messages;

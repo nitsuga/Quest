@@ -9,10 +9,9 @@
 
 namespace Quest.Lib.DataModel
 {
-    using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    
+
     public partial class OsmEntities : DbContext
     {
         public OsmEntities()

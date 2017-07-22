@@ -10,8 +10,7 @@
 namespace Quest.Lib.Research.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class Avl
     {
         public int RawAvlsId { get; set; }

@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.DataModel
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class tRelationTag
     {
         public long RelationId { get; set; }

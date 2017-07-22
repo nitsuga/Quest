@@ -1,6 +1,5 @@
 ﻿using System;
 using Quest.Common.Messages;
-using Quest.Mobile.Service;
 using Quest.Mobile.Job;
 
 namespace Quest.Mobile.Models

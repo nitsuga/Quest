@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Quest.Lib.MapMatching;
-using Quest.Lib.Research.Model;
-using Quest.Lib.Utils;
-using Quest.Common.Messages;
 
 namespace Quest.Lib.Research.Utils
 {

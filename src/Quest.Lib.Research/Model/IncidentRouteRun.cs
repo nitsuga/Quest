@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.Research.Model
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class IncidentRouteRun
     {
         public int IncidentRouteRunId { get; set; }

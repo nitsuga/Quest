@@ -1,7 +1,5 @@
 ﻿using Quest.Mobile.Job;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Quest.Mobile.Service
 {

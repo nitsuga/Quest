@@ -10,8 +10,7 @@
 namespace Quest.Lib.Simulation.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class VehicleView
     {
         public int VehicleId { get; set; }

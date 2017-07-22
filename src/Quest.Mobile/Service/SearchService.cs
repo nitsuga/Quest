@@ -1,7 +1,6 @@
 ﻿#pragma warning disable 0169,649
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using Quest.Mobile.Models;
 using Quest.Common.Messages;
 

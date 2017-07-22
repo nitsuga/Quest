@@ -10,8 +10,7 @@
 namespace Quest.Lib.OS.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class NLPG
     {
         public long Id { get; set; }

@@ -7,7 +7,6 @@ using System.IO;
 using SharpKml.Dom;
 using SharpKml.Engine;
 using SharpKml.Dom.GX;
-using GeoAPI.Geometries;
 
 namespace Quest.Lib.Research.Utils
 {

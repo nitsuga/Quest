@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.DataModel
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class tNodeTag
     {
         public long NodeId { get; set; }

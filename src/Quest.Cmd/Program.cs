@@ -5,15 +5,11 @@ using Autofac.Features.ResolveAnything;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quest.Lib.Processor;
-using Quest.Lib.Research.Job;
-using Quest.Lib.Search.Elastic;
-using Quest.Lib.Simulation.Incidents;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 

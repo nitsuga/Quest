@@ -6,7 +6,6 @@ using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using Nest;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Index.Quadtree;
 using NetTopologySuite.IO;
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;

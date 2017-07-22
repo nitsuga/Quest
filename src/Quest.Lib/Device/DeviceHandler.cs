@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Spatial;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -12,7 +11,6 @@ using PushSharp.Google;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
-using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;

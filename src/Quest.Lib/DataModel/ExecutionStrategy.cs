@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Data.Entity.SqlServer;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Quest.Lib.DataModel
+﻿namespace Quest.Lib.DataModel
 {
 
 #if USE_EXECUTION_STRATEGY

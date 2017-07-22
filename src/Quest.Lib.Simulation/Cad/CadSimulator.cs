@@ -12,9 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Quest.Lib.Utils;
 using Quest.Lib.Simulation.Resources;
-using Quest.Lib.Incident;
 using Quest.Lib.Simulation.Incidents;
-using GeoJSON.Net.Geometry;
 using GeoAPI.Geometries;
 
 namespace Quest.Lib.Simulation.Cad

@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Quest.Common.Messages;
-using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 
 /// <summary>

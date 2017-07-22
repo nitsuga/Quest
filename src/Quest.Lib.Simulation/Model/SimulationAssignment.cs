@@ -10,8 +10,7 @@
 namespace Quest.Lib.Simulation.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class SimulationAssignment
     {
         public int SimulationAssignments { get; set; }

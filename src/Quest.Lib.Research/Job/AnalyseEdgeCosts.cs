@@ -13,7 +13,6 @@ using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using System.IO;
 using Autofac;
-using Quest.Lib.Search.Elastic;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Processor;
 using Quest.Lib.DependencyInjection;

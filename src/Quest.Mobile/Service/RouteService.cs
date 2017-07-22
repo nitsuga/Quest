@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using Quest.Common.Messages;
 using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using GeoAPI.Geometries;
 using Quest.Lib.Utils;

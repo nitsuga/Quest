@@ -10,8 +10,7 @@
 namespace Quest.Lib.OS.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class RoadName
     {
         public string RoadName1 { get; set; }

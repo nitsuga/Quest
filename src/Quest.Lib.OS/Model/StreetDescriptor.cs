@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.OS.Model
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class StreetDescriptor
     {
         public short RECORD_IDENTIFIER { get; set; }

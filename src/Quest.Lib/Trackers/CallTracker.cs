@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Data;
-using System.Diagnostics;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using Quest.Lib.DataModel;
 using Quest.Common.Messages;
 using Quest.Lib.Processor;

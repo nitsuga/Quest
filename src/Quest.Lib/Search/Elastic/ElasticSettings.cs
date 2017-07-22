@@ -5,7 +5,6 @@ using System.Text;
 using Elasticsearch.Net;
 using Nest;
 using Quest.Lib.Trace;
-using System.IO;
 
 namespace Quest.Lib.Search.Elastic
 {

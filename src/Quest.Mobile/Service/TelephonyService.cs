@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.Composition;
-using Quest.Common.Messages;
+﻿using Quest.Common.Messages;
 
 namespace Quest.Mobile.Service
 {
-    
+
     public class TelephonyService
     {
         private int _callid;

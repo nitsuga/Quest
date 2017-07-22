@@ -1,6 +1,5 @@
 ﻿using Quest.Common.Messages;
 using Quest.Common.ServiceBus;
-using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using System.Collections.Generic;
 using System.Diagnostics;

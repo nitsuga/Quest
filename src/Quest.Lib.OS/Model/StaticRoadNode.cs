@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.OS.Model
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class StaticRoadNode
     {
         public int RoadNodeId { get; set; }

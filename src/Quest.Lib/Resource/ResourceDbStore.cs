@@ -1,13 +1,7 @@
 ﻿using Quest.Common.Messages;
-using Quest.Common.ServiceBus;
 using Quest.Lib.DataModel;
-using Quest.Lib.Notifier;
 using Quest.Lib.Utils;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Quest.Lib.Resource
 {

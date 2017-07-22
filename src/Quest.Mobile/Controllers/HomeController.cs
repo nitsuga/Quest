@@ -9,7 +9,6 @@ using System.IO;
 #if NET45
 using System.Data.Spatial;
 #endif
-using Quest.Lib.DataModel;
 using Quest.Mobile.Attributes;
 using Quest.Common.Messages;
 using System.Diagnostics;

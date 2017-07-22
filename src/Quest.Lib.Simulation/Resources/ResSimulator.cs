@@ -7,7 +7,6 @@ using Quest.Lib.Processor;
 using Quest.Lib.Simulation.Model;
 using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
-using Quest.Common.Simulation;
 
 namespace Quest.Lib.Simulation.Resources
 {

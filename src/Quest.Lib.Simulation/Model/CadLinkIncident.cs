@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.Simulation.Model
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class CadLinkIncident
     {
         public int CadLinkId { get; set; }

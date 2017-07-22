@@ -5,24 +5,6 @@
 //   Use of this code is not permitted without a valid license from Marcus Poulton
 //   
 ////////////////////////////////////////////////////////////////////////////////////////////////
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
-using System.Threading;
-using System.IO;
-using System.Runtime.Serialization.Json;
-using Quest.Lib.Net;
-using Quest.Lib.Utils;
-using Quest.Lib.HEMS.Message;
-using Quest.Lib.Processor;
-using Quest.Lib.ServiceBus;
-using Quest.Lib.Trace;
-using Quest.Common.Messages;
-using PushSharp.Google;
-using Quest.Common.ServiceBus;
 
 namespace Quest.Lib.HEMS
 {

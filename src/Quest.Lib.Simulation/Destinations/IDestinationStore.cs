@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Simulation;
+﻿using Quest.Common.Simulation;
 using System.Collections.Generic;
 
 namespace Quest.Lib.Simulation.Destinations

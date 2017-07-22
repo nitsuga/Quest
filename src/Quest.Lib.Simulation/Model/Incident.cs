@@ -10,8 +10,7 @@
 namespace Quest.Lib.Simulation.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class Incident
     {
         public Nullable<System.DateTime> IncidentDate { get; set; }

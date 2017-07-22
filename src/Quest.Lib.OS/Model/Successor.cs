@@ -10,8 +10,7 @@
 namespace Quest.Lib.OS.Model
 {
     using System;
-    using System.Collections.Generic;
-    
+
     public partial class Successor
     {
         public Nullable<short> RECORD_IDENTIFIER { get; set; }

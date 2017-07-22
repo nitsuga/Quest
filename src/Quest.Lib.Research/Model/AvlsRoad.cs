@@ -9,9 +9,7 @@
 
 namespace Quest.Lib.Research.Model
 {
-    using System;
-    using System.Collections.Generic;
-    
+
     public partial class AvlsRoad
     {
         public int AvlsRoadId { get; set; }

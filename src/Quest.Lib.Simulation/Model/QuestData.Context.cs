@@ -9,10 +9,9 @@
 
 namespace Quest.Lib.Simulation.Model
 {
-    using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    
+
     public partial class QuestDataEntities : DbContext
     {
         public QuestDataEntities()
