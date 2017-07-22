@@ -844,6 +844,18 @@
       "instanceScope": "single-instance",
       "properties": {
       }
+    },
+    {
+      "type": "Quest.Lib.Research.Job.CompareWithGoogle,Quest.Lib.Research",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "CompareWithGoogle"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance"
     }
+
   ]
 }
