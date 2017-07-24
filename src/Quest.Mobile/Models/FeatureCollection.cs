@@ -187,16 +187,6 @@ namespace Quest.Mobile.Models
         public ResourceFeature(IGeometryObject position, ResourceFeatureProperties obj) : base(position, obj)
         {
         }
-
-        [JsonProperty("id")]
-        public string ID { get; set; }
-
-        [JsonProperty("ft")]
-        public string FeatureType { get; set; }
-
-        [JsonProperty("a")]
-        public string Action { get; set; }
-
     }
 
     /// <summary>

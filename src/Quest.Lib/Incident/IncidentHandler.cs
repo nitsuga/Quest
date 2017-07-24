@@ -12,7 +12,7 @@ namespace Quest.Lib.Incident
 
             var incsFeature = new EventMapItem
             {
-                ID = inc.IncidentID,
+                ID = inc.IncidentID.ToString(),
                 revision = inc.Revision ?? 0,
                 X = inc.Longitude ?? 0,
                 Y = inc.Latitude ?? 0,

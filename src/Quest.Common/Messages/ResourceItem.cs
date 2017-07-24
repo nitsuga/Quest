@@ -4,9 +4,8 @@ namespace Quest.Common.Messages
 {
     [Serializable]
     
-    public class ResourceItem
+    public class ResourceItem: PointMapItem
     {
-        public long revision;        
         public DateTime? lastUpdate;        
         public string Destination;        
         public DateTime? Eta;        
@@ -27,32 +26,20 @@ namespace Quest.Common.Messages
         public bool PrevBusy;
         public bool PrevBusyEnroute;
 
-        public float? Latitude;
-        public float? Longitude;
-        public int ID { get; set; }        
-        public double Y { get; set;}        
-        public double X { get; set; }
-
-        // callsign
-        
-        public string Callsign { get; set; }
+        // callsign        
+        public string Callsign;
 
         /// <summary>
         ///     vehicle type
         /// </summary>
-        
-        public string VehicleType { get; set; }
+        public string VehicleType;
 
         // status
-        
-        public string Status { get; set; }
+        public string Status;
+        public string StatusCategory;
+        public string ResourceTypeGroup;
 
-        
-        public string StatusCategory { get; set; }
-        
-        public string ResourceTypeGroup { get; set; }
 
-        
     }
 
     

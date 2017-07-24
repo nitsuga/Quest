@@ -138,7 +138,7 @@ namespace Quest.Lib.Simulation.Resources
             SetSysMessage(resource, string.Format("Calculating route to   :  {0} {1}", resource.ResourceId, resource.Destination.Name));
 
             Coordinate startPoint = resource.Position;
-            Coordinate endPoint = resource.Destination.Position;
+            Coordinate endPoint = new Coordinate(resource.Destination.X, resource.Destination.Y);
 
             var result = _router.CalculateQuickestRoute(new RouteRequest
             {
@@ -169,15 +169,15 @@ namespace Quest.Lib.Simulation.Resources
                 }
                 else
                 {
-                    var easting = Resource.StandbyPoint.Position.X + (int)((_rnd.NextDouble() - 0.5) * 2000);
-                    var northing = Resource.StandbyPoint.Position.Y + (int)((_rnd.NextDouble() - 0.5) * 2000);
+                    var easting = Resource.StandbyPoint.X + (int)((_rnd.NextDouble() - 0.5) * 2000);
+                    var northing = Resource.StandbyPoint.Y + (int)((_rnd.NextDouble() - 0.5) * 2000);
                     Resource.Position = new Coordinate(easting, northing);
                 }
             }
             else
             {
-                var easting = Resource.Destination.Position.X + (int)((_rnd.NextDouble() - 0.5) * 2000);
-                var northing = Resource.Destination.Position.Y + (int)((_rnd.NextDouble() - 0.5) * 2000);
+                var easting = Resource.Destination.X + (int)((_rnd.NextDouble() - 0.5) * 2000);
+                var northing = Resource.Destination.Y + (int)((_rnd.NextDouble() - 0.5) * 2000);
                 Resource.Position = new Coordinate(easting, northing);
             }
 
@@ -236,12 +236,12 @@ namespace Quest.Lib.Simulation.Resources
         /// <param name="resource"></param>
         private void CalcNewLocation(SimResource resource)
         {
-            double dx = resource.Destination.Position.X- resource.Position.X;
-            double dy = resource.Destination.Position.Y - resource.Position.Y;
+            double dx = resource.Destination.X- resource.Position.X;
+            double dy = resource.Destination.Y - resource.Position.Y;
 
             if (dx < 50 && dy < 50)
             {
-                resource.Position = resource.Destination.Position;
+                resource.Position = new Coordinate(resource.Destination.X, resource.Destination.Y); 
             }
             else
             {
@@ -426,7 +426,7 @@ namespace Quest.Lib.Simulation.Resources
 
             SendCurrentPosition(resource);
 
-            Logger.Write(string.Format("{0} MoveVehicleTowardsTarget: {1}/{2} {3} ({4}/{5}) Next in {6} seconds ETA={7} distance={8}", resource.Callsign, resource.Position.X.ToString("000000"), resource.Position.Y.ToString("000000"), resource.Destination.Name, resource.Destination.Position.X.ToString("000000"), resource.Destination.Position.Y.ToString("000000"), nextreportseconds, resource.TTG, resource.DTG));
+            Logger.Write(string.Format("{0} MoveVehicleTowardsTarget: {1}/{2} {3} ({4}/{5}) Next in {6} seconds ETA={7} distance={8}", resource.Callsign, resource.Position.X.ToString("000000"), resource.Position.Y.ToString("000000"), resource.Destination.Name, resource.Destination.X.ToString("000000"), resource.Destination.Y.ToString("000000"), nextreportseconds, resource.TTG, resource.DTG));
         }
 
         /// <summary>
@@ -613,7 +613,7 @@ namespace Quest.Lib.Simulation.Resources
                 // select a list of candidate destination standby points within the specified range
                 var candidates = from dest in _destinationStore.GetDestinations(false, false, true)
                                  where 
-                                 Math.Sqrt(Math.Pow(dest.Position.Y - resource.Position.Y, 2) + Math.Pow(dest.Position.X - resource.Position.X, 2)) < _randomMovementRange
+                                 Math.Sqrt(Math.Pow(dest.Y - resource.Position.Y, 2) + Math.Pow(dest.X - resource.Position.X, 2)) < _randomMovementRange
                                  select dest;
 
                 if (candidates.Count() > 0)
@@ -799,8 +799,8 @@ namespace Quest.Lib.Simulation.Resources
                 return true;
 
             int distance = (int)Math.Sqrt(
-                ((Resource.Destination.Position.X - Resource.Position.X) * (Resource.Destination.Position.X - Resource.Position.X)) +
-                ((Resource.Destination.Position.Y - Resource.Position.Y) * (Resource.Destination.Position.Y - Resource.Position.Y))
+                ((Resource.Destination.X - Resource.Position.X) * (Resource.Position.X - Resource.Position.X)) +
+                ((Resource.Destination.Y - Resource.Position.Y) * (Resource.Position.Y - Resource.Position.Y))
                 );
 
             return (Resource.AtDestinationRange >= distance);
@@ -1025,7 +1025,7 @@ namespace Quest.Lib.Simulation.Resources
                 // create a new destination object
                 SimDestination d = new SimDestination();
                 d.Name = "Incident " + resource.Incident.IncidentId.ToString();
-                d.Position = incidentDetails.IncidentDetails.Position;
+                //d.Position = incidentDetails.IncidentDetails.Position;
                 resource.Destination = d;
 
                 RespondToNewIncident(resource);
@@ -1141,7 +1141,7 @@ namespace Quest.Lib.Simulation.Resources
         /// <param name="name"></param>
         public void NavigateTo(NavigateTo details)
         {
-            SimDestination dest = _destinationStore.GetDestinations(false, false, true).Where(d => d.DestinationId == details.DestinationId).FirstOrDefault();
+            SimDestination dest = _destinationStore.GetDestinations(false, false, true).Where(d => d.ID == details.DestinationId.ToString()).FirstOrDefault();
 
             Logger.Write(String.Format("IUserOut::NavigateTo: {0}-->{1} {2}", details.ResourceId, dest.Name, details.Reason));
 

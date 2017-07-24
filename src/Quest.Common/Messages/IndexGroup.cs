@@ -18,7 +18,7 @@ namespace Quest.Common.Messages
     [Serializable]
     public class IndexGroupResponse : Response
     {
-        public List<IndexGroup> Groups { get; set; }
+        public List<IndexGroup> Groups;
         public override string ToString()
         {
             return $"IndexGroupResult {Groups.Count} items";
@@ -30,12 +30,12 @@ namespace Quest.Common.Messages
     {
         public DateTime ValidFrom;
         public DateTime ValidTo;
-        public int IndexGroupId { get; set; }
-        public string Name { get; set; }
-        public string Indices { get; set; }
-        public bool isEnabled { get; set; }
-        public bool isDefault { get; set; }
-        public bool useGeometry { get; set; }
+        public int IndexGroupId;
+        public string Name;
+        public string Indices;
+        public bool isEnabled;
+        public bool isDefault;
+        public bool useGeometry;
 
         [NonSerialized]
         public PolygonGeoShape Polygon;

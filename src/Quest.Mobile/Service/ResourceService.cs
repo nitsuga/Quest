@@ -25,6 +25,11 @@ namespace Quest.Mobile.Service
         {
         }
 
+        public MapItemsResponse GetMapItems(MapItemsRequest request)
+        {
+            return _messageCache.SendAndWait<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -74,16 +79,16 @@ namespace Quest.Mobile.Service
 
         public ResourceFeature GetResourceUpdateFeature(ResourceDatabaseUpdate item)
         {
-            return GetResourceUpdateFeature(item.Item, item.ResourceId);
+            return GetResourceUpdateFeature(item.Item, item.ResourceId.ToString());
         }
 
         public ResourceFeature GetResourceDeleteFeature(ResourceDatabaseUpdate item)
         {
             var feature = new ResourceFeature(new Point(new Position(item.Item.Y, item.Item.X)), null)
             {
-                ID = item.Item.ID.ToString(),
-                FeatureType = "res",
-                Action = "d",
+                //ID = item.Item.ID.ToString(),
+                //FeatureType = "res",
+                //Action = "d",
             };
             return feature;
         }
@@ -93,7 +98,7 @@ namespace Quest.Mobile.Service
         /// </summary>
         /// <param name="res"></param>
         /// <returns></returns>
-        public ResourceFeature GetResourceUpdateFeature(ResourceItem res, int id)
+        public ResourceFeature GetResourceUpdateFeature(ResourceItem res, string id)
         {
             try
             {
@@ -127,17 +132,11 @@ namespace Quest.Mobile.Service
                     };
                     feature = new ResourceFeature(geometry, properties)
                     {
-                        ID = id.ToString(),
-                        FeatureType = "res",
-                        Action = "u",
                     };
                 }
                 else
                     feature = new ResourceFeature(new Point(new Position(res.Y, res.X)), null)
                     {
-                        ID = id.ToString(),
-                        FeatureType = "res",
-                        Action = "d",
                     };
 
 

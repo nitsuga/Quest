@@ -649,21 +649,23 @@ namespace Quest.Lib.Device
                     .ToList()
                     .Select(x => new QuestDestination
                     {
-                        DestinationId = x.DestinationID,
+                        ID = x.DestinationID.ToString(),
                         IsHospital = x.IsHospital ?? false,
                         IsAandE = x.IsAandE ?? false,
                         IsRoad = x.IsRoad ?? false,
                         IsStandby = x.IsStandby ?? false,
                         IsStation = x.IsStation ?? false,
                         Name = x.Destination,
-                        Position = new GeoAPI.Geometries.Coordinate(x.X ?? 0, x.Y ?? 0)
+                        X = x.X ?? 0,
+                        Y = x.Y ?? 0
                     })
                     .ToList();
 
                 foreach (var res in d)
                 {
-                    var latlng = LatLongConverter.OSRefToWGS84(res.Position);
-                    res.Position = new GeoAPI.Geometries.Coordinate(  latlng.Longitude, latlng.Latitude);
+                    var latlng = LatLongConverter.OSRefToWGS84(res.X,res.Y);
+                    res.X = latlng.Longitude;
+                    res.Y = latlng.Latitude;
                 }
                 return d;
             }
@@ -727,7 +729,7 @@ namespace Quest.Lib.Device
                         {
                             var incsFeature = new EventMapItem
                             {
-                                ID = inc.IncidentID,
+                                ID = inc.IncidentID.ToString(),
                                 revision = inc.Revision ?? 0,
                                 X = inc.Longitude ?? 0,
                                 Y = inc.Latitude ?? 0,
@@ -777,7 +779,7 @@ namespace Quest.Lib.Device
                             .Select(
                                 res => new ResourceItem
                                 {
-                                    ID = res.DeviceID,
+                                    ID = res.DeviceID.ToString(),
                                     revision = res.Revision ?? 0,
                                     X = res.Longitude??0,
                                     Y = res.Latitude??0,
@@ -818,7 +820,7 @@ namespace Quest.Lib.Device
                             .Select(
                                        res => new ResourceItem
                                        {
-                                           ID = res.DeviceID,
+                                           ID = res.DeviceID.ToString(),
                                            revision = res.Revision ?? 0,
                                            X = res.Longitude ?? 0,
                                            Y = res.Latitude ?? 0,
@@ -1174,7 +1176,7 @@ namespace Quest.Lib.Device
         {
             return new ResourceItem
             {
-                ID = res.ResourceID,
+                ID = res.ResourceID.ToString(),
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,

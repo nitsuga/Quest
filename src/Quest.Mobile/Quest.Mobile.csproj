@@ -389,6 +389,8 @@
     <Compile Include="Code\AssemblyExtensions.cs" />
     <Compile Include="Code\JsonNetResult.cs" />
     <Compile Include="Code\LocationInfo.cs" />
+    <Compile Include="Controllers\ResourcesController.cs" />
+    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Models\DisplayDocument.cs" />
     <Compile Include="Models\DisplaySearchResult.cs" />
     <Compile Include="Job\Workitem.cs" />
@@ -407,7 +409,6 @@
     <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\JobsViewModel.cs" />
     <Compile Include="Service\ClientConnectionService.cs" />
-    <Compile Include="Controllers\DefaultController.cs" />
     <Compile Include="Controllers\DeviceManagerController.cs" />
     <Compile Include="Controllers\DownController.cs">
       <SubType>Code</SubType>

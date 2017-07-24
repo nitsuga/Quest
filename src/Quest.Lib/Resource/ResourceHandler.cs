@@ -185,7 +185,7 @@ namespace Quest.Lib.Resource
         {
             return new ResourceItem
             {
-                ID = res.ResourceID,
+                ID = res.ResourceID.ToString(),
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,

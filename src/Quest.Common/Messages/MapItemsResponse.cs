@@ -10,29 +10,20 @@ namespace Quest.Common.Messages
     
     public class MapItemsResponse : Response
     {
-        
-        public List<ResourceItem> Resources { get; set; }
 
-        
-        public List<int> DeleteResources { get; set; }
+        public List<ResourceItem> Resources;
+        public List<int> DeleteResources;
 
         // these are children of the resources
-        
-        public List<ResourceItem> Devices { get; set; }
-
-        
-        public List<EventMapItem> Events { get; set; }
-
-        
-        public List<QuestDestination> Destinations { get; set; }
+        public List<ResourceItem> Devices;
+        public List<EventMapItem> Events;
+        public List<QuestDestination> Destinations;
 
         // the revision returned
-        
-        public long Revision { get; set; }
+        public long Revision;
 
         // the actual current revision
-        
-        public long CurrRevision { get; set; }
+        public long CurrRevision;
     }
 
     

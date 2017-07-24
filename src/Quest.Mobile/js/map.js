@@ -806,7 +806,7 @@ function LocationSearch( options )//callback for 3rd party ajax requests
     };
 
     return $.ajax({
-        url: getURL("Home/SemanticSearch"),
+        url: getURL("api/Search/Find"),
         data: parms,
         dataType: "json",
         success: function (items) {

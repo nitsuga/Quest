@@ -7,18 +7,15 @@ namespace Quest.Common.Messages
     /// A single destination
     /// </summary>
     [Serializable]    
-    public class QuestDestination
+    public class QuestDestination: PointMapItem
     {
-        public int DestinationId;
-        public long revision;
-        public Coordinate Position { get; set; }
-        public string Name { get; set; }
-        public string Group { get; set; }
-        public bool IsEnabled { get; set; }
-        public bool IsHospital { get; set; }
-        public bool IsAandE { get; set; }
-        public bool IsRoad { get; set; }
-        public bool IsStation { get; set; }
-        public bool IsStandby { get; set; }
+        public string Name;
+        public string Group;
+        public bool IsEnabled;
+        public bool IsHospital;
+        public bool IsAandE;
+        public bool IsRoad;
+        public bool IsStation;
+        public bool IsStandby;
     }
 }

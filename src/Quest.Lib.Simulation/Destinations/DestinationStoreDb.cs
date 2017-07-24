@@ -34,14 +34,15 @@ namespace Quest.Lib.Simulation.Destinations
                         var edge = _data.GetEdgeFromPoint(pos);
                         return new SimDestination
                         {
-                            DestinationId = x.DestinationID,
+                            ID = x.DestinationID.ToString(),
                             IsHospital = x.IsHospital ?? false,
                             IsAandE = x.IsAandE ?? false,
                             IsRoad = x.IsRoad ?? false,
                             IsStandby = x.IsStandby ?? false,
                             IsStation = x.IsStation ?? false,
                             Name = x.Destination,
-                            Position = pos,
+                            X = x.X ?? 0,
+                            Y = x.Y ?? 0,
                             RoadPosition = edge
                         };
                     })

@@ -137,6 +137,8 @@ namespace Quest.Mobile
             //builder.RegisterApiControllers(Assembly.GetExecutingAssembly()); //Register WebApi Controllers
             builder.RegisterType<NotificationsController>().InstancePerRequest();
             builder.RegisterType<DeviceController>().InstancePerRequest();
+            builder.RegisterType<SearchController>().InstancePerRequest();
+            builder.RegisterType<ResourcesController>().InstancePerRequest();            
 
             // OPTIONAL: Register model binders that require DI.
             //builder.RegisterModelBinders(typeof(MvcApplication).Assembly);

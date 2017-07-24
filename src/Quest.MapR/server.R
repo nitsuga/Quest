@@ -32,15 +32,20 @@ function(input, output, session) {
   })
 
   observe({
-    event <- input$resources.unavailable
+    event <- input$resources
     if (is.null(event))
       return()
 
-    url = paste(baseurl, "Resources/Get=", sep="")
+    url.res = paste(baseurl, "Resources/GetMapItems", sep="")
+    res = fromJSON(url.res)
+    res$Resources$latitude = res$Resources$Y
+    res$Resources$longitude = res$Resources$X
     
     isolate({
       proxy <- leafletProxy("map")
-      proxy %>% addGeoJSON( fromJSON(url), layerId="resources" )
+      proxy %>% addCircleMarkers(data=res$Resources, popup=~Callsign)
+    })
+    
   })
   
   ## Search ###########################################

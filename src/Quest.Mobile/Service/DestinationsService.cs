@@ -77,7 +77,7 @@ namespace Quest.Mobile.Service
         {
             try
             {
-                var geometry = new Point(new Position(item.Position.Y, item.Position.X));
+                var geometry = new Point(new Position(item.Y, item.X));
                 var properties = new DestinationFeatureProperties
                 {
                     CoverTier = 0,
@@ -111,7 +111,7 @@ namespace Quest.Mobile.Service
 
                 var feature = new DestinationFeature(geometry, properties)
                 {
-                    ID = item.DestinationId.ToString(),
+                    ID = item.ID,
                 };
 
                 return feature;
