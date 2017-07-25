@@ -13,6 +13,11 @@ using Quest.Lib.Utils;
 using Quest.Lib.Google;
 using Quest.Lib.Google.DistanceMatrix;
 using System.Diagnostics;
+using System.Threading;
+using Quest.Lib.Routing.Speeds;
+using Quest.Common.Messages;
+using NetTopologySuite.Geometries;
+using GeoAPI.Geometries;
 
 namespace Quest.Lib.Research.Job
 {
@@ -22,27 +27,19 @@ namespace Quest.Lib.Research.Job
     [Injection()]
     public class CompareWithGoogle : SimpleProcessor
     {
-        #region Private Fields
         private ILifetimeScope _scope;
-#if ROUTING
         private RoutingData _data;
+        private VariableSpeedByEdge _edgeCalculator;
         private DijkstraRoutingEngine _selectedRouteEngine;
-#endif
-        #endregion
-
 
         public CompareWithGoogle(
             ILifetimeScope scope,
             RoutingData data,
-#if ROUTING
             DijkstraRoutingEngine selectedRouteEngine,
-#endif
             TimedEventQueue eventQueue) : base(eventQueue)
         {
-#if ROUTING
             _selectedRouteEngine = selectedRouteEngine;
             _data = data;
-#endif
             _scope = scope;
         }
 
@@ -56,15 +53,10 @@ namespace Quest.Lib.Research.Job
 
         public void Analyse()
         {
-#if ROUTING
-            var edgeCalculators = _scope.Resolve<IEnumerable<IRoadSpeedCalculator>>().ToList();
-
             // start the engine
             Logger.Write("Loading road network", GetType().Name);
             while (_data.IsInitialised == false)
                 Thread.Sleep(1000);
-#endif
-
             var filename = @"GoogleRoutingResults1.csv";
 
             if (File.Exists(filename))
@@ -107,7 +99,6 @@ namespace Quest.Lib.Research.Job
 
         }
 
-
         /// <summary>
         /// calculate all the estimates for a given route.
         /// we calculate route using routing engine AND track using map-matcher
@@ -125,25 +116,6 @@ namespace Quest.Lib.Research.Job
             if (track.Fixes.Count == 0)
                 return;
 
-#if false
-            List<RoadSpeedItem> mapmatchdata;
-
-            using (var db = new QuestResearchEntities())
-            {
-                db.Database.CommandTimeout = int.MaxValue;
-                db.Configuration.ProxyCreationEnabled = false;
-                // get map match route as well
-                mapmatchdata = db.RoadSpeedItems
-                .AsNoTracking()
-                .Where(x => x.IncidentRouteId == route.IncidentRouteID)
-                .OrderBy(x => x.DateTime)
-                .ToList();
-            }
-
-            if (!mapmatchdata.Any())
-                return;
-#endif
-
             var starttime = track.Fixes.First().Timestamp;
             var endtime = track.Fixes.Last().Timestamp;
             var start = LatLongConverter.OSRefToWGS84(track.Fixes.First().Position);
@@ -151,6 +123,8 @@ namespace Quest.Lib.Research.Job
             var dow = ((int)starttime.DayOfWeek + 6) % 7;
             var how = starttime.Hour + dow * 24;
             var actualDuration = (endtime - starttime).TotalSeconds;
+            var startpos = track.Fixes.First().Position;
+            var endpos = track.Fixes.Last().Position;
 
             string APIKEY = null;
             var baseURL = "https://maps.googleapis.com/maps/api/distancematrix/json";
@@ -164,135 +138,37 @@ namespace Quest.Lib.Research.Job
 
             Result estimate = gmap.Calculate(start,end,starttime, key: APIKEY);
 
-            var csvLine = $"{route.IncidentRouteID},{how},{dow},{(int)actualDuration},{track.VehicleType},{estimate.Rows[0].Elements[0].Duration.Value},{estimate.Rows[0].Elements[0].DurationInTraffic.Value},{estimate.Rows[0].Elements[0].Distance.Value}";
-            Debug.Print(csvLine);
-            file.WriteLine(csvLine);
-        }
 
-#if ROUTING
-        void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRouteView r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index)
-        {
-//            Logger.Write($"CalculateEstimateUsingOriginalTrack", GetType().Name);
-            try
-            {
-                var starttime = track.Fixes.First().Timestamp;
-                var endtime = track.Fixes.Last().Timestamp;
-                var dow = ((int)starttime.DayOfWeek + 6) % 7;
-                var how = starttime.Hour + dow * 24;
-                var actualDuration = (endtime - starttime).TotalSeconds;
-
-                var duration = 0.0;
-                var distance = 0.0;
-                var links=0;
-
-                RoadVector vector;
-
-                vector.DistanceMeters = 0;
-                vector.DurationSecs = 0;
-
-                // loop through each 
-                foreach (var rl in mapmatchdata.Select(x => x.RoadLinkEdgeId).Distinct().ToList())
-                {
-                    RoadEdge edge = null;
-                    _data.Dict.TryGetValue(rl ?? 0, out edge);
-                    if (edge != null)
-                    {
-                        vector = edgeCalculator.CalculateEdgeCost(r.VehicleId == 1 ? "AEU" : "FRU", how, edge);
-                    }
-                    duration += vector.DurationSecs;
-                    distance += vector.DistanceMeters;
-                    links++;
-                }
-
-                try
-                {
-                    //var apath = MakePathFromRoadSpeedItems(mapmatchdata);
-                    var id = edgeCalculator.GetId();
-                    file.WriteLine($"{r.IncidentRouteID},{how},{2},{id},{(int)duration},{(int)distance},{links},{(int)actualDuration},{track.VehicleType},0,0,0,0,0,0,0,0,\"\",\"\"");
-
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        void CalculateEstimateUsingRoutingEngine(StreamWriter file, Track track, IncidentRouteView route, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index)
-        {
-//            Logger.Write($"CalculateEstimateUsingRoutingEngine", GetType().Name);
-            try
-            {
-                var starttime = track.Fixes.First().Timestamp;
-                var endtime = track.Fixes.Last().Timestamp;
-                var startpos = track.Fixes.First().Position;
-                var endpos = track.Fixes.Last().Position;
-                var actualDuration = (endtime - starttime).TotalSeconds;
-                var how = starttime.HourOfWeek();
-
-                var startPoint = _data.GetEdgeFromPoint(startpos);
-                var endPoints = new List<EdgeWithOffset>
+            var startPoint = _data.GetEdgeFromPoint(startpos);
+            var endPoints = new List<EdgeWithOffset>
                             {
                                 _data.GetEdgeFromPoint(endpos)
                             };
 
-                var request = new RouteRequestMultiple
-                {
-                    DistanceMax = 15000,
-                    DurationMax = 1800,
-                    InstanceMax = 1,
-                    StartLocation = startPoint,
-                    HourOfWeek = how,
-                    SearchType = RouteSearchType.Quickest,
-                    EndLocations = endPoints,
-                    VehicleType = track.VehicleType == 1 ? "AEU" : "FRU",
-                    RoadSpeedCalculator = edgeCalculator.GetType().Name
-                };
-
-                var result = _selectedRouteEngine.CalculateRouteMultiple(request);
-
-                if (result.Items.Count > 0)
-                {
-                    try
-                    {
-                        var engineroute = result.Items[0];
-
-                        var links = engineroute.Connections.Count;
-                        var id = edgeCalculator.GetId();
-
-                        // calculate quantile road link matches
-                        var original = mapmatchdata.Select(x=>x.RoadLinkEdgeId??0).ToArray();
-                        var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
-
-                        var qA = QuantileByRoadlink(original, routing);
-                        var qB = QuantileByDistance(original, routing);
-
-
-                        var origPath = "";
-                        var newPath = "";
-
-                        //if (index < 100)
-                        //{
-                            origPath = MakePathFromRoadSpeedItems(mapmatchdata);
-                            newPath = MakePathFromRoadSpeedItems(engineroute.Connections.Select(x=>x.Edge).ToList());
-                        //}
-
-                        file.WriteLine($"{route.IncidentRouteID},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\"");
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-                }
-            }
-            catch (Exception)
+            var request = new RouteRequestMultiple
             {
-                // ignored
-            }
+                DistanceMax = 15000,
+                DurationMax = 1800,
+                InstanceMax = 1,
+                StartLocation = startPoint,
+                HourOfWeek = how,
+                SearchType = RouteSearchType.Quickest,
+                EndLocations = endPoints,
+                VehicleType = track.VehicleType == 1 ? "AEU" : "FRU",
+                RoadSpeedCalculator = _edgeCalculator.GetType().Name
+            };
+
+            var result = _selectedRouteEngine.CalculateRouteMultiple(request);
+            var engineroute = result.Items[0];
+
+            var links = engineroute.Connections.Count;
+            var id = _edgeCalculator.GetId();
+
+            var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
+
+            var csvLine = $"{route.IncidentRouteID},{how},{dow},{(int)actualDuration},{track.VehicleType},{estimate.Rows[0].Elements[0].Duration.Value},{estimate.Rows[0].Elements[0].DurationInTraffic.Value},{estimate.Rows[0].Elements[0].Distance.Value}";
+            Debug.Print(csvLine);
+            file.WriteLine(csvLine);
         }
 
         /// <summary>
@@ -381,6 +257,5 @@ namespace Quest.Lib.Research.Job
         {
             return _data.Dict[roadLinkEdgeId??0].Geometry;
         }
-#endif
     }
 }

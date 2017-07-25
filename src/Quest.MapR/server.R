@@ -4,29 +4,49 @@ library(scales)
 library(lattice)
 library(dplyr)
 library(jsonlite)
+library(devtools)
+library(leaflet.extras)
+
+#if (!require('devtools')) install.packages('devtools')
+#  devtools::install_github('rstudio/leaflet')
+
+#devtools::install_github('bhaskarvk/leaflet.extras')
 
 
 function(input, output, session) {
+  
+  last.search <- ""
   
   ## Interactive Map ###########################################
   
   # Create the map
   output$map <- renderLeaflet({
     leaflet() %>%
-      addTiles(group = "OpenStreetMap") %>%
+      addWMSTiles(group = "Barts", "http://127.0.0.1:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", layers="Barts", options = WMSTileOptions(format = "image/png", transparent = F)  ) %>%
+      addProviderTiles("OpenStreetMap.Mapnik", group = "OpenStreetMap") %>%
       addProviderTiles("Stamen.Toner", group = "Black and White") %>%
       addProviderTiles("Stamen.TonerBackground", group = "Black and White 2") %>%
       addProviderTiles("OpenStreetMap.BlackAndWhite", group = "Black and White 3") %>%
+      addDrawToolbar(targetGroup='draw', editOptions = editToolbarOptions(selectedPathOptions = selectedPathOptions()))  %>%
+      addStyleEditor() %>%
       setView(lng = -0.1, lat = 51.5, zoom = 10)  %>%
+      enableTileCaching() %>%
       addMeasure(
         position = "bottomleft",
         primaryLengthUnit = "meters",
         primaryAreaUnit = "sqmeters",
         activeColor = "#3D535D",
         completedColor = "#7D4479") %>%
+      addMiniMap(toggleDisplay=T) %>%
+      addEasyButton(easyButton(
+        icon="fa-globe", title="Zoom to Level 1",
+        onClick=JS("function(btn, map){ map.setView([51.5,-0.1],10) }"))) %>%
+      addEasyButton(easyButton(
+        icon="fa-crosshairs", title="Locate Me",
+        onClick=JS("function(btn, map){ map.locate({setView: true}); }"))) %>%
       addLayersControl(
         options = layersControlOptions(collapsed = T),
-        baseGroups = c("OpenStreetMap", "Black and White", "Black and White 2", "Black and White 3"),
+        baseGroups = c("OpenStreetMap", "Barts", "Black and White", "Black and White 2", "Black and White 3"),
         overlayGroups = c("Operational Areas")
       )
   })
@@ -35,7 +55,7 @@ function(input, output, session) {
     event <- input$resources
     if (is.null(event))
       return()
-
+    
     url.res = paste(baseurl, "Resources/GetMapItems", sep="")
     res = fromJSON(url.res)
     res$Resources$latitude = res$Resources$Y
@@ -48,18 +68,46 @@ function(input, output, session) {
     
   })
   
+  
+  ## Search ###########################################
+  ## search item link clicked, picked up by gomap.js
+  observe({
+    if (is.null(input$goto))
+      return()
+    isolate({
+      map <- leafletProxy("map")
+      map %>% clearPopups()
+      dist <- 0.001
+      lat <- input$goto$lat
+      lng <- input$goto$lng
+      label <- input$goto$label
+      map %>% fitBounds(lng - dist, lat - dist, lng + dist, lat + dist)  %>%
+      addPulseMarkers(
+        lng=lng, lat=lat,
+        label=label,
+        icon = makePulseIcon(heartbeat = 0.5))
+    })
+  })
+  
   ## Search ###########################################
   
   observe({
     event <- input$search.text
+    
     if (is.null(event))
       return()
 
     if (input$search.text=="")
       return()
 
-    b = input$map_bounds;
+    # ignore repeated search
+    if (last.search == input$search.text)
+      return()
+
+    last.search <<- input$search.text
     
+    # build up he request
+    b = input$map_bounds;
     url = paste(baseurl, "Search/Find?searchText=",
                 URLencode(trimws(input$search.text)), 
                 "&searchMode=", input$search.mode, 
@@ -72,10 +120,13 @@ function(input, output, session) {
                 "&filterterms=&indexGroup=", input$search.areas,
                 sep="")
     
+    # get results
     search.results = fromJSON(url)
+    
+    # flatten results
     search.results$Documents$Latitude=search.results$Documents$l$lat
     search.results$Documents$Longitude=search.results$Documents$l$lon
-    search.results$Documents$Action = paste('<a class="go-map" href="" data-lat="', search.results$Documents$Latitude, '" data-long="', search.results$Documents$Longitude, '" data-id="', search.results$Documents$ID, '"><i class="fa fa-crosshairs"></i></a>', sep="")
+    search.results$Documents$Action = paste('<a class="go-map" href="" data-lat="', search.results$Documents$Latitude, '" data-long="', search.results$Documents$Longitude, '" data-id="', search.results$Documents$ID, '" data-label="', search.results$Documents$d, '"><i class="fa fa-crosshairs"></i></a>', sep="")
 
     
     if (search.results$Count==0)
@@ -90,18 +141,20 @@ function(input, output, session) {
           Action = Action
         )
 
-    columnDefs = list(list(visible=FALSE, targets=c(1,3,4)))
-    
-    output$search.table <- DT::renderDataTable({
-      action <- DT::dataTableAjax(session, search.documents)
-      
-      DT::datatable(search.documents, 
-                    options = list(
-                      ajax = list(url = action), 
-                      columnDefs = columnDefs,
-                      search = list(caseInsensitive = FALSE)), 
+    output$search.table <- DT::renderDataTable(
+      {
+        action <- DT::dataTableAjax(session, search.documents)
+        DT::datatable(search.documents, 
+                      class="compact",
+                      selection = "single",
+                      options = list(
+                        ajax = list(url = action), 
+                        columnDefs = list(list(visible=FALSE, targets=c(1,3,4))),
+                        search = list(caseInsensitive = FALSE)
+                      ), 
                     escape = FALSE)
-    })
+      }
+    )
     
     isolate({
 
