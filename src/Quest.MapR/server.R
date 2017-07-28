@@ -171,5 +171,42 @@ function(input, output, session) {
       
     })
   })
-
+  
+    
+  observe({
+    event <- input$heldcalls.Category
+    
+    brownian <- function(n=100)
+    {
+      t <- 1:n  # time
+      sig2 <- 0.01
+      ## first, simulate a set of random deviates
+      x <- rnorm(n = length(t) - 1, sd = sqrt(sig2))
+      ## now compute their cumulative sum
+      x <- c(0, cumsum(x))
+      return(x)
+    }
+    
+    samples = 420
+    
+    now = round((brownian(samples)/2+1)*3,0)
+    yesterday = round((brownian(samples)/2+1)*3,0)
+    
+    df <- data.frame(
+      date = as.POSIXct(seq(Sys.time(), by = "min", length.out = samples)),
+      now = now,
+      yesterday = yesterday
+    )
+    
+    zoo.heldcalls <- as.zoo(df)
+    
+    output$heldcallsplot <- renderPlot({
+      ggplot(df, aes(x=date, y=now, factor())) + theme_bw() +geom_line() +geom_ribbon(aes(ymin=0, ymax=yesterday), fill="lightpink3", color="lightpink3")+
+        geom_line(color="lightpink4", lwd=1)
+      })
+    
+    
+    })
+    
+    
 }

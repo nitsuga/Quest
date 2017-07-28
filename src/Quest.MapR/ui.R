@@ -86,8 +86,8 @@ navbarPage("Quest", id="nav",
                              selectInput("states", "States", c("All states"="", structure(state.abb, names=state.name), "Washington, DC"="DC"), multiple=TRUE)
                       ),
                       column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("cities", "Cities", c("All cities"=""), multiple=TRUE)
+                             conditionalPanel("heldcalls.category",
+                                              selectInput("Category", "Category:", c("C1","C2"), multiple=TRUE)
                              )
                       ),
                       column(3,
@@ -98,21 +98,8 @@ navbarPage("Quest", id="nav",
                     )
            ),
            tabPanel("Held Calls",
-                    fluidRow(
-                      column(3,
-                             selectInput("states", "States", c("All states"="", structure(state.abb, names=state.name), "Washington, DC"="DC"), multiple=TRUE)
-                      ),
-                      column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("cities", "Cities", c("All cities"=""), multiple=TRUE)
-                             )
-                      ),
-                      column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("zipcodes", "Zipcodes", c("All zipcodes"=""), multiple=TRUE)
-                             )
-                      )
-                    )
+                    plotOutput("heldcallsplot"),
+                    selectInput("heldcalls.Category", "Category:", c("C1","C2"), multiple=TRUE)
            ),
            
            tabPanel("Admin",

@@ -68,6 +68,7 @@ namespace Quest.Lib.Utils
             IGeometryFactory geomFact = new GeometryFactory();
 
             PolygonIndex = new Quadtree<PolygonData>();
+            var dir = System.IO.Directory.GetCurrentDirectory();
 
             using (var reader = new ShapefileDataReader(filename, geomFact))
             {

@@ -815,7 +815,7 @@ function LocationSearch( options )//callback for 3rd party ajax requests
 
             $("#message-wait").hide();
 
-            if (items.error !== undefined) {
+            if (items !== undefined && items.error !== undefined) {
                 $("#message").html(items.error);
                 $("#message").show();
             }

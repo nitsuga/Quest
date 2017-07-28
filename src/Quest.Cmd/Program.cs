@@ -34,7 +34,7 @@ namespace Quest.Cmd
         // -components=simulation.json -exec=RosterSimulator
 
         // to run the full stack
-        // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager
+        // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager;IndexerManager
 
         // for research, use these
         // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100

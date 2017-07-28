@@ -285,78 +285,99 @@
     <Content Include="components.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Data\IndexData\indexgroups.dbf">
+    <Content Include="Data\IndexData\indexgroups.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\indexgroups.prj">
+    </Content>
+    <Content Include="Data\IndexData\indexgroups.prj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\indexgroups.qpj">
+    </Content>
+    <Content Include="Data\IndexData\indexgroups.qpj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\indexgroups.shp">
+    </Content>
+    <Content Include="Data\IndexData\indexgroups.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\indexgroups.shx">
+    </Content>
+    <Content Include="Data\IndexData\indexgroups.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.cpg">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.cpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.dbf">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.prj">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.prj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.sbn">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.sbn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.sbx">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.sbx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.shp">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\IOIFootprints_wgs84.shx">
+    </Content>
+    <Content Include="Data\IndexData\IOIFootprints_wgs84.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\local_area_names.csv">
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\local_area_names.json">
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\master_4326.dbf">
+    </Content>
+    <Content Include="Data\IndexData\master_4326.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\master_4326.prj">
+    </Content>
+    <Content Include="Data\IndexData\master_4326.prj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\master_4326.qpj">
+    </Content>
+    <Content Include="Data\IndexData\master_4326.qpj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\master_4326.shp">
+    </Content>
+    <Content Include="Data\IndexData\master_4326.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\master_4326.shx">
+    </Content>
+    <Content Include="Data\IndexData\master_4326.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\Triggers.dbf">
+    </Content>
+    <Content Include="Data\IndexData\Triggers.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\Triggers.prj">
+    </Content>
+    <Content Include="Data\IndexData\Triggers.prj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\Triggers.qpj">
+    </Content>
+    <Content Include="Data\IndexData\Triggers.qpj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\Triggers.shp">
+    </Content>
+    <Content Include="Data\IndexData\Triggers.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\IndexData\Triggers.shx">
+    </Content>
+    <Content Include="Data\IndexData\Triggers.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.qpj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\local_area_names.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\map.qgs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\IndexData\TfL\bus-sequences.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Data\MyMaps\gpx\14_Jun_2017_15_49_22.gpx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
