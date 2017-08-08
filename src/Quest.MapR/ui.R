@@ -41,7 +41,7 @@ navbarPage("Quest", id="nav",
                                           column(3, offset = 0,  selectInput("search.areas", "Areas:", search.indexgroups,selectize = TRUE, multiple = F, selected = search.indexgroups.selected )),
                                           column(3, offset = 3,  selectInput("search.mode", "Mode:", c("exact"=0,"relax"=1,"fuzzy"=2),selectize = TRUE, multiple = F, selected = "exact" ))
                                         ),
-                                        
+                                        div()
                                         hr(),
                                         DT::dataTableOutput("search.table")
                                         
@@ -80,46 +80,14 @@ navbarPage("Quest", id="nav",
                         
                     )
            ),
-           tabPanel("Standby Requests",
-                    fluidRow(
-                      column(3,
-                             selectInput("states", "States", c("All states"="", structure(state.abb, names=state.name), "Washington, DC"="DC"), multiple=TRUE)
-                      ),
-                      column(3,
-                             conditionalPanel("heldcalls.category",
-                                              selectInput("Category", "Category:", c("C1","C2"), multiple=TRUE)
-                             )
-                      ),
-                      column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("zipcodes", "Zipcodes", c("All zipcodes"=""), multiple=TRUE)
-                             )
-                      )
-                    )
-           ),
            tabPanel("Held Calls",
-                    plotOutput("heldcallsplot"),
+                    plotOutput("heldcallsplott"),
+                    plotOutput("heldcallsplot1"),
+                    plotOutput("heldcallsplot2"),
+                    plotOutput("heldcallsplot3"),
+                    plotOutput("heldcallsplot4"),
                     selectInput("heldcalls.Category", "Category:", c("C1","C2"), multiple=TRUE)
            ),
-           
-           tabPanel("Admin",
-                    fluidRow(
-                      column(3,
-                             selectInput("states", "States", c("All states"="", structure(state.abb, names=state.name), "Washington, DC"="DC"), multiple=TRUE)
-                      ),
-                      column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("cities", "Cities", c("All cities"=""), multiple=TRUE)
-                             )
-                      ),
-                      column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("zipcodes", "Zipcodes", c("All zipcodes"=""), multiple=TRUE)
-                             )
-                      )
-                    )
-           ),
-           
            conditionalPanel("true", icon("crosshair"))
            
            

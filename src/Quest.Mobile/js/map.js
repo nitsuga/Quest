@@ -468,11 +468,12 @@ function setupActions() {
     
 
     $("#search_input_text").on("input", function () {
-        LocationSearch({ take: 100 });
+        // uncomment for immediate search
+        //LocationSearch({ take: 100 });
         clearTimeout(wto);
         wto = setTimeout(function () {
-            // LocationSearch();
-        }, 1000);
+            LocationSearch({ take: 100 });
+        }, 250);
     });
 
     $("#help").on("show.bs.collapse", function () {
@@ -815,7 +816,7 @@ function LocationSearch( options )//callback for 3rd party ajax requests
 
             $("#message-wait").hide();
 
-            if (items !== undefined && items.error !== undefined) {
+            if (items === null && items !== undefined && items.error !== undefined) {
                 $("#message").html(items.error);
                 $("#message").show();
             }

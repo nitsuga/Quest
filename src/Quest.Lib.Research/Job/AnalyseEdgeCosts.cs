@@ -81,15 +81,15 @@ namespace Quest.Lib.Research.Job
                 // and so are effectvely unseen
                 routes = db.IncidentRouteViews
                     .AsNoTracking()
-                      .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
-                    //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGPS == false)
-                    .Take(10000)
+                    //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
+                    .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGPS == false)
+                    .Take(100000)
                     .ToList();
             }
 
             using (var file = new StreamWriter(filename))
             {
-                file.WriteLine($"IncidentRouteID, HoW, RoutingMethod, EdgeMethod, EstimatedDuration,EstimatedDistance, Links, ActualDuration, Vehicleid,qA1,qA2,qA3,qA4,qB1,qB2,qB3,qB4,Orig,NewPath");
+                file.WriteLine($"IncidentRouteID, HoW, RoutingMethod, EdgeMethod, EstimatedDuration,EstimatedDistance, Links, ActualDuration, Vehicleid,qA1,qA2,qA3,qA4,qB1,qB2,qB3,qB4,Orig,NewPath,sx,sy,ex,ey,totalAngleDelta,deg45c,deg90c,RoadCount");
 
                 var i = 0;
                 foreach (var r in routes)
@@ -171,8 +171,17 @@ namespace Quest.Lib.Research.Job
 //            Logger.Write($"CalculateEstimateUsingOriginalTrack", GetType().Name);
             try
             {
-                var starttime = track.Fixes.First().Timestamp;
-                var endtime = track.Fixes.Last().Timestamp;
+                var first = track.Fixes.First();
+                var last = track.Fixes.Last();
+
+                var starttime = first.Timestamp;
+                var endtime = last.Timestamp;
+
+                var sx = first.Position.X;
+                var ex = last.Position.X;
+                var sy = first.Position.Y;
+                var ey = last.Position.Y;
+
                 var dow = ((int)starttime.DayOfWeek + 6) % 7;
                 var how = starttime.Hour + dow * 24;
                 var actualDuration = (endtime - starttime).TotalSeconds;
@@ -204,8 +213,7 @@ namespace Quest.Lib.Research.Job
                 {
                     //var apath = MakePathFromRoadSpeedItems(mapmatchdata);
                     var id = edgeCalculator.GetId();
-                    file.WriteLine($"{r.IncidentRouteID},{how},{2},{id},{(int)duration},{(int)distance},{links},{(int)actualDuration},{track.VehicleType},0,0,0,0,0,0,0,0,\"\",\"\"");
-
+                    file.WriteLine($"{r.IncidentRouteID},{how},{2},{id},{(int)duration},{(int)distance},{links},{(int)actualDuration},{track.VehicleType},0,0,0,0,0,0,0,0,\"\",\"\",{sx},{sy},{ex},{ey},0,0,0,0" );
                 }
                 catch (Exception)
                 {
@@ -223,10 +231,20 @@ namespace Quest.Lib.Research.Job
 //            Logger.Write($"CalculateEstimateUsingRoutingEngine", GetType().Name);
             try
             {
-                var starttime = track.Fixes.First().Timestamp;
-                var endtime = track.Fixes.Last().Timestamp;
-                var startpos = track.Fixes.First().Position;
-                var endpos = track.Fixes.Last().Position;
+                var first = track.Fixes.First();
+                var last = track.Fixes.Last();
+
+                var starttime = first.Timestamp;
+                var endtime = last.Timestamp;
+
+                var sx = first.Position.X;
+                var ex = last.Position.X;
+                var sy = first.Position.Y;
+                var ey = last.Position.Y;
+
+                var startpos = first.Position;
+                var endpos = last.Position;
+
                 var actualDuration = (endtime - starttime).TotalSeconds;
                 var how = starttime.HourOfWeek();
 
@@ -260,13 +278,38 @@ namespace Quest.Lib.Research.Job
                         var links = engineroute.Connections.Count;
                         var id = edgeCalculator.GetId();
 
+                        var rc = 0;
+                        var deg45 = Math.PI / 4;
+                        var deg90 = Math.PI / 2;
+                        var deg45c = 0;
+                        var deg90c= 0;
+                        var totalAngleDelta = 0.0;
+                        for (int i = 0; i < engineroute.Connections.Count() - 1; i++)
+                        {
+                            var from = engineroute.Connections[i].Edge;
+                            var to = engineroute.Connections[i + 1].Edge;
+
+                            // calculate number of road name changes
+                            if (from.RoadName != to.RoadName)
+                                rc++;
+
+                            // calculate number of sharp angle changes
+                            var fromAngle = Math.Atan2(from.Geometry[0].X - from.Geometry[from.Geometry.Count - 1].X, from.Geometry[0].Y - from.Geometry[from.Geometry.Count - 1].Y);
+                            var toAngle = Math.Atan2(    to.Geometry[0].X - to.Geometry[to.Geometry.Count - 1].X, to.Geometry[0].Y - to.Geometry[to.Geometry.Count - 1].Y);
+                            if (fromAngle < 0) fromAngle += (2 * Math.PI);
+                            if (toAngle < 0) toAngle += (2 * Math.PI);
+                            var angledelta = Math.Abs(fromAngle - toAngle);
+                            if (angledelta >= deg45 && angledelta < deg90) deg45c++;
+                            if (angledelta >= deg90) deg90c++;
+                            totalAngleDelta += angledelta;
+                        }
+
                         // calculate quantile road link matches
                         var original = mapmatchdata.Select(x=>x.RoadLinkEdgeId??0).ToArray();
                         var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
 
                         var qA = QuantileByRoadlink(original, routing);
                         var qB = QuantileByDistance(original, routing);
-
 
                         var origPath = "";
                         var newPath = "";
@@ -277,7 +320,7 @@ namespace Quest.Lib.Research.Job
                             newPath = MakePathFromRoadSpeedItems(engineroute.Connections.Select(x=>x.Edge).ToList());
                         //}
 
-                        file.WriteLine($"{route.IncidentRouteID},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\"");
+                        file.WriteLine($"{route.IncidentRouteID},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\",{sx},{sy},{ex},{ey},{totalAngleDelta},{deg45c},{deg90c},{rc}");
                     }
                     catch (Exception)
                     {

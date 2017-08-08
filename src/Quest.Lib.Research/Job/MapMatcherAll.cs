@@ -51,6 +51,7 @@ namespace Quest.Lib.Research.Job
 
             var request = new MapMatcherMatchAllRequest
             {
+                InProcess = parms.InProcess,
                 MapMatcher = parms.MapMatcher,
                 RoutingEngine = parms.RoutingEngine,
                 RoutingData = parms.RoutingData,

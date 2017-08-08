@@ -81,7 +81,7 @@ namespace Quest.Lib.Research.Utils
 
 
             var track = new Track
-            {
+            { 
                 Incident = incidentId,
                 Callsign = callsign,
                 Fixes = MakeFixes(fixesfiltered),

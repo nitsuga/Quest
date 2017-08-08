@@ -7,8 +7,6 @@ namespace Quest.Common.Messages
     [Serializable]
     public class RouteMatcherResponse
     {
-        public int Id;
-
         public string Name;
 
         public List<RoadLinkEdgeSpeed> Results;
