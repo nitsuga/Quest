@@ -4,7 +4,9 @@ using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Processor;
 using Quest.Lib.Routing;
 using Quest.Lib.ServiceBus;
+using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace Quest.Lib.Research.Job
@@ -15,7 +17,6 @@ namespace Quest.Lib.Research.Job
         private ILifetimeScope _scope;
         private MapMatcherUtil _mapMatcherUtil;
         #endregion
-
 
         public MapMatcherWorker(
             ILifetimeScope scope,
@@ -47,24 +48,40 @@ namespace Quest.Lib.Research.Job
 
         private void DoMapMatch()
         {
-            var args = Configuration["args"];
+            try
+            {
+                Logger.Write("MapMatcher Worker Starting");
 
-            dynamic parms = ExpandoUtils.MakeExpandoFromString(args);
+                var args = Configuration["args"];
 
-            var engine = _scope.ResolveNamed<IRouteEngine>((string)parms.RoutingEngine);
-            var matcher = _scope.ResolveNamed<IMapMatcher>((string)parms.MapMatcher);
+                dynamic parms = ExpandoUtils.MakeExpandoFromString(args);
 
-            int taskid;
-            int runid;
-            int startrouteid;
-            int endrouteid;
+                Logger.Write($"Locating routing engine {(string)parms.RoutingEngine}");
+                var engine = _scope.ResolveNamed<IRouteEngine>((string)parms.RoutingEngine);
 
-            int.TryParse(Configuration["taskid"], out taskid);
-            int.TryParse(Configuration["runid"], out runid);
-            int.TryParse(Configuration["startrouteid"], out startrouteid);
-            int.TryParse(Configuration["endrouteid"], out endrouteid);
+                Logger.Write($"Locating map matcher {(string)parms.MapMatcher}");
+                var matcher = _scope.ResolveNamed<IMapMatcher>((string)parms.MapMatcher);
 
-            _mapMatcherUtil.RoadMatcherBatchWorker(taskid, startrouteid, endrouteid, runid, matcher, engine, parms);
+                int taskid;
+                int runid;
+                int startrouteid;
+                int endrouteid;
+
+                Logger.Write($"Retrieving task details.");
+
+                int.TryParse(Configuration["taskid"], out taskid);
+                int.TryParse(Configuration["runid"], out runid);
+                int.TryParse(Configuration["startrouteid"], out startrouteid);
+                int.TryParse(Configuration["endrouteid"], out endrouteid);
+
+                Logger.Write($"Found taskid={taskid} runid={runid} startid={startrouteid} endid={endrouteid}");
+
+                _mapMatcherUtil.RoadMatcherBatchWorker(taskid, startrouteid, endrouteid, runid, matcher, engine, parms);
+            }
+            catch (Exception ex)
+            {
+                Logger.Write(ex.ToString(), "MapMatcher");
+            }
         }
     }
 }

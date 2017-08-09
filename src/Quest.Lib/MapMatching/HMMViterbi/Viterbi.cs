@@ -27,8 +27,8 @@ namespace Quest.Lib.MapMatching.HMMViterbi
         }
 
         /// <summary>
-        /// calculate the viterbi at the current step, claculating the new
-        /// viterbi values passed on fro the previous step. Any candidates
+        /// calculate the viterbi at the current step, calculating the new
+        /// viterbi values passed on from the previous step. Any candidates
         /// that cannot be routed to from any of the candidates on the 
         /// previous layer are removed.
         /// </summary>

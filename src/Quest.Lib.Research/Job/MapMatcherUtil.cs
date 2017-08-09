@@ -78,8 +78,10 @@ namespace Quest.Lib.Research.Job
             dynamic parms
             )
         {
+            Logger.Write("Getting Incident Routes..");
             var routeids = GetIncidentRoutes(true);
             var toProcess = routeids.Where(x => x >= startid && x <= endid).ToList();
+            Logger.Write($"Found {toProcess.Count} Incident Routes to process");
             RoadMatcherBatchWorker(taskid, toProcess, runid, matcher, engine, parms);
         }
 
@@ -89,85 +91,103 @@ namespace Quest.Lib.Research.Job
         /// <param name="container"></param>
         /// <param name="request"></param>
         /// <param name="jobParameters"></param>
-        private static void RoadMatcherAllCommandActionWorker(ILifetimeScope scope,MapMatcherMatchAllRequest request)
+        private static void RoadMatcherAllCommandActionWorker(ILifetimeScope scope, MapMatcherMatchAllRequest request)
         {
             int runid;
 
-            var matcher = scope.ResolveNamed<IMapMatcher>(request.MapMatcher);
-
-            using (var context = new QuestResearchEntities())
+            try
             {
-                var run = new IncidentRouteRun
+                var matcher = scope.ResolveNamed<IMapMatcher>(request.MapMatcher);
+                Logger.Write($"Starting new run");
+                using (var context = new QuestResearchEntities())
                 {
-                    Timestamp = DateTime.UtcNow,
-                    Parameters = request.Parameters
-                };
+                    var myparams = request.Parameters.Replace("'", "''");
+                    var cmd = $" SET NOCOUNT ON; INSERT [dbo].[IncidentRouteRun]([Parameters], [Timestamp]) VALUES('{myparams}', '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}');SELECT scope_identity()\n";
+                    context.Database.ExecuteSqlCommand(cmd);
+                    runid = context.IncidentRouteRuns.Max(x => x.IncidentRouteRunId);
+                    Logger.Write($"Run id {runid}");
+                }
 
-                context.IncidentRouteRuns.Add(run);
-                context.SaveChanges();
-                runid = run.IncidentRouteRunId;
-            }
+                Logger.Write($"Getting incident routes");
+                // get unscanned records
+                var routeids = GetIncidentRoutes(true);
 
-            // get unscanned records
-            var routeids = GetIncidentRoutes(true);
+                Logger.Write($"Found {routeids.Count} that need processing");
 
-            // split into batches
+                // split into batches
 
-            var batchsize = routeids.Count/(request.Workers);
+                var batchsize = routeids.Count / (request.Workers);
 
-            if (batchsize == 0)
-                batchsize = 8;
+                Logger.Write($"Create {request.Workers} each with {batchsize} incident routes");
 
-            var workers = new List<Task>();
-            var arglist = new List<string>();
-            var taskid = 0;
-            while (routeids.Count > 0)
-            {
-                var batch = routeids.Take(batchsize).ToList();
-                var engine = scope.ResolveNamed<IRouteEngine>(request.RoutingEngine);
+                if (batchsize == 0)
+                    batchsize = 8;
 
-                if (batch.Count > 0)
+                var workers = new List<Task>();
+                var arglist = new List<string>();
+                var taskid = 0;
+                while (routeids.Count > 0)
                 {
-                    routeids.RemoveRange(0, batch.Count);
-                    if (request.InProcess)
+                    var batch = routeids.Take(batchsize).ToList();
+                    var engine = scope.ResolveNamed<IRouteEngine>(request.RoutingEngine);
+
+                    if (batch.Count > 0)
                     {
-                        dynamic parms = ExpandoUtils.MakeExpandoFromString(request.Parameters);
-                        var t =
-                            new Task(
-                                () =>
-                                    RoadMatcherBatchWorker(taskid++, batch, runid, matcher, engine, parms),
-                                TaskCreationOptions.LongRunning);
+                        routeids.RemoveRange(0, batch.Count);
+                        if (request.InProcess)
+                        {
+                            Logger.Write($"Creating in-process worker {batch}");
+                            dynamic parms = ExpandoUtils.MakeExpandoFromString(request.Parameters);
+                            var t =
+                                new Task(
+                                    () =>
+                                        RoadMatcherBatchWorker(taskid++, batch, runid, matcher, engine, parms),
+                                    TaskCreationOptions.LongRunning);
 
-                        workers.Add(t);
+                            workers.Add(t);
+                        }
+                        else
+                        {
+                            Logger.Write($"Creating external process worker {batch}");
+
+#if DOCKER
+                            var quotedjobParameters = request.Parameters.Replace("\"", "\\\"").Replace("'", @"\'"); 
+#else
+                            var quotedjobParameters = request.Parameters.Replace("\"", "\\\"");
+#endif
+
+                            var additional = $"/taskid={taskid} /runid={runid} /startrouteid={batch.First()} /endrouteid={ batch.Last()}";
+                            var cmdParms = $"-exec=MapMatcherWorker -args={quotedjobParameters} {additional}";
+
+                            if (!string.IsNullOrEmpty(request.Components))
+                                cmdParms += $" -components={request.Components}";
+
+                            arglist.Add(cmdParms);
+                        }
                     }
-                    else
+                }
+
+                if (request.InProcess)
+                {
+                    // start the workers
+                    workers.ForEach(x => x.Start());
+
+                    // wait for work to finish
+                    Task.WaitAll(workers.ToArray());
+                }
+                else
+                {
+                    foreach (var arg in arglist)
                     {
-                        var quotedjobParameters = request.Parameters.Replace("\"", "\\\"");
-
-                        var additional = $"/taskid={taskid} /runid={runid} /startrouteid={batch.First()} /endrouteid={ batch.Last()}";
-                        var cmdParms = $"-exec=MapMatcherWorker -args={quotedjobParameters} {additional}";
-
-                        arglist.Add(cmdParms);
+                        Logger.Write($"Starting: {arg}");
+                        Process.Start("Quest.Cmd.exe", arg);
+                        Thread.Sleep(1000);
                     }
                 }
             }
-
-            if (request.InProcess)
+            catch (Exception ex)
             {
-                // start the workers
-                workers.ForEach(x => x.Start());
-
-                // wait for work to finish
-                Task.WaitAll(workers.ToArray());
-            }
-            else
-            {
-                foreach (var arg in arglist)
-                {
-                    Logger.Write($"Starting: {arg}");
-                    Process.Start("Quest.Cmd.exe", arg);
-                    Thread.Sleep(1000);
-                }
+                Logger.Write(ex);
             }
         }
 

@@ -11,7 +11,6 @@ namespace Quest.Lib.MapMatching.HMMViterbi
 {
     public class HmmViterbiMapMatcherUnOp : IMapMatcher
     {
-        
         private RoutingData _data;
 
         /// <summary>
@@ -29,7 +28,6 @@ namespace Quest.Lib.MapMatching.HMMViterbi
 
                 if (steps.Length > 0)
                 {
-
                     CalculateRoutes(steps, parameters);
 
                     var path = steps.GetViterbiPath(parameters);
@@ -47,9 +45,7 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                 return new RouteMatcherResponse { IsSuccess = false, Message = ex.Message };
             }
         }
-
-
-
+        
         /// <summary>
         /// calculate a road route between each candidate at each step t and each candidate in step t+1
         /// Do this for all steps. Each route also includes a calculated transition function.
@@ -70,6 +66,5 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                     );
             }
         }
-
     }
 }

@@ -46,6 +46,7 @@ namespace Quest.Lib.Research.Job
         private void DoMapMatch()
         {
             var args = Configuration["args"];
+            var components = Configuration["components"];
 
             dynamic parms = ExpandoUtils.MakeExpandoFromString(args);
 
@@ -56,7 +57,8 @@ namespace Quest.Lib.Research.Job
                 RoutingEngine = parms.RoutingEngine,
                 RoutingData = parms.RoutingData,
                 Workers = parms.Workers,
-                Parameters = args
+                Parameters = args,
+                Components = components
             };
 
             _mapMatcherUtil.MapMatcherMatchAll(request);

@@ -16,7 +16,10 @@ namespace Quest.Lib.MapMatching.HMMViterbi
         private RoutingData _data;
 
         /// <summary>
-        ///     analyse a set of fixes and determine the route using Hmm with Viterbi
+        ///     analyse a set of fixes and determine the route using Hmm with Viterbi.
+        ///     This routing differs from the unoptimised version because it works
+        ///     iteratively through the list of fixes, only keeping the best route
+        ///     so far
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>

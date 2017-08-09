@@ -77,12 +77,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Docker|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Docker\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;DOCKER</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <GenerateSerializationAssemblies>On</GenerateSerializationAssemblies>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Docker|x64'">
     <DebugSymbols>true</DebugSymbols>

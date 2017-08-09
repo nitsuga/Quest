@@ -17,6 +17,7 @@ namespace Quest.Common.Messages
         public string RoutingData = "Standard";
 
         public string Parameters;
+        public string Components;
 
         public override string ToString()
         {

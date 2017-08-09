@@ -4,6 +4,7 @@ using Autofac.Extensions.DependencyInjection;
 using Autofac.Features.ResolveAnything;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Quest.Lib.DependencyInjection;
 using Quest.Lib.Processor;
 using Quest.Lib.Trace;
 using System;
@@ -37,7 +38,8 @@ namespace Quest.Cmd
         // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager;DeviceManager;IndexerManager
 
         // for research, use these
-        // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100
+        // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 -components=components.json
+
         // -exec=MapMatcherWorker -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 /taskid=0 /runid=69 /startrouteid=1254133 /endrouteid=1254136
 
         // -exec=AnalyseEdgeCosts
@@ -65,9 +67,6 @@ namespace Quest.Cmd
                 Logger.Write($"-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the", TraceEventType.Information, "Quest.Cmd");
                 Logger.Write($"-- GNU General Public License for more details.", TraceEventType.Information, "Quest.Cmd");
                 Logger.Write($"-----------------------------------------", TraceEventType.Information, "Quest.Cmd");
-
-                //var inc = new IncSimulator();
-                //var inc = new MapMatcherProcessor();
 
                 // load settings file 
                 var configFile = Parameters.GetParameter(args, "-config", null);
@@ -186,14 +185,14 @@ namespace Quest.Cmd
         /// <returns></returns>
         internal static IServiceProvider ConfigureServices(IServiceCollection services, IConfiguration config)
         {
-
             // Register the ConfigurationModule with Autofac.
             var module = new ConfigurationModule(config);
 
             var builder = new ContainerBuilder();
             builder.RegisterModule(module);
 
-            //services.AddProcessRunnerService();
+            // Add any Autofac modules or registrations.
+            builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.Research", "Quest.Lib.Simulation" }));
 
             var dataAccess = Assembly.GetExecutingAssembly();
 
