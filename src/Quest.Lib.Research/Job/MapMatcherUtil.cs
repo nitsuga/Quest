@@ -337,7 +337,7 @@ namespace Quest.Lib.Research.Job
                     incidents = context.IncidentRoutes
                         .Where(x => x.Scanned == false)
                         // remove this to process everything
-                        .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000)
+                        //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000)
                         .Select(x => x.IncidentRouteID)
                         .OrderBy(x => x)
                         .ToList();

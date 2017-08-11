@@ -9,7 +9,7 @@ namespace Quest.Lib.MapMatching.HMMViterbi
 {
     internal static class Viterbi
     {
-        internal static void CalculateViterbiValues(this Step[] steps, HmmParameters parameters)
+        internal static void CalculateViterbiValues(this Step[] steps, HmmParameters parameters, bool removeUnroutables, bool onlyKeepBestFromPrevious)
         {
             var stepCount = steps.Length;
 
@@ -23,7 +23,7 @@ namespace Quest.Lib.MapMatching.HMMViterbi
             //
             // If no links exist to this candidate then remove this candidate altogether
             for (var i = 1; i < stepCount; i++)
-                steps.CalculateViterbiAtStep(i, parameters);
+                steps.CalculateViterbiAtStep(i, parameters, removeUnroutables, onlyKeepBestFromPrevious);
         }
 
         /// <summary>
@@ -35,13 +35,14 @@ namespace Quest.Lib.MapMatching.HMMViterbi
         /// <param name="steps"></param>
         /// <param name="index"></param>
         /// <param name="parameters"></param>
-        internal static void CalculateViterbiAtStep(this Step[] steps, int index, HmmParameters parameters)
+        internal static void CalculateViterbiAtStep(this Step[] steps, int index, HmmParameters parameters, bool removeUnroutables, bool onlyKeepBestFromPrevious)
         {
             var step = steps[index];
             var prevStep = steps[index - 1];
 
             foreach (var candidateFix in step.CandidateFixes.ToList())
             {
+                // get a list of candidates to this fix
                 var linksToThisCandidate =
                     prevStep.CandidateFixes
                         .Where(x => x.HasRoutesToHere) // only pick previous candidates that are routable
@@ -56,9 +57,9 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                 candidateFix.HasRoutesToHere = linksToThisCandidate.Count > 0;
 
                 // remove unroutable candidates
-                if (!candidateFix.HasRoutesToHere)
+                if (!candidateFix.HasRoutesToHere && removeUnroutables)
                 {
-                    //step.CandidateFixes.Remove(candidateFix);
+                    step.CandidateFixes.Remove(candidateFix);
                     continue;
                 }
 
@@ -69,6 +70,9 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                 // loop through routes to this node and calculate best route
                 linksToThisCandidate.CalculateViterbiForCandidate(candidateFix, parameters);
             }
+
+            if (onlyKeepBestFromPrevious)
+                prevStep.CandidateFixes = prevStep.CandidateFixes.Where(x => x.IsBest == true).ToList();
         }
 
         private static void CalculateViterbiForCandidate(this List<SampleRoute> linksToThisCandidate, CandidateFix candidateFix, HmmParameters parameters)
@@ -88,9 +92,9 @@ namespace Quest.Lib.MapMatching.HMMViterbi
             }
         }
 
-        internal static List<RoadLinkEdgeSpeed> GetViterbiPath(this Step[] steps, HmmParameters parameters)
+        internal static List<RoadLinkEdgeSpeed> GetViterbiPath(this Step[] steps, HmmParameters parameters, bool removeUnroutables, bool onlyKeepBestFromPrevious)
         {
-            steps.CalculateViterbiValues(parameters);
+            steps.CalculateViterbiValues(parameters, removeUnroutables, onlyKeepBestFromPrevious);
 
             var route = steps.ExtractViterbiPath();
 

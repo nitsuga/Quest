@@ -402,13 +402,25 @@
         "IgnoreRoadTypes": [ 9 ]
       }
     },
-
+    {
+      "type": "Quest.Lib.MapMatching.HMMViterbi.HmmViterbiMapMatcher",
+      "services": [
+        {
+          "type": "Quest.Lib.MapMatching.RouteMatcher.IMapMatcher",
+          "key": "HmmViterbiMapMatcher"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
     {
       "type": "Quest.Lib.MapMatching.HMMViterbi.HmmViterbiMapMatcherUnOp",
       "services": [
         {
           "type": "Quest.Lib.MapMatching.RouteMatcher.IMapMatcher",
-          "key": "HmmViterbiMapMatcher"
+          "key": "HmmViterbiMapMatcherUnOp"
         }
       ],
       "injectProperties": true,
@@ -428,8 +440,7 @@
       "instanceScope": "single-instance",
       "properties": {
       }
-    }
-    ,
+    },
     {
       "type": "Quest.Lib.Routing.RoutingData",
       "injectProperties": true,

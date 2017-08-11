@@ -34,7 +34,6 @@ namespace Quest.Lib.Research.Job
         private DijkstraRoutingEngine _selectedRouteEngine;
         #endregion
 
-
         public AnalyseEdgeCosts(
             ILifetimeScope scope,
             RoutingData data,
@@ -146,11 +145,36 @@ namespace Quest.Lib.Research.Job
 
             CalculateStartEnd(track, route);
 
+            var first = track.Fixes.First();
+            var last = track.Fixes.Last();
+
+            var starttime = first.Timestamp;
+            var endtime = last.Timestamp;
+
+            var sx = first.Position.X;
+            var ex = last.Position.X;
+            var sy = first.Position.Y;
+            var ey = last.Position.Y;
+
+            var startpos = first.Position;
+            var endpos = last.Position;
+
+            var actualDuration = (endtime - starttime).TotalSeconds;
+            var how = starttime.HourOfWeek();
+
+            var startPoint = _data.GetEdgeFromPoint(startpos);
+            var endPoints = new List<EdgeWithOffset>
+                            {
+                                _data.GetEdgeFromPoint(endpos)
+                            };
+
             //// try each edge cost in turn,
             foreach (var edgeCalculator in edgeCalculators)
             {
-                CalculateEstimateUsingOriginalTrack(file, track, route, edgeCalculator, mapmatchdata, index);
-                CalculateEstimateUsingRoutingEngine(file, track, route, edgeCalculator, mapmatchdata, index);
+                Logger.Write($"..1", GetType().Name);
+                CalculateEstimateUsingOriginalTrack(file, track, route, edgeCalculator, mapmatchdata, index, first, last, startPoint, endPoints, how, actualDuration, sx, sy, ex, ey);
+                Logger.Write($"..2", GetType().Name);
+                CalculateEstimateUsingRoutingEngine(file, track, route, edgeCalculator, mapmatchdata, index, first, last, startPoint, endPoints, how, actualDuration, sx, sy, ex, ey);
             }
         }
 
@@ -166,25 +190,14 @@ namespace Quest.Lib.Research.Job
             }
         }
 
-        void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRouteView r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index)
+        void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRouteView r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
         {
 //            Logger.Write($"CalculateEstimateUsingOriginalTrack", GetType().Name);
             try
             {
-                var first = track.Fixes.First();
-                var last = track.Fixes.Last();
-
                 var starttime = first.Timestamp;
                 var endtime = last.Timestamp;
-
-                var sx = first.Position.X;
-                var ex = last.Position.X;
-                var sy = first.Position.Y;
-                var ey = last.Position.Y;
-
                 var dow = ((int)starttime.DayOfWeek + 6) % 7;
-                var how = starttime.Hour + dow * 24;
-                var actualDuration = (endtime - starttime).TotalSeconds;
 
                 var duration = 0.0;
                 var distance = 0.0;
@@ -226,34 +239,10 @@ namespace Quest.Lib.Research.Job
             }
         }
 
-        void CalculateEstimateUsingRoutingEngine(StreamWriter file, Track track, IncidentRouteView route, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index)
+        void CalculateEstimateUsingRoutingEngine(StreamWriter file, Track track, IncidentRouteView route, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
         {
-//            Logger.Write($"CalculateEstimateUsingRoutingEngine", GetType().Name);
             try
             {
-                var first = track.Fixes.First();
-                var last = track.Fixes.Last();
-
-                var starttime = first.Timestamp;
-                var endtime = last.Timestamp;
-
-                var sx = first.Position.X;
-                var ex = last.Position.X;
-                var sy = first.Position.Y;
-                var ey = last.Position.Y;
-
-                var startpos = first.Position;
-                var endpos = last.Position;
-
-                var actualDuration = (endtime - starttime).TotalSeconds;
-                var how = starttime.HourOfWeek();
-
-                var startPoint = _data.GetEdgeFromPoint(startpos);
-                var endPoints = new List<EdgeWithOffset>
-                            {
-                                _data.GetEdgeFromPoint(endpos)
-                            };
-
                 var request = new RouteRequestMultiple
                 {
                     DistanceMax = 15000,
@@ -314,11 +303,11 @@ namespace Quest.Lib.Research.Job
                         var origPath = "";
                         var newPath = "";
 
-                        //if (index < 100)
-                        //{
+                        if (index < 100)
+                        {
                             origPath = MakePathFromRoadSpeedItems(mapmatchdata);
                             newPath = MakePathFromRoadSpeedItems(engineroute.Connections.Select(x=>x.Edge).ToList());
-                        //}
+                        }
 
                         file.WriteLine($"{route.IncidentRouteID},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\",{sx},{sy},{ex},{ey},{totalAngleDelta},{deg45c},{deg90c},{rc}");
                     }

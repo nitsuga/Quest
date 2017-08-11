@@ -30,7 +30,7 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                 {
                     CalculateRoutes(steps, parameters);
 
-                    var path = steps.GetViterbiPath(parameters);
+                    var path = steps.GetViterbiPath(parameters, removeUnroutables: false, onlyKeepBestFromPrevious: false);
                     var result = HmmUtil.BuildResponse(steps, path, parameters, request.Name);
                     result.IsSuccess = true;
                     result.Message = "Ok";

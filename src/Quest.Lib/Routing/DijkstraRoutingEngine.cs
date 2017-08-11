@@ -56,8 +56,8 @@ namespace Quest.Lib.Routing
                     Thread.Sleep(250);
 
                 if (request == null) throw new ArgumentNullException(nameof(request));
-                var watch = new Stopwatch();
-                watch.Start();
+                //var watch = new Stopwatch();
+                //watch.Start();
 
 
                 IRoadSpeedCalculator speedCalc = _scope.ResolveNamed<IRoadSpeedCalculator>(request.RoadSpeedCalculator);

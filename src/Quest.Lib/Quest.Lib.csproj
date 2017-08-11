@@ -733,6 +733,7 @@
     <Compile Include="Resource\ResourceStoreElastic.cs" />
     <Compile Include="Routing\RouteSet.cs" />
     <Compile Include="Routing\RoutingTest.cs" />
+    <Compile Include="Routing\Speeds\VariableSpeedByEdge2.cs" />
     <Compile Include="Search\IElasticIndexer.cs" />
     <Compile Include="Search\Elastic\IndexerManager.cs" />
     <Compile Include="Net\LfCodec.cs" />
@@ -824,7 +825,6 @@
     <Compile Include="Routing\Speeds\IRoadSpeedCalculator.cs" />
     <Compile Include="Routing\Speeds\SpeedDataMatrix.cs" />
     <Compile Include="Routing\Speeds\RoadTypeSpeedCalculator.cs" />
-    <Compile Include="Routing\Speeds\VariableSpeedByEdge.cs" />
     <Compile Include="Routing\Speeds\VariableSpeedHoD.cs" />
     <Compile Include="Search\Elastic\BatchIndexer.cs" />
     <Compile Include="Search\Elastic\BuildIndexSettings.cs" />

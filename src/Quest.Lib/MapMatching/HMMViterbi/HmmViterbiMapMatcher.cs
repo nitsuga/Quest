@@ -43,7 +43,7 @@ namespace Quest.Lib.MapMatching.HMMViterbi
                     CalculateRoutes(steps, i, parameters);
 
                     // calculate the viterbi 
-                    steps.CalculateViterbiAtStep(i+1, parameters);
+                    steps.CalculateViterbiAtStep(i+1, parameters, removeUnroutables: true, onlyKeepBestFromPrevious: true);
                 }
 
                 var path = steps.ExtractViterbiPath();

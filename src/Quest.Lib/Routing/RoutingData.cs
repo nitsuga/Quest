@@ -167,14 +167,14 @@ namespace Quest.Lib.Routing
 
             IList<RoadEdge> nearbyRoadsCourse = null;
 
-            var range = 50;
+            var range = 10;
             do
             {
                 var envelope = point.Buffer(range).EnvelopeInternal;
 
                 // get a block of nearest roads
                 nearbyRoadsCourse = ConnectionIndex.Query(envelope);
-                range += 50;
+                range += 10;
 
             } while ((nearbyRoadsCourse == null || nearbyRoadsCourse.Count == 0) && range <= 500);
 
