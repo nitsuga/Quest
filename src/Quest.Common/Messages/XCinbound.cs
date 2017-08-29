@@ -3,7 +3,7 @@
 namespace Quest.Common.Messages
 {
     [Serializable]
-    public class XCInbound
+    public class XCInbound : MessageBase
     {
         public XCInbound()
         {

@@ -47,7 +47,7 @@ namespace Quest.Lib.Resource
         protected override void OnStart()
         {
             Initialise();
-            Logger.Write("DeviceTracker initialised","Device");
+            Logger.Write("ResourceManager initialised", "Device");
         }
        
 

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
 using System.Data;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
 using System.Diagnostics;
-using MessageBroker.Objects;
 using Quest.Lib;
+using Quest.Common.Messages;
 
 namespace Quest.XC
 {

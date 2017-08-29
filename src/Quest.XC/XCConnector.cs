@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using QuestXC.Properties;
-using Microsoft.VisualBasic;
-using System.Collections;
-using System.Data;
 using System.Diagnostics;
 using System.Collections.Specialized;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
-using System.Data.SqlClient;
-using MessageBroker.Objects;
 using Quest.Lib.Utils;
 using Quest.Lib.Net;
+using Quest.Lib.Trace;
+using Quest.Lib.Processor;
+using Quest.Lib.Resource;
+using Quest.Lib.Incident;
+using Quest.Lib.Device;
+using Quest.Lib.Search.Elastic;
+using Quest.Lib.Notifier;
+using Quest.Common.ServiceBus;
+using Quest.Lib.ServiceBus;
+using Quest.Common.Messages;
+using Quest.Lib.Coords;
 
 namespace Quest.XC
 {
@@ -32,7 +34,7 @@ namespace Quest.XC
         double n { get; set; }
     }
 
-    public class XCConnector : IXCMessageParser
+    public class XCConnector : ServiceBusProcessor, IXCMessageParser
     {
         public enum StatusCode
         {
@@ -45,15 +47,15 @@ namespace Quest.XC
 
         public event System.EventHandler<DataEventArgs> IncomingData;
 
-        private System.Collections.Generic.Dictionary<string, int> _incformat = new System.Collections.Generic.Dictionary<string, int>();
-        private System.Collections.Generic.Dictionary<string, int> _resformat = new System.Collections.Generic.Dictionary<string, int>();
-        private System.Collections.Generic.Dictionary<string, int> _cliformat = new System.Collections.Generic.Dictionary<string, int>();
-        private System.Collections.Generic.Dictionary<string, int> _drformat = new System.Collections.Generic.Dictionary<string, int>();
-        private System.Collections.Generic.Dictionary<string, int> _rscformat = new System.Collections.Generic.Dictionary<string, int>();
+        private Dictionary<string, int> _incformat = new Dictionary<string, int>();
+        private Dictionary<string, int> _resformat = new Dictionary<string, int>();
+        private Dictionary<string, int> _cliformat = new Dictionary<string, int>();
+        private Dictionary<string, int> _drformat = new Dictionary<string, int>();
+        private Dictionary<string, int> _rscformat = new Dictionary<string, int>();
         
-        private System.Collections.Generic.Dictionary<string, MessageHandler> _handlers;
+        private Dictionary<string, XCMessageHandler> _handlers;
 
-        private delegate void MessageHandler(string[] parts);
+        private delegate void XCMessageHandler(string[] parts);
 
         private int _HBTReceiveDelay = 60;
         private int _HBTSendDelay = 30;
@@ -62,7 +64,6 @@ namespace Quest.XC
         private Thread worker;
         private string _name;
         private StatusCode _status = StatusCode.Disconnected;
-        private ChannelController _parent;
         private int _timeout = 3;
         private int _retries = 5;
         private String _subscriptions = "";
@@ -71,7 +72,39 @@ namespace Quest.XC
 
         private bool _isPrimary = false;
         private ManualResetEvent _quiting = new ManualResetEvent(false);
-        private MessageHelper _msgSource;
+
+        private ElasticSettings _elastic;
+        private BuildIndexSettings _config;
+        private DeviceHandler _deviceHandler;
+        private IDeviceStore _devStore;
+        private IResourceStore _resStore;
+        private IIncidentStore _incStore;
+        private NotificationSettings _notificationSettings = new NotificationSettings();
+
+        public XCConnector(
+            IDeviceStore devStore,
+            IResourceStore resStore,
+            IIncidentStore incStore,
+            DeviceHandler deviceHandler,
+            ElasticSettings elastic,
+            NotificationSettings notificationSettings,
+            IServiceBusClient serviceBusClient,
+            MessageHandler msgHandler,
+            TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
+        {
+            _devStore = devStore;
+            _resStore = resStore;
+            _incStore = incStore;
+            _elastic = elastic;
+            _deviceHandler = deviceHandler;
+            _notificationSettings = notificationSettings;
+        }
+
+        protected override void OnPrepare()
+        {
+            // create a list of actions associated with each object type arriving from the queue
+            MsgHandler.AddHandler("XCOutbound", XCOutboundHandler);
+        }
 
         /// <summary>
         /// initialise the channel
@@ -82,13 +115,9 @@ namespace Quest.XC
         /// <param name="port">target port</param>
         /// <param name="backupFor">act as backup for this channel</param>
         /// <param name="includeMessages">only process these messages</param>
-        public void Initialise(ChannelController parent, string name, MessageHelper msgSource)
+        public void Initialise()
         {
-            _msgSource = msgSource;
-            _msgSource.NewMessage += new EventHandler<MessageBroker.NewMessageArgs>(_msgSource_NewMessage);
-            _name = name;
-            _parent = parent;
-            _handlers = new System.Collections.Generic.Dictionary<string, MessageHandler>();
+            _handlers = new Dictionary<string, XCMessageHandler>();
 
             StringCollection codes = new StringCollection();
 
@@ -149,49 +178,35 @@ namespace Quest.XC
             SplitOut(ref _drformat, drformat);
             SplitOut(ref _rscformat, rscformat);
 
-            Logger.Write("Inc format is " + incformat, LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-            Logger.Write("Res format is " + resformat, LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-            Logger.Write("Cli format is " + cliformat, LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-            Logger.Write("Dr  format is " + drformat,  LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-            Logger.Write("Rsc format is " + rscformat, LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write("Inc format is " + incformat, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write("Res format is " + resformat, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write("Cli format is " + cliformat, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write("Dr  format is " + drformat,  TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write("Rsc format is " + rscformat, TraceEventType.Information, "Quest Channel " + _name);
         }
 
-        void _msgSource_NewMessage(object sender, MessageBroker.NewMessageArgs e)
+        private Response XCOutboundHandler(NewMessageArgs t)
         {
-            try
-            {
-                // message from Quest Processor to write to XC
-                XCOutbound instance1 = e.Payload as XCOutbound;
-                
-                // message from another XCReader 
-                XCInbound instance2 = e.Payload as XCInbound;
+            XCOutbound instance1 = t.Payload as XCOutbound;
 
-                if (instance1 != null && _channel != null)
+            if (instance1 != null && _channel != null)
+            {
+                // output to this channel?
+                if (instance1.channel.Split(',').Contains(_name))
                 {
-                    // output to this channel?
-                    if (instance1.channel.Split(',').Contains(_name))
-                    {
-                        Logger.Write(string.Format("XCOutbound {1} - sent {0}", instance1.command, _name), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-                        _channel.Send(instance1.command);
-                    }
-                }
-
-                if (instance2 != null)
-                { 
+                    Logger.Write(string.Format("XCOutbound {1} - sent {0}", instance1.command, _name), TraceEventType.Information, "Quest Channel " + _name);
+                    _channel.Send(instance1.command);
                 }
             }
-            catch (Exception ex)
-            {
-                if (ExceptionPolicy.HandleException(ex, LoggingPolicy.Policy.TracePolicy.ToString()))
-                    throw;
-            }
+            return null;
         }
 
-        /// <summary>
-        /// start the channel
-        /// </summary>
-        public void Start()
+        protected override void OnStart()
         {
+            Logger.Write("XC Connector initialised", "Device");
+
+            Initialise();
+
             worker = new Thread(new ThreadStart(Work));
             worker.IsBackground = true;
             worker.Name = "XC Worker - " + _name;
@@ -223,8 +238,6 @@ namespace Quest.XC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, LoggingPolicy.Policy.TracePolicy.ToString()))
-                    throw;
             }
         }
 
@@ -252,7 +265,7 @@ namespace Quest.XC
             // get connection settings.. these decide whether this is a server or client
             String connsettings = SettingsHelper.GetVariable( _name + ".Parameters", "");
 
-            _channel = ChannelFactory.MakeTCPchannel(connsettings);
+            _channel = ChannelFactory.MakeTcPchannel(connsettings);
             _channel.Data += new EventHandler<DataEventArgs>(connection_Data);
             _channel.ActionOnDisconnect = DisconnectAction.RaiseDisconnectEvent;
 
@@ -318,12 +331,13 @@ namespace Quest.XC
                         if (!_isPrimary)
                         {
                             // get the status of the primary from the parent                            
-                            _parent.Channels.TryGetValue(backupFor, out primary);
-                            if (primary == null)
-                            {
-                                Logger.Write(string.Format("Warning: No primary channel found called {0} that {1} is to act as backup for.", backupFor, _name), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-                                continue;
-                            }
+                            //TODO: 
+                            //_parent.Channels.TryGetValue(backupFor, out primary);
+                            //if (primary == null)
+                            //{
+                            //    Logger.Write(string.Format("Warning: No primary channel found called {0} that {1} is to act as backup for.", backupFor, _name), TraceEventType.Information, "Quest Channel " + _name);
+                            //    continue;
+                            //}
                         }
 
                         // did we get disconnected?
@@ -441,29 +455,25 @@ namespace Quest.XC
                     }
                     catch (Exception ex2)
                     {
-                        if (ExceptionPolicy.HandleException(ex2, LoggingPolicy.Policy.TracePolicy.ToString()))
-                            throw;
                     }
                 }
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, LoggingPolicy.Policy.TracePolicy.ToString()))
-                    throw;
             }
         }
 
         void ChangeStatus(String reason, StatusCode newStatus)
         {
-            Logger.Write(reason, LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write(reason, TraceEventType.Information, "Quest Channel " + _name);
             Status = newStatus;
             ServiceStatus status = new ServiceStatus() { Instance = _name, ServiceName = "Quest", Status = Status.ToString(), Reason = reason, Server = System.Net.Dns.GetHostName() };
-            _msgSource.BroadcastMessage(status);
+            base.ServiceBusClient.Broadcast(status);
         }
 
         void connection_Disconnected(object sender, DisconnectedEventArgs e)
         {
-            Logger.Write(string.Format("Got disconnected"), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write(string.Format("Got disconnected"), TraceEventType.Information, "Quest Channel " + _name);
             Disconnect();
             Status = StatusCode.Disconnected;
         }
@@ -484,14 +494,14 @@ namespace Quest.XC
 
             XCInbound data = new XCInbound(e.Data, _name);
 
-            _msgSource.BroadcastMessage(data);
+            base.ServiceBusClient.Broadcast(data);
         }
 
-        private void SplitOut(ref System.Collections.Generic.Dictionary<string, int> target, string source)
+        private void SplitOut(ref Dictionary<string, int> target, string source)
         {
             string[] parts = source.Split('|');
             int i = 0;
-            target = new System.Collections.Generic.Dictionary<string, int>();
+            target = new Dictionary<string, int>();
             foreach (string p in parts)
             {
                 if (!target.ContainsKey(p))
@@ -509,7 +519,7 @@ namespace Quest.XC
                 if (parts.Length < 3)
                     return;
 
-                MessageHandler f = null;
+                XCMessageHandler f = null;
 
                 _handlers.TryGetValue(parts[3], out f);
 
@@ -520,12 +530,12 @@ namespace Quest.XC
 
                 if (Status != StatusCode.Active)
                 {
-                    Logger.Write(string.Format("{0} (ignored): {1}", Status, message), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                    Logger.Write(string.Format("{0} (ignored): {1}", Status, message), TraceEventType.Information, "Quest Channel " + _name);
                     return;
                 }
                 else
                 {
-                    Logger.Write(string.Format("{0} : {1}", Status, message), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                    Logger.Write(string.Format("{0} : {1}", Status, message), TraceEventType.Information, "Quest Channel " + _name);
                 }
 
                 if (f != null)
@@ -536,28 +546,26 @@ namespace Quest.XC
                     {
                         try
                         {
-                            Logger.Write(string.Format("Processing: #{0} {1}", i, message), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                            Logger.Write(string.Format("Processing: #{0} {1}", i, message), TraceEventType.Information, "Quest Channel " + _name);
                             f(parts);
                             break;
                         }
                         catch (Exception e)
                         {
-                            Logger.Write(string.Format("#{0} {1}", i, e.ToString()), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                            Logger.Write(string.Format("#{0} {1}", i, e.ToString()), TraceEventType.Information, "Quest Channel " + _name);
                             failed = true;
                         }
                     }
                     if (failed)
-                        Logger.Write(string.Format("Exit @ try #{0}/{1}", i, _retries), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                        Logger.Write(string.Format("Exit @ try #{0}/{1}", i, _retries), TraceEventType.Information, "Quest Channel " + _name);
 
                 }
                 else
-                    Logger.Write(string.Format("Ignoring  : {0}", message), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+                    Logger.Write(string.Format("Ignoring  : {0}", message), TraceEventType.Information, "Quest Channel " + _name);
 
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, LoggingPolicy.Policy.TracePolicy.ToString()))
-                    throw;
             }
 
         }
@@ -574,15 +582,15 @@ namespace Quest.XC
         private void OSBHandler(string[] parts)
         {
             // subscribe to messages
-            Logger.Write(string.Format("Requesting subscription: " + _subscriptions), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write(string.Format("Requesting subscription: " + _subscriptions), TraceEventType.Information, "Quest Channel " + _name);
             _channel.Send("0|||STM|" + _subscriptions);
 
-            Logger.Write(string.Format("Resetting current status"), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write(string.Format("Resetting current status"), TraceEventType.Information, "Quest Channel " + _name);
 
             BeginDump update = new BeginDump();
-            _msgSource.BroadcastMessage(update);
+            base.ServiceBusClient.Broadcast(update);
 
-            Logger.Write(string.Format("Reset complete"), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
+            Logger.Write(string.Format("Reset complete"), TraceEventType.Information, "Quest Channel " + _name);
 
         }
 
@@ -590,7 +598,7 @@ namespace Quest.XC
         private void DRHandler(string[] parts)
         {
             DeleteResource update = new DeleteResource() { Callsign = GetValueString("Callsign", _resformat, parts) };
-            _msgSource.BroadcastMessage(update);
+            base.ServiceBusClient.Broadcast(update);
         }
 
         private void RSCHandler(string[] parts)
@@ -606,7 +614,7 @@ namespace Quest.XC
                 DateTime logoff = new DateTime(n[0], n[1], n[2], n[3], n[4], n[5]);
 
                 ResourceLogon update = new ResourceLogon() { Callsign = callsign, Logoff = logoff, Logon=DateTime.Now };
-                _msgSource.BroadcastMessage(update);
+                base.ServiceBusClient.Broadcast(update);
             }
         }
 
@@ -623,7 +631,7 @@ namespace Quest.XC
             }
 
             CloseIncident update = new CloseIncident() { Serial = serial };
-            _msgSource.BroadcastMessage(update);
+            base.ServiceBusClient.Broadcast(update);
 
         }
 
@@ -640,36 +648,31 @@ namespace Quest.XC
                 serial = Makeserial(o.ToString());
             }
 
-            String pos = GetPositionGeometry(_resformat, parts);
-
-            // valid ?
-            if (pos == "")
-            {
-                Logger.Write(string.Format("Resource had invalid E/N - ignored"), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-                return;
-            }
+            var pos = GetPosition(_resformat, parts);
 
             ResourceUpdate update = new ResourceUpdate()
-                {
-                    Callsign = GetValueString("Callsign", _resformat, parts),
-                    ResourceType = GetValueString("ResourceType", _resformat, parts),
-                    Status = GetValueString("Status", _resformat, parts),
-                    Geometry = pos,
-                    Speed = GetValueInt("Speed", _resformat, parts),
-                    Direction = GetValueString("Direction", _resformat, parts),
-                    Skill = GetValueString("Skill", _resformat, parts),
-                    LastUpdate = GetValueDate("LastUpdate", _resformat, parts),
-                    FleetNo = GetValueInt("FleetNo", _resformat, parts),
-                    Sector = GetValueString("Sector", _resformat, parts),
-                    Incident = GetValueString("Incident", _resformat, parts),
-                    Emergency = GetValueString("Emergency", _resformat, parts),
-                    Destination = GetValueString("Destination", _resformat, parts),
-                    Agency = GetValueString("Agency", _resformat, parts),
-                    Class = GetValueString("Class", _resformat, parts),
-                    EventType = GetValueString("EventType", _resformat, parts)
-                };
+            {
+                Callsign = GetValueString("Callsign", _resformat, parts),
+                ResourceType = GetValueString("ResourceType", _resformat, parts),
+                Status = GetValueString("Status", _resformat, parts),
+                Latitude = pos.Latitude,
+                Longitude = pos.Longitude,
+                Speed = GetValueInt("Speed", _resformat, parts),
+                Direction = GetValueInt("Direction", _resformat, parts),
+                Skill = GetValueString("Skill", _resformat, parts),
+                //LastUpdate = GetValueDate("LastUpdate", _resformat, parts),
+                FleetNo = GetValueInt("FleetNo", _resformat, parts),
+                //Sector = GetValueString("Sector", _resformat, parts),
+                Incident = GetValueString("Incident", _resformat, parts),
+                Emergency = GetValueBool("Emergency", _resformat, parts),
+                Destination = GetValueString("Destination", _resformat, parts),
+                Agency = GetValueString("Agency", _resformat, parts),
+                Class = GetValueString("Class", _resformat, parts),
+                EventType = GetValueString("EventType", _resformat, parts),
+                UpdateTime = DateTime.UtcNow, 
+            };
 
-            _msgSource.BroadcastMessage(update);
+            base.ServiceBusClient.Broadcast(update);
 
         }
 
@@ -686,20 +689,14 @@ namespace Quest.XC
                 return;
             }
 
-            String pos = GetPositionGeometry(_incformat, parts);
-
-            // valid ?
-            if (pos == "")
-            {
-                Logger.Write(string.Format("Incident had invalid E/N - ignored"), LoggingPolicy.Category.Trace.ToString(), 0, 0, TraceEventType.Information, "Quest Channel " + _name);
-                return;
-            }
+            var pos = GetPosition(_incformat, parts);
 
             IncidentUpdate update = new IncidentUpdate()
             {
                 Serial = GetValueString("Serial", _incformat, parts),
                 Status = GetValueString("Status", _incformat, parts),
-                Geometry = pos,
+                Latitude = pos.Latitude,
+                Longitude = pos.Longitude,
                 IncidentType = GetValueString("IncidentType", _incformat, parts),
                 Complaint = GetValueString("Complaint", _incformat, parts),
                 Determinant = GetValueString("Determinant", _incformat, parts),
@@ -709,7 +706,7 @@ namespace Quest.XC
                 Description = GetValueString("Description", _incformat, parts),
             };
 
-            _msgSource.BroadcastMessage(update);
+            base.ServiceBusClient.Broadcast(update);
         }
 
         private string Makeserial(string serial)
@@ -751,7 +748,7 @@ namespace Quest.XC
         /// <param name="dict"></param>
         /// <param name="parts"></param>
         /// <returns></returns>
-        private string GetPositionGeometry(System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private string GetPositionGeometry(Dictionary<string, int> dict, string[] parts)
         {
             int eastingordinal = -1;
             int northingordinal = -1;
@@ -779,7 +776,38 @@ namespace Quest.XC
             }
         }
 
-        private int GetValueInt(string field, System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private LatLng GetPosition(Dictionary<string, int> dict, string[] parts)
+        {
+            int eastingordinal = -1;
+            int northingordinal = -1;
+            dict.TryGetValue("easting", out eastingordinal);
+            dict.TryGetValue("northing", out northingordinal);
+            if (eastingordinal != -1 & northingordinal != -1)
+            {
+                String e = parts[eastingordinal];
+                String n = parts[northingordinal];
+
+                double ev = 0;
+                double nv = 0;
+
+                double.TryParse(e, out ev);
+                double.TryParse(n, out nv);
+
+                if (ev == 0 || nv == 0)
+                    return new LatLng(0, 0);
+                else
+                {
+                    var ll = LatLongConverter.OSRefToWGS84(ev, nv);
+                    return ll;
+                }
+            }
+            else
+            {
+                return new LatLng(0, 0);
+            }
+        }
+
+        private int GetValueInt(string field, Dictionary<string, int> dict, string[] parts)
         {
             object o = GetValue(field, dict, parts);
             int i = 0;
@@ -787,13 +815,13 @@ namespace Quest.XC
             return i;
         }
 
-        private String GetValueString(string field, System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private String GetValueString(string field, Dictionary<string, int> dict, string[] parts)
         {
             object o = GetValue(field, dict, parts);
             return o.ToString();
         }
 
-        private DateTime GetValueDate(string field, System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private DateTime GetValueDate(string field, Dictionary<string, int> dict, string[] parts)
         {
             object o = GetValue(field, dict, parts);
             DateTime k = DateTime.Now;
@@ -801,7 +829,7 @@ namespace Quest.XC
             return k;
         }
 
-        private bool GetValueBool(string field, System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private bool GetValueBool(string field, Dictionary<string, int> dict, string[] parts)
         {
             object o = GetValue(field, dict, parts);
             bool j = false;
@@ -809,7 +837,7 @@ namespace Quest.XC
             return j;
         }
 
-        private object GetValue(string field, System.Collections.Generic.Dictionary<string, int> dict, string[] parts)
+        private object GetValue(string field, Dictionary<string, int> dict, string[] parts)
         {
             //' try and find out which column the value is in
             int ordinal = -1;

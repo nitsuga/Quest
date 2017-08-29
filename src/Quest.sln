@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.15
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.Lib", "Quest.Lib\Quest.Lib.csproj", "{68E95B32-4B37-48F3-8560-9E063F527B13}"
 EndProject
@@ -46,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.Lib.Simulation", "Quest.Lib.Simulation\Quest.Lib.Simulation.csproj", "{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}"
 EndProject
 Project("{DA7A21FA-8162-4350-AD77-A8D1B671F3ED}") = "Quest.R", "Quest.R\Quest.R.rxproj", "{F9D90E34-27EA-47BF-B166-4487D4735670}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.XC", "Quest.XC\Quest.XC.csproj", "{57C6FA37-9D5E-4511-BF29-616A873AA1D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -301,6 +303,30 @@ Global
 		{F9D90E34-27EA-47BF-B166-4487D4735670}.Release|x64.Build.0 = Release|Any CPU
 		{F9D90E34-27EA-47BF-B166-4487D4735670}.Release|x86.ActiveCfg = Release|Any CPU
 		{F9D90E34-27EA-47BF-B166-4487D4735670}.Release|x86.Build.0 = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|ARM.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|x64.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Debug|x86.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|Any CPU.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|ARM.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|ARM.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|x64.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|x64.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|x86.ActiveCfg = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Docker|x86.Build.0 = Debug|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|ARM.ActiveCfg = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|ARM.Build.0 = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|x64.ActiveCfg = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|x64.Build.0 = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|x86.ActiveCfg = Release|Any CPU
+		{57C6FA37-9D5E-4511-BF29-616A873AA1D1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -313,5 +339,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
+		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
 	EndGlobalSection
 EndGlobal

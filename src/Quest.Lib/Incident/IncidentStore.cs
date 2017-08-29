@@ -36,8 +36,8 @@ namespace Quest.Lib.Incident
                 dbinc.Status = item.Status;
                 dbinc.IncidentType = item.IncidentType;
                 dbinc.Complaint = item.Complaint;
-                dbinc.Longitude = item.Longitude;
-                dbinc.Latitude = item.Latitude;
+                dbinc.Longitude = (float)item.Longitude;
+                dbinc.Latitude = (float)item.Latitude;
                 dbinc.Determinant = item.Determinant;
                 dbinc.Location = item.Location;
                 dbinc.Priority = item.Priority;

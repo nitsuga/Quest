@@ -19,7 +19,7 @@ namespace Quest.Common.Messages
     /// A resource update has been received from CAD
     /// </summary>
     [Serializable]
-    public class ResourceUpdate : Request
+    public class ResourceUpdate : MessageBase
     {
         public string Session;
         public string Callsign;

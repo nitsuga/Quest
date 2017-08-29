@@ -8,6 +8,7 @@ using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
 using System.Diagnostics;
 using Quest.Lib.Utils;
 using Quest.Lib;
+using Quest.Lib.Trace;
 
 namespace Quest.XC
 {
@@ -22,7 +23,6 @@ namespace Quest.XC
         private int _retries;
         private String _channel="Msg";
         private System.Timers.Timer _timer = new System.Timers.Timer(5000);
-        private MessageHelper msgSource;
 
         public void Initialise(String QueueName)
         {

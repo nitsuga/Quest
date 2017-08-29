@@ -42,8 +42,8 @@ namespace Quest.Common.Messages
         
         public string Sector ;
         public string Description;
-        public float? Latitude = 0;
-        public float? Longitude = 0;
+        public double? Latitude = 0;
+        public double? Longitude = 0;
         public DateTime UpdateTime;
         public string UpdateType;
 
