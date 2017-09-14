@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
 using Quest.Common.Messages;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.ServiceBus;
@@ -286,9 +285,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
 
             return new EisecResponse(ReturnCode.Exception);

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Quest.Lib.Trace;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Practices.EnterpriseLibrary.Common.Utility;
-using Quest.Lib.Trace;
 
 namespace Quest.Lib.Search.Elastic
 {
@@ -50,11 +49,11 @@ namespace Quest.Lib.Search.Elastic
 
             while (alltasks.Count > 0)
             {
-                var subtasks = alltasks.Take(concurrentBatches).ToArray();
+                var subtasks = alltasks.Take(concurrentBatches).ToList();
                 subtasks.ForEach(x => { x.Start(); });
 
                 // wait for task to compete
-                Task.WaitAll(subtasks);
+                Task.WaitAll(subtasks.ToArray());
 
                 // remove completed tasks from the list
                 subtasks.ForEach(x => alltasks.Remove(x));

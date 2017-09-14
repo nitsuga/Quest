@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Practices.EnterpriseLibrary.ExceptionHandling;
 using Quest.Common.Messages;
 using Quest.Lib.Net;
 
@@ -153,9 +152,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
 
             return new EisecResponse(ReturnCode.Exception);
@@ -178,9 +174,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
 
             return new EisecResponse(ReturnCode.Exception);
@@ -508,9 +501,6 @@ namespace Quest.Lib.EISEC
 
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
 
             return new EisecResponse(ReturnCode.Exception);
@@ -553,9 +543,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
 
             return new EisecResponse(ReturnCode.Exception);
@@ -579,9 +566,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                // Standard application exeption handling
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                    throw;
             }
             return new EisecResponse(ReturnCode.Exception);
         }
@@ -625,10 +609,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -647,10 +627,6 @@ namespace Quest.Lib.EISEC
                 }
                 catch (Exception ex1)
                 {
-                    if (ExceptionPolicy.HandleException(ex1, "TRACE"))
-                    {
-                        throw;
-                    }
                 }
 
                 _logger($"Grace logon - {reject.GraceLogons} left");
@@ -663,10 +639,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -703,10 +675,6 @@ namespace Quest.Lib.EISEC
                 }
                 catch (Exception ex1)
                 {
-                    if (ExceptionPolicy.HandleException(ex1, "TRACE"))
-                    {
-                        throw;
-                    }
                 }
 
                 // signal completion of this command
@@ -715,10 +683,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -738,10 +702,6 @@ namespace Quest.Lib.EISEC
                 }
                 catch (Exception ex1)
                 {
-                    if (ExceptionPolicy.HandleException(ex1, "TRACE"))
-                    {
-                        throw;
-                    }
                 }
 
                 // signal completion of this command
@@ -750,10 +710,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -788,10 +744,6 @@ namespace Quest.Lib.EISEC
                 }
                 catch (Exception ex1)
                 {
-                    if (ExceptionPolicy.HandleException(ex1, "TRACE"))
-                    {
-                        throw;
-                    }
                 }
 
                 // signal completion of this command
@@ -800,10 +752,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -821,8 +769,6 @@ namespace Quest.Lib.EISEC
                 var addrResp = new EisecAddressQueryResp();
                 int reqNo;
 
-                try
-                {
                     addrResp.Deserialize(response);
                     reqNo = addrResp.Request;
 
@@ -830,21 +776,9 @@ namespace Quest.Lib.EISEC
 
                     // remember the address found and store it with the request
                     _parent.SetAddress(reqNo, addrResp.Details);
-                }
-                catch (Exception ex1)
-                {
-                    if (ExceptionPolicy.HandleException(ex1, "TRACE"))
-                    {
-                        throw;
-                    }
-                }
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -872,10 +806,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 
@@ -903,10 +833,6 @@ namespace Quest.Lib.EISEC
             }
             catch (Exception ex)
             {
-                if (ExceptionPolicy.HandleException(ex, "TRACE"))
-                {
-                    throw;
-                }
             }
         }
 

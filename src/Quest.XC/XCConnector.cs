@@ -236,7 +236,7 @@ namespace Quest.XC
                 Status = XCConnector.StatusCode.Disconnected;
 
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -453,12 +453,12 @@ namespace Quest.XC
 
 
                     }
-                    catch (Exception ex2)
+                    catch 
                     {
                     }
                 }
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -564,7 +564,7 @@ namespace Quest.XC
                     Logger.Write(string.Format("Ignoring  : {0}", message), TraceEventType.Information, "Quest Channel " + _name);
 
             }
-            catch (Exception ex)
+            catch 
             {
             }
 

@@ -1,14 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Quest.Common.Messages;
-using Quest.Lib.Trace;
 using Quest.Mobile.Models;
 using Quest.Mobile.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 
 namespace Quest.Mobile.Controllers

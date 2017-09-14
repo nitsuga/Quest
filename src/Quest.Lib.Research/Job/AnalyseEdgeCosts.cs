@@ -277,10 +277,6 @@ namespace Quest.Lib.Research.Job
                         var deg60c_l = 0;
                         var deg90c_l = 0;
 
-                        var deg45_r = Math.PI / 4;
-                        var deg60_r = Math.PI / 3;
-                        var deg90_r = Math.PI / 2;
-
                         var deg45c_r = 0;
                         var deg60c_r = 0;
                         var deg90c_r = 0;

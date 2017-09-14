@@ -1,6 +1,5 @@
 ﻿#pragma warning disable 0169,649
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Newtonsoft.Json;
@@ -11,7 +10,6 @@ using System.Data.Spatial;
 #endif
 using Quest.Mobile.Attributes;
 using Quest.Common.Messages;
-using System.Diagnostics;
 using System.Web.Script.Serialization;
 #if OAUTH
 using Microsoft.AspNet.Identity;

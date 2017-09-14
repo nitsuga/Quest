@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using System;
+﻿using System;
 
 namespace Quest.Common.Messages
 {

@@ -3,17 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.ServiceModel;
 using www.aspect.com.unifiedip.edk.clientpublishapi._2009._08;
 using www.aspect.com.unifiedip.edk.commondata._2009._08;
 
 namespace Quest.Lib.Telephony.AspectCTIPS
 {
-    
-    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
-                     ConcurrencyMode = ConcurrencyMode.Multiple,
-                     IncludeExceptionDetailInFaults = true)]
-
     public class CTIEventHandler : CTIEventService
     {
         public event System.EventHandler HeartbeatEvent;

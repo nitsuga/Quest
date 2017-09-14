@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.Practices.EnterpriseLibrary.Common.Utility;
 using Quest.Lib.DataModel;
 using Quest.Lib.OS.Model;
 using Quest.Lib.Trace;
@@ -454,11 +453,11 @@ namespace Quest.Lib.OS.Routing.ITN
 
             while (alltasks.Count > 0)
             {
-                var subtasks = alltasks.Take(concurrentBatches).ToArray();
+                var subtasks = alltasks.Take(concurrentBatches).ToList();
                 subtasks.ForEach(x => { x.Start(); });
 
                 // wait for task to compete
-                Task.WaitAll(subtasks);
+                Task.WaitAll(subtasks.ToArray());
 
                 // remove completed tasks from the list
                 subtasks.ForEach(x => alltasks.Remove(x));

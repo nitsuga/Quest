@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.ServiceModel;
 using www.aspect.com.unifiedip.edk.ctipsapi._2009._08;
 using www.aspect.com.unifiedip.edk.commondata._2009._08;
 using System.Timers;

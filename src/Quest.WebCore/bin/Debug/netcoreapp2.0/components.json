@@ -1,0 +1,36 @@
+{
+  "Name": "Web",
+  "defaultAssembly": "Quest.Lib",
+  "components": [
+    {
+      "type": "Quest.Lib.ServiceBus.MessageHandler",
+      "injectProperties": true,
+      "instanceScope": "per-dependency"
+    },
+    {
+      "type": "Quest.Lib.ServiceBus.ActiveMqClient",
+      "services": [
+        {
+          "type": "Quest.Common.ServiceBus.IServiceBusClient,Quest.Common"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "per-dependency",
+      "properties": {
+        "server": "activemq:tcp://127.0.0.1:61616?jms.useAsyncSend=true",
+        "format": "json",
+        "topic": "quest.common",
+        "TTL": 10,
+        "Persistent": false
+      }
+    },
+    {
+      "type": "Quest.WebCore.ProcessRunner,Quest.WebCore",
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "parameters": {
+      }
+    }
+
+  ]
+}

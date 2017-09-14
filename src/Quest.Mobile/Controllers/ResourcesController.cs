@@ -1,11 +1,6 @@
 ﻿using Quest.Common.Messages;
 using Quest.Mobile.Models;
 using Quest.Mobile.Service;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 
 namespace Quest.Mobile.Controllers

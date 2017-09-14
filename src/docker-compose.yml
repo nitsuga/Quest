@@ -1,14 +1,10 @@
-version: '2'
+version: '3'
 
 services:
-  quest.webcore:
-    image: quest.webcore
+  quest.core:
+    image: quest.core
     build:
-      context: ./Quest.WebCore
+      context: ./Quest.Core
       dockerfile: Dockerfile
-
-  quest.cmd:
-    image: quest.cmd
-    build:
-      context: ./Quest.Cmd
-      dockerfile: Dockerfile
+    command: ["-exec=SearchManager","-components=components.json"]
+       

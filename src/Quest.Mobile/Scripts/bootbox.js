@@ -1,5 +1,5 @@
 /**
- * bootbox.js [v4.4.0]
+ * bootbox.js [master branch]
  *
  * http://bootboxjs.com/license.txt
  */
@@ -16,7 +16,13 @@
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
-    module.exports = factory(require("jquery"));
+
+    if (typeof $ === "undefined") {
+      module.exports = factory(require("jquery"));
+    } else {
+      module.exports = factory($); // jshint ignore:line
+    }
+
   } else {
     // Browser globals (root is window)
     root.bootbox = factory(root.jQuery);
@@ -29,7 +35,7 @@
   // the base DOM structure needed to create a modal
   var templates = {
     dialog:
-      "<div class='bootbox modal' tabindex='-1' role='dialog'>" +
+      "<div class='bootbox modal' tabindex='-1' role='dialog' aria-hidden='true'>" +
         "<div class='modal-dialog'>" +
           "<div class='modal-content'>" +
             "<div class='modal-body'><div class='bootbox-body'></div></div>" +
@@ -43,7 +49,7 @@
     footer:
       "<div class='modal-footer'></div>",
     closeButton:
-      "<button type='button' class='bootbox-close-button close' data-dismiss='modal' aria-hidden='true'>&times;</button>",
+      "<button type='button' class='bootbox-close-button close' aria-hidden='true'>&times;</button>",
     form:
       "<form class='bootbox-form'></form>",
     inputs: {
@@ -113,8 +119,13 @@
     }
   }
 
+  // Bootstrap 3.x supports back to IE8 on Windows (http://getbootstrap.com/getting-started/#support)
+  // so unfortunately we can't just get away with assuming Object.keys exists
   function getKeyLength(obj) {
-    // @TODO defer to Object.keys(x).length if available?
+    if (Object.keys) {
+      return Object.keys(obj).length;
+    }
+
     var k, t = 0;
     for (k in obj) {
       t ++;
@@ -122,6 +133,7 @@
     return t;
   }
 
+  // tiny wrapper function around jQuery.each; just adds index as the third parameter
   function each(collection, iterator) {
     var index = 0;
     $.each(collection, function(key, value) {
@@ -129,6 +141,11 @@
     });
   }
 
+  /**
+   * Filter and tidy up any user supplied parameters to this dialog.
+   * Also looks for any shorthands used and ensures that the options
+   * which are returned are all normalized properly
+   */
   function sanitize(options) {
     var buttons;
     var total;
@@ -144,6 +161,8 @@
     // make sure any supplied options take precedence over defaults
     options = $.extend({}, defaults, options);
 
+    // no buttons is still a valid dialog but it's cleaner  toalways have
+    // a buttons object to iterate over, even if it's empty
     if (!options.buttons) {
       options.buttons = {};
     }
@@ -153,6 +172,7 @@
     total = getKeyLength(buttons);
 
     each(buttons, function(key, button, index) {
+      var isLast = index === total-1;
 
       if ($.isFunction(button)) {
         // short form, assume value is our callback. Since button
@@ -173,8 +193,8 @@
       }
 
       if (!button.className) {
-        if (total <= 2 && index === total-1) {
-          // always add a primary to the main option in a two-button dialog
+        if (total <= 2 && isLast) {
+          // always add a primary to the main option in a one or two-button dialog
           button.className = "btn-primary";
         } else {
           button.className = "btn-default";
@@ -260,7 +280,7 @@
   /**
    * from a given list of arguments return a suitable object of button labels
    * all this does is normalise the given labels and translate them where possible
-   * e.g. "ok", "confirm" -> { ok: "OK, cancel: "Annuleren" }
+   * e.g. "ok", "confirm" -> { ok: "OK", cancel: "Annuleren" }
    */
   function createLabels() {
     var buttons = {};
@@ -298,12 +318,15 @@
 
     options = mergeDialogOptions("alert", ["ok"], ["message", "callback"], arguments);
 
+    // @TODO: can this move inside exports.dialog when we're iterating over each
+    // button and checking its button.callback value instead?
     if (options.callback && !$.isFunction(options.callback)) {
       throw new Error("alert requires callback property to be a function when provided");
     }
 
     /**
-     * overrides
+     * override the ok and escape callback to make sure they just invoke
+     * the single user-supplied one (if provided)
      */
     options.buttons.ok.callback = options.onEscape = function() {
       if ($.isFunction(options.callback)) {
@@ -320,6 +343,12 @@
 
     options = mergeDialogOptions("confirm", ["cancel", "confirm"], ["message", "callback"], arguments);
 
+    // confirm specific validation; they don't make sense without a callback so make
+    // sure it's present
+    if (!$.isFunction(options.callback)) {
+      throw new Error("confirm requires a callback");
+    }
+
     /**
      * overrides; undo anything the user tried to set they shouldn't have
      */
@@ -330,11 +359,6 @@
     options.buttons.confirm.callback = function() {
       return options.callback.call(this, true);
     };
-
-    // confirm specific validation
-    if (!$.isFunction(options.callback)) {
-      throw new Error("confirm requires a callback");
-    }
 
     return exports.dialog(options);
   };
@@ -388,29 +412,12 @@
     options.buttons.confirm.callback = function() {
       var value;
 
-      switch (options.inputType) {
-        case "text":
-        case "textarea":
-        case "email":
-        case "select":
-        case "date":
-        case "time":
-        case "number":
-        case "password":
-          value = input.val();
-          break;
-
-        case "checkbox":
-          var checkedItems = input.find("input:checked");
-
-          // we assume that checkboxes are always multiple,
-          // hence we default to an empty array
-          value = [];
-
-          each(checkedItems, function(_, item) {
-            value.push($(item).val());
-          });
-          break;
+      if (options.inputType === "checkbox") {
+        value = input.find("input:checked").map(function() {
+          return $(this).val();
+        }).get();
+      } else {
+        value = input.val();
       }
 
       return options.callback.call(this, value);
@@ -463,7 +470,7 @@
           var elem = input;
 
           if (option.value === undefined || option.text === undefined) {
-            throw new Error("given options in wrong format");
+            throw new Error("each option needs a `value` and a `text` property");
           }
 
           // ... but override that element if this option sits in a group
@@ -497,7 +504,7 @@
         }
 
         if (!inputOptions[0].value || !inputOptions[0].text) {
-          throw new Error("given options in wrong format");
+          throw new Error("each option needs a `value` and a `text` property");
         }
 
         // checkboxes have to nest within a containing element, so
@@ -623,7 +630,7 @@
       if (options.title) {
         dialog.find(".modal-header").prepend(closeButton);
       } else {
-        closeButton.css("margin-top", "-10px").prependTo(body);
+        closeButton.css("margin-top", "-2px").prependTo(body);
       }
     }
 
@@ -638,12 +645,18 @@
 
 
     /**
-     * Bootstrap event listeners; used handle extra
+     * Bootstrap event listeners; these handle extra
      * setup & teardown required after the underlying
      * modal has performed certain actions
      */
 
-    dialog.on("hidden.bs.modal", function(e) {
+    // make sure we unbind any listeners once the dialog has definitively been dismissed
+    dialog.one("hide.bs.modal", function() {
+      dialog.off("escape.close.bb");
+      dialog.off("click");
+    });
+
+    dialog.one("hidden.bs.modal", function(e) {
       // ensure we don't accidentally intercept hidden events triggered
       // by children of the current dialog. We shouldn't anymore now BS
       // namespaces its events; but still worth doing
@@ -663,14 +676,13 @@
     });
     */
 
-    dialog.on("shown.bs.modal", function() {
+    dialog.one("shown.bs.modal", function() {
       dialog.find(".btn-primary:first").focus();
     });
 
     /**
-     * Bootbox event listeners; experimental and may not last
-     * just an attempt to decouple some behaviours from their
-     * respective triggers
+     * Bootbox event listeners; used to decouple some
+     * behaviours from their respective triggers
      */
 
     if (options.backdrop !== "static") {
@@ -698,6 +710,9 @@
     }
 
     dialog.on("escape.close.bb", function(e) {
+      // the if statement looks redundant but it isn't; without it
+      // if we *didn't* have an onEscape handler then processCallback
+      // would automatically dismiss the dialog
       if (callbacks.onEscape) {
         processCallback(e, dialog, callbacks.onEscape);
       }
@@ -794,6 +809,11 @@
    * unlikely to be required. If this gets too large it can be split out into separate JS files.
    */
   var locales = {
+    ar : {
+      OK      : "موافق",
+      CANCEL  : "الغاء",
+      CONFIRM : "تأكيد"
+    },
     bg_BG : {
       OK      : "Ок",
       CANCEL  : "Отказ",
@@ -834,6 +854,11 @@
       CANCEL  : "Cancelar",
       CONFIRM : "Aceptar"
     },
+    eu : {
+      OK      : "OK",
+      CANCEL  : "Ezeztatu",
+      CONFIRM : "Onartu"
+    },
     et : {
       OK      : "OK",
       CANCEL  : "Katkesta",
@@ -852,7 +877,7 @@
     fr : {
       OK      : "OK",
       CANCEL  : "Annuler",
-      CONFIRM : "D'accord"
+      CONFIRM : "Confirmer"
     },
     he : {
       OK      : "אישור",
@@ -919,6 +944,16 @@
       CANCEL  : "Отмена",
       CONFIRM : "Применить"
     },
+    sk : {
+      OK      : "OK",
+      CANCEL  : "Zrušiť",
+      CONFIRM : "Potvrdiť"
+    },
+    sl : {
+      OK : "OK",
+      CANCEL : "Prekliči",
+      CONFIRM : "Potrdi"
+    },
     sq : {
       OK : "OK",
       CANCEL : "Anulo",
@@ -938,6 +973,11 @@
       OK      : "Tamam",
       CANCEL  : "İptal",
       CONFIRM : "Onayla"
+    },
+    uk : {
+      OK      : "OK",
+      CANCEL  : "Відміна",
+      CONFIRM : "Прийняти"
     },
     zh_CN : {
       OK      : "OK",
