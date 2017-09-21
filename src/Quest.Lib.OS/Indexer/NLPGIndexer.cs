@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Nest;
@@ -8,7 +7,7 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
-using Quest.Lib.OS.Model;
+using Quest.Lib.OS.DataModelNLPG;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -25,17 +24,14 @@ namespace Quest.Lib.OS.Indexer
 
         private void Build(BuildIndexSettings config)
         {
-            using (var db = new QuestNLPGEntities())
+            using (var db = new QuestNLPGContext())
             {
-                db.Configuration.ProxyCreationEnabled = false;
 
                 Logger.Write($"{GetType().Name}: Counting records..", GetType().Name);
 
-                ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 360;
-
                 // figure out batch sizes
-                var startRecord = db.NLPGs.Min(x => x.Id);
-                var stopRecord = db.NLPGs.Max(x => x.Id);
+                var startRecord = db.Nlpg.Min(x => x.Id);
+                var stopRecord = db.Nlpg.Max(x => x.Id);
                 var total = stopRecord - startRecord;
 
                 int estimatedRecordSize = 512;
@@ -46,7 +42,7 @@ namespace Quest.Lib.OS.Indexer
                 long batchSize = recordsPerPacket;
                 int concurrentBatches = 4;
 
-                config.RecordsTotal = db.NLPGs.Select(x=>x.Id).Count();
+                config.RecordsTotal = db.Nlpg.Select(x=>x.Id).Count();
                 //config.Logfrequency = recordsPerPacket;
 
                 BatchIndexer.ProcessBatches(this, config, startRecord, stopRecord, batchSize,
@@ -59,17 +55,13 @@ namespace Quest.Lib.OS.Indexer
         {
             try
             {
-                using (var db = new QuestNLPGEntities())
+                using (var db = new QuestNLPGContext())
                 {
-                    db.Configuration.ProxyCreationEnabled = false;
-
-                    ((IObjectContextAdapter) db).ObjectContext.CommandTimeout = 360;
-
                     var descriptor = GetBulkRequest(config);
 
                     // main loop here
                     foreach (
-                        var r in db.NLPGs.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex))
+                        var r in db.Nlpg.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex))
                     {
                         lock (config)
                         {
@@ -77,7 +69,7 @@ namespace Quest.Lib.OS.Indexer
                         }
 
                         // dont index street records - these are taken care of by ITN
-                        if (r.pao_text == "STREET RECORD")
+                        if (r.PaoText== "STREET RECORD")
                         {
                             lock (config)
                             {
@@ -86,7 +78,7 @@ namespace Quest.Lib.OS.Indexer
                             continue;
                         }
 
-                        var point = GeomUtils.ConvertToLatLonLoc(r.nlpg_x_coordinate ?? 0, r.nlpg_y_coordinate ?? 0);
+                        var point = GeomUtils.ConvertToLatLonLoc(r.NlpgXCoordinate ?? 0, r.NlpgYCoordinate ?? 0);
 
                         // check whether point is in master area if required
                         if (!IsPointInRange(config, point.Longitude, point.Latitude))
@@ -105,20 +97,20 @@ namespace Quest.Lib.OS.Indexer
 
                         // add primary number ranges:
                         var buildingNumbers = new List<int>();
-                        var startnum = r.pao_start_number ?? 0;
+                        var startnum = r.PaoStartNumber ?? 0;
                         if (startnum > 0)
                         {
-                            var endnum = r.pao_end_number ?? startnum;
+                            var endnum = r.PaoEndNumber ?? startnum;
                             if (endnum == 0)
                                 endnum = startnum;
                             for (int x = startnum; x <= endnum; x++)
                                 buildingNumbers.Add(x);
                         }
                         // add secondary number ranges:
-                        startnum = r.sao_start_number ?? 0;
+                        startnum = r.SaoStartNumber ?? 0;
                         if (startnum > 0)
                         {
-                            var endnum = r.sao_end_number ?? startnum;
+                            var endnum = r.SaoEndNumber ?? startnum;
                             if (endnum == 0)
                                 endnum = startnum;
                             for (int x = startnum; x <= endnum; x++)
@@ -126,18 +118,18 @@ namespace Quest.Lib.OS.Indexer
                         }
 
                         var indextext = buildingNumbers.Count > 1
-                            ? string.Join(" ", buildingNumbers) + " " + r.geo_single_address_label.ToUpper()
-                            : r.geo_single_address_label.ToUpper();
+                            ? string.Join(" ", buildingNumbers) + " " + r.GeoSingleAddressLabel.ToUpper()
+                            : r.GeoSingleAddressLabel.ToUpper();
 
                         //add first chars for central london postcode districts that have an alpha suffix eg NW1J, W1X
                         //this means a search of SW1 will return SW1X etc
 
-                        if (!string.IsNullOrEmpty(r.postcode_locator))
+                        if (!string.IsNullOrEmpty(r.PostcodeLocator))
                         {
                             var pattern = @"^(?<postcodeshort>[A-Z]{1,2}[0-9])[A-Z].*";
 
                             var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-                            var m = regex.Match(r.postcode_locator);
+                            var m = regex.Match(r.PostcodeLocator);
                             if (m.Success)
                             {
                                 indextext += " " + m.Groups["postcodeshort"].Value;
@@ -146,24 +138,24 @@ namespace Quest.Lib.OS.Indexer
 
                         //add 'FLAT 1A' to indextext as well as 'FLAT A, 1' which is default
                         // use sao text and pao_start_number
-                        if (r.sao_text != null && r.pao_start_number > 0)
+                        if (r.SaoText != null && r.PaoStartNumber > 0)
                         {
                             var pattern = @"^FLAT\s(?<flatletter>[A-Z])$";
                             var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-                            var m = regex.Match(r.sao_text);
+                            var m = regex.Match(r.SaoText);
                             if (m.Success)
                             {
-                                var flattext = r.pao_start_number + m.Groups["flatletter"].Value;
+                                var flattext = r.PaoStartNumber + m.Groups["flatletter"].Value;
                                 indextext += " FLAT " + flattext;
                             }
                         }
 
                         var locality = new List<string>();
-                        if (!string.IsNullOrEmpty(r.town_name))
-                            locality.Add(r.town_name.ToUpper());
+                        if (!string.IsNullOrEmpty(r.TownName))
+                            locality.Add(r.TownName.ToUpper());
 
-                        if (!string.IsNullOrEmpty(r.locality_name))
-                            locality.Add(r.locality_name.ToUpper());
+                        if (!string.IsNullOrEmpty(r.LocalityName))
+                            locality.Add(r.LocalityName.ToUpper());
 
 
                             var address = new LocationDocument
@@ -173,21 +165,21 @@ namespace Quest.Lib.OS.Indexer
                                 Type = IndexBuilder.AddressDocumentType.Address,
                                 Source = "NLPG",
                                 //BuildingName = r.pao_text,
-                                Description = r.geo_single_address_label.ToUpper(),
+                                Description = r.GeoSingleAddressLabel.ToUpper(),
                                 indextext = Join(indextext, terms, false).Decompound(config.DecompoundList),
                                 Location = point,
                                 Point = PointfromGeoLocation(point),
                                 //Organisation = "",
                                 //Postcode = r.postcode_locator,
                                 //SubBuilding = "",
-                                Thoroughfare = new List<string> {r.street_description.ToUpper()},
+                                Thoroughfare = new List<string> {r.StreetDescription.ToUpper()},
                                 Locality = locality,
                                 //BuildingNumbers = buildingNumbers,
                                 Areas = terms,
-                                UPRN = r.uprn ?? 0,
-                                USRN = r.usrn ?? 0,
-                                Status = LogicalStatus(r.logical_status ?? 0),
-                                Classification = r.CLASSIFICATION_CODE
+                                UPRN = r.Uprn ?? 0,
+                                USRN = r.Usrn ?? 0,
+                                Status = LogicalStatus(r.LogicalStatus ?? 0),
+                                Classification = r.ClassificationCode
                             };
                             // add to the list of stuff to index
                             address.indextext = address.indextext.Replace("&", " and ");

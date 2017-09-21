@@ -9,10 +9,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Quest.Lib.DataModel;
 using Quest.Lib.Data;
 using Quest.Lib.Trace;
-using Quest.Lib.DataModelOS;
+using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Routing.ITN
 {

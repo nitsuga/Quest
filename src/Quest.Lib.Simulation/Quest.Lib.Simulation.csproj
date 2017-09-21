@@ -5,6 +5,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\**" />
+    <Compile Remove="Old\**" />
+    <EmbeddedResource Remove="Model\**" />
+    <EmbeddedResource Remove="Old\**" />
+    <None Remove="Model\**" />
+    <None Remove="Old\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Interfaces\IArdIn.cs" />
+    <Compile Remove="Interfaces\ICadIn.cs" />
+    <Compile Remove="Interfaces\ICadOut.cs" />
+    <Compile Remove="Interfaces\ICTI.cs" />
+    <Compile Remove="Interfaces\IGeoIn.cs" />
+    <Compile Remove="Interfaces\IResManager.cs" />
+    <Compile Remove="Interfaces\ISimPart.cs" />
+    <Compile Remove="Interfaces\IUserOut.cs" />
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GeoJSON.Net" Version="1.1.64" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
@@ -17,6 +38,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

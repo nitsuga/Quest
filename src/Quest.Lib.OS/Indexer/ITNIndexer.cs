@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
-using Quest.Lib.OS.Model;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
-using Quest.Lib.DataModelOS;
+using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -37,11 +36,11 @@ namespace Quest.Lib.OS.Indexer
                 var wgs84 = GeographicCoordinateSystem.WGS84;
                 var transformer = ctFact.CreateFromCoordinateSystems(from, wgs84);
 
-                foreach (var r in db.Road.OrderBy(x => x.RoadId))
+                foreach (var r in db.StaticRoadNames.OrderBy(x => x.RoadId))
                 {
                     config.RecordsCurrent++;
 
-                    var point = GeomUtils.ConvertToLatLonLoc(r.RoadNetworkMember.s.X,r.Y);
+                    var point = GeomUtils.ConvertToLatLonLoc(r.X,r.Y);
 
                     // check whether point is in master area if required
                     if (!IsPointInRange(config, point.Longitude, point.Latitude))
@@ -79,7 +78,7 @@ namespace Quest.Lib.OS.Indexer
                         Locality = new List<string>(),
                         Areas = terms,
                         Status = "Approved",
-                        MultiLine = GeomUtils.GetMultiLine(r.WKT, transformer),
+                        MultiLine = GeomUtils.GetMultiLine(r.Wkt, transformer),
                         Classification = "CT99" // Road
                     };
 

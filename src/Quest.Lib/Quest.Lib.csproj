@@ -14,18 +14,30 @@
 
   <ItemGroup>
     <Compile Remove="AutoDispatch\**" />
+    <Compile Remove="DataModelNLPG\**" />
+    <Compile Remove="DataModelOsm\**" />
+    <Compile Remove="DataModelOS\**" />
+    <Compile Remove="DataModelResearch\**" />
+    <Compile Remove="DataModelSim\**" />
     <Compile Remove="DataModel\Temp\**" />
-    <Compile Remove="Device\**" />
     <Compile Remove="Models\**" />
     <Compile Remove="Telephony\Aspect\**" />
     <EmbeddedResource Remove="AutoDispatch\**" />
+    <EmbeddedResource Remove="DataModelNLPG\**" />
+    <EmbeddedResource Remove="DataModelOsm\**" />
+    <EmbeddedResource Remove="DataModelOS\**" />
+    <EmbeddedResource Remove="DataModelResearch\**" />
+    <EmbeddedResource Remove="DataModelSim\**" />
     <EmbeddedResource Remove="DataModel\Temp\**" />
-    <EmbeddedResource Remove="Device\**" />
     <EmbeddedResource Remove="Models\**" />
     <EmbeddedResource Remove="Telephony\Aspect\**" />
     <None Remove="AutoDispatch\**" />
+    <None Remove="DataModelNLPG\**" />
+    <None Remove="DataModelOsm\**" />
+    <None Remove="DataModelOS\**" />
+    <None Remove="DataModelResearch\**" />
+    <None Remove="DataModelSim\**" />
     <None Remove="DataModel\Temp\**" />
-    <None Remove="Device\**" />
     <None Remove="Models\**" />
     <None Remove="Telephony\Aspect\**" />
   </ItemGroup>

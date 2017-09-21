@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Quest.Lib.OS.Model;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
+using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -19,14 +19,14 @@ namespace Quest.Lib.OS.Indexer
 
         private void Build(BuildIndexSettings config)
         {
-            using (var db = new QuestOSEntities())
+            using (var db = new QuestOSContext())
             {
 
                 Logger.Write($"{GetType().Name}: Counting records..", GetType().Name);
 
                 // figure out batch sizes
-                var startRecord = db.PAFs.Min(x => x.Id);
-                var stopRecord = db.PAFs.Max(x => x.Id);
+                var startRecord = db.Paf.Min(x => x.Id);
+                var stopRecord = db.Paf.Max(x => x.Id);
 
                 int estimatedRecordSize = 512;
                 // recommended packet size is 10Mb
@@ -36,7 +36,7 @@ namespace Quest.Lib.OS.Indexer
                 long batchSize = recordsPerPacket;
                 int concurrentBatches = 4;
 
-                config.RecordsTotal = db.PAFs.Select(x => x.Id).Count();
+                config.RecordsTotal = db.Paf.Select(x => x.Id).Count();
                 //config.Logfrequency = recordsPerPacket;
 
                 BatchIndexer.ProcessBatches(this, config, startRecord, stopRecord, batchSize,
@@ -46,16 +46,16 @@ namespace Quest.Lib.OS.Indexer
 
         private void ProcessBatch(BuildIndexSettings config, BatchIndexer.BatchWork work)
         {
-            using (var db = new QuestOSEntities())
+            using (var db = new QuestOSContext())
             {
-                var total = db.PAFs.Count();
+                var total = db.Paf.Count();
                 config.RecordsTotal = total;
 
                 var pattern = @"^(?<postcodeshort>[A-Z]{1,2}[0-9])[A-Z].*";
                 var regex = new Regex(pattern, RegexOptions.IgnoreCase);
 
                 var descriptor = GetBulkRequest(config);
-                foreach (var r in db.PAFs.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex).ToList())
+                foreach (var r in db.Paf.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex).ToList())
                 {
                     config.RecordsCurrent++;
 
@@ -64,7 +64,7 @@ namespace Quest.Lib.OS.Indexer
 
                     try
                     {
-                        var point = GeomUtils.ConvertToLatLonLoc(r.X_COORDINATE, r.Y_COORDINATE);
+                        var point = GeomUtils.ConvertToLatLonLoc(r.XCoordinate, r.YCoordinate);
 
                         // check whether point is in master area if required
                         if (!IsPointInRange(config, point.Longitude, point.Latitude))
@@ -75,8 +75,8 @@ namespace Quest.Lib.OS.Indexer
 
                         var terms = GetLocalAreas(config, point);
 
-                        var range = ExtractRange(r.BUILDING_NAME);
-                        var indexText = r.FULLADDRESS;
+                        var range = ExtractRange(r.BuildingName);
+                        var indexText = r.Fulladdress;
                         if (range != null)
                         {
                             for (var x = range[0]; x <= range[1]; x++)
@@ -84,22 +84,22 @@ namespace Quest.Lib.OS.Indexer
                         }
 
 
-                        if (!string.IsNullOrEmpty(r.POSTCODE))
+                        if (!string.IsNullOrEmpty(r.Postcode))
                         {
-                            var m = regex.Match(r.POSTCODE);
+                            var m = regex.Match(r.Postcode);
                             if (m.Success)
                             {
                                 indexText += " " + m.Groups["postcodeshort"].Value;
                             }
                         }
 
-                        r.DEPENDENT_LOCALITY = r.DEPENDENT_LOCALITY ?? "";
-                        r.BUILDING_NAME = r.BUILDING_NAME ?? "";
-                        r.FULLADDRESS = r.FULLADDRESS ?? "";
-                        r.ORGANISATION_NAME = r.ORGANISATION_NAME ?? "";
-                        r.SUB_BUILDING_NAME = r.SUB_BUILDING_NAME ?? "";
-                        r.THOROUGHFARE = r.THOROUGHFARE ?? "";
-                        r.DEPENDENT_THOROUGHFARE = r.DEPENDENT_THOROUGHFARE ?? "";
+                        r.DependentLocality = r.DependentLocality ?? "";
+                        r.BuildingName = r.BuildingName ?? "";
+                        r.Fulladdress = r.Fulladdress ?? "";
+                        r.OrganisationName = r.OrganisationName ?? "";
+                        r.SubBuildingName = r.SubBuildingName ?? "";
+                        r.Thoroughfare = r.Thoroughfare ?? "";
+                        r.DependentThoroughfare = r.DependentThoroughfare ?? "";
 
                         var address = new LocationDocument
                         {
@@ -108,7 +108,7 @@ namespace Quest.Lib.OS.Indexer
                             Type = IndexBuilder.AddressDocumentType.Address,
                             Source = "PAF",
                             //BuildingName = r.BUILDING_NUMBER == 0 ? r.BUILDING_NAME : r.BUILDING_NUMBER.ToString().ToUpper(),
-                            Description = r.FULLADDRESS.ToUpper(),
+                            Description = r.Fulladdress.ToUpper(),
                             indextext = Join(indexText, terms, false).Decompound(config.DecompoundList),
                             Location = point,
                             Point = PointfromGeoLocation(point),
@@ -119,17 +119,17 @@ namespace Quest.Lib.OS.Indexer
                             Locality = new List<string>(),
                             //BuildingNumbers = range,
                             Areas = terms,
-                            UPRN = r.UPRN,
-                            USRN = r.USRN,
+                            UPRN = r.Uprn,
+                            USRN = r.Usrn,
                             Classification = ""
                         };
 
-                        address.Thoroughfare.Add(r.THOROUGHFARE.ToUpper());
-                        if (r.DEPENDENT_THOROUGHFARE.Length > 0)
-                            address.Thoroughfare.Add(r.DEPENDENT_THOROUGHFARE.ToUpper());
+                        address.Thoroughfare.Add(r.Thoroughfare.ToUpper());
+                        if (r.DependentThoroughfare.Length > 0)
+                            address.Thoroughfare.Add(r.DependentThoroughfare.ToUpper());
 
-                        address.Locality.Add(r.POST_TOWN);
-                        if (r.DEPENDENT_LOCALITY.Length > 0) address.Locality.Add(r.DEPENDENT_LOCALITY.ToUpper());
+                        address.Locality.Add(r.PostTown);
+                        if (r.DependentLocality.Length > 0) address.Locality.Add(r.DependentLocality.ToUpper());
 
                         //TODO: include status in PAF load
                         address.Status = "Active"; // LogicalStatus(r.LOGICAL_STATUS??0);

@@ -7,8 +7,9 @@ using System.Linq;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Quest.Lib.DataModel;
-using Quest.Lib.OS.Model;
 using Quest.Lib.Trace;
+using Quest.Lib.Data;
+using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Routing.ITN
 {
@@ -19,12 +20,11 @@ namespace Quest.Lib.OS.Routing.ITN
         {
             IEnumerable<RoadLinkEdgeTemp> network = LoadItnRoadNetwork();
             int i = 0;
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                db.Database.ExecuteSqlCommand("truncate table RoadLinkEdgeLink");
-                db.Database.ExecuteSqlCommand("truncate table RoadLinkEdge");
+                db.Execute("truncate table RoadLinkEdgeLink");
+                db.Execute("truncate table RoadLinkEdge");
 
-                db.Configuration.ProxyCreationEnabled = false;
                 var sql = "";
                 foreach (var edge in network)
                 {
@@ -45,12 +45,12 @@ namespace Quest.Lib.OS.Routing.ITN
                     i++;
                     if (i%50 == 0)
                     {
-                        db.Database.ExecuteSqlCommand(sql);
+                        db.Execute(sql);
                         sql = "";
                     }
                         //db.SaveChanges();
                 }
-                db.Database.ExecuteSqlCommand(sql);
+                db.Execute(sql);
             }
             
         }
@@ -66,21 +66,17 @@ namespace Quest.Lib.OS.Routing.ITN
 
                 var reader = new WKTReader();
                 var linkId=0;
-                using (var context = new QuestEntities())
+                using (var context = new QuestContext())
                 {
-                    context.Configuration.ProxyCreationEnabled = false;
-
                     var locs = LoadNodes();
-
                     var links = LoadLinks();
-
 
                     foreach (var current in links)
                     {
                         int fid = current.FromRoadNodeId ?? 0,
                             tid = current.ToRoadNodeId ?? 0;
 
-                        var geomAny = reader.Read(current.WKT);
+                        var geomAny = reader.Read(current.Wkt);
                         var geom = geomAny.GetGeometryN(0) as LineString;
 
                         if (fid == 0 || tid == 0) continue;
@@ -136,10 +132,9 @@ namespace Quest.Lib.OS.Routing.ITN
             var locs = new Dictionary<int, RoutingLocation>();
             StaticRoadNode[] nodes;
 
-            using (var context = new QuestOSEntities())
+            using (var context = new QuestOSContext())
             {
-                context.Configuration.ProxyCreationEnabled = false;
-                nodes = context.StaticRoadNodes.ToArray();
+                nodes = context.StaticRoadNode.ToArray();
             }
 
             foreach (var current in nodes)
@@ -155,14 +150,13 @@ namespace Quest.Lib.OS.Routing.ITN
             return locs;
         }
 
-        private static StaticRoadLink[] LoadLinks()
+        private static StaticRoadLinks[] LoadLinks()
         {
             try
             {
                 Logger.Write("Routing Data is loading the road links", "LoadItn");
-                using (var context = new QuestOSEntities())
+                using (var context = new QuestOSContext())
                 {
-                    context.Configuration.ProxyCreationEnabled = false;
                     var links = context.StaticRoadLinks.ToArray();
                     Logger.Write("Routing Data has loaded the road links", "LoadItn");
                     return links;

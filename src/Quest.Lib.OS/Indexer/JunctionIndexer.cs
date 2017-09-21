@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Quest.Lib.OS.Model;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -20,7 +20,7 @@ namespace Quest.Lib.OS.Indexer
         {
             DeleteDataSet<LocationDocument>(config.DefaultIndex, config.Client, IndexBuilder.AddressDocumentType.Junction);
 
-            using (var db = new QuestOSEntities())
+            using (var db = new QuestOSContext())
             {
                 var descriptor = GetBulkRequest(config);
                 var total = db.Junctions.Count();
@@ -52,7 +52,7 @@ namespace Quest.Lib.OS.Indexer
                         Created = DateTime.Now,
                         Type = IndexBuilder.AddressDocumentType.Junction,
                         Source = "Extent",
-                        ID = IndexBuilder.AddressDocumentType.Junction + r.JunctionID,
+                        ID = IndexBuilder.AddressDocumentType.Junction + r.JunctionId,
                         indextext = Join(description, terms, false),
                         Description = Join(description, terms, true),
                         Location = point,

@@ -10,6 +10,7 @@ namespace Quest.Lib.OS.DataModelOS
         public virtual DbSet<Paf> Paf { get; set; }
         public virtual DbSet<Road> Road { get; set; }
         public virtual DbSet<RoadLink> RoadLink { get; set; }
+        public virtual DbSet<StaticRoadNames> StaticRoadNames { get; set; }
         public virtual DbSet<RoadNetworkMember> RoadNetworkMember { get; set; }
         public virtual DbSet<RoadNode> RoadNode { get; set; }
         public virtual DbSet<RoadRouteInfo> RoadRouteInfo { get; set; }
@@ -261,6 +262,19 @@ namespace Quest.Lib.OS.DataModelOS
                     .HasForeignKey<RoadLink>(d => d.RoadLinkId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_RoadLink_RoadLink");
+            });
+
+            modelBuilder.Entity<StaticRoadNames>(entity =>
+            {
+                entity.HasKey(e => e.RoadNetworkMemberId);
+
+                entity.Property(e => e.RoadNetworkMemberId).ValueGeneratedNever();
+
+                entity.Property(e => e.RoadName)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Wkt).IsUnicode(false);
             });
 
             modelBuilder.Entity<RoadNetworkMember>(entity =>

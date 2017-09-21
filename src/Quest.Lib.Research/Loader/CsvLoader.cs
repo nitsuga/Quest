@@ -1,8 +1,9 @@
-﻿using System;
+﻿using CsvHelper;
+using System;
 using System.Diagnostics;
 using System.Text;
-using Microsoft.VisualBasic.FileIO;
 using Quest.Lib.Research.Model;
+using System.IO;
 
 namespace Quest.Lib.Research.Loader
 {
@@ -11,77 +12,73 @@ namespace Quest.Lib.Research.Loader
         public static void Load(string filename, int headers, Func<string[], string> processRow)
         {
             // throw away header line
-            using (var parser = new TextFieldParser(filename))
+            using (StreamReader reader = File.OpenText(filename))
             {
-
-                parser.SetDelimiters("\t");
-
-                using (var db = new QuestResearchEntities())
+                using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "\t" }))
                 {
-                    db.Database.CommandTimeout = int.MaxValue;
-
-                    // skip header
-                    while (headers > 0)
+                    using (var db = new QuestResearchEntities())
                     {
-                        headers--;
-                        parser.ReadFields();
+                        // skip header
+                        while (headers > 0)
+                        {
+                            headers--;
+                            data.Read();
+                        }
+
+                        var batch = new StringBuilder();
+                        var readRowcount = 0;
+                        var writeRowcount = 0;
+                        var skipped = 0;
+                        while (data.Read())
+                        {
+                            if (data == null)
+                            {
+                                skipped++;
+                                continue;
+                            }
+
+                            string sqlToExec;
+                            try
+                            {
+                                sqlToExec = processRow(data);
+
+                            }
+                            catch (Exception)
+                            {
+                                skipped++;
+                                continue;
+                            }
+
+                            if (sqlToExec == null)
+                            {
+                                skipped++;
+                                continue;
+                            }
+
+                            batch.Append(sqlToExec);
+
+                            readRowcount++;
+
+                            if (readRowcount % 10000 != 0) continue;
+
+                            try
+                            {
+                                var rows = db.Database.ExecuteSqlCommand(batch.ToString());
+                                writeRowcount += rows;
+                                batch.Clear();
+                                Debug.WriteLine($"{filename} {readRowcount} {skipped} {writeRowcount} {rows}");
+                            }
+                            catch (Exception)
+                            {
+                                Debug.WriteLine($"{batch} ");
+                                throw;
+                            }
+                        }
+
+                        if (batch.ToString().Length > 0)
+                            db.Database.ExecuteSqlCommand(batch.ToString());
+
                     }
-
-                    var batch = new StringBuilder();
-                    var readRowcount = 0;
-                    var writeRowcount = 0;
-                    var skipped = 0;
-                    while (!parser.EndOfData)
-                    {
-                        var data = parser.ReadFields();
-
-                        if (data == null)
-                        {
-                            skipped++;
-                            continue;
-                        }
-
-                        string sqlToExec;
-                        try
-                        {
-                            sqlToExec = processRow(data);
-
-                        }
-                        catch (Exception)
-                        {
-                            skipped++;
-                            continue;
-                        }
-
-                        if (sqlToExec == null)
-                        {
-                            skipped++;
-                            continue;
-                        }
-
-                        batch.Append(sqlToExec);
-
-                        readRowcount++;
-
-                        if (readRowcount % 10000 != 0) continue;
-
-                        try
-                        {
-                            var rows = db.Database.ExecuteSqlCommand(batch.ToString());
-                            writeRowcount += rows;
-                            batch.Clear();
-                            Debug.WriteLine($"{filename} {readRowcount} {skipped} {writeRowcount} {rows}");
-                        }
-                        catch (Exception)
-                        {
-                            Debug.WriteLine($"{batch} ");
-                            throw;
-                        }
-                    }
-
-                    if (batch.ToString().Length > 0)
-                        db.Database.ExecuteSqlCommand(batch.ToString());
-
                 }
             }
         }
