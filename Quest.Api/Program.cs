@@ -14,19 +14,19 @@ namespace Quest.Api
     {
         public static void Main(string[] args)
         {
+            // set env. variable ActiveMQ to specify the message q
+
             var configuration = new ConfigurationBuilder()
               .AddCommandLine(args)
               .Build();
 
-            BuildWebHost(args).Run();
-        }
-
-
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
                 .Build();
+
+            host.Run();
+        }
     }
 }

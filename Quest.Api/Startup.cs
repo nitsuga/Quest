@@ -21,6 +21,9 @@ using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
+using Quest.Api.Modules;
+using Quest.Api.Middleware;
+using Quest.Lib.ServiceBus;
 
 namespace Quest.Api
 {
@@ -33,18 +36,19 @@ namespace Quest.Api
 
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        public MessageCache MsgClientCache { get; private set; }
+
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
 
             var configBuilder = new ConfigurationBuilder()
-                //.SetBasePath(env.ContentRootPath)
+                .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddJsonFile("components.json", optional: false)
                 .AddEnvironmentVariables();
         }
-
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
@@ -152,12 +156,45 @@ namespace Quest.Api
             loggerFactory.AddDebug();
             //loggerFactory.AddFile(Configuration.GetSection("Logging"));
 
-            //var logger = loggerFactory.CreateLogger("Dungbeetle.Api");
-            //var dbFactory = ApplicationContainer.Resolve<DatabaseFactory>();
-            //Logger.Configure(logger, dbFactory);
-
             // integrate error handling into the pipeline
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Quest Api V1");
+            });
+
+#if NOSEC
+#else
+            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
+
+                ValidateAudience = true,
+                ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingKey,
+
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
+
+                ClockSkew = TimeSpan.Zero
+            };
+
+            app.UseJwtBearerAuthentication(new JwtBearerOptions
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                TokenValidationParameters = tokenValidationParameters
+            });
+#endif
 
             app.UseMvc();
         }

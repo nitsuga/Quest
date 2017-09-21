@@ -9,16 +9,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Quest.Api
+namespace Quest.Api.Middleware
 {
-
-    public class ApiResult
-    {
-        public HttpStatusCode Code;
-        public string Message;
-        public string Stack;
-        public string Error;
-    }
 
     public class ErrorHandlingMiddleware
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Quest.Api
+namespace Quest.Api.Modules
 {
     public class AutofacModule : Autofac.Module
     {
