@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Caching;
 using GeoJSON.Net.Feature;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
@@ -8,6 +7,7 @@ using Quest.Lib.Processor;
 using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Quest.Lib.Visuals
 {
@@ -15,14 +15,17 @@ namespace Quest.Lib.Visuals
     {
         private const string Name = "VisualsManager";
         private readonly ILifetimeScope _scope;
+        IMemoryCache _cache;
 
         public VisualsManager(
+            IMemoryCache cache,
             ILifetimeScope scope,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
             _scope = scope;
+            _cache = cache;
         }
 
         protected override void OnPrepare()
@@ -48,12 +51,9 @@ namespace Quest.Lib.Visuals
             if (request != null)
                 foreach (var r in request.Ids)
                 {
-                    if (MemoryCache.Default.Contains(r))
-                    {
-                        var visual = MemoryCache.Default[r] as Visual;
-                        if (visual != null)
-                            result.Geometry.Features.AddRange(visual.Geometry.Features);
-                    }
+                    var visual = _cache.Get<Visual>(r);
+                    if (visual != null)
+                        result.Geometry.Features.AddRange(visual.Geometry.Features);
                 }
 
             // var providers = _container.GetExports<IVisualProvider>();
@@ -62,7 +62,7 @@ namespace Quest.Lib.Visuals
 
             return result;
         }
-        
+
 
         /// <summary>
         /// Get visuals catalogue from providers
@@ -78,8 +78,7 @@ namespace Quest.Lib.Visuals
 
             foreach (var v in result.Items)
             {
-                MemoryCache.Default.Remove(v.Id.Id);
-                MemoryCache.Default.Add(v.Id.Id, v, DateTime.Now.AddHours(1));
+                _cache.CreateEntry(v.Id.Id).SetSlidingExpiration(new TimeSpan(1, 0, 0)).Value = v;
             }
 
             return result;
@@ -90,27 +89,25 @@ namespace Quest.Lib.Visuals
             var request = args.Payload as QueryVisualRequest;
             var provider = _scope.ResolveNamed<IVisualProvider>(request.Provider);
 
-            if (provider==null)
+            if (provider == null)
             {
                 return new QueryVisualResponse { Message = $"No such provider '{request.Provider}'", Success = false };
             }
 
             var result = provider.QueryVisual(_scope, request);
-                
-            if (result!=null && result.Visuals != null)
-            foreach (var v in result.Visuals)
-            {
-                if (v != null)
+
+            if (result != null && result.Visuals != null)
+                foreach (var v in result.Visuals)
                 {
-                    MemoryCache.Default.Remove(v.Id.Id);
-                    MemoryCache.Default.Add(v.Id.Id, v, DateTime.Now.AddHours(1));
+                    if (v != null)
+                    {
+                        _cache.CreateEntry(v.Id.Id).SetSlidingExpiration(new TimeSpan(1, 0, 0)).Value = v;
+                    }
                 }
-            }
 
             return result;
         }
 
     }
-
 
 }

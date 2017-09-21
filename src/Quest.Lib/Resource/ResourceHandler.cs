@@ -44,14 +44,14 @@ namespace Quest.Lib.Resource
         public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
             IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // make sure callsign exists
-                var callsign = db.Callsigns.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
+                var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
                 if (callsign == null)
                 {
                     callsign = new Callsign {Callsign1 = resourceUpdate.Callsign};
-                    db.Callsigns.Add(callsign);
+                    db.Callsign.Add(callsign);
                     db.SaveChanges();
                 }
 
@@ -59,7 +59,7 @@ namespace Quest.Lib.Resource
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Status == resourceUpdate.Status);
                 if (status == null)
                 {
-                    status = new ResourceStatu
+                    status = new DataModel.ResourceStatus
                     {
                         Status = resourceUpdate.Status,
                         Rest = false,
@@ -78,29 +78,29 @@ namespace Quest.Lib.Resource
                 long? originalRevision = null;
 
                 // find corresponding resource;
-                var res = db.Resources.FirstOrDefault(x => x.CallsignID == callsign.CallsignID);
+                var res = db.Resource.FirstOrDefault(x => x.CallsignId == callsign.CallsignId);
                 if (res == null)
                 {
-                    originalTypeId = db.ResourceTypes.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
+                    originalTypeId = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
                     res = new DataModel.Resource();
-                    db.Resources.Add(res);
+                    db.Resource.Add(res);
                 }
                 else
                 {
                     originalTypeId = res.ResourceTypeId;
-                    originalStatusId = res.ResourceStatusID;
+                    originalStatusId = res.ResourceStatusId;
                     originalRevision = res.Revision;
                 }
 
                 // save the new resource record
                 res.Agency = resourceUpdate.Agency;
-                res.CallsignID = callsign.CallsignID;
+                res.CallsignId = callsign.CallsignId;
                 res.Class = resourceUpdate.Class;
                 //res.Comment = resourceUpdate.Comment;
                 res.Destination = resourceUpdate.Destination;
                 res.Direction = 0; //resourceUpdate.Direction;
                 res.Emergency = resourceUpdate.Emergency?"Y":"N";
-                res.ETA = null; // resourceUpdate.ETA;
+                res.Eta = null; // resourceUpdate.ETA;
                 res.EventType = resourceUpdate.EventType;
                 res.FleetNo = resourceUpdate.FleetNo;
                 res.Latitude = (float?)resourceUpdate.Latitude;
@@ -112,8 +112,8 @@ namespace Quest.Lib.Resource
                 res.ResourceTypeId = originalTypeId;
                 res.Skill = resourceUpdate.Skill;
                 res.Sector = "";
-                res.ResourceStatusPrevID = res.ResourceStatusID;
-                res.ResourceStatusID = status.ResourceStatusID;
+                res.ResourceStatusPrevId = res.ResourceStatusId;
+                res.ResourceStatusId = status.ResourceStatusId;
 
 #if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                 var requireEventNotification = false;
@@ -121,7 +121,7 @@ namespace Quest.Lib.Resource
 #endif
 
                 // detect change in status
-                if (originalStatusId != status.ResourceStatusID)
+                if (originalStatusId != status.ResourceStatusId)
                 {
 #if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                     requireStatusNotification = true;
@@ -132,20 +132,20 @@ namespace Quest.Lib.Resource
                         // save a status history if the status has changed
                         var history = new ResourceStatusHistory
                     {
-                        ResourceID = res.ResourceID,
-                        ResourceStatusID = originalStatusId ?? status.ResourceStatusID,
+                        ResourceId = res.ResourceId,
+                        ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
                         // use current status if status not known
                         Revision = originalRevision ?? 0
                     };
 
-                    db.ResourceStatusHistories.Add(history);
+                    db.ResourceStatusHistory.Add(history);
                 }
                 db.SaveChanges();
 
-                var rv = db.ResourceViews.FirstOrDefault(x => x.ResourceID == res.ResourceID);
-                ResourceItem ri = GetResourceItemFromView(rv);
+                //var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
+                ResourceItem ri = GetResourceItemFromView(res);
 
-                var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude??0));
+                var point = new PointGeoShape(new GeoCoordinate(res.Latitude ?? 0, res.Longitude??0));
 
                 if (config != null)
                 {
@@ -159,7 +159,7 @@ namespace Quest.Lib.Resource
                         Source = "Quest",
                         indextext = indextext,
                         Description = indextext,
-                        Location = new GeoLocation(rv.Latitude ?? 0, rv.Longitude ?? 0),
+                        Location = new GeoLocation(res.Latitude ?? 0, res.Longitude ?? 0),
                         Point = point,
                         Created = DateTime.UtcNow
                     };
@@ -176,27 +176,27 @@ namespace Quest.Lib.Resource
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
 #endif
 
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceID, Item=ri });
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item=ri });
 
             }
         }
 
-        private ResourceItem GetResourceItemFromView(ResourceView res)
+        private ResourceItem GetResourceItemFromView( DataModel.Resource res)
         {
             return new ResourceItem
             {
-                ID = res.ResourceID.ToString(),
+                ID = res.ResourceId.ToString(),
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,
-                Callsign = res.Callsign,
+                Callsign = res.Callsign.Callsign1,
                 lastUpdate = res.LastUpdated,
-                StatusCategory = GetStatusDescription(res),
-                Status = res.Status,
-                PrevStatus = res.PrevStatus,
-                VehicleType = res.ResourceType ?? "VEH",
+                StatusCategory = GetStatusDescription(res.ResourceStatus),
+                Status = res.ResourceStatus.Status,
+                PrevStatus = res.ResourceStatusPrev.Status,
+                VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
                 Destination = res.Destination,
-                Eta = res.ETA,
+                Eta = res.Eta,
                 FleetNo = res.FleetNo,
                 Road = res.Road,
                 Comment = res.Comment,
@@ -204,22 +204,22 @@ namespace Quest.Lib.Resource
                 Speed = res.Speed,
                 Direction = res.Direction,
                 Incident = res.Serial,
-                Available = res.Available ?? false,
-                Busy = res.Busy ?? false,
-                BusyEnroute = res.BusyEnroute ?? false,
-                ResourceTypeGroup = res.ResourceTypeGroup,
+                Available = res.ResourceStatus.Available ?? false,
+                Busy = res.ResourceStatus.Busy ?? false,
+                BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
+                //ResourceTypeGroup = res.ResourceTypeGroup,
             };
         }
 
         private void GetDeleteStatusId()
         {
             var deletedStatus = SettingsHelper.GetVariable("DeviceManager.DeletedStatus", "OOS");
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var ds = db.ResourceStatus.FirstOrDefault(x => x.Status == deletedStatus);
                 if (ds != null)
                 {
-                    _deleteStatusId = ds.ResourceStatusID;
+                    _deleteStatusId = ds.ResourceStatusId;
                 }
             }
         }
@@ -232,23 +232,23 @@ namespace Quest.Lib.Resource
         /// <param name="msgSource"></param>
         public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var i = db.Resources.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
+                var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
                 if (!i.Any()) return;
                 foreach (var x in i)
                 {
-                    x.ResourceStatusID = DeleteStatusId;
+                    x.ResourceStatusId = DeleteStatusId;
                     x.LastUpdated = DateTime.UtcNow;
                     db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceID});
+                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceId});
                 }
             }
         }
 
         public void ResourceLogon(ResourceLogon item, NotificationSettings settings)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
             }
         }
@@ -265,7 +265,8 @@ namespace Quest.Lib.Resource
                 return "Rest";
             return "Offroad";
         }
-        private string GetStatusDescription(ResourceView status)
+
+        private string GetStatusDescription(DataModel.ResourceStatus status)
         {
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using GeoAPI.Geometries;
 using Nest;
@@ -10,6 +9,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Utilities;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Quest.Lib.Search.Elastic
 {
@@ -340,11 +340,7 @@ namespace Quest.Lib.Search.Elastic
 
             Initialise();
 
-            if (MemoryCache.Default.Contains("GetIndexGroups"))
-                return MemoryCache.Default["GetIndexGroups"] as IndexGroupResponse;
-
             PolygonManager mgr = new PolygonManager();
-
 
             mgr.BuildFromShapefile(_settings.IndexGroups);
             var all = mgr.PolygonIndex.QueryAll();
@@ -375,9 +371,6 @@ namespace Quest.Lib.Search.Elastic
 
             result.Groups = groups;
 
-
-            MemoryCache.Default.Add("GetIndexGroups", result,
-                new CacheItemPolicy {SlidingExpiration = new TimeSpan(0, 0, 5)});
             return result;
         }
 

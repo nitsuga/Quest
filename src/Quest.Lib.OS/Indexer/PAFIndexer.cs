@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Quest.Lib.OS.Model;
@@ -22,11 +21,8 @@ namespace Quest.Lib.OS.Indexer
         {
             using (var db = new QuestOSEntities())
             {
-                db.Configuration.ProxyCreationEnabled = false;
 
                 Logger.Write($"{GetType().Name}: Counting records..", GetType().Name);
-
-                ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 360;
 
                 // figure out batch sizes
                 var startRecord = db.PAFs.Min(x => x.Id);
@@ -52,10 +48,6 @@ namespace Quest.Lib.OS.Indexer
         {
             using (var db = new QuestOSEntities())
             {
-                db.Configuration.ProxyCreationEnabled = false;
-
-                ((IObjectContextAdapter) db).ObjectContext.CommandTimeout = 360;
-
                 var total = db.PAFs.Count();
                 config.RecordsTotal = total;
 
@@ -63,7 +55,7 @@ namespace Quest.Lib.OS.Indexer
                 var regex = new Regex(pattern, RegexOptions.IgnoreCase);
 
                 var descriptor = GetBulkRequest(config);
-                foreach (var r in db.PAFs.AsNoTracking().Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex).ToList())
+                foreach (var r in db.PAFs.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex).ToList())
                 {
                     config.RecordsCurrent++;
 

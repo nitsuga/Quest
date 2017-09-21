@@ -70,7 +70,7 @@ namespace Quest.Lib.Research.Job
 
                 Logger.Write("Getting routes", GetType().Name);
                 routes = db.IncidentRouteViews
-                    .AsNoTracking()
+                    
                     //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161130004872 && x.IsBadGPS == false)
                     .Where(x => x.IncidentRouteID >= 1405137 && x.IsBadGPS == false)
                     .Where(x => x.ActualDuration != null && x.IsBadGPS == false)

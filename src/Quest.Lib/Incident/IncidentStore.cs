@@ -10,9 +10,9 @@ namespace Quest.Lib.Incident
     {
         public QuestIncident Get(string id)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var dbinc = db.Incidents.FirstOrDefault(x => x.Serial == id);
+                var dbinc = db.Incident.FirstOrDefault(x => x.Serial == id);
                 var inc = Cloner.CloneJson<QuestIncident>(dbinc);
                 return inc;
             }
@@ -20,13 +20,13 @@ namespace Quest.Lib.Incident
 
         public QuestIncident Update(IncidentUpdate item)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var dbinc = db.Incidents.FirstOrDefault(x => x.Serial == item.Serial);
+                var dbinc = db.Incident.FirstOrDefault(x => x.Serial == item.Serial);
                 if (dbinc == null)
                 {
                     dbinc = new DataModel.Incident();
-                    db.Incidents.Add(dbinc);
+                    db.Incident.Add(dbinc);
 
                     // use the tiestamp of the message for the creation time
                     dbinc.Created = new DateTime((item.Timestamp + 62135596800) * 10000000);
@@ -57,9 +57,9 @@ namespace Quest.Lib.Incident
 
         public void Close(string serial)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var i = db.Incidents.Where(x => x.Serial == serial).ToList();
+                var i = db.Incident.Where(x => x.Serial == serial).ToList();
                 if (i.Any())
                 {
                     foreach (var incident in i)

@@ -41,9 +41,8 @@ namespace Quest.Lib.Routing
             {
                 try
                 {
-                    using (var db = new QuestEntities())
+                    using (var db = new QuestContext())
                     {
-                        db.Database.CommandTimeout = 600;
                         // add in programmable ones.
                         var results = db.GetOperationalArea(2000);
                         var area = results.First();
@@ -62,7 +61,6 @@ namespace Quest.Lib.Routing
             }
             return null;
         }
-
 
         public static CoverageMap GetOperationalArea(int tilesize)
         {

@@ -44,10 +44,10 @@ namespace Quest.Lib.Routing.Speeds
 
             try
             {
-                using (var context = new QuestEntities())
+                using (var context = new QuestContext())
                 {
                     Logger.Write("calling RoadSpeedMatrixHoDSummaries", GetType().Name);
-
+#if false
                     var summaries = context.RoadSpeedMatrixHoDSummaries.FirstOrDefault();
                     if (summaries != null)
                     {
@@ -60,6 +60,15 @@ namespace Quest.Lib.Routing.Speeds
                         Hourmax = summaries.HourCount ?? 0;
                     }
 
+#else
+                    RMax = context.RoadSpeedMatrixHoD.Max(x => x.RoadTypeId);
+                    EastingMax = context.RoadSpeedMatrixHoD.Max(x => x.GridX);
+                    NorthingMax = context.RoadSpeedMatrixHoD.Max(x => x.GridY);
+                    EastingMin = context.RoadSpeedMatrixHoD.Min(x => x.GridX);
+                    NorthingMin = context.RoadSpeedMatrixHoD.Min(x => x.GridY);
+                    VMax = context.RoadSpeedMatrixHoD.Max(x => x.VehicleId);
+                    Hourmax = context.RoadSpeedMatrixHoD.Max(x => x.HourOfDay);
+#endif
                     var dimx = 1 + (EastingMax - EastingMin) / Cellsize;
                     var dimy = 1 + (NorthingMax - NorthingMin) / Cellsize;
                     // create and array
@@ -67,7 +76,7 @@ namespace Quest.Lib.Routing.Speeds
 
                     Logger.Write("calling RoadSpeedMatrixHoDs", GetType().Name);
 
-                    foreach (var reader in context.RoadSpeedMatrixHoDs.AsNoTracking())
+                    foreach (var reader in context.RoadSpeedMatrixHoD)
                     {
                         var x = (reader.GridX - EastingMin) / Cellsize;
                         var y = (reader.GridY - NorthingMin) / Cellsize;

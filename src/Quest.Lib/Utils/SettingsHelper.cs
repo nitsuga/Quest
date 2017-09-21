@@ -62,9 +62,9 @@ namespace Quest.Lib.Utils
 
                 try
                 {
-                    using (var db = new QuestEntities())
+                    using (var db = new QuestContext())
                     {
-                        var v = db.Variables.AsNoTracking().FirstOrDefault( x=>x.Variable1 == variable);
+                        var v = db.Variable.FirstOrDefault( x=>x.Variable1 == variable);
 
                         if (v == null)
                         {
@@ -75,7 +75,7 @@ namespace Quest.Lib.Utils
                                 Value = defaultValue,
                                 Variable1 = variable
                             };
-                            db.Variables.Add(v);
+                            db.Variable.Add(v);
                             db.SaveChanges();
                         }
 

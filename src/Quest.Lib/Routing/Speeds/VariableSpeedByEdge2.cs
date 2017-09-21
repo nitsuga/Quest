@@ -52,14 +52,12 @@ namespace Quest.Lib.Routing.Speeds
                 Logger.Write("Need 64bit arhitecture for this estimator", GetType().Name, System.Diagnostics.TraceEventType.Error);
             }
 
-            using (var context = new QuestEntities())
+            using (var context = new QuestContext())
             {
-                context.Configuration.ProxyCreationEnabled = false;
-
                 Logger.Write("Loading road speeds", GetType().Name);
                 // count roadlinks
                 var speeds =
-                    context.RoadSpeeds.AsNoTracking()
+                    context.RoadSpeed
                         .ToArray()
                         .GroupBy(x => x.RoadLinkEdgeId ?? 0);
 

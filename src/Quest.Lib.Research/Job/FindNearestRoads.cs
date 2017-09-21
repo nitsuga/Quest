@@ -86,9 +86,9 @@ namespace Quest.Lib.Research.Job
                 context.Database.CommandTimeout = 36000;
                 context.Configuration.ProxyCreationEnabled = false;
 
-                var total = context.Avls.AsNoTracking().Count(x => x.Process == true);
-                var max = context.Avls.AsNoTracking().Where(x => x.Process == true).Max(x => x.RawAvlsId);
-                var min = context.Avls.AsNoTracking().Where(x => x.Process == true).Min(x => x.RawAvlsId);
+                var total = context.Avls.Count(x => x.Process == true);
+                var max = context.Avls.Where(x => x.Process == true).Max(x => x.RawAvlsId);
+                var min = context.Avls.Where(x => x.Process == true).Min(x => x.RawAvlsId);
                 var batchsize = (max - min)/maxtasks;
                 var batch = 0;
                 for (int i = min; i < max; i += batchsize)
@@ -177,7 +177,7 @@ namespace Quest.Lib.Research.Job
                 context2.Configuration.ProxyCreationEnabled = false;
                 int itemsAppended = 0;
                 var items =
-                    context2.Avls.AsNoTracking()
+                    context2.Avls
                         .Where(x => x.RawAvlsId >= p.From && x.RawAvlsId < (p.From + p.BatchSize) && x.Process);
                 foreach (var r in items) // for each GPS fix..
                 {

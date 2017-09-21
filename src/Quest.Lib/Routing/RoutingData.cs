@@ -95,15 +95,11 @@ namespace Quest.Lib.Routing
             try
             {
                 Logger.Write($"Loading road network...", TraceEventType.Information, "Routing Data");
-                using (var db = new QuestEntities())
+                using (var db = new QuestContext())
                 {
-                    db.Configuration.ProxyCreationEnabled = false;
-                    db.Database.CommandTimeout = 60;
-                    connection = db.Database.Connection.ConnectionString;
-
-                    foreach (var current in db.RoadLinkEdges.AsNoTracking())
+                    foreach (var current in db.RoadLinkEdge)
                     {
-                        var geomAny = _reader.Read(current.WKT);
+                        var geomAny = _reader.Read(current.Wkt);
                         var geom = geomAny.GetGeometryN(0) as LineString;
                         var con = new RoadEdge(current.RoadLinkEdgeId, current.RoadLinkId, current.RoadName, current.RoadTypeId, geom, current.SourceGrade, current.TargetGrade);
 
@@ -114,7 +110,7 @@ namespace Quest.Lib.Routing
                     }
 
                     // patch up outlinks
-                    foreach (var link in db.RoadLinkEdgeLinks.AsNoTracking())
+                    foreach (var link in db.RoadLinkEdgeLink)
                     {
                         var src = Dict[link.SourceRoadLinkEdge];
                         var dst = Dict[link.TargetRoadLinkEdge];

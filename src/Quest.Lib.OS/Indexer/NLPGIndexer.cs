@@ -69,7 +69,7 @@ namespace Quest.Lib.OS.Indexer
 
                     // main loop here
                     foreach (
-                        var r in db.NLPGs.AsNoTracking().Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex))
+                        var r in db.NLPGs.Where(x => x.Id >= work.StartIndex && x.Id <= work.StopIndex))
                     {
                         lock (config)
                         {

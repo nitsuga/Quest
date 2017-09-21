@@ -9,6 +9,7 @@
 
 namespace Quest.Lib.OS.Model
 {
+    using Microsoft.EntityFrameworkCore;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
 

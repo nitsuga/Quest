@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Quest.Common.Messages;
 using Quest.Lib.Processor;
+using Quest.Lib.Search.Elastic;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,7 @@ namespace Quest.Core
             foreach (var proc in settings.modules)
             {
                 Logger.Write($"Creating {proc}", GetType().Name);
+                var t = System.IO.Directory.GetCurrentDirectory();
                 IProcessor procInstance = applicationContainer.ResolveNamed<IProcessor>(proc);
                 AllProcessors.Add(proc, procInstance);
             }
@@ -70,8 +72,6 @@ namespace Quest.Core
         {
             var queue = $"ProcessRunner_{settings.session}";
             Logger.Write($"{settings.session}:ProcessRunner: Attaching to queue {queue}", GetType().Name);
-            //IServiceBusClient serviceBusClient = container.GetService<IServiceBusClient>();
-            //serviceBusClient.Initialise(queue);
 
             foreach (var proc in settings.modules)
             {

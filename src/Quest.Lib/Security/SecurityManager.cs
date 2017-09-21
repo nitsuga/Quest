@@ -83,22 +83,19 @@ namespace Quest.Lib.Security
         /// <returns></returns>
         private List<AuthorisationClaim> GetAppClaims(string name)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 return GetAppClaims(name, db);
             }
         }
 
-        private List<AuthorisationClaim> GetAppClaims(string name, QuestEntities db)
+        private List<AuthorisationClaim> GetAppClaims(string name, QuestContext db)
         {
-            using (var results = db.GetClaims("user", name))
-            {
-                var list =
-                    results.Select(
+            var results = db.GetClaims("user", name);
+            var list =  results.Select(
                         x => new AuthorisationClaim() { ClaimType = x.SecuredItemName, ClaimValue = x.SecuredValue })
                         .ToList();
                 return list;
-            }
         }
 
         /// <summary>
@@ -153,7 +150,7 @@ namespace Quest.Lib.Security
             if (checkExists)
                 CheckExists(claimType, claimValue);
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var claimList1 = db.GetClaims(parentClaimType, parentClaimValue).ToList();
                 var claimList2 = db.GetClaims(claimType, claimValue).ToList();
@@ -178,7 +175,7 @@ namespace Quest.Lib.Security
         /// <param name="claimValue"></param>
         private void CheckExists(string claimType, string claimValue)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 if (
                     !db.SecuredItems.Any(x => x.SecuredItemName == claimType && x.SecuredValue == claimValue))
@@ -188,19 +185,19 @@ namespace Quest.Lib.Security
                             .FirstOrDefault(x => x.SecuredItemName == "specialrole" && x.SecuredValue == "WebService");
                     if (ws == null)
                     {
-                        ws = new SecuredItem() {SecuredItemName = "specialrole", SecuredValue = "WebService"};
+                        ws = new SecuredItems {SecuredItemName = "specialrole", SecuredValue = "WebService"};
                         db.SecuredItems.Add(ws);
                         db.SaveChanges();
                     }
 
-                    var item = new SecuredItem() {SecuredItemName = claimType, SecuredValue = claimValue};
+                    var item = new SecuredItems {SecuredItemName = claimType, SecuredValue = claimValue};
                     db.SecuredItems.Add(item);
                     db.SaveChanges();
 
-                    var link = new SecuredItemLink()
+                    var link = new SecuredItemLinks
                     {
-                        SecuredItemIDParent = ws.SecuredItemID,
-                        SecuredItemIDChild = item.SecuredItemID
+                        SecuredItemIdparent = ws.SecuredItemId,
+                        SecuredItemIdchild = item.SecuredItemId
                     };
                     db.SecuredItemLinks.Add(link);
                     db.SaveChanges();
@@ -217,14 +214,14 @@ namespace Quest.Lib.Security
         {
             List<SecurityItem> returnItem;
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 returnItem =
                     db.SecuredItems.Select(
                         x =>
                             new SecurityItem()
                             {
-                                SecuredItemID = x.SecuredItemID,
+                                SecuredItemID = x.SecuredItemId,
                                 SecuredItemName = x.SecuredItemName,
                                 SecuredValue = x.SecuredValue,
                                 Priority = x.Priority
@@ -238,11 +235,11 @@ namespace Quest.Lib.Security
         {
             SecurityNetwork returnItem=new SecurityNetwork();
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 db.Configuration.ProxyCreationEnabled = false;
-                returnItem.Items = db.SecuredItems.AsNoTracking().ToList();
-                returnItem.Links = db.SecuredItemLinks.AsNoTracking().ToList();
+                returnItem.Items = db.SecuredItems.ToList();
+                returnItem.Links = db.SecuredItemLinks.ToList();
             }
             return returnItem;
         }
@@ -255,7 +252,7 @@ namespace Quest.Lib.Security
         public List<SecurityItemLink> GetAllSecuredItemLinks()
         {
             List<SecurityItemLink> returnItem;
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 returnItem =
                     db.SecuredItemLinks.Select(
@@ -263,8 +260,8 @@ namespace Quest.Lib.Security
                             new SecurityItemLink()
                             {
                                 SecuredItemLinkId = x.SecuredItemLinkId,
-                                SecuredItemIDChild = x.SecuredItemIDChild,
-                                SecuredItemIDParent = x.SecuredItemIDParent
+                                SecuredItemIDChild = x.SecuredItemIdchild,
+                                SecuredItemIDParent = x.SecuredItemIdparent
                             }).ToList();
             }
             return returnItem;

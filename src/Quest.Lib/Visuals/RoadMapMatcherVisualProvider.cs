@@ -6,6 +6,7 @@ using System.Linq;
 using Quest.Lib.DataModel;
 using Quest.Lib.MapMatching;
 using Quest.Lib.ServiceBus.Messages;
+using Quest.Common.Messages;
 
 namespace Quest.Lib.Visuals
 {

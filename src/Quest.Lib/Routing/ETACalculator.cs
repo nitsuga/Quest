@@ -39,13 +39,13 @@ namespace Quest.Lib.Routing
 
                             var result = new EtaResult
                             {
-                                Callsign = r.Callsign,
+                                Callsign = r.Callsign.Callsign1,
                                 Eta = UpdateResourceEta(
                                     routingEngine,
                                     routingdata,
-                                    r.ResourceID,
-                                    r.ResourceType,
-                                    r.ETA,
+                                    r.ResourceId,
+                                    r.ResourceType.ResourceType1,
+                                    r.Eta,
                                     fc.Easting, fc.Northing,
                                     tc.Easting, tc.Northing,
                                     speedCalc)
@@ -67,22 +67,7 @@ namespace Quest.Lib.Routing
             }
             catch (Exception ex)
             {
-                WriteError(ex);
-            }
-        }
-
-        private static void ClearNonEnrouteTimes()
-        {
-            try
-            {
-                using (var db = new QuestEntities())
-                {
-                    db.Database.ExecuteSqlCommand("update resource set eta=null where BusyEnroute=0");
-                }
-            }
-            catch (Exception ex)
-            {
-                WriteError(ex);
+                Logger.Write(ex);
             }
         }
 
@@ -90,22 +75,22 @@ namespace Quest.Lib.Routing
         ///     get enroute vehicles for ETA calcs.
         /// </summary>
         /// <returns></returns>
-        private static ResourceView[] GetEnrouteResources()
+        private static DataModel.Resource[] GetEnrouteResources()
         {
-            ResourceView[] result = null;
+            DataModel.Resource[] result = null;
             try
             {
-                using (var db = new QuestEntities())
+                using (var db = new QuestContext())
                 {
                     using (new TransactionScope(TransactionScopeOption.Required,
                         new TransactionOptions {IsolationLevel = IsolationLevel.ReadUncommitted}))
                     {
-                        var vehEnroute = from r in db.ResourceViews
-                            where r.LastUpdated > _fromTimeStampEnroute && r.BusyEnroute == true
+                        var vehEnroute = from r in db.Resource
+                            where r.LastUpdated > _fromTimeStampEnroute && r.ResourceStatus.BusyEnroute == true
                             select r;
 
                         result = vehEnroute.ToArray();
-                        var dateTime = (from x in db.ResourceViews select x.LastUpdated).Max();
+                        var dateTime = (from x in db.Resource select x.LastUpdated).Max();
                         if (dateTime != null)
                             _fromTimeStampEnroute = (DateTime) dateTime;
                     }
@@ -113,7 +98,7 @@ namespace Quest.Lib.Routing
             }
             catch (Exception ex)
             {
-                WriteError(ex);
+                Logger.Write(ex);
             }
             return result;
         }
@@ -173,18 +158,18 @@ namespace Quest.Lib.Routing
                 else
                 {
                     // update the resource
-                    using (var db = new QuestEntities())
+                    using (var db = new QuestContext())
                     {
                         try
                         {
-                            var res = db.Resources.First(x => x.ResourceID == resourceId);
-                            res.ETA = eta;
+                            var res = db.Resource.First(x => x.ResourceId == resourceId);
+                            res.Eta = eta;
                             res.Road = roadName;
                             db.SaveChanges();
                         }
                         catch (Exception ex)
                         {
-                            WriteError(ex);
+                            Logger.Write(ex);
                         }
                     }
                 }
@@ -193,10 +178,5 @@ namespace Quest.Lib.Routing
             return eta;
         }
 
-        private static void WriteError(Exception ex)
-        {
-            EventLog.WriteEntry("Application", ex.ToString());
-            //WriteEvent(ex.ToString(), EventLogEntryType.Error);
-        }
     }
 }

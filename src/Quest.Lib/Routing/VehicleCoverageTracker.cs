@@ -202,7 +202,7 @@ namespace Quest.Lib.Routing
                 _cache.Remove(callsign);
         }
 
-        private void UpdateCacheLocations(List<ResourceView> resources)
+        private void UpdateCacheLocations(List<DataModel.Resource> resources)
         {
             // cycle through resources updating the cache if the resource is
             foreach (var res in resources)
@@ -215,7 +215,7 @@ namespace Quest.Lib.Routing
                     if (res.Callsign == null)
                         continue;
 
-                    if (!_cache.ContainsKey(res.Callsign))
+                    if (!_cache.ContainsKey(res.Callsign.Callsign1))
                     {
                         // create a new cache entry as this one doesn't exist
                         updatedRoutingPoint = new Coordinate
@@ -224,11 +224,11 @@ namespace Quest.Lib.Routing
                             Y = res.Latitude ?? 0
                         };
 
-                        entry = new CacheEntry {Callsign = res.Callsign, CurLocation = updatedRoutingPoint, Map = null};
-                        _cache.Add(res.Callsign, entry);
+                        entry = new CacheEntry {Callsign = res.Callsign.Callsign1, CurLocation = updatedRoutingPoint, Map = null};
+                        _cache.Add(res.Callsign.Callsign1, entry);
                     }
                     else
-                        entry = _cache[res.Callsign];
+                        entry = _cache[res.Callsign.Callsign1];
 
                     // entry is now either a new or existing cache entry
 
@@ -250,21 +250,21 @@ namespace Quest.Lib.Routing
             }
         }
 
-        private List<ResourceView> GetAvailableResources(string[] vehicleCodes)
+        private List<DataModel.Resource> GetAvailableResources(string[] vehicleCodes)
         {
-            List<ResourceView> resources = null;
+            List<DataModel.Resource> resources = null;
 
             // calculate available 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 using (
                     var scope = new TransactionScope(TransactionScopeOption.Required,
                         new TransactionOptions {IsolationLevel = IsolationLevel.ReadUncommitted}))
                 {
-                    var results = from result in db.ResourceViews
+                    var results = from result in db.Resource
                         where
-                            result.Available == true
-                            && vehicleCodes.Contains(result.ResourceType)
+                            result.ResourceStatus.Available == true
+//                            && vehicleCodes.Contains(result.ResourceType)
                             && result.Latitude != null
                         select result;
                     resources = results.ToList();

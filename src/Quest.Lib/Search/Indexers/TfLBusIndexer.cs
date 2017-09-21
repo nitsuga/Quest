@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualBasic.FileIO;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using CsvHelper;
+using System.IO;
 
 namespace Quest.Lib.Search.Indexers
 {
@@ -21,90 +22,83 @@ namespace Quest.Lib.Search.Indexers
         private void BuildBusStops(object filename, BuildIndexSettings config)
         {
             // throw away header line
-            using (var parser = new TextFieldParser(filename.ToString()))
+            using (StreamReader reader = File.OpenText(Filename))
             {
-
-                parser.SetDelimiters(",");
-
-                // skip header
-                parser.ReadFields();
-                var descriptor = GetBulkRequest(config);
-
-                while (!parser.EndOfData)
+                using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "," }))
                 {
-                    config.RecordsCurrent++;
-                    config.RecordsTotal++;
+                    var descriptor = GetBulkRequest(config);
 
-                    var data = parser.ReadFields();
-
-                    if (data == null)
-                        continue;
-
-                    if (data.Length < 8)
-                        break;
-
-                    var bus = data[0];
-                    var run = data[1];
-                    var seq = data[2];
-                    var code = data[4];
-                    var stopname = data[6].Replace("#", "");
-                    var easting = data[7];
-                    var northing = data[8];
-
-                    double e, n;
-
-                    double.TryParse(easting, out e);
-                    double.TryParse(northing, out n);
-
-                    var point = GeomUtils.ConvertToLatLonLoc(e, n);
-
-                    // commit any messages and report progress
-                    CommitCheck(this, config, descriptor);
-
-                    // check whether point is in master area if required
-                    if (!IsPointInRange(config, point.Longitude, point.Latitude))
+                    while (data.Read())
                     {
-                        config.Skipped++;
-                        continue;
-                    }
+                        config.RecordsCurrent++;
+                        config.RecordsTotal++;
 
-                    var terms = GetLocalAreas(point, config.LocalAreaNames);
+                        if (data == null)
+                            continue;
 
-                    //if (terms.Length > 0)
-                    {
-                        var description = "bus stop " + bus + " " + stopname;
-                        description = description.ToUpper();
+                        var bus = data[0];
+                        var run = data[1];
+                        var seq = data[2];
+                        var code = data[4];
+                        var stopname = data[6].Replace("#", "");
+                        var easting = data[7];
+                        var northing = data[8];
 
-                        var address = new LocationDocument
+                        double e, n;
+
+                        double.TryParse(easting, out e);
+                        double.TryParse(northing, out n);
+
+                        var point = GeomUtils.ConvertToLatLonLoc(e, n);
+
+                        // commit any messages and report progress
+                        CommitCheck(this, config, descriptor);
+
+                        // check whether point is in master area if required
+                        if (!IsPointInRange(config, point.Longitude, point.Latitude))
                         {
-                            Created = DateTime.Now,
-                            Type = IndexBuilder.AddressDocumentType.Bus,
-                            Source = "TFL",
-                            ID = IndexBuilder.AddressDocumentType.Bus + " " + bus + " " + run + "/" + seq,
-                            //BuildingName = "",
-                            indextext = Join(description, terms, false).Decompound(config.DecompoundList) + " " + code,
-                            Description = Join(description, terms, true),
-                            Location = point,
-                            Point = PointfromGeoLocation(point),
-                            // Organisation = "",
-                            // Postcode = "",
-                            //      SubBuilding = "",
-                            Thoroughfare = stopname.Split('/').ToList(),
-                            Locality = new List<string>(),
-                            Areas = terms,
-                            Status = "Approved"
-                        };
+                            config.Skipped++;
+                            continue;
+                        }
 
-                        // add to the list of stuff to index
-                        address.indextext = address.indextext.Replace("&", " and ");
+                        var terms = GetLocalAreas(point, config.LocalAreaNames);
 
-                        // add item to the list of documents to index
-                        AddIndexItem(address, descriptor);
+                        //if (terms.Length > 0)
+                        {
+                            var description = "bus stop " + bus + " " + stopname;
+                            description = description.ToUpper();
+
+                            var address = new LocationDocument
+                            {
+                                Created = DateTime.Now,
+                                Type = IndexBuilder.AddressDocumentType.Bus,
+                                Source = "TFL",
+                                ID = IndexBuilder.AddressDocumentType.Bus + " " + bus + " " + run + "/" + seq,
+                                //BuildingName = "",
+                                indextext = Join(description, terms, false).Decompound(config.DecompoundList) + " " + code,
+                                Description = Join(description, terms, true),
+                                Location = point,
+                                Point = PointfromGeoLocation(point),
+                                // Organisation = "",
+                                // Postcode = "",
+                                //      SubBuilding = "",
+                                Thoroughfare = stopname.Split('/').ToList(),
+                                Locality = new List<string>(),
+                                Areas = terms,
+                                Status = "Approved"
+                            };
+
+                            // add to the list of stuff to index
+                            address.indextext = address.indextext.Replace("&", " and ");
+
+                            // add item to the list of documents to index
+                            AddIndexItem(address, descriptor);
+                        }
                     }
+
+                    CommitBultRequest(config, descriptor);
+
                 }
-
-                CommitBultRequest(config, descriptor);
-
             }
         }
     }

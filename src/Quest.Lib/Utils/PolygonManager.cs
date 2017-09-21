@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using GeoAPI.Geometries;
-using Microsoft.VisualBasic.FileIO;
 using Nest;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Quadtree;
 using NetTopologySuite.IO;
 using Quest.Lib.Trace;
-using FieldType = Microsoft.VisualBasic.FileIO.FieldType;
 using Newtonsoft.Json;
+using System.IO;
+using CsvHelper;
 
 namespace Quest.Lib.Utils
 {
@@ -93,61 +93,7 @@ namespace Quest.Lib.Utils
             }
         }
 
-        public void BuildFromCsv(string filename, int geomColumn, bool skipHeader, int srid = 4326)
-        {
-            Logger.Write($"Building polygon index from {filename}, geom in {geomColumn}, srid={srid}", GetType().Name);
-
-            IGeometryFactory geomFact = new GeometryFactory();
-            var fileReader = new WKTReader(geomFact);
-
-            try
-            {
-                using (var parser = new TextFieldParser(filename) { TextFieldType = FieldType.Delimited, Delimiters = new string[] { "," } })
-                {
-                    parser.TextFieldType = FieldType.Delimited;
-                    parser.HasFieldsEnclosedInQuotes = true;
-
-                    // skip header
-                    if (skipHeader)
-                    {
-                        Logger.Write($"Skipping header");
-                        parser.ReadFields();
-                    }
-
-                    PolygonIndex = new Quadtree<PolygonData>();
-
-                    while (!parser.EndOfData)
-                    {
-                        try
-                        {
-                            var data = parser.ReadFields();
-                            if (data != null)
-                            {
-                                var geom = fileReader.Read(data[geomColumn]);
-
-                                var polydata = new PolygonData { data = data, geom = geom };
-
-                                geom.SRID = srid;
-
-                                // add to the index
-                                PolygonIndex.Insert(geom.EnvelopeInternal, polydata);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Write($"Polygon index failed: {ex}", GetType().Name);
-                        }
-                    }
-
-                    Logger.Write("Polygon index built", GetType().Name);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"Polygon index failed: {ex}", GetType().Name);
-            }
-        }
-
+     
         public void BuildFromJson(string filename, int geomColumn, int srid = 4326)
         {
             Logger.Write($"Building polygon index from {filename} srid={srid}", GetType().Name);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Spatial;
 using System.Globalization;
 using System.Linq;
 using GeoAPI.CoordinateSystems;
@@ -10,10 +9,14 @@ using Nest;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using NetTopologySuite.Utilities;
-using ProjNet.CoordinateSystems;
-using ProjNet.CoordinateSystems.Transformations;
+//using ProjNet.CoordinateSystems;
+//using ProjNet.CoordinateSystems.Transformations;
 using Quest.Lib.Coords;
 using Quest.Common.Messages;
+using ProjNet.CoordinateSystems.Transformations;
+using ProjNet.CoordinateSystems;
+//using GeoAPI.Geometries;
+//using GeoAPI.Geometries;
 
 namespace Quest.Lib.Utils
 {
@@ -29,19 +32,20 @@ namespace Quest.Lib.Utils
             return 12742.0 * Math.Asin(Math.Sqrt(a)); // 2 * R; R = 6371 km
         }
 
-        public static Coordinate ConvertToCoordinate(this DbGeometry x)
-        {
-            if (x.YCoordinate != null)
-            {
-                if (x.XCoordinate != null)
-                {
-                    var c = new LatLng((double)x.YCoordinate, (double)x.XCoordinate).WGS84ToOSRef();
 
-                    return new Coordinate(c.Easting, c.Northing);
-                }
-            }
-            return null;
-        }
+        //public static Coordinate ConvertToCoordinate(this DbGeometry x)
+        //{
+        //    if (x.YCoordinate != null)
+        //    {
+        //        if (x.XCoordinate != null)
+        //        {
+        //            var c = new LatLng((double)x.YCoordinate, (double)x.XCoordinate).WGS84ToOSRef();
+
+        //            return new Coordinate(c.Easting, c.Northing);
+        //        }
+        //    }
+        //    return null;
+        //}
 
         public static Coordinate ConvertToCoordinate(double lat, double lon)
         {
@@ -60,40 +64,52 @@ namespace Quest.Lib.Utils
             return string.Format(CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", x.Easting, x.Northing);
         }
 
-        public static DbGeometry ConvertToDbGeometry(OSRef x)
-        {
-            return DbGeometry.PointFromText(ConvertToGeometryString(x), 27700);
-        }
+        //public static Microsoft.Spatial.Geometry ConvertToDbGeometry(OSRef x)
+        //{
+        //    return Microsoft.Spatial.Geometry.PointFromText(ConvertToGeometryString(x), 27700);
+        //}
 
+        /// <summary>
+        /// Create an ellipse in WGS84 coordinate system. 
+        /// </summary>
+        /// <param name="angle">Angle in degrees</param>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="major">Semi-major radius in meters</param>
+        /// <param name="minor">semi-minor radius in meters</param>
+        /// <returns></returns>
         public static PolygonGeoShape MakeEllipseWsg84(double angle, double lat, double lon, double major, double minor)
         {
-            CoordinateTransformationFactory ctFact = new CoordinateTransformationFactory();
+            var geomFact = new GeometryFactory();
+            var csFact = new CoordinateSystemFactory();
+            var ctFact = new CoordinateTransformationFactory();
+
             IGeographicCoordinateSystem wgs84 = GeographicCoordinateSystem.WGS84;
-            var llCoords = new Coordinate { X = lon, Y = lat };
+            var llCoords = new double[] { lon, lat };
             // use 1st longitude to determine UTM Zone
-            var long2Utm = ((int)((llCoords.X + 180) / 6)) + 1;
-            ICoordinateSystem utm = ProjectedCoordinateSystem.WGS84_UTM(long2Utm, llCoords.Y > 0);
+            var long2Utm = ((int)((llCoords[0] + 180) / 6)) + 1;
+            ICoordinateSystem utm = ProjectedCoordinateSystem.WGS84_UTM(long2Utm, llCoords[1] > 0);
 
             // convert coords to UTM
             ICoordinateTransformation trans2Utm = ctFact.CreateFromCoordinateSystems(wgs84, utm);
             ICoordinateTransformation trans2Wgs84 = ctFact.CreateFromCoordinateSystems(utm, wgs84);
 
             var utmCoords = trans2Utm.MathTransform.Transform(llCoords);
-            
 
+            // create ellipse in local coordinates
             var factory = new GeometricShapeFactory();
             angle = angle * -1;
-            factory.Centre = utmCoords;
+            factory.Centre = new Coordinate(utmCoords[1], utmCoords[0]);
             factory.Height = major;
             factory.Width = minor;
-            factory.Rotation = angle / 180 * Math.PI;
-
+            factory.Rotation = angle / 180 * Math.PI;            
             var ellipse = factory.CeateEllipse();
+            var poly = geomFact.CreatePolygon(new LinearRing(ellipse.Coordinates));
 
             //convert back to latlong
-            var coordsWsg84 = trans2Wgs84.MathTransform.TransformList(ellipse.Coordinates.ToList()).ToArray();
-            var fact = new GeometryFactory();
-            var poly = fact.CreatePolygon(coordsWsg84);
+            var coords = ellipse.Coordinates.Select(x => new double[] { x.X, x.Y }).ToList();
+            var coordsWsg84 = trans2Wgs84.MathTransform.TransformList(coords).ToList();
+
             var nestPoly = MakePolygon(poly);
             return nestPoly;
         }
@@ -126,7 +142,7 @@ namespace Quest.Lib.Utils
             var nestPoly = MakePolygon(poly);
             return nestPoly;
         }
-        
+
         public static MultiLineStringGeoShape GetMultiLine(string wkt, ICoordinateTransformation transformer)
         {
             MultiLineStringGeoShape shape = new MultiLineStringGeoShape();
@@ -154,9 +170,9 @@ namespace Quest.Lib.Utils
                     for (var i = 0; i < numpoints; i++)
                     {
                         var coord = subgeom.Coordinates[i];
-                        if (transformer!=null)
+                        if (transformer != null)
                             coord = transformer.MathTransform.Transform(coord);
-                        points.Add(new GeoCoordinate( coord.Y, coord.X ));
+                        points.Add(new GeoCoordinate(coord.Y, coord.X));
                     }
                     listofpoints.Add(points);
                 }
@@ -170,7 +186,7 @@ namespace Quest.Lib.Utils
                 throw new Exception("Error", ex);
             }
         }
-        
+
         public static PolygonGeoShape MakePolygon(IGeometry geom)
         {
             try
@@ -243,7 +259,7 @@ namespace Quest.Lib.Utils
 
                 listofpoints.Add(points);
 
-                PolygonGeoShape result = new PolygonGeoShape {Coordinates = listofpoints};
+                PolygonGeoShape result = new PolygonGeoShape { Coordinates = listofpoints };
                 return result;
             }
             catch (Exception ex)
@@ -252,37 +268,37 @@ namespace Quest.Lib.Utils
             }
         }
 
-        public static List<List<GeoCoordinate>> GetMultiLine(DbGeometry geom)
-        {
-            try
-            {
-                var numpoints = geom.PointCount ?? 0;
-                var points = new List<GeoCoordinate>();
-                var listofpoints = new List<List<GeoCoordinate>>();
+        //public static List<List<GeoCoordinate>> GetMultiLine(DbGeometry geom)
+        //{
+        //    try
+        //    {
+        //        var numpoints = geom.PointCount ?? 0;
+        //        var points = new List<GeoCoordinate>();
+        //        var listofpoints = new List<List<GeoCoordinate>>();
 
-                for (var i = 1; i <= numpoints; i++)
-                {
-                    var x = geom.PointAt(i).XCoordinate;
-                    var y = geom.PointAt(i).YCoordinate;
+        //        for (var i = 1; i <= numpoints; i++)
+        //        {
+        //            var x = geom.PointAt(i).XCoordinate;
+        //            var y = geom.PointAt(i).YCoordinate;
 
-                    // convert from 27700 to WGS84
-                    if (x != null)
-                    {
-                        if (y != null)
-                        {
-                            var latlng = LatLongConverter.OSRefToWGS84((double) x, (double) y);
-                            points.Add(new GeoCoordinate(latlng.Latitude, latlng.Longitude));
-                        }
-                    }
-                }
-                listofpoints.Add(points);
-                return listofpoints;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error", ex);
-            }
-        }
+        //            // convert from 27700 to WGS84
+        //            if (x != null)
+        //            {
+        //                if (y != null)
+        //                {
+        //                    var latlng = LatLongConverter.OSRefToWGS84((double) x, (double) y);
+        //                    points.Add(new GeoCoordinate(latlng.Latitude, latlng.Longitude));
+        //                }
+        //            }
+        //        }
+        //        listofpoints.Add(points);
+        //        return listofpoints;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("Error", ex);
+        //    }
+        //}
 
         public static GeoLocation ConvertToLatLonLoc(double easting, double northing)
         {
@@ -295,55 +311,55 @@ namespace Quest.Lib.Utils
             return new GeoLocation(coord.Y, coord.X);
         }
 
-        public static PolygonGeoShape MakePolygon(DbGeometry geom)
-        {
-            var result = GetPolygon(geom);
+        //public static PolygonGeoShape MakePolygon(DbGeometry geom)
+        //{
+        //    var result = GetPolygon(geom);
 
-            var shape = new PolygonGeoShape {Coordinates = result};
+        //    var shape = new PolygonGeoShape {Coordinates = result};
 
-            return shape;
-        }
+        //    return shape;
+        //}
 
-        private static List<List<GeoCoordinate>> GetPolygon(DbGeometry geom)
-        {
-            try
-            {
-                var numpoints = geom.PointCount ?? 0;
-                var points = new List<GeoCoordinate>();
-                var listofpoints = new List<List<GeoCoordinate>>();
+        //private static List<List<GeoCoordinate>> GetPolygon(DbGeometry geom)
+        //{
+        //    try
+        //    {
+        //        var numpoints = geom.PointCount ?? 0;
+        //        var points = new List<GeoCoordinate>();
+        //        var listofpoints = new List<List<GeoCoordinate>>();
 
-                for (var i = 1; i <= numpoints; i++)
-                {
-                    var x = geom.PointAt(i).XCoordinate;
-                    var y = geom.PointAt(i).YCoordinate;
+        //        for (var i = 1; i <= numpoints; i++)
+        //        {
+        //            var x = geom.PointAt(i).XCoordinate;
+        //            var y = geom.PointAt(i).YCoordinate;
 
-                    // convert from 27700 to WGS84
-                    if (x != null)
-                    {
-                        if (y != null)
-                        {
-                            var latlng = LatLongConverter.OSRefToWGS84((double) x, (double) y);
-                            points.Add(new GeoCoordinate(latlng.Latitude, latlng.Longitude));
-                        }
-                    }
-                }
+        //            // convert from 27700 to WGS84
+        //            if (x != null)
+        //            {
+        //                if (y != null)
+        //                {
+        //                    var latlng = LatLongConverter.OSRefToWGS84((double) x, (double) y);
+        //                    points.Add(new GeoCoordinate(latlng.Latitude, latlng.Longitude));
+        //                }
+        //            }
+        //        }
 
-                // add 1st point as last to complete the polygon
-                var lastPoint = points.Last();
-                if (lastPoint.Latitude != points[0].Latitude || lastPoint.Longitude != points[0].Longitude)
-                {
-                    var newlastPoint = new GeoCoordinate(points[0].Latitude, points[0].Longitude);
-                    points.Add(newlastPoint);
-                }
+        //        // add 1st point as last to complete the polygon
+        //        var lastPoint = points.Last();
+        //        if (lastPoint.Latitude != points[0].Latitude || lastPoint.Longitude != points[0].Longitude)
+        //        {
+        //            var newlastPoint = new GeoCoordinate(points[0].Latitude, points[0].Longitude);
+        //            points.Add(newlastPoint);
+        //        }
 
-                listofpoints.Add(points);
-                return listofpoints;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error", ex);
-            }
-        }
+        //        listofpoints.Add(points);
+        //        return listofpoints;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("Error", ex);
+        //    }
+        //}
 
         public static PolygonizeResult Polygonize(SearchResponse results, double range)
         {
@@ -362,7 +378,7 @@ namespace Quest.Lib.Utils
 
             // also add polygons
             var polys = results.Documents
-                .Where(x=>x.l.Poly!=null)
+                .Where(x => x.l.Poly != null)
                 .SelectMany(doc => doc.l.Poly.Coordinates)
                 .SelectMany(c1 => c1)
                 .Select(doc => new Coordinate { X = doc.Longitude, Y = doc.Latitude })
@@ -371,8 +387,8 @@ namespace Quest.Lib.Utils
             coords.AddRange(polys);
 
             // use 1st longitude to determine UTM Zone
-            var long2Utm = ((int)((coords[0].X + 180)/6)) + 1;
-            ICoordinateSystem utm = ProjectedCoordinateSystem.WGS84_UTM(long2Utm, coords[0].Y>0);
+            var long2Utm = ((int)((coords[0].X + 180) / 6)) + 1;
+            ICoordinateSystem utm = ProjectedCoordinateSystem.WGS84_UTM(long2Utm, coords[0].Y > 0);
 
             // convert coords to UTM
             ICoordinateTransformation trans2Utm = ctFact.CreateFromCoordinateSystems(wgs84, utm);
@@ -384,8 +400,8 @@ namespace Quest.Lib.Utils
 
             // buffer the geom
             hullGeom = hullGeom.Buffer(range);
-            
-            result.centroid = trans2Wgs84.MathTransform.Transform(new [] { hullGeom.Centroid.X, hullGeom.Centroid.Y } );
+
+            result.centroid = trans2Wgs84.MathTransform.Transform(new[] { hullGeom.Centroid.X, hullGeom.Centroid.Y });
 
             // now convert back to WGS84
             var wgs84Coords = trans2Wgs84.MathTransform.TransformList(hullGeom.Coordinates);
@@ -408,7 +424,7 @@ namespace Quest.Lib.Utils
             foreach (var coordBng in geom.Coordinates)
             {
                 var coord = LatLongConverter.OSRefToWGS84(coordBng.X, coordBng.Y);
-                var en = new Coordinate {X = coord.Longitude, Y = coord.Latitude};
+                var en = new Coordinate { X = coord.Longitude, Y = coord.Latitude };
                 coords.Add(en);
             }
 

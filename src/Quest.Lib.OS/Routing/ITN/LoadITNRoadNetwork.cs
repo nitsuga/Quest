@@ -139,7 +139,7 @@ namespace Quest.Lib.OS.Routing.ITN
             using (var context = new QuestOSEntities())
             {
                 context.Configuration.ProxyCreationEnabled = false;
-                nodes = context.StaticRoadNodes.AsNoTracking().ToArray();
+                nodes = context.StaticRoadNodes.ToArray();
             }
 
             foreach (var current in nodes)
@@ -163,7 +163,7 @@ namespace Quest.Lib.OS.Routing.ITN
                 using (var context = new QuestOSEntities())
                 {
                     context.Configuration.ProxyCreationEnabled = false;
-                    var links = context.StaticRoadLinks.AsNoTracking().ToArray();
+                    var links = context.StaticRoadLinks.ToArray();
                     Logger.Write("Routing Data has loaded the road links", "LoadItn");
                     return links;
                 }

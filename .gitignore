@@ -1,7 +1,11 @@
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
-
+/src/.vs
+/src/Quest.WebCore/bin
+/src/Quest.WebCore/obj
+/src/Quest.Core/bin
+/src/Quest.Core/obj
 /src/packages
 /src/Quest.Cmd/bin
 /src/Quest.Cmd/obj

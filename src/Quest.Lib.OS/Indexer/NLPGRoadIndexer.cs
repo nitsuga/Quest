@@ -27,7 +27,7 @@ namespace Quest.Lib.Search.Indexers
                 db.Configuration.ProxyCreationEnabled = false;
                 var descriptor = GetBulkRequest(config);
 
-                foreach (var r in db.vw_NLPG_ROAD.AsNoTracking()) //#change NLPGroads
+                foreach (var r in db.vw_NLPG_ROAD) //#change NLPGroads
                 {
                     var point = Elastic.Utils.ConvertToLatLonLoc(r.STREET_START_X, r.STREET_START_Y);
 

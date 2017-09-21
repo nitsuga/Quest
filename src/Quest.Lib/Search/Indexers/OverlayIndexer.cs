@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
@@ -44,20 +43,17 @@ namespace Quest.Lib.Search.Indexers
             ICoordinateTransformation trans = ctFact.CreateFromCoordinateSystems(from, wgs84);
             WKTReader _reader = new WKTReader();
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                ((IObjectContextAdapter) db).ObjectContext.CommandTimeout = 360;
-
                 var descriptor = GetBulkRequest(config);
 
-                foreach (var overlay in db.MapOverlays.AsNoTracking())
+                foreach (var overlay in db.MapOverlay)
                 {
                     try
                     {
-                        config.RecordsTotal = db.MapOverlayItems.Count(x => x.MapOverlayID == overlay.MapOverlayID);
-                        var data = db.MapOverlayItemViews.AsNoTracking()
-                            .Where(x => x.MapOverlayID == overlay.MapOverlayID)                            ;
+                        config.RecordsTotal = db.MapOverlayItem.Count(x => x.MapOverlayId == overlay.MapOverlayId);
+                        var data = db.MapOverlayItem
+                            .Where(x => x.MapOverlayId == overlay.MapOverlayId);
                         foreach (var item in data)
                         {
                             config.RecordsCurrent++;
@@ -65,7 +61,8 @@ namespace Quest.Lib.Search.Indexers
                             // commit any messages and report progress
                             CommitCheck(this, config, descriptor);
 
-                            var geom = _reader.Read(item.WKT);
+                            //var geom = _reader.Read(item.Wkt);
+                            var geom = _reader.Read("");
                             var centre = geom.Centroid;
 
                             if (centre == null)
@@ -81,7 +78,7 @@ namespace Quest.Lib.Search.Indexers
                             {
                                 Type = overlay.OverlayName,
                                 Source = IndexBuilder.AddressDocumentType.Overlay,
-                                ID = IndexBuilder.AddressDocumentType.Overlay + item.MapOverlayItemID,
+                                ID = IndexBuilder.AddressDocumentType.Overlay + item.MapOverlayItemId,
                                 Description = item.Description,
                                 indextext = item.Description,
                                 Location = point,

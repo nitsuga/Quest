@@ -58,7 +58,7 @@ namespace Quest.Lib.ServiceBus
             }
             catch (Exception ex)
             {
-                EventLog.WriteEntry("Application", ex.ToString());
+                Logger.Write(ex);
             }
         }
 

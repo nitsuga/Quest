@@ -35,10 +35,10 @@ namespace Quest.Lib.Trackers
 
         static public void recordcallEnd(CallEnd msg)
         {
-            using (QuestEntities db = new QuestEntities())
+            using (var db = new QuestContext())
             {
 
-                var call = (from c in db.Calls where c.SwitchId == msg.CallId select c).FirstOrDefault();
+                var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
                 if (call != null)
                 {
                     call.Updated = DateTime.Now;
@@ -52,13 +52,13 @@ namespace Quest.Lib.Trackers
         static public Response CallEventHandler(NewMessageArgs t)
         {
             CallEvent msg = t.Payload as CallEvent;
-            using (QuestEntities db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var call = (from c in db.Calls where c.SwitchId == msg.CallId select c).FirstOrDefault();
+                var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
                 if (call == null)
                 {
                     call = new Call();
-                    db.Calls.Add(call);
+                    db.Call.Add(call);
                 }
 
                 call.Extension = msg.Extension.ToString();
@@ -76,9 +76,9 @@ namespace Quest.Lib.Trackers
 
         static public void recordcallerdetails(CallLookupResponse msg)
         {
-            using (QuestEntities db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var call = (from c in db.Calls where c.SwitchId == msg.CallId select c).FirstOrDefault();
+                var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
                 if (call != null)
                 {
                     call.Address1 = msg.Address[0] ?? "";

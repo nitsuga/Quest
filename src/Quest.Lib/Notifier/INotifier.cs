@@ -2,10 +2,10 @@
 {
     public interface INotifier
     {
-        void Send(string address, string replyto, IMessage message);
+        void Send(string address, string replyto, INotificationMessage message);
     }
 
-    public interface IMessage
+    public interface INotificationMessage
     {
         string Subject { get; set; }
         string Body { get; set; }

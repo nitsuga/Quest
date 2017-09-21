@@ -79,7 +79,7 @@ namespace Quest.Lib.Research.Job
                 // get 10000 "good" routes from November 2016. These routes have been excluded from the summary speed tables
                 // and so are effectvely unseen
                 routes = db.IncidentRouteViews
-                    .AsNoTracking()
+                    
                     //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
                     .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGPS == false)
                     .Take(100000)
@@ -134,7 +134,7 @@ namespace Quest.Lib.Research.Job
                 db.Configuration.ProxyCreationEnabled = false;
                 // get map match route as well
                 mapmatchdata = db.RoadSpeedItems
-                .AsNoTracking()
+                
                 .Where(x => x.IncidentRouteId == route.IncidentRouteID)
                 .OrderBy(x => x.DateTime)
                 .ToList();

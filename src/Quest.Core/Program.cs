@@ -14,6 +14,7 @@ using System.IO;
 using System.Threading;
 using Quest.Lib.Processor;
 using Quest.Lib.Research;
+using Quest.Lib.Search.Elastic;
 
 namespace Quest.Core
 {
@@ -196,8 +197,6 @@ namespace Quest.Core
             builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.Research", "Quest.Lib.Simulation" }));
 
             var dataAccess = Assembly.GetExecutingAssembly();
-
-            RoadMapMatcherVisualProvider p = new RoadMapMatcherVisualProvider();
 
             builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
 

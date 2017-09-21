@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic.FileIO;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using CsvHelper;
 
 namespace Quest.Lib.Search.Indexers
 {
@@ -42,7 +42,7 @@ namespace Quest.Lib.Search.Indexers
             var descriptor = GetBulkRequest(config);
 
             //speed up by checking london and surrounding counties only
-            string[] london = {"MET", "THAM", "ESSX", "HERT", "KENT", "SURY"};
+            string[] london = { "MET", "THAM", "ESSX", "HERT", "KENT", "SURY" };
 
             if (Filename.EndsWith(".zcsv"))
             {
@@ -52,111 +52,111 @@ namespace Quest.Lib.Search.Indexers
                 Filename = uncompressed;
             }
 
-            using (var parser = new TextFieldParser(Filename))
+            using (StreamReader reader = File.OpenText(Filename))
             {
-                parser.SetDelimiters(",");
-                // skip header
-                parser.ReadFields();
-
-                while (!parser.EndOfData)
+                using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "," }))
                 {
-                    config.RecordsTotal++;
-                    config.RecordsCurrent++;
+                    // skip header
+                    data.Read();
 
-                    var data = parser.ReadFields();
-
-                    //using an enum to relate column numbers to headings
-
-                    var type = data[(int)HAdata.Recordtype];
-                    var county = data[(int)HAdata.County];
-
-                    //if (!london.Contains(county))
-                    //{
-                    //    config.Skipped++;
-                    //    continue;
-                    //}
-
-                    if (!(type == "JUNCTION" || type == "INSERTMP" || type == "LINKMP"))
+                    while (data.Read())
                     {
-                        config.Skipped++;
-                        continue;
-                    }
+                        config.RecordsTotal++;
+                        config.RecordsCurrent++;
 
-                    var point = GeomUtils.ConvertToLatLonLoc(double.Parse(data[(int)HAdata.Easting]),
-                        double.Parse(data[(int)HAdata.Northing]));
+                        //using an enum to relate column numbers to headings
 
+                        var type = data[(int)HAdata.Recordtype];
+                        var county = data[(int)HAdata.County];
 
-                    if (data[(int)HAdata.Dd] != "M25")
-                    {
-                        // check whether point is in master area if required
-                        if (!IsPointInRange(config, point.Longitude, point.Latitude))
+                        //if (!london.Contains(county))
+                        //{
+                        //    config.Skipped++;
+                        //    continue;
+                        //}
+
+                        if (!(type == "JUNCTION" || type == "INSERTMP" || type == "LINKMP"))
                         {
                             config.Skipped++;
                             continue;
                         }
+
+                        var point = GeomUtils.ConvertToLatLonLoc(double.Parse(data[(int)HAdata.Easting]),
+                            double.Parse(data[(int)HAdata.Northing]));
+
+
+                        if (data[(int)HAdata.Dd] != "M25")
+                        {
+                            // check whether point is in master area if required
+                            if (!IsPointInRange(config, point.Longitude, point.Latitude))
+                            {
+                                config.Skipped++;
+                                continue;
+                            }
+                        }
+
+                        var terms = GetLocalAreas(config, point);
+
+                        // commit any messages and report progress
+                        CommitCheck(this, config, descriptor);
+
+                        var description = "";
+                        var addresstype = "";
+                        var id = "HWAY" + data[(int)HAdata.Haid];
+
+                        if (type == "JUNCTION") //use road number (DD) and junction name (TN) for description
+                        {
+                            description = $"{data[(int)HAdata.Dd]} {data[(int)HAdata.Tn]}";
+                            addresstype = IndexBuilder.AddressDocumentType.Junction;
+                            Debug.Print(id + " " + description);
+                        }
+                        else if (type == "INSERTMP" || type == "LINKMP")
+                        //use road number (DD) and junction name (TN) for description
+                        {
+                            addresstype = IndexBuilder.AddressDocumentType.MarkerPost;
+                            var pattern = @"P(?<postnumber>\d*)\/(?<postdecimal>\d)(?<postletter>[A-Z])";
+                            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+                            var m = regex.Match(data[(int)HAdata.Bd]);
+                            if (m.Success)
+                                description =
+                                    $"{data[(int)HAdata.Dd]} {m.Groups["postletter"].Value} {m.Groups["postnumber"].Value}.{m.Groups["postdecimal"].Value}";
+                            else
+                                continue;
+                        }
+                        // "M25 A 10.2"
+
+                        var address = new LocationDocument
+                        {
+                            Created = DateTime.Now,
+                            Type = addresstype,
+                            Source = "HighwaysAgency",
+                            ID = id,
+                            //BuildingName = "",
+                            Description = Join(description, terms, true),
+                            indextext = Join(description, terms, false),
+                            Location = point,
+                            //Organisation = "",
+                            //Postcode = "",
+                            //SubBuilding = "",
+                            Thoroughfare = new List<string>(),
+                            Locality = new List<string>(),
+                            Areas = terms,
+                            Status = "Approved"
+                        };
+                        //Debug.Print(address.indextext);
+                        address.Thoroughfare.Add(data[(int)HAdata.Dd]);
+
+                        // add to the list of stuff to index
+
+                        address.indextext = address.indextext.Replace("&", " and ").Decompound(config.DecompoundList);
+
+                        // add item to the list of documents to index
+                        AddIndexItem<LocationDocument>(address, descriptor);
                     }
 
-                    var terms = GetLocalAreas(config, point);
-
-                    // commit any messages and report progress
-                    CommitCheck(this, config, descriptor);
-
-                    var description = "";
-                    var addresstype = "";
-                    var id = "HWAY" + data[(int)HAdata.Haid];
-
-                    if (type == "JUNCTION") //use road number (DD) and junction name (TN) for description
-                    {
-                        description = $"{data[(int)HAdata.Dd]} {data[(int)HAdata.Tn]}";
-                        addresstype = IndexBuilder.AddressDocumentType.Junction;
-                        Debug.Print(id + " " + description);
-                    }
-                    else if (type == "INSERTMP" || type == "LINKMP")
-                    //use road number (DD) and junction name (TN) for description
-                    {
-                        addresstype = IndexBuilder.AddressDocumentType.MarkerPost;
-                        var pattern = @"P(?<postnumber>\d*)\/(?<postdecimal>\d)(?<postletter>[A-Z])";
-                        var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-                        var m = regex.Match(data[(int)HAdata.Bd]);
-                        if (m.Success)
-                            description =
-                                $"{data[(int)HAdata.Dd]} {m.Groups["postletter"].Value} {m.Groups["postnumber"].Value}.{m.Groups["postdecimal"].Value}";
-                        else
-                            continue;
-                    }
-                    // "M25 A 10.2"
-
-                    var address = new LocationDocument
-                    {
-                        Created = DateTime.Now,
-                        Type = addresstype,
-                        Source = "HighwaysAgency",
-                        ID = id,
-                        //BuildingName = "",
-                        Description = Join(description, terms, true),
-                        indextext = Join(description, terms, false),
-                        Location = point,
-                        //Organisation = "",
-                        //Postcode = "",
-                        //SubBuilding = "",
-                        Thoroughfare = new List<string>(),
-                        Locality = new List<string>(),
-                        Areas = terms,
-                        Status = "Approved"
-                    };
-                    //Debug.Print(address.indextext);
-                    address.Thoroughfare.Add(data[(int)HAdata.Dd]);
-
-                    // add to the list of stuff to index
-
-                    address.indextext = address.indextext.Replace("&", " and ").Decompound(config.DecompoundList);
-
-                    // add item to the list of documents to index
-                    AddIndexItem<LocationDocument>(address, descriptor);
+                    // commit anything else
+                    CommitBultRequest(config, descriptor);
                 }
-
-                // commit anything else
-                CommitBultRequest(config, descriptor);
             }
         }
     }

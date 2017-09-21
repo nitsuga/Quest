@@ -10,8 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Quest.Lib.DataModel;
-using Quest.Lib.OS.Model;
+using Quest.Lib.Data;
 using Quest.Lib.Trace;
+using Quest.Lib.DataModelOS;
 
 namespace Quest.Lib.OS.Routing.ITN
 {
@@ -48,9 +49,8 @@ namespace Quest.Lib.OS.Routing.ITN
 
         private void WriterQueue()
         {
-            using (var entities = new QuestEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.Database.CommandTimeout = int.MaxValue;
                 int count;
                 do
                 {
@@ -63,7 +63,8 @@ namespace Quest.Lib.OS.Routing.ITN
                         if (cmds.Count > 0)
                         {
                             string cmd = string.Join("\n", cmds);
-                            entities.Database.ExecuteSqlCommand(cmd);
+                                
+                            entities.Execute(cmd);
                             cmds.Clear();
                         }
                         count = cmds.Count;
@@ -527,41 +528,46 @@ namespace Quest.Lib.OS.Routing.ITN
 
         private void Clean()
         {
-            using (var entities = new QuestEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.CleanRoads();
+                //TODO: EF work
+                //entities.CleanRoads();
             }
         }
 
         private void AddRoadIndexes()
         {
-            using (var entities = new QuestEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.Database.ExecuteSqlCommand("exec AddRoadIndexes");
+                //TODO: EF work
+                //entities.Database.ExecuteSqlCommand("exec AddRoadIndexes");
             }
         }
 
         private void MakeStaticRoadinks()
         {
-            using (var entities = new QuestEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.Database.ExecuteSqlCommand("exec MakeStaticRoadinks");
+                //TODO: EF work
+                //entities.Database.ExecuteSqlCommand("exec MakeStaticRoadinks");
             }
         }
 
         private void PopulateJunctions()
         {
-            using (var entities = new QuestEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.Database.ExecuteSqlCommand("exec PopulateJunctions");
+                //TODO: EF work
+                //entities.Database.ExecuteSqlCommand("exec PopulateJunctions");
             }
         }
 
         private void PostProcess()
         {
-            using (var entities = new QuestOSEntities())
+            using (var entities = new QuestOSContext())
             {
-                entities.PostprocessITNLoad();
+                //TODO: EF work
+                //entities.PostprocessITNLoad();
             }
         }
 

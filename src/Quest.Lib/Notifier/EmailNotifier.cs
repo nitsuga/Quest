@@ -12,7 +12,7 @@ namespace Quest.Lib.Notifier
         private int _port;
 
 
-        public void Send(string address, string replyto, IMessage message)
+        public void Send(string address, string replyto, INotificationMessage message)
         {
             Logger.Write($"Sending email to {address} {message.Subject}", 
                 TraceEventType.Information, "EmailNotifier");

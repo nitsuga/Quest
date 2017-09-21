@@ -29,7 +29,7 @@ namespace Quest.Lib.Research.Utils
                 var routeinfo = context.IncidentRouteViews.FirstOrDefault(x => x.IncidentRouteID == id);
 
                 var fixes = context.Avls
-                    .AsNoTracking()
+                    
                     .Where(x => x.IncidentId == routeinfo.IncidentId)
                     .Where(x => x.Callsign.Trim() == routeinfo.Callsign.Trim())
                     .Where(x => x.Process)                  // Process flag must be set

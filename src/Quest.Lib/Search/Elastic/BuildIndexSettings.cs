@@ -16,9 +16,7 @@ namespace Quest.Lib.Search.Elastic
 
             LocalAreaNames = new PolygonManager();
 
-            if (settings.LocalAreasFile.EndsWith(".csv", StringComparison.InvariantCultureIgnoreCase))
-                LocalAreaNames.BuildFromCsv(settings.LocalAreasFile, 2, true);
-            else if (settings.LocalAreasFile.EndsWith(".json", StringComparison.InvariantCultureIgnoreCase))
+            if (settings.LocalAreasFile.EndsWith(".json", StringComparison.InvariantCultureIgnoreCase))
                 LocalAreaNames.BuildFromJson(settings.LocalAreasFile, 2);
             else if (settings.LocalAreasFile.EndsWith(".shp", StringComparison.InvariantCultureIgnoreCase))
                 LocalAreaNames.BuildFromShapefile(settings.LocalAreasFile);

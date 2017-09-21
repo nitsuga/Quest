@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using Quest.Lib.OS.Model;
 using Quest.Lib.Search.Elastic;
@@ -24,14 +23,10 @@ namespace Quest.Lib.OS.Indexer
             using (var db = new QuestOSEntities())
             {
                 var descriptor = GetBulkRequest(config);
-
-                db.Configuration.ProxyCreationEnabled = false;
-
-                ((IObjectContextAdapter) db).ObjectContext.CommandTimeout = 360;
                 var total = db.Junctions.Count();
                 config.RecordsTotal = total;
 
-                foreach (var r in db.Junctions.AsNoTracking())
+                foreach (var r in db.Junctions)
                 {
                     config.RecordsCurrent++;
 

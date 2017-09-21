@@ -1,15 +1,9 @@
 ﻿using GeoAPI.Geometries;
 using ServiceBus.Objects;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
 using RTree;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.SqlServer;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 using Quest.Lib.DataModel;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;

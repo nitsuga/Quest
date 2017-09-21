@@ -174,14 +174,14 @@ namespace Quest.Lib.Routing
                     }
                     catch (Exception ex)
                     {
-                        WriteError(ex);
+                        Logger.Write(ex);
                     }
 
                 } while (!_stopping);
             }
             catch (Exception ex)
             {
-                WriteError(ex);
+                Logger.Write(ex);
             }
         }
 
@@ -225,7 +225,7 @@ namespace Quest.Lib.Routing
                     }
                     catch (Exception ex)
                     {
-                        WriteError(ex);
+                        Logger.Write(ex);
                     }
 
                     try
@@ -239,10 +239,10 @@ namespace Quest.Lib.Routing
                     }
                     catch (Exception ex)
                     {
-                        WriteError(ex);
+                        Logger.Write(ex);
                     }
 
-                    using (var db = new QuestEntities())
+                    using (var db = new QuestContext())
                     {
                         db.CleanCoverage();
                     }
@@ -251,7 +251,7 @@ namespace Quest.Lib.Routing
             }
             catch (Exception ex)
             {
-                WriteError(ex);
+                Logger.Write(ex);
             }
         }
 
@@ -292,7 +292,7 @@ namespace Quest.Lib.Routing
             {
                 Logger.Write($"CalculateCustomCoverages: failed {ex}",
                     TraceEventType.Information, "Routing Manager");
-                WriteError(ex);
+                Logger.Write(ex);
             }
             return results;
         }
@@ -341,7 +341,7 @@ namespace Quest.Lib.Routing
             var request = t.Payload as GetCoverageRequest;
             if (request != null)
             {
-                using (var db = new QuestEntities())
+                using (var db = new QuestContext())
                 {
                     var r = new GetCoverageResponse();
                     var results = db.GetVehicleCoverage(Convert.ToInt16(request.vehtype)).First();
@@ -406,10 +406,10 @@ namespace Quest.Lib.Routing
         private void MakeTrackerList()
         {
             Logger.Write("Making coverage tracking list", TraceEventType.Information, "Routing Manager");
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // add in programmable ones.
-                var maps = from c in db.CoverageMapDefinitions where c.VehicleCodes.Length > 0 select c;
+                var maps = from c in db.CoverageMapDefinition where c.VehicleCodes.Length > 0 select c;
 
                 foreach (var m in maps)
                     _vehicleCoverageTrackerList.Add(new VehicleCoverageTracker<RoutingManager>
@@ -587,7 +587,7 @@ namespace Quest.Lib.Routing
             }
             catch (Exception ex)
             {
-                WriteError(ex);
+                Logger.Write(ex);
             }
 
             return null;
@@ -604,7 +604,7 @@ namespace Quest.Lib.Routing
 
             try
             {
-                using (var db = new QuestEntities())
+                using (var db = new QuestContext())
                 {
                     var results = db.GetIncidentDensity().ToList();
 
@@ -627,19 +627,12 @@ namespace Quest.Lib.Routing
             }
             catch (Exception ex)
             {
-                WriteError(ex);
+                Logger.Write(ex);
             }
 
             map.Percent = Math.Round(map.Coverage(_operationalArea)*100, 1);
 
             return map;
-        }
-
-        private static void WriteError(Exception ex)
-        {
-            Logger.Write(ex.ToString(), TraceEventType.Error,
-                "Routing Manager");
-            EventLog.WriteEntry("Application", ex.ToString());
         }
 
         /// <summary>
@@ -675,7 +668,7 @@ namespace Quest.Lib.Routing
         {
             try
             {
-                using (var db = new QuestEntities())
+                using (var db = new QuestContext())
                 {
                     try
                     {
@@ -688,17 +681,17 @@ namespace Quest.Lib.Routing
                             Data = map.Data,
                             OffsetX = map.OffsetX,
                             OffsetY = map.OffsetY,
-                            tstamp = DateTime.Now,
+                            Tstamp = DateTime.Now,
                             Percent = map.Percent
                         };
 
-                        db.CoverageMapStores.Add(newrecord);
+                        db.CoverageMapStore.Add(newrecord);
 
                         db.SaveChanges();
                     }
                     catch (Exception ex)
                     {
-                        WriteError(ex);
+                        Logger.Write(ex);
                     }
                 }
             }

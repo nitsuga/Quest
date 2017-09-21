@@ -14,7 +14,7 @@ namespace Quest.Lib.Notifier
         /// <param name="addresses">target addresses in the form address[,address...] where address is like mailto:someone@home.com</param>
         /// <param name="replyto">a return address if the target wishes to respond</param>
         /// <param name="message"></param>
-        public void Send(ILifetimeScope scope, string[] addresses, string replyto, IMessage message)
+        public void Send(ILifetimeScope scope, string[] addresses, string replyto, INotificationMessage message)
         {
             if (addresses == null)
                 return;
@@ -48,7 +48,7 @@ namespace Quest.Lib.Notifier
         /// <param name="address">target address in the form mailto:someone@home.com</param>
         /// <param name="replyto">a return address if the target wishes to respond</param>
         /// <param name="message"></param>
-        public async Task SendAsync(ILifetimeScope scope, string address, string replyto, IMessage message)
+        public async Task SendAsync(ILifetimeScope scope, string address, string replyto, INotificationMessage message)
         {
             if (address == null)
                 return;

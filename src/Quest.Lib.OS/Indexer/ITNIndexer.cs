@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
@@ -8,6 +7,7 @@ using Quest.Lib.OS.Model;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using Quest.Lib.DataModelOS;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -22,12 +22,9 @@ namespace Quest.Lib.OS.Indexer
         {
             DeleteDataSet<LocationDocument>(config.DefaultIndex, config.Client, IndexBuilder.AddressDocumentType.RoadLink);
 
-            using (var db = new QuestOSEntities())
+            using (var db = new QuestOSContext())
             {
-                db.Configuration.ProxyCreationEnabled = false;
-
-                ((IObjectContextAdapter) db).ObjectContext.CommandTimeout = 360;
-                var total = db.RoadNameViews.Count();
+                var total = db.Road.Count();
 
                 var descriptor = GetBulkRequest(config);
 
@@ -40,11 +37,11 @@ namespace Quest.Lib.OS.Indexer
                 var wgs84 = GeographicCoordinateSystem.WGS84;
                 var transformer = ctFact.CreateFromCoordinateSystems(from, wgs84);
 
-                foreach (var r in db.RoadNameViews.AsNoTracking().OrderBy(x => x.RoadLinkId))
+                foreach (var r in db.Road.OrderBy(x => x.RoadId))
                 {
                     config.RecordsCurrent++;
 
-                    var point = GeomUtils.ConvertToLatLonLoc(r.X,r.Y);
+                    var point = GeomUtils.ConvertToLatLonLoc(r.RoadNetworkMember.s.X,r.Y);
 
                     // check whether point is in master area if required
                     if (!IsPointInRange(config, point.Longitude, point.Latitude))
