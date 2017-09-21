@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using Nest;
 using Newtonsoft.Json.Linq;
-using PushSharp.Google;
+using PushSharp.Common;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
@@ -17,6 +17,7 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
+using PushSharp.Google;
 
 namespace Quest.Lib.Device
 {
@@ -46,20 +47,20 @@ namespace Quest.Lib.Device
 
         public void Update(QuestDevice device)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // locate record and create or update
                 var resrecord = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
                 if (resrecord != null)
                 {
-                    resrecord.OwnerID = device.OwnerID;
+                    resrecord.OwnerId = device.OwnerId;
                     resrecord.LoggedOnTime = DateTime.UtcNow;
                     resrecord.LastUpdate = DateTime.UtcNow;
-                    resrecord.NotificationTypeID = device.NotificationTypeID;
-                    resrecord.NotificationID = device.NotificationID;
+                    resrecord.NotificationTypeId = device.NotificationTypeId;
+                    resrecord.NotificationId = device.NotificationId;
                     resrecord.AuthToken = device.Token;
                     resrecord.DeviceIdentity = device.DeviceIdentity;
-                    resrecord.OSVersion = device.OSVersion;
+                    resrecord.Osversion = device.OSVersion;
                     resrecord.DeviceMake = device.DeviceMake;
                     resrecord.DeviceModel = device.DeviceModel;
                 }
@@ -67,23 +68,23 @@ namespace Quest.Lib.Device
                 {
                     var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
                     // new record
-                    resrecord = new DataModel.Device
+                    resrecord = new DataModel.Devices
                     {
-                        OwnerID = device.OwnerID,
+                        OwnerId = device.OwnerId,
                         DeviceIdentity = device.DeviceIdentity,
                         LoggedOnTime = DateTime.UtcNow,
                         LastUpdate = DateTime.UtcNow,
-                        DeviceRoleID = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
-                        NotificationTypeID = device.NotificationTypeID,
-                        NotificationID = device.NotificationID,
+                        DeviceRoleId = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
+                        NotificationTypeId = device.NotificationTypeId,
+                        NotificationId = device.NotificationId,
                         AuthToken = device.Token,
-                        isEnabled = true,
+                        IsEnabled = true,
                         LastStatusUpdate = DateTime.UtcNow,
                         LoggedOffTime = null,
-                        OSVersion = device.OSVersion,
+                        Osversion = device.OSVersion,
                         DeviceMake = device.DeviceMake,
                         DeviceModel = device.DeviceModel,
-                        ResourceID = null,
+                        ResourceId = null,
                         PositionAccuracy = 0,
                         NearbyDistance = 0,
                     };
@@ -110,11 +111,11 @@ namespace Quest.Lib.Device
 
             var resrecord = devStore.Get(request.DeviceIdentity);
             if (resrecord != null) {
-                resrecord.OwnerID = request.Username;
+                resrecord.OwnerId = request.Username;
                 resrecord.LoggedOnTime = DateTime.UtcNow;
                 resrecord.LastUpdate = DateTime.UtcNow;
-                resrecord.NotificationTypeID = request.NotificationTypeId;
-                resrecord.NotificationID = request.NotificationId;
+                resrecord.NotificationTypeId = request.NotificationTypeId;
+                resrecord.NotificationId = request.NotificationId;
                 resrecord.AuthToken = token;
                 resrecord.DeviceIdentity = request.DeviceIdentity;
                 resrecord.OSVersion = request.OSVersion;
@@ -129,21 +130,21 @@ namespace Quest.Lib.Device
                 // new record
                 resrecord = new QuestDevice
                 {
-                    OwnerID = request.Username,
+                    OwnerId = request.Username,
                     DeviceIdentity = request.DeviceIdentity,
                     LoggedOnTime = DateTime.UtcNow,
                     LastUpdate = DateTime.UtcNow,
-                    DeviceRoleID = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
-                    NotificationTypeID = request.NotificationTypeId,
-                    NotificationID = request.NotificationId,
+                    DeviceRoleId = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
+                    NotificationTypeId = request.NotificationTypeId,
+                    NotificationId = request.NotificationId,
                     AuthToken = token,
-                    isEnabled = true,
+                    IsEnabled = true,
                     LastStatusUpdate = DateTime.UtcNow,
                     LoggedOffTime = null,
                     OSVersion = request.OSVersion,
                     DeviceMake = request.DeviceMake,
                     DeviceModel = request.DeviceModel,
-                    ResourceID = null,
+                    ResourceId = null,
                     PositionAccuracy = 0,
                     NearbyDistance = 0,
                 };
@@ -156,15 +157,15 @@ namespace Quest.Lib.Device
                 // make sure device is paired with a callsign
                 resStore.Get()
                 Resource resource = null;
-                if (resrecord.ResourceID != null)
-                    resource = db.Resources.FirstOrDefault(x => x.ResourceID == resrecord.ResourceID);
+                if (resrecord.ResourceId != null)
+                    resource = db.Resources.FirstOrDefault(x => x.ResourceId == resrecord.ResourceId);
 
                 if (resource == null)
                 {
                     // the device is not linked to a resource so make up a callsign using the device id
                     // this might already exist in which case link to that resource using that callsign
                     // make a suitable callsign
-                    callsign = "#" + resrecord.DeviceID.ToString("0000");
+                    callsign = "#" + resrecord.DeviceId.ToString("0000");
                     var cs = db.Callsigns.FirstOrDefault(x => x.Callsign1 == callsign);
                     if (cs == null)
                     {
@@ -178,7 +179,7 @@ namespace Quest.Lib.Device
                     if (resource != null)
                     {
                         // a resource record already exists for this devices temporary callsign so use it
-                        resrecord.ResourceID = resource.ResourceID;
+                        resrecord.ResourceId = resource.ResourceId;
                         db.SaveChanges();
                     }
                     else
@@ -196,7 +197,7 @@ namespace Quest.Lib.Device
                             {
                                 Agency = "",
                                 Destination = "",
-                                CallsignID = cs.CallsignID,
+                                CallsignId = cs.CallsignId,
                                 Class = "",
                                 Comment = "device for " + request.Username,
                                 Direction = 0,
@@ -207,7 +208,7 @@ namespace Quest.Lib.Device
                                 LastUpdated = DateTime.UtcNow,
                                 ResourceTypeId = type.ResourceTypeId,
                                 Road = "",
-                                ResourceStatusID = status.ResourceStatusID,
+                                ResourceStatusId = status.ResourceStatusId,
                                 Sector = "",
                                 Serial = "",
                                 Skill = "",
@@ -217,7 +218,7 @@ namespace Quest.Lib.Device
                             db.Resources.Add(resource);
                             db.SaveChanges();
 
-                            resrecord.ResourceID = resource.ResourceID;
+                            resrecord.ResourceId = resource.ResourceId;
                             db.SaveChanges();
 
                             //TODO: Save to Elastic
@@ -263,8 +264,8 @@ namespace Quest.Lib.Device
                 resrecord.LoggedOffTime = DateTime.UtcNow;
                 resrecord.LastUpdate = DateTime.UtcNow;
                 resrecord.AuthToken = null;
-                resrecord.NotificationID = "";
-                resrecord.NotificationTypeID = 0;
+                resrecord.NotificationId = "";
+                resrecord.NotificationTypeId = 0;
 
                 devStore.Update(resrecord);
 
@@ -286,7 +287,7 @@ namespace Quest.Lib.Device
         public CallsignChangeResponse CallsignChange(CallsignChangeRequest request)
         {
             var oldCallsign = "";
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -304,7 +305,7 @@ namespace Quest.Lib.Device
 
                 if (request.Callsign != null && request.Callsign.Length >= 0)
                 {
-                    var resrecord = db.Resources.FirstOrDefault(x => x.Callsign.Callsign1 == request.Callsign);
+                    var resrecord = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == request.Callsign);
                     if (resrecord == null)
                     {
                         return new CallsignChangeResponse
@@ -314,7 +315,7 @@ namespace Quest.Lib.Device
                             Message = "unknown callsign"
                         };
                     }
-                    deviceRecord.ResourceID = resrecord.ResourceID;
+                    deviceRecord.ResourceId = resrecord.ResourceId;
                 }
 
                 deviceRecord.LastUpdate = DateTime.UtcNow;
@@ -341,7 +342,7 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public RefreshStateResponse RefreshState(RefreshStateRequest request, NotificationSettings settings, IIncidentStore incStore)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -365,7 +366,7 @@ namespace Quest.Lib.Device
                 // send incident details if currently assigned
                 if (inc != null)
                 {
-                    var devices = new List<DataModel.Device> {deviceRecord};
+                    var devices = new List<DataModel.Devices> {deviceRecord};
                     SendEventNotification(devices, inc, settings, "Refresh");
                 }
 
@@ -379,7 +380,7 @@ namespace Quest.Lib.Device
 
         public AckAssignedEventResponse AckAssignedEvent(AckAssignedEventRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -421,7 +422,7 @@ namespace Quest.Lib.Device
 
         public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -450,7 +451,7 @@ namespace Quest.Lib.Device
 
         public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -475,7 +476,7 @@ namespace Quest.Lib.Device
 
         public PatientDetailsResponse PatientDetails(PatientDetailsRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -515,7 +516,7 @@ namespace Quest.Lib.Device
 
         public GetEntityTypesResponse GetEntityTypes(GetEntityTypesRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -560,12 +561,11 @@ namespace Quest.Lib.Device
                 Message = "successful"
             };
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // make a note of the current revision
-                var firstOrDefault = db.GetRevision().FirstOrDefault();
-                if (firstOrDefault != null)
-                    response.CurrRevision = (long) firstOrDefault;
+                var resmax = db.Resource.Max(x => x.Revision);
+                response.CurrRevision = (long)resmax+1;
             }
 
             response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
@@ -639,26 +639,32 @@ namespace Quest.Lib.Device
 
         private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var d = db.DestinationViews
+                var d = db.Destinations
                     .Where(x => ((hospitals == true && x.IsHospital == true))
                              || ((stations == true && x.IsStation == true))
                              || ((standby == true && x.IsStandby == true))
                               )
                     .ToList()
-                    .Select(x => new QuestDestination
+                    .Select(x =>
                     {
-                        ID = x.DestinationID.ToString(),
-                        IsHospital = x.IsHospital ?? false,
-                        IsAandE = x.IsAandE ?? false,
-                        IsRoad = x.IsRoad ?? false,
-                        IsStandby = x.IsStandby ?? false,
-                        IsStation = x.IsStation ?? false,
-                        Name = x.Destination,
-                        X = x.X ?? 0,
-                        Y = x.Y ?? 0
-                    })
+                        var point = Lib.Utils.GeomUtils.GetPointFromWkt(x.Wkt);
+                        return new QuestDestination
+                        {
+                            ID = x.DestinationId.ToString(),
+                            IsHospital = x.IsHospital ?? false,
+                            IsAandE = x.IsAandE ?? false,
+                            IsRoad = x.IsRoad ?? false,
+                            IsStandby = x.IsStandby ?? false,
+                            IsStation = x.IsStation ?? false,
+                            Name = x.Destination,
+                            X = point.X,
+                            Y = point.Y
+                        };
+
+                        }
+                    )
                     .ToList();
 
                 foreach (var res in d)
@@ -671,35 +677,41 @@ namespace Quest.Lib.Device
             }
         }
 
-        private List<int?> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
+        IEnumerable<DataModel.Resource> ResourceAtRevision(QuestContext db, long revision)
         {
-            using (var db = new QuestEntities())
+            //TODO: Net Core
+            return null;
+        }
+
+        private List<int> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
+        {
+            using (var db = new QuestContext())
             {
-                var results = new List<int?>();
+                var results = new List<int>();
 
                 // work out which ones were on display at the original revision
                 if (avail && busy)
                 {
                     results.AddRange(
-                        db.ResourceAtRevision(revision)
-                            .Where(x => x.Busy == true || x.Available == true)
-                            .Select(x => x.ResourceID)
+                        ResourceAtRevision(db, revision)
+                            .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
+                            .Select(x => x.ResourceId)
                         );
                 }
                 else
                 {
                     if (avail)
                         results.AddRange(
-                            db.ResourceAtRevision(revision)
-                                .Where(x => x.Available == true)
-                                .Select(x => x.ResourceID)
+                            ResourceAtRevision(db, revision)
+                                .Where(x => x.ResourceStatus.Available == true)
+                                .Select(x => x.ResourceId)
                             );
 
                     if (busy)
                         results.AddRange(
-                            db.ResourceAtRevision(revision)
-                                .Where(x => x.Busy == true)
-                                .Select(x => x.ResourceID)
+                            ResourceAtRevision(db, revision)
+                                .Where(x => x.ResourceStatus.Busy == true)
+                                .Select(x => x.ResourceId)
                             );
                 }
 
@@ -709,15 +721,15 @@ namespace Quest.Lib.Device
 
         public List<EventMapItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var results = new List<IncidentView>();
+                var results = new List<DataModel.Incident>();
 
                 if (includeCatA)
-                    results.AddRange(db.IncidentViews.Where(x => x.Priority.StartsWith("R") && x.Revision > revision));
+                    results.AddRange(db.Incident.Where(x => x.Priority.StartsWith("R") && x.Revision > revision));
 
                 if (includeCatB)
-                    results.AddRange(db.IncidentViews.Where(x => !x.Priority.StartsWith("R") && x.Revision > revision));
+                    results.AddRange(db.Incident.Where(x => !x.Priority.StartsWith("R") && x.Revision > revision));
 
                 var features = new List<EventMapItem>();
 
@@ -729,7 +741,7 @@ namespace Quest.Lib.Device
                         {
                             var incsFeature = new EventMapItem
                             {
-                                ID = inc.IncidentID.ToString(),
+                                ID = inc.IncidentId.ToString(),
                                 revision = inc.Revision ?? 0,
                                 X = inc.Longitude ?? 0,
                                 Y = inc.Latitude ?? 0,
@@ -740,7 +752,7 @@ namespace Quest.Lib.Device
                                 Created = inc.Created?.ToString("hh:MM") ?? "?",
                                 LastUpdated =inc.LastUpdated,
                                 //AssignedResources = inc.AssignedResources,
-                                AZ = inc.AZ,
+                                AZ = inc.Az,
                                 Determinant = inc.Determinant,
                                 DeterminantDescription = inc.DeterminantDescription,
                                 Location= inc.Location,
@@ -761,32 +773,31 @@ namespace Quest.Lib.Device
 
         private List<ResourceItem> GetDeviceResources(long revision, bool avail = false, bool busy = false)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var features = new List<ResourceItem>();
 
                 if (avail)
                     features.AddRange(
 
-                            db.DeviceViews
-                            .AsNoTracking()
+                            db.Devices
                             .Where(
                                 x =>
-                                    x.Available == true &&
+                                    x.ResourceStatus.Available == true &&
                                     x.Latitude != null && x.Longitude != null)
                             .Where(x => x.Revision > revision)
                             .ToList()
                             .Select(
                                 res => new ResourceItem
                                 {
-                                    ID = res.DeviceID.ToString(),
+                                    ID = res.DeviceId.ToString(),
                                     revision = res.Revision ?? 0,
                                     X = res.Longitude??0,
                                     Y = res.Latitude??0,
-                                    Callsign = res.DeviceCallsign??$"DV{res.DeviceID}",
+                                    Callsign = res.DeviceCallsign??$"DV{res.DeviceId}",
                                     lastUpdate = res.LastUpdate,
-                                    StatusCategory = GetStatusDescription(res.Available ?? false, res.Busy ?? false, res.BusyEnroute ?? false, res.Rest ?? false),
-                                    Status = res.Status,
+                                    StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
+                                    Status = res.ResourceStatus.Status,
                                     PrevStatus = res.PrevStatus,
                                     VehicleType = "Device",
                                     Destination = res.Destination,
@@ -798,9 +809,9 @@ namespace Quest.Lib.Device
                                     Speed = res.Speed,
                                     Direction = res.Direction,
                                     Incident = res.Event,
-                                    Available = res.Available ?? false,
-                                    Busy = res.Busy ?? false,
-                                    BusyEnroute = res.BusyEnroute ?? false,
+                                    Available = res.ResourceStatus.Available ?? false,
+                                    Busy = res.ResourceStatus.Busy ?? false,
+                                    BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
                                     ResourceTypeGroup = "HAND"
                                 }
                             )
@@ -809,25 +820,24 @@ namespace Quest.Lib.Device
 
                 if (busy)
                     features.AddRange(
-                        db.DeviceViews
-                            .AsNoTracking()
+                        db.Devices
                             .Where(
                                 x =>
-                                    x.Busy == true && 
+                                    x.ResourceStatus.Busy == true && 
                                     x.Latitude != null && x.Longitude != null)
                             .Where(x => x.Revision > revision)
                             .ToList()
                             .Select(
                                        res => new ResourceItem
                                        {
-                                           ID = res.DeviceID.ToString(),
+                                           ID = res.DeviceId.ToString(),
                                            revision = res.Revision ?? 0,
                                            X = res.Longitude ?? 0,
                                            Y = res.Latitude ?? 0,
-                                           Callsign = res.DeviceCallsign ?? $"DV{res.DeviceID}",
+                                           Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
                                            lastUpdate = res.LastUpdate,
-                                           StatusCategory = GetStatusDescription(res.Available ?? false, res.Busy ?? false, res.BusyEnroute ?? false, res.Rest ?? false),
-                                           Status = res.Status,
+                                           StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
+                                           Status = res.ResourceStatus.Status,
                                            PrevStatus = res.PrevStatus,
                                            VehicleType = "Device",
                                            Destination = res.Destination,
@@ -839,9 +849,9 @@ namespace Quest.Lib.Device
                                            Speed = res.Speed,
                                            Direction = res.Direction,
                                            Incident = res.Event,
-                                           Available = res.Available ?? false,
-                                           Busy = res.Busy ?? false,
-                                           BusyEnroute = res.BusyEnroute ?? false,
+                                           Available = res.ResourceStatus.Available ?? false,
+                                           Busy = res.ResourceStatus.Busy ?? false,
+                                           BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
                                            ResourceTypeGroup = "HAND"
                                        }
 
@@ -871,14 +881,14 @@ namespace Quest.Lib.Device
 
         private List<ResourceItem> GetStandardResources(long revision, bool avail = false, bool busy = false)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var results = new List<ResourceView>();
+                var results = new List<DataModel.Resource>();
 
                 if (avail && busy)
                 {
                     results.AddRange(
-                        db.ResourceViews.Where(x => x.Busy == true || x.Available == true)
+                        db.Resource.Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
                             .Where(x => x.Revision > revision)
                         );
                 }
@@ -886,15 +896,15 @@ namespace Quest.Lib.Device
                 {
                     if (avail)
                         results.AddRange(
-                            db.ResourceViews
-                                .Where(x => x.Available == true)
+                            db.Resource
+                                .Where(x => x.ResourceStatus.Available == true)
                                 .Where(x => x.Revision > revision)
                             );
 
                     if (busy)
                         results.AddRange(
-                            db.ResourceViews
-                                .Where(x => x.Busy == true)
+                            db.Resource
+                                .Where(x => x.ResourceStatus.Busy == true)
                                 .Where(x => x.Revision > revision)
                             );
                 }
@@ -913,7 +923,7 @@ namespace Quest.Lib.Device
 
         public GetHistoryResponse GetHistory(GetHistoryRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -982,10 +992,10 @@ namespace Quest.Lib.Device
         /// <param name="target"></param>
         /// <param name="serial"></param>
         /// <returns></returns>
-        private bool IsNearbyDeviceOrAssigned(DataModel.Device device, float? Latitude, float? Longitude, string serial)
+        private bool IsNearbyDeviceOrAssigned(DataModel.Devices device, float? Latitude, float? Longitude, string serial)
         {
             // enabled?
-            if (device.isEnabled == false)
+            if (device.IsEnabled == false)
                 return false;
 
             // its linked to a resource - good, as it should always be anyway, and it has the right callsign?
@@ -1039,14 +1049,14 @@ namespace Quest.Lib.Device
         public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
             IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // make sure callsign exists
-                var callsign = db.Callsigns.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
+                var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
                 if (callsign == null)
                 {
                     callsign = new Callsign {Callsign1 = resourceUpdate.Callsign};
-                    db.Callsigns.Add(callsign);
+                    db.Callsign.Add(callsign);
                     db.SaveChanges();
                 }
 
@@ -1054,7 +1064,7 @@ namespace Quest.Lib.Device
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Status == resourceUpdate.Status);
                 if (status == null)
                 {
-                    status = new ResourceStatu
+                    status = new DataModel.ResourceStatus
                     {
                         Status = resourceUpdate.Status,
                         Rest = false,
@@ -1073,29 +1083,29 @@ namespace Quest.Lib.Device
                 long? originalRevision = null;
 
                 // find corresponding resource;
-                var res = db.Resources.FirstOrDefault(x => x.CallsignID == callsign.CallsignID);
+                var res = db.Resource.FirstOrDefault(x => x.CallsignId == callsign.CallsignId);
                 if (res == null)
                 {
-                    originalTypeId = db.ResourceTypes.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
+                    originalTypeId = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
                     res = new DataModel.Resource();
-                    db.Resources.Add(res);
+                    db.Resource.Add(res);
                 }
                 else
                 {
                     originalTypeId = res.ResourceTypeId;
-                    originalStatusId = res.ResourceStatusID;
+                    originalStatusId = res.ResourceStatusId;
                     originalRevision = res.Revision;
                 }
 
                 // save the new resource record
                 res.Agency = resourceUpdate.Agency;
-                res.CallsignID = callsign.CallsignID;
+                res.CallsignId = callsign.CallsignId;
                 res.Class = resourceUpdate.Class;
                 //res.Comment = resourceUpdate.Comment;
                 res.Destination = resourceUpdate.Destination;
                 res.Direction = 0; //resourceUpdate.Direction;
                 res.Emergency = resourceUpdate.Emergency?"Y":"N";
-                res.ETA = null; // resourceUpdate.ETA;
+                res.Eta = null; // resourceUpdate.ETA;
                 res.EventType = resourceUpdate.EventType;
                 res.FleetNo = resourceUpdate.FleetNo;
                 res.Latitude = (float?)resourceUpdate.Latitude;
@@ -1107,8 +1117,8 @@ namespace Quest.Lib.Device
                 res.ResourceTypeId = originalTypeId;
                 res.Skill = resourceUpdate.Skill;
                 res.Sector = "";
-                res.ResourceStatusPrevID = res.ResourceStatusID;
-                res.ResourceStatusID = status.ResourceStatusID;
+                res.ResourceStatusPrevId = res.ResourceStatusId;
+                res.ResourceStatusId = status.ResourceStatusId;
 
 
                 // detect changes in status to DSP
@@ -1116,7 +1126,7 @@ namespace Quest.Lib.Device
                 var requireStatusNotification = false;
 
                 // detect change in status
-                if (originalStatusId != status.ResourceStatusID)
+                if (originalStatusId != status.ResourceStatusId)
                 {
                     requireStatusNotification = true;
                     if (status.Status == triggerStatus)
@@ -1125,17 +1135,17 @@ namespace Quest.Lib.Device
                     // save a status history if the status has changed
                     var history = new ResourceStatusHistory
                     {
-                        ResourceID = res.ResourceID,
-                        ResourceStatusID = originalStatusId ?? status.ResourceStatusID,
+                        ResourceId = res.ResourceId,
+                        ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
                         // use current status if status not known
                         Revision = originalRevision ?? 0
                     };
 
-                    db.ResourceStatusHistories.Add(history);
+                    db.ResourceStatusHistory.Add(history);
                 }
                 db.SaveChanges();
 
-                var rv = db.ResourceViews.FirstOrDefault(x => x.ResourceID == res.ResourceID);
+                var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
                 ResourceItem ri = GetResourceItemFromView(rv);
 
                 var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude??0));
@@ -1167,27 +1177,27 @@ namespace Quest.Lib.Device
                 if (requireEventNotification)
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
                 
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceID, Item=ri });
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item=ri });
 
             }
         }
 
-        private ResourceItem GetResourceItemFromView(ResourceView res)
+        private ResourceItem GetResourceItemFromView(DataModel.Resource res)
         {
             return new ResourceItem
             {
-                ID = res.ResourceID.ToString(),
+                ID = res.ResourceId.ToString(),
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,
-                Callsign = res.Callsign,
+                Callsign = res.Callsign.Callsign1,
                 lastUpdate = res.LastUpdated,
                 StatusCategory = GetStatusDescription(res),
-                Status = res.Status,
-                PrevStatus = res.PrevStatus,
-                VehicleType = res.ResourceType ?? "VEH",
+                Status = res.ResourceStatus.Status,
+                PrevStatus = res.ResourceStatusPrev.Status,
+                VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
                 Destination = res.Destination,
-                Eta = res.ETA,
+                Eta = res.Eta,
                 FleetNo = res.FleetNo,
                 Road = res.Road,
                 Comment = res.Comment,
@@ -1195,22 +1205,22 @@ namespace Quest.Lib.Device
                 Speed = res.Speed,
                 Direction = res.Direction,
                 Incident = res.Serial,
-                Available = res.Available ?? false,
-                Busy = res.Busy ?? false,
-                BusyEnroute = res.BusyEnroute ?? false,
-                ResourceTypeGroup = res.ResourceTypeGroup,
+                Available = res.ResourceStatus.Available ?? false,
+                Busy = res.ResourceStatus.Busy ?? false,
+                BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
+                ResourceTypeGroup = res.ResourceType.ResourceTypeGroup,
             };
         }
 
         private void GetDeleteStatusId()
         {
             var deletedStatus = SettingsHelper.GetVariable("DeviceManager.DeletedStatus", "OOS");
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var ds = db.ResourceStatus.FirstOrDefault(x => x.Status == deletedStatus);
                 if (ds != null)
                 {
-                    _deleteStatusId = ds.ResourceStatusID;
+                    _deleteStatusId = ds.ResourceStatusId;
                 }
             }
         }
@@ -1223,16 +1233,16 @@ namespace Quest.Lib.Device
         /// <param name="msgSource"></param>
         public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var i = db.Resources.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
+                var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
                 if (!i.Any()) return;
                 foreach (var x in i)
                 {
-                    x.ResourceStatusID = DeleteStatusId;
+                    x.ResourceStatusId = DeleteStatusId;
                     x.LastUpdated = DateTime.UtcNow;
                     db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceID});
+                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceId});
                 }
             }
         }
@@ -1240,11 +1250,11 @@ namespace Quest.Lib.Device
 
         public void CPEventStatusListHandler( CPEventStatusList item, NotificationSettings settings)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 foreach (var i in item.Items)
                 {
-                    var inc = db.Incidents.FirstOrDefault(x => x.Serial == i.Serial);
+                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
                     if (inc != null)
                     {
                         inc.PatientAge = i.Age;
@@ -1261,11 +1271,11 @@ namespace Quest.Lib.Device
         public void CallDisconnectStatusListHandler( CallDisconnectStatusList item,
             NotificationSettings settings)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 foreach (var i in item.Items)
                 {
-                    var inc = db.Incidents.FirstOrDefault(x => x.Serial == i.Serial);
+                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
                     if (inc != null)
                     {
                         inc.DisconnectTime = i.DisconnectTime;
@@ -1279,17 +1289,17 @@ namespace Quest.Lib.Device
         public void BeginDump( BeginDump item, NotificationSettings settings)
         {
             Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // remove all incidents
-                db.Incidents.RemoveRange(db.Incidents);
+                db.Incident.RemoveRange(db.Incident);
 
                 db.SaveChanges();
 
                 // set all resource
-                db.Resources.RemoveRange(db.Resources.Where(x => !x.Devices.Any()));
+                db.Resource.RemoveRange(db.Resource.Where(x => !x.Devices.Any()));
 
-                db.ResourceStatusHistories.RemoveRange(db.ResourceStatusHistories);
+                db.ResourceStatusHistory.RemoveRange(db.ResourceStatusHistory);
 
                 db.SaveChanges();
             }
@@ -1302,7 +1312,7 @@ namespace Quest.Lib.Device
 
         public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
@@ -1368,9 +1378,9 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public SetStatusResponse SetStatusRequest(SetStatusRequest request, NotificationSettings settings)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
-                var deviceRecord = db.DeviceViews.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
                 if (deviceRecord == null)
                     return new SetStatusResponse
                     {
@@ -1383,7 +1393,7 @@ namespace Quest.Lib.Device
 
                 // device is linked, set status on resource instead
                 // the resource update will update all linked devices
-                if (deviceRecord.ResourceID != null)
+                if (deviceRecord.ResourceId != null)
                 {
                     //TODO:
                     return new SetStatusResponse
@@ -1400,12 +1410,12 @@ namespace Quest.Lib.Device
 
                     StatusCode oldStatusCode = null;
 
-                    if (deviceRecord.ResourceStatusID != null)
+                    if (deviceRecord.ResourceStatusId != null)
                     {
                         oldStatusCode = new StatusCode
                         {
-                            Code = deviceRecord.Status,
-                            Description = GetStatusDescription(deviceRecord.Available ?? false, deviceRecord.Busy ?? false, deviceRecord.BusyEnroute ?? false, deviceRecord.Rest ?? false),
+                            Code = deviceRecord.ResourceStatus.Status,
+                            Description = GetStatusDescription(deviceRecord.ResourceStatus.Available ?? false, deviceRecord.ResourceStatus.Busy ?? false, deviceRecord.ResourceStatus.BusyEnroute ?? false, deviceRecord.ResourceStatus.Rest ?? false),
                     };
                     }
 
@@ -1424,7 +1434,7 @@ namespace Quest.Lib.Device
                     var newStatusCode = new StatusCode
                     {
                         Code = newStatusRecord.Status,
-                        Description = GetStatusDescription(deviceRecord.Available ?? false, deviceRecord.Busy ?? false, deviceRecord.BusyEnroute ?? false, deviceRecord.Rest ?? false)
+                        Description = GetStatusDescription(deviceRecord.ResourceStatus.Available ?? false, deviceRecord.ResourceStatus.Busy ?? false, deviceRecord.ResourceStatus.BusyEnroute ?? false, deviceRecord.ResourceStatus.Rest ?? false)
 
                     };
 
@@ -1436,11 +1446,11 @@ namespace Quest.Lib.Device
                     else
                     {
                         // set the device status
-                        deviceRecord.ResourceStatusID = newStatusRecord.ResourceStatusID;
+                        deviceRecord.ResourceStatusId = newStatusRecord.ResourceStatusId;
                         db.SaveChanges();
                     }
 
-                    SendStatusNotification(deviceRecord.Callsign, settings, "Update");
+                    SendStatusNotification(deviceRecord.DeviceCallsign, settings, "Update");
 
                     return new SetStatusResponse
                     {
@@ -1455,14 +1465,14 @@ namespace Quest.Lib.Device
             }
         }
 
-        private string GetStatusDescription(ResourceStatu status)
+        private string GetStatusDescription(DataModel.ResourceStatus status)
         {
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
 
-        private string GetStatusDescription(ResourceView status)
+        private string GetStatusDescription(DataModel.Resource status)
         {
-            return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
+            return GetStatusDescription(status.ResourceStatus.Available ?? false, status.ResourceStatus.Busy ?? false, status.ResourceStatus.BusyEnroute ?? false, status.ResourceStatus.Rest ?? false);
         }
 
         private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
@@ -1484,12 +1494,11 @@ namespace Quest.Lib.Device
 
         private void SendCallsignNotification(string callsign, NotificationSettings settings, string reason)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // find associated devices with this resource callsign
                 var devices = db
                     .Devices
-                    .AsNoTracking()
                     .ToList()
                     .Where(x => x.Resource != null && x.Resource.Callsign.Callsign1 == callsign)
                     .ToList();
@@ -1505,7 +1514,7 @@ namespace Quest.Lib.Device
             }
         }
 
-        private void SendCallsignNotification(List<DataModel.Device> devices, string callsign,
+        private void SendCallsignNotification(List<DataModel.Devices> devices, string callsign,
             NotificationSettings settings, string reason)
         {
             if (devices == null || !devices.Any())
@@ -1529,19 +1538,19 @@ namespace Quest.Lib.Device
         private void SendEventNotification(string callsign, string serial, NotificationSettings settings,
             string reason, IIncidentStore incStore)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // make sure callsign exists
-                var callsignRec = db.Callsigns.FirstOrDefault(x => x.Callsign1 == callsign);
+                var callsignRec = db.Callsign.FirstOrDefault(x => x.Callsign1 == callsign);
                 if (callsignRec == null)
                 {
                     callsignRec = new Callsign {Callsign1 = callsign};
-                    db.Callsigns.Add(callsignRec);
+                    db.Callsign.Add(callsignRec);
                     db.SaveChanges();
                 }
 
                 // find corresponding resource;
-                var res = db.Resources.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
+                var res = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
                 if (res == null)
                     throw new ApplicationException(
                         $"Unable to send notification, no resource exists with callsign {callsignRec}");
@@ -1552,9 +1561,8 @@ namespace Quest.Lib.Device
                 // find associated devices with this resource callsign
                 var devices = db
                     .Devices
-                    .AsNoTracking()
                     .ToList()
-                    .Where(x => x.ResourceID == res.ResourceID)
+                    .Where(x => x.ResourceId == res.ResourceId)
                     .ToList();
 
                 foreach (var deviceRecord in devices)
@@ -1569,7 +1577,7 @@ namespace Quest.Lib.Device
         }
 
 
-        private void SendEventNotification(List<DataModel.Device> devices, QuestIncident inc,
+        private void SendEventNotification(List<DataModel.Devices> devices, QuestIncident inc,
             NotificationSettings settings, string reason)
         {
             if (devices == null || !devices.Any())
@@ -1616,10 +1624,10 @@ namespace Quest.Lib.Device
         /// <param name="reason"></param>
         private void SendStatusNotification(string callsign, NotificationSettings settings, string reason)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // find corresponding resource;
-                var resource = db.Resources.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
+                var resource = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
                 if (resource == null)
                     throw new ApplicationException(
                         $"Unable to send notification, no resource exists with callsign {callsign}");
@@ -1628,8 +1636,8 @@ namespace Quest.Lib.Device
                 {
                     Status = new StatusCode
                     {
-                        Code = resource.ResourceStatu.Status,
-                        Description = GetStatusDescription(resource.ResourceStatu),
+                        Code = resource.ResourceStatus.Status,
+                        Description = GetStatusDescription(resource.ResourceStatus),
                     }
                 };
 
@@ -1638,9 +1646,8 @@ namespace Quest.Lib.Device
 
                 var devices = db
                     .Devices
-                    .AsNoTracking()
                     .ToList()
-                    .Where(x => x.ResourceID == resource.ResourceID)
+                    .Where(x => x.ResourceId == resource.ResourceId)
                     .ToList();
 
                 foreach (var deviceRecord in devices)
@@ -1663,7 +1670,7 @@ namespace Quest.Lib.Device
         /// <param name="evt"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        private void NotifyDevices(IEnumerable<DataModel.Device> devices, IDeviceNotification evt,
+        private void NotifyDevices(IEnumerable<DataModel.Devices> devices, IDeviceNotification evt,
             NotificationSettings settings, string reason)
         {
             try
@@ -1672,23 +1679,23 @@ namespace Quest.Lib.Device
 
                 // send push notifications
                 foreach (var target in devices)
-                    if (target.isEnabled == true && !string.IsNullOrEmpty(target.DeviceIdentity))
+                    if (target.IsEnabled == true && !string.IsNullOrEmpty(target.DeviceIdentity))
                     {
                         try
                         {
-                            switch (target.NotificationTypeID)
+                            switch (target.NotificationTypeId)
                             {
                                 case 0:
                                     break;
 
                                 case 1:
 #if APPLE_MSG
-                                    PushToApple( target.NotificationID, evt);
+                                    PushToApple( target.NotificationId, evt);
 #endif
                                     break;
 
                                 case 2:
-                                    PushToGoogle(target.NotificationID, evt, reason);
+                                    PushToGoogle(target.NotificationId, evt, reason);
                                     break;
                             }
                         }
@@ -1738,7 +1745,7 @@ namespace Quest.Lib.Device
         }
 
 #if APPLE_MSG
-        private void PushToApple(string deviceToken, IDeviceNotification notification)
+        private void PushToApple(string deviceToken, IdeviceNotification notification)
         {
             var evt = notification as EventNotification;
             if (evt != null)
@@ -1883,7 +1890,7 @@ namespace Quest.Lib.Device
 
                 if (settings.GCMKey.Length > 0)
                 {
-                    var gcmConfig = new GcmConfiguration("GCM-SENDER-ID", settings.GCMKey, null);
+                    var gcmConfig = new GcmConfiguration("GCM-SENDER-Id", settings.GCMKey, null);
 
                     // Create a new broker
                     _gcmBroker = new GcmServiceBroker(gcmConfig);
@@ -1973,4 +1980,5 @@ namespace Quest.Lib.Device
 
 #endregion
     }
+
 }

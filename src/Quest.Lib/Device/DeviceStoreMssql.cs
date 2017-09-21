@@ -9,7 +9,7 @@ namespace Quest.Lib.Device
     {
         public QuestDevice Get(string deviceIdentity)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // locate record and create or update
                 var rec = db.Devices.FirstOrDefault(x => x.DeviceIdentity == deviceIdentity);
@@ -21,7 +21,7 @@ namespace Quest.Lib.Device
 
         public QuestDevice GetByToken(string token)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // locate record and create or update
                 var rec = db.Devices.FirstOrDefault(x => x.AuthToken == token);
@@ -32,13 +32,13 @@ namespace Quest.Lib.Device
 
         public void Update(QuestDevice device)
         {
-            using (var db = new QuestEntities())
+            using (var db = new QuestContext())
             {
                 // locate record and create or update
                 var resrecord = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
                 if (resrecord == null)
                 {
-                    resrecord = new DataModel.Device();
+                    resrecord = new DataModel.Devices();
                     db.Devices.Add(resrecord);
 
                     // use the tiestamp of the message for the creation time
@@ -47,21 +47,21 @@ namespace Quest.Lib.Device
                 
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
 
-                resrecord.OwnerID = device.OwnerID;
+                resrecord.OwnerId = device.OwnerId;
                 resrecord.DeviceIdentity = device.DeviceIdentity;
                 resrecord.LoggedOnTime = device.LoggedOnTime;
                 resrecord.LastUpdate = device.LastUpdate;
-                resrecord.DeviceRoleID = device.DeviceRoleID;
-                resrecord.NotificationTypeID = device.NotificationTypeID;
-                resrecord.NotificationID = device.NotificationID;
+                resrecord.DeviceRoleId = device.DeviceRoleId;
+                resrecord.NotificationTypeId = device.NotificationTypeId;
+                resrecord.NotificationId = device.NotificationId;
                 resrecord.AuthToken = device.Token;
-                resrecord.isEnabled = device.isEnabled;
+                resrecord.IsEnabled = device.IsEnabled;
                 resrecord.LastStatusUpdate = device.LastStatusUpdate;
                 resrecord.LoggedOffTime = device.LoggedOffTime;
-                resrecord.OSVersion = device.OSVersion;
+                resrecord.Osversion = device.OSVersion;
                 resrecord.DeviceMake = device.DeviceMake;
                 resrecord.DeviceModel = device.DeviceModel;
-                resrecord.ResourceID = device.ResourceID;
+                resrecord.ResourceId = device.ResourceId;
                 resrecord.PositionAccuracy = device.PositionAccuracy;
                 resrecord.NearbyDistance = device.NearbyDistance;
 

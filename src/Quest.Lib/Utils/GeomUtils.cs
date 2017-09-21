@@ -31,8 +31,7 @@ namespace Quest.Lib.Utils
 
             return 12742.0 * Math.Asin(Math.Sqrt(a)); // 2 * R; R = 6371 km
         }
-
-
+        
         //public static Coordinate ConvertToCoordinate(this DbGeometry x)
         //{
         //    if (x.YCoordinate != null)
@@ -153,6 +152,14 @@ namespace Quest.Lib.Utils
                 return null;
 
             return GetMultiLine(geom, transformer);
+        }
+
+        public static Point GetPointFromWkt(string wkt)
+        {
+            MultiLineStringGeoShape shape = new MultiLineStringGeoShape();
+            WKTReader reader = new WKTReader();
+            var geom = reader.Read(wkt) as Point;
+            return geom;
         }
 
         public static MultiLineStringGeoShape GetMultiLine(IGeometry geom, ICoordinateTransformation transformer)

@@ -46,7 +46,7 @@ namespace Quest.Lib.Device
         protected override void OnPrepare()
         {
             // create a list of actions associated with each object type arriving from the queue
-            MsgHandler.AddHandler("AssignDeviceRequest", AssignDeviceHandler);
+            MsgHandler.AddHandler<AssignDeviceRequest>(AssignDeviceHandler);
             MsgHandler.AddHandler("LoginRequest", LoginRequestHandler);
             MsgHandler.AddHandler("LogoutRequest", LogoutRequestHandler);
             MsgHandler.AddHandler("AckAssignedEventRequest", AckAssignedEventRequestHandler);

@@ -6,21 +6,21 @@ namespace Quest.Common.Messages
     {
         public int DeviceID { get; set; }
         public Nullable<long> Revision { get; set; }
-        public string OwnerID { get; set; }
-        public Nullable<int> ResourceID { get; set; }
+        public string OwnerId { get; set; }
+        public Nullable<int> ResourceId { get; set; }
         public string AuthToken { get; set; }
         public string DeviceIdentity { get; set; }
-        public Nullable<int> NotificationTypeID { get; set; }
-        public string NotificationID { get; set; }
+        public Nullable<int> NotificationTypeId { get; set; }
+        public string NotificationId { get; set; }
         public Nullable<System.DateTime> LastUpdate { get; set; }
         public Nullable<System.DateTime> LastStatusUpdate { get; set; }
         public Nullable<float> PositionAccuracy { get; set; }
-        public Nullable<bool> isEnabled { get; set; }
+        public Nullable<bool> IsEnabled { get; set; }
         public Nullable<bool> SendNearby { get; set; }
         public Nullable<float> NearbyDistance { get; set; }
         public Nullable<System.DateTime> LoggedOnTime { get; set; }
         public Nullable<System.DateTime> LoggedOffTime { get; set; }
-        public Nullable<int> DeviceRoleID { get; set; }
+        public Nullable<int> DeviceRoleId { get; set; }
         public string OSVersion { get; set; }
         public string DeviceMake { get; set; }
         public string DeviceModel { get; set; }

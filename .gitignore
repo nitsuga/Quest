@@ -35,3 +35,4 @@
 build/Docker/volume_data/Quest.mdf
 build/Docker/volume_data/Quest_log.ldf
 src/.vs/Quest/v15/.suo
+src/.vs/Quest/v15/sqlite3/storage.ide

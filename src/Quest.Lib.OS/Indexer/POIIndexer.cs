@@ -8,6 +8,8 @@ using Nest;
 using NetTopologySuite.IO;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
+using System.IO;
+using CsvHelper;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -59,32 +61,30 @@ namespace Quest.Lib.OS.Indexer
             var descriptor = GetBulkRequest(config);
 
             // throw away header line
-            using (var parser = new TextFieldParser(poIfilename))
+            using (StreamReader reader = File.OpenText(Filename))
             {
-                parser.SetDelimiters("|");
-
-                // skip header
-                parser.ReadFields();
-               
-                while (!parser.EndOfData)
+                using (var parser = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "|" }))
                 {
-                    config.RecordsCurrent++;
-                    config.RecordsTotal++;
+                    // skip header
+                    parser.Read();
 
-                    var data = parser.ReadFields();
-                    if (data == null) continue;
+                    while (parser.Read())
+                    {
+                        config.RecordsCurrent++;
+                        config.RecordsTotal++;
 
-                    // commit any messages and report progress
-                    CommitCheck(this, config, descriptor);
+                        // commit any messages and report progress
+                        CommitCheck(this, config, descriptor);
 
-                    var featureEasting = data[3];
-                    var featureNorthing = data[4];
-                    var point = GeomUtils.ConvertToLatLonLoc(double.Parse(featureEasting), double.Parse(featureNorthing));
+                        var featureEasting = parser[3];
+                        var featureNorthing = parser[4];
+                        var point = GeomUtils.ConvertToLatLonLoc(double.Parse(featureEasting), double.Parse(featureNorthing));
 
-                    ProcessRecord(data, config, descriptor, point);
+                        ProcessRecord(parser.CurrentRecord, config, descriptor, point);
+                    }
+                    // commit anything else
+                    CommitBultRequest(config, descriptor);
                 }
-                // commit anything else
-                CommitBultRequest(config, descriptor);
             }
         }
 

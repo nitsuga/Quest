@@ -13,8 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Threading;
 using Quest.Lib.Processor;
-using Quest.Lib.Research;
-using Quest.Lib.Search.Elastic;
 
 namespace Quest.Core
 {
