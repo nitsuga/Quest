@@ -19,7 +19,7 @@ namespace Quest.Common.Messages
 
         public override string ToString()
         {
-            return $"CallsignChange AuthToken={AuthToken} Callsign={Callsign}";
+            return $"CallsignChange Callsign={Callsign}";
         }
     }
 }

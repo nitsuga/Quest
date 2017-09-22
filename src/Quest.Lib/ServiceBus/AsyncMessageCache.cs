@@ -11,7 +11,6 @@ using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.ServiceBus
 {
-    [Injection(Lifetime.Singleton)]
     public class AsyncMessageCache
     {
         public IServiceBusClient MsgSource;

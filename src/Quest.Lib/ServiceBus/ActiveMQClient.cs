@@ -16,7 +16,7 @@ using Quest.Common.ServiceBus;
 namespace Quest.Lib.ServiceBus
 {
 
-    public class ActiveMqClient : IServiceBusClient, IOptionalComponent, IModule
+    public class ActiveMqClient : IServiceBusClient
     {
         public event EventHandler<NewMessageArgs> NewMessage;
 

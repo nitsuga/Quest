@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
@@ -14,58 +11,9 @@ namespace Quest.Api.Controllers
     {
         AsyncMessageCache _messageCache;
 
-        protected DeviceController(AsyncMessageCache messageCache)
+        public DeviceController(AsyncMessageCache messageCache)
         {
             _messageCache = messageCache;
-        }
-        [HttpPost("Login")]
-        public LoginResponse Login([FromBody]LoginRequest request)
-        {
-            LoginResponse result = null;
-            try
-            {
-#if OAUTH
-                var context = new ApplicationDbContext();
-                var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
-                var user = userManager.FindByName(request.Username);
-                var isValidUser = (user != null);
-                var isValidPassword = false;
-
-                if (isValidUser)
-                    isValidPassword = userManager.CheckPassword(user, request.Password);
-#else
-                var isValidPassword = true;
-                var user = request.Username;
-#endif
-
-                // we can check the login request user credentials here
-                if (isValidPassword == false)
-                {
-                    return new LoginResponse()
-                    {
-                        AuthToken = "",
-                        QuestApi = "",
-                        RequestId = request.RequestId,
-                        RequiresCallsign = false,
-                        Callsign = "",
-                        Status = null,
-                        Success = false,
-                        Message = "incorrect username or password"
-                    };
-                }
-                else
-                {
-                    result = request.Submit<LoginResponse>(_messageCache);
-                }
-            }
-            catch (Exception ex)
-            {
-                return new LoginResponse() { Success = false, Message = "failed to log on: " + ex.Message };
-            }
-            finally
-            {
-            }
-            return result;
         }
 
         [HttpPost("Logout")]

@@ -13450,6 +13450,8 @@
       "Autofac.Configuration >= 4.0.1",
       "Autofac.Extensions.DependencyInjection >= 4.2.0",
       "Microsoft.AspNetCore.All >= 2.0.0",
+      "Microsoft.AspNetCore.Authentication >= 2.0.0",
+      "Microsoft.AspNetCore.Authentication.JwtBearer >= 2.0.0",
       "Microsoft.NETCore.App >= 2.0.0",
       "Quest.Lib >= 1.0.0",
       "Swashbuckle.AspNetCore >= 1.0.0"
@@ -13516,11 +13518,19 @@
             "version": "2.0.0",
             "autoReferenced": true
           },
+          "Microsoft.AspNetCore.Authentication.JwtBearer": {
+            "target": "Package",
+            "version": "2.0.0"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "1.0.0"
           },
           "Microsoft.AspNetCore.All": {
+            "target": "Package",
+            "version": "2.0.0"
+          },
+          "Microsoft.AspNetCore.Authentication": {
             "target": "Package",
             "version": "2.0.0"
           },

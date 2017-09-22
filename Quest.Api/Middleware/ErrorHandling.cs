@@ -3,16 +3,14 @@ using Newtonsoft.Json;
 using Quest.Lib.Exceptions;
 using Quest.Lib.Trace;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace Quest.Api.Middleware
 {
 
-    public class ErrorHandlingMiddleware
+    internal class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate next;
 

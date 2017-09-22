@@ -1,15 +1,14 @@
 ﻿using Autofac;
 using Autofac.Builder;
 using Quest.Lib.DependencyInjection;
+using Quest.Lib.Trace;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Quest.Api.Modules
 {
-    public class AutofacModule : Autofac.Module
+    internal class AutofacModule : Autofac.Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -17,7 +16,7 @@ namespace Quest.Api.Modules
             Load(builder, Assembly.Load("Quest.Common"));
         }
 
-        protected void Load(ContainerBuilder builder, Assembly asm)
+        private void Load(ContainerBuilder builder, Assembly asm)
         {
             foreach (var t in asm.GetTypes())
             {
@@ -25,12 +24,12 @@ namespace Quest.Api.Modules
             }
         }
 
-        static void RegisterType(ContainerBuilder builder, Type t)
+        private static void RegisterType(ContainerBuilder builder, Type t)
         {
-
             var attribute = t.CustomAttributes.FirstOrDefault(x => x.AttributeType.GetInterface("IInjectionAttribute") != null);
             if (attribute != null)
             {
+                Logger.Write($"Registering {t.Name}");
                 var data = CustomAttributeData.GetCustomAttributes(t);
 
                 Type theinterface = null;
@@ -39,7 +38,6 @@ namespace Quest.Api.Modules
 
                 foreach (var d in data)
                 {
-
                     foreach (var ca in d.ConstructorArguments)
                     {
                         if (ca.ArgumentType == typeof(string))
@@ -82,13 +80,8 @@ namespace Quest.Api.Modules
                             b = b.InstancePerLifetimeScope();
                             break;
                     }
-
-
                 }
-
             }
-
         }
-
     }
 }

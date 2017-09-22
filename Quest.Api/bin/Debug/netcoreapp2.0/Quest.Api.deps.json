@@ -7,6 +7,8 @@
     "defines": [
       "TRACE",
       "DEBUG",
+      "NETCOREAPP2_0 NOSEC",
+      "DEBUG",
       "NETCOREAPP2_0"
     ],
     "languageVersion": "",
@@ -16,7 +18,7 @@
     "optimize": false,
     "keyFile": "",
     "emitEntryPoint": true,
-    "xmlDoc": false,
+    "xmlDoc": true,
     "debugType": "portable"
   },
   "targets": {
@@ -27,6 +29,8 @@
           "Autofac.Configuration": "4.0.1",
           "Autofac.Extensions.DependencyInjection": "4.2.0",
           "Microsoft.AspNetCore.All": "2.0.0",
+          "Microsoft.AspNetCore.Authentication": "2.0.0",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "2.0.0",
           "Microsoft.NETCore.App": "2.0.0",
           "Quest.Lib": "1.0.0",
           "Swashbuckle.AspNetCore": "1.0.0"

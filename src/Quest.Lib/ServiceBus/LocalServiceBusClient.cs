@@ -7,7 +7,7 @@ using Quest.Common.ServiceBus;
 
 namespace Quest.Lib.ServiceBus
 {
-    public class LocalServiceBusClient : IServiceBusClient, IOptionalComponent
+    public class LocalServiceBusClient : IServiceBusClient
     {
         /// <summary>
         /// use a shared (static) underlying service bus engine

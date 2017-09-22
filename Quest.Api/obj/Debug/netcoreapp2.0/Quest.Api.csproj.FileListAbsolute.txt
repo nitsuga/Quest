@@ -16,3 +16,5 @@ E:\Dropbox\Quest\Git\Quest\Quest.Api\bin\Debug\netcoreapp2.0\Quest.Api.pdb
 E:\Dropbox\Quest\Git\Quest\Quest.Api\obj\Debug\netcoreapp2.0\Quest.Api.dll
 E:\Dropbox\Quest\Git\Quest\Quest.Api\obj\Debug\netcoreapp2.0\Quest.Api.pdb
 E:\Dropbox\Quest\Git\Quest\Quest.Api\bin\Debug\netcoreapp2.0\Quest.Api.xml
+E:\Dropbox\Quest\Git\Quest\Quest.Api\bin\Debug\netcoreapp2.0\components.json
+E:\Dropbox\Quest\Git\Quest\Quest.Api\bin\Debug\netcoreapp2.0\appsettings.json

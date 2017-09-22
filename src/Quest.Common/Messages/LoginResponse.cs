@@ -11,9 +11,11 @@ namespace Quest.Common.Messages
     {
         /// <summary>
         ///     This token to be passed in all subsequent calls
+        ///     Include in the header as Authentication = Bearer /AccessToken/
         /// </summary>
-        
-        public string AuthToken { get; set; }
+        public string AccessToken;
+
+        public DateTime ValidTo;
 
         /// <summary>
         ///     Server wants the client to send back its callsign

@@ -105,7 +105,6 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore)
         {
-            var token = Guid.NewGuid().ToString();
             var callsign = "";
             var sc = new StatusCode();
 
@@ -116,7 +115,6 @@ namespace Quest.Lib.Device
                 resrecord.LastUpdate = DateTime.UtcNow;
                 resrecord.NotificationTypeId = request.NotificationTypeId;
                 resrecord.NotificationId = request.NotificationId;
-                resrecord.AuthToken = token;
                 resrecord.DeviceIdentity = request.DeviceIdentity;
                 resrecord.OSVersion = request.OSVersion;
                 resrecord.DeviceMake = request.DeviceMake;
@@ -124,7 +122,6 @@ namespace Quest.Lib.Device
             }
             else
             {
-
                 var offRoadStatus = resStore.GetOffroadStatusId();
 
                 // new record
@@ -137,7 +134,6 @@ namespace Quest.Lib.Device
                     DeviceRoleId = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
                     NotificationTypeId = request.NotificationTypeId,
                     NotificationId = request.NotificationId,
-                    AuthToken = token,
                     IsEnabled = true,
                     LastStatusUpdate = DateTime.UtcNow,
                     LoggedOffTime = null,
@@ -244,7 +240,6 @@ namespace Quest.Lib.Device
 
             return new LoginResponse
             {
-                AuthToken = token,
                 QuestApi = Version,
                 RequestId = request.RequestId,
                 RequiresCallsign = false,
