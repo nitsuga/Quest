@@ -51,7 +51,6 @@
     <Compile Remove="Routing\StandbyCoverage.cs" />
     <Compile Remove="Search\AddressSearch.cs" />
     <Compile Remove="Search\Elastic\IndexGroup.cs" />
-    <Compile Remove="Search\Indexers\OSMIndexer.cs" />
     <Compile Remove="Trackers\AlarmTracker.cs" />
     <Compile Remove="Trackers\CommandPointTracker.cs" />
     <Compile Remove="Utils\RouteLine.cs" />
@@ -91,6 +90,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Quest.Common\Quest.Common.csproj" />
+    <ProjectReference Include="..\TfL.Api.Common\Tfl.Api.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Tfl.Api.Presentation.Entities">
+      <HintPath>Lib\Tfl.Api.Presentation.Entities.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

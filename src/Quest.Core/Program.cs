@@ -37,6 +37,8 @@ namespace Quest.Core
         // to run the full stack
         // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager;DeviceManager;IndexerManager
 
+        // -exec=SecurityManager;DeviceManager
+
         // for research, use these
         // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 -components=components.json
 
@@ -185,6 +187,8 @@ namespace Quest.Core
         /// <returns></returns>
         internal static IServiceProvider ConfigureServices(IServiceCollection services, IConfiguration config)
         {
+            services.AddMemoryCache();
+
             // Register the ConfigurationModule with Autofac.
             var module = new ConfigurationModule(config);
 
@@ -192,7 +196,8 @@ namespace Quest.Core
             builder.RegisterModule(module);
 
             // Add any Autofac modules or registrations.
-            builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.Research", "Quest.Lib.Simulation" }));
+            // builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.Research", "Quest.Lib.Simulation" }));
+            builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.OS" }));
 
             var dataAccess = Assembly.GetExecutingAssembly();
 

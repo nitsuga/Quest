@@ -47,7 +47,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Core", "Quest.Core\Qu
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.Api", "..\Quest.Api\Quest.Api.csproj", "{A863846E-58E4-4599-8600-D24BBD30C2B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Api", "Quest.Api\Quest.Api.csproj", "{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -303,30 +303,30 @@ Global
 		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x64.Build.0 = Release|Any CPU
 		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x86.ActiveCfg = Release|Any CPU
 		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x86.Build.0 = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|ARM.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|x64.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Debug|x86.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|Any CPU.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|ARM.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|ARM.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|x64.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|x64.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|x86.ActiveCfg = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Docker|x86.Build.0 = Debug|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|ARM.ActiveCfg = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|ARM.Build.0 = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|x64.ActiveCfg = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|x64.Build.0 = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|x86.ActiveCfg = Release|Any CPU
-		{A863846E-58E4-4599-8600-D24BBD30C2B8}.Release|x86.Build.0 = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|x64.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|x86.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|Any CPU.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|ARM.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|ARM.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|x64.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|x64.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|x86.ActiveCfg = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Docker|x86.Build.0 = Debug|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|ARM.Build.0 = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|x64.ActiveCfg = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|x64.Build.0 = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|x86.ActiveCfg = Release|Any CPU
+		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -338,7 +338,7 @@ Global
 		{494058D6-7775-4533-8C64-E0D324FC60F1} = {0075C3E1-157B-4660-A444-A95607472626}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
+		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
 	EndGlobalSection
 EndGlobal

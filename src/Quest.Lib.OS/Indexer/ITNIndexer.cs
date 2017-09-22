@@ -10,7 +10,7 @@ using Quest.Lib.OS.DataModelOS;
 
 namespace Quest.Lib.OS.Indexer
 {
-    internal class ItnIndexer : ElasticIndexer
+    public class ItnIndexer : ElasticIndexer
     {
         public override void StartIndexing(BuildIndexSettings config)
         {

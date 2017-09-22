@@ -18,14 +18,17 @@ namespace Quest.Lib.Search.Indexers
 
         public override void StartIndexing(BuildIndexSettings config)
         {
+#if false
             Build(config);
+#endif
         }
+
+#if false
         private void Build(BuildIndexSettings config)
         {
             var database = "";
 
             DeleteDataSet<LocationDocument>(config.DefaultIndex, config.Client, IndexBuilder.AddressDocumentType.Osm);
-
             using (var context = new OsmEntities())
             {
                 _tags = context.tTagTypes.ToDictionary(x => x.Typ, y => y.Name);
@@ -168,15 +171,7 @@ namespace Quest.Lib.Search.Indexers
                 Description = description.ToUpper()
             };
         }
+#endif
 
     }
-
-    //public partial class osm2Entities 
-    //{
-    //    public osm2Entities(string name)
-    //        : base($"name={name}")
-    //    {
-    //    }
-    //}
-
 }

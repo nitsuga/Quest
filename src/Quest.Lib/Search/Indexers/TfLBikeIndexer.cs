@@ -1,12 +1,11 @@
-﻿#if TFLEntities
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nest;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
-using Tfl.Api.Presentation.Entities;
 using Quest.Common.Messages;
+using Tfl.Api.Presentation.Entities;
 
 namespace Quest.Lib.Search.Indexers
 {
@@ -77,4 +76,3 @@ namespace Quest.Lib.Search.Indexers
         }
     }
 }
-#endif

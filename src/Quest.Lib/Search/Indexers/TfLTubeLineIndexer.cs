@@ -1,5 +1,4 @@
-﻿#if TFLEntities
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Quest.Lib.Search.Elastic;
@@ -80,4 +79,3 @@ namespace Quest.Lib.Search.Indexers
         }
     }
 }
-#endif

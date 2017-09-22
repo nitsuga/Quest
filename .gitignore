@@ -4,6 +4,8 @@
 /src/.vs/*
 /src/obj/*
 /src/Quest.WebCore/bin
+/src/Quest.Api/obj
+/src/Quest.Api/bin
 /src/Quest.WebCore/obj
 /src/Quest.Core/bin
 /src/Quest.Core/obj
