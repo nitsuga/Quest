@@ -15,6 +15,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Quest.Api.Options;
 using Quest.Common.Messages;
+using Quest.Api.Extensions;
 
 namespace Quest.Api.Controllers
 {
@@ -75,9 +76,11 @@ namespace Quest.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Logon([FromForm] LoginRequest applicationUser)
+        public async Task<IActionResult> Logon([FromForm] LoginRequest request)
         {
-            var identity = await GetClaimsIdentity(applicationUser);
+            var result = request.Submit<LoginResponse>(_messageCache);
+
+            var identity = await GetClaimsIdentity(request);
             if (identity == null)
             {
 //                _logger.LogInformation($"Invalid username ({applicationUser.UserName}) or password ({applicationUser.Password})");
