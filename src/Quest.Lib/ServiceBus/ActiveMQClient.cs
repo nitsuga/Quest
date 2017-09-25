@@ -336,23 +336,13 @@ namespace Quest.Lib.ServiceBus
             Broadcast(message, metadata);
         }
 
-        public void Send(IServiceBusMessage message, string queue)
-        {
-            PublishMetaData metadata = new PublishMetaData()
-            {
-                CorrelationId = "",
-                ReplyTo = "",
-                RoutingKey = "",
-                Source = QueueName,
-                Destination = queue
-            };
-
-            Broadcast(message, metadata);
-        }
-
-        public void Stop()
+         public void Stop()
         {
         }
 
+        public T SendMessageAndWait<T>(IServiceBusMessage message, string destqueue, string srcqueue = null) where T : class
+        {
+            throw new NotImplementedException();
+        }
     }
 }

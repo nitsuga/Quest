@@ -113,7 +113,18 @@ namespace Quest.Lib.Processor
         {
             var msg = new TimedEventRequest() { Key = key, FireTime = fireTime, Message = message };
             var queue = $"TimedEventManager_{Id.Session}_{Id.Instance}";
-            ServiceBusClient.Send(msg, queue);
+
+                PublishMetaData metadata = new PublishMetaData()
+                {
+                    CorrelationId = "",
+                    ReplyTo = "",
+                    RoutingKey = "",
+                    Source = queue,
+                    Destination = queue
+                };
+
+            ServiceBusClient.Broadcast(msg, metadata);
+
         }
 
         public void SetMessage(string message, TraceEventType severity = TraceEventType.Information)

@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Threading;
 using Quest.Lib.Processor;
+using System.Text;
 
 namespace Quest.Core
 {
@@ -78,6 +79,9 @@ namespace Quest.Core
                     Logger.Write($"config file: not set", TraceEventType.Information, "Quest.Cmd");
 
                 var sessionOverride = Parameters.GetParameter(args, "-session", "0");
+
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                var enc1252 = Encoding.GetEncoding(1252);
 
                 // load components file unless overriden on the command line
                 var components = Parameters.GetParameter(args, "-components", "components.json");

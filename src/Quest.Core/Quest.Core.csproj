@@ -169,6 +169,7 @@
     <PackageReference Include="NEST" Version="5.5.0" />
     <PackageReference Include="NetTopologySuite" Version="1.14.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

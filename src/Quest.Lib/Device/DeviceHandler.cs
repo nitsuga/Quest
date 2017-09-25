@@ -18,12 +18,13 @@ using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using PushSharp.Google;
+using Quest.Lib.ServiceBus;
 
 namespace Quest.Lib.Device
 {
     public class DeviceHandler
     {
-        private const string Version = "1.0.0";
+        private const string Version = "1";
 
 #if APPLE_MSG
         private ApnsServiceBroker _apnsBroker;
@@ -108,6 +109,13 @@ namespace Quest.Lib.Device
             var callsign = "";
             var sc = new StatusCode();
 
+            // go look up the username / password in a different way!!
+            if (!(request.Username == "QuestDevice" && request.Password == "f593d801-bb3b-47ae-b288-2498463a7c14"))
+            {
+                return new LoginResponse { Success = false, Message = "Login failed" };
+            }
+
+
             var resrecord = devStore.Get(request.DeviceIdentity);
             if (resrecord != null) {
                 resrecord.OwnerId = request.Username;
@@ -146,8 +154,10 @@ namespace Quest.Lib.Device
                 };
             }
 
-            devStore.Update(resrecord);
+            // make a new token. this becomes a claim (jti unique identitier
+            resrecord.AuthToken = Guid.NewGuid().ToString();
 
+            devStore.Update(resrecord);
 
 #if false
                 // make sure device is paired with a callsign
@@ -246,6 +256,7 @@ namespace Quest.Lib.Device
                 Callsign = callsign,
                 Status = sc,
                 Success = true,
+                SessionToken = resrecord.AuthToken,
                 Message = "successfully logged on"
             };
         }

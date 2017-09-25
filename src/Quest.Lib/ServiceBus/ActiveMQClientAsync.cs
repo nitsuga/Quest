@@ -140,6 +140,60 @@ namespace Quest.Lib.ServiceBus
             return t;
         }
 
+        public T SendMessageAndWait<T>(IServiceBusMessage message, string destqueue, string srcqueue = null) where T: class
+        {
+            if (srcqueue == null)
+                srcqueue = Guid.NewGuid().ToString();
+
+            MessageQueueItem objectToSend = new MessageQueueItem
+            {
+                Message = message,
+                Metadata = new PublishMetaData()
+                {
+                    CorrelationId = "",
+                    ReplyTo = srcqueue,
+                    RoutingKey = "",
+                    Source = srcqueue,
+                    Destination = destqueue
+                }
+            };
+
+            var env = Environment.GetEnvironmentVariable("ActiveMQ");
+            if (env != null)
+            {
+                Logger.Write($"Overriding ActiveMQ address with {env}", GetType().Name);
+                server = env;
+            }
+
+            Logger.Write($"Connecting to ActiveMq on {server}", GetType().Name);
+
+            Uri connecturi = new Uri(server);
+            ConnectionFactory amqfactory = new ConnectionFactory(connecturi);
+            TimeSpan receiveTimeout = new TimeSpan(0, 0, 0, 30);
+            using (IConnection connection = amqfactory.CreateConnection())
+            {
+                using (ISession session = connection.CreateSession(AcknowledgementMode.ClientAcknowledge))
+                {
+                    var queue = new ActiveMQQueue(QueueName);
+                    // Create a consumer and producer
+                    using (IMessageConsumer queue_consumer = session.CreateConsumer(queue))
+                    {
+                        // clear existing messages
+                        while (queue_consumer.ReceiveNoWait() != null) ;
+
+                        SendMessage(objectToSend, session, receiveTimeout, destqueue);
+
+                        var msg = queue_consumer.Receive();
+
+                        NewMessageArgs reply = ParseMessage(msg);
+
+                        T result = reply.Payload as T;
+                        return result;
+                    }
+                }
+            }
+        }
+
         private Task ListenOnQueue(ISession session)
         {
             var t2 = Task.Factory.StartNew(() =>
@@ -160,16 +214,8 @@ namespace Quest.Lib.ServiceBus
             return t2;
         }
 
-        private void SendNextMessage(ISession session, TimeSpan receiveTimeout, string topic)
+        private void SendMessage(MessageQueueItem objectToSend, ISession session, TimeSpan receiveTimeout, string topic)
         {
-            if (_outputQueue.Count > 0)
-            {
-                var objectToSend = _outputQueue.Dequeue();
-                if (objectToSend == null)
-                {
-                    Logger.Write("Object is NULL", TraceEventType.Error, GetType().Name);
-                }
-
                 IMessage msg = null;
 
                 switch (format)
@@ -229,15 +275,12 @@ namespace Quest.Lib.ServiceBus
                         {
                             producer.DeliveryMode = Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
                             producer.RequestTimeout = receiveTimeout;
-
                             producer.Send(queue, msg);
                         }
                     }
                 }
             }
-        }
-
-
+       
         private Task Writer(ISession session, TimeSpan receiveTimeout, string topic)
         {
             var t2 = Task.Factory.StartNew(() =>
@@ -247,7 +290,17 @@ namespace Quest.Lib.ServiceBus
                     try
                     {
                         _semaphore.WaitOne(1);
-                        SendNextMessage(session, receiveTimeout, topic);
+
+                        if (_outputQueue.Count > 0)
+                        {
+                            var objectToSend = _outputQueue.Dequeue();
+                            if (objectToSend == null)
+                            {
+                                Logger.Write("Object is NULL", TraceEventType.Error, GetType().Name);
+                            }
+
+                            SendMessage(objectToSend, session, receiveTimeout, topic);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -275,6 +328,13 @@ namespace Quest.Lib.ServiceBus
         /// </summary>
         /// <param name="receivedMsg"></param>
         protected void OnMessage(IMessage receivedMsg)
+        {
+            var msg = ParseMessage(receivedMsg);
+            if (msg!=null)
+                    NewMessage?.Invoke(this, msg);
+        }
+
+        protected NewMessageArgs ParseMessage(IMessage receivedMsg)
         {
             try
             {
@@ -311,7 +371,6 @@ namespace Quest.Lib.ServiceBus
 
                 if (mqi != null)
                 {
-                    Debug.WriteLine(mqi.Message);
                     var args = new NewMessageArgs()
                     {
                         Client = this,
@@ -319,7 +378,7 @@ namespace Quest.Lib.ServiceBus
                         Payload = mqi.Message
                     };
 
-                    NewMessage?.Invoke(this, args);
+                    return(args);
                 }
 
             }
@@ -327,6 +386,7 @@ namespace Quest.Lib.ServiceBus
             {
                 Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq");
             }
+            return null;
         }
 
         /// <summary>
@@ -356,20 +416,6 @@ namespace Quest.Lib.ServiceBus
                 RoutingKey = "",
                 Source = QueueName,
                 Destination = ""
-            };
-
-            Broadcast(message, metadata);
-        }
-
-        public void Send(IServiceBusMessage message, string queue)
-        {
-            PublishMetaData metadata = new PublishMetaData()
-            {
-                CorrelationId = "",
-                ReplyTo = "",
-                RoutingKey = "",
-                Source = QueueName,
-                Destination = queue
             };
 
             Broadcast(message, metadata);

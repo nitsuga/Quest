@@ -12,11 +12,19 @@ namespace Quest.Common.ServiceBus
 
         event EventHandler<NewMessageArgs> NewMessage;
 
-        void Send(IServiceBusMessage message, string queue);
-
         void Broadcast(IServiceBusMessage message);
 
         void Broadcast(IServiceBusMessage message, PublishMetaData metadata);
+
+        /// <summary>
+        /// Sends a message to a destination queue and qaits for a response
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
+        /// <param name="destqueue"></param>
+        /// <param name="srcqueue"></param>
+        /// <returns></returns>
+        T SendMessageAndWait<T>(IServiceBusMessage message, string destqueue, string srcqueue = null) where T : class;
 
         void Stop();
     }

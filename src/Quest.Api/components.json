@@ -8,7 +8,7 @@
       "instanceScope": "per-dependency"
     },
     {
-      "type": "Quest.Lib.ServiceBus.ActiveMqClient",
+      "type": "Quest.Lib.ServiceBus.ActiveMqClientAsync",
       "services": [
         {
           "type": "Quest.Common.ServiceBus.IServiceBusClient,Quest.Common"
@@ -19,7 +19,7 @@
       "properties": {
         "server": "activemq:tcp://127.0.0.1:61616?jms.useAsyncSend=true",
         "format": "json",
-        "topic": "quest.api",
+        "topic": "quest.common",
         "TTL": 10,
         "Persistent": false
       }

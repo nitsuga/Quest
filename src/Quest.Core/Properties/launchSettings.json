@@ -2,7 +2,7 @@
   "profiles": {
     "Quest.Core": {
       "commandName": "Project",
-      "commandLineArgs": "-exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager;DeviceManager;IndexerManager",
+      "commandLineArgs": "-exec=SecurityManager;DeviceManager",
       "workingDirectory": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.Core\\bin\\Debug\\netcoreapp2.0"
     }
   }

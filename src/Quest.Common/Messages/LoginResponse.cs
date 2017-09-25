@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Quest.Common.Messages
 {
@@ -14,6 +15,8 @@ namespace Quest.Common.Messages
         ///     Include in the header as Authentication = Bearer /AccessToken/
         /// </summary>
         public string AccessToken;
+
+        public string SessionToken;
 
         public DateTime ValidTo;
 
@@ -31,12 +34,15 @@ namespace Quest.Common.Messages
 
         /// <summary>
         ///     The version of Quest that this server is implementing
-        /// </summary>
-        
+        /// </summary>        
         public string QuestApi { get; set; }
-
-        
+                
         public StatusCode Status { get; set; }
+
+        /// <summary>
+        /// A list of claims that belong to this principle.
+        /// </summary>
+        public List<AuthorisationClaim> Claims;
     }
 
     

@@ -14,7 +14,7 @@ namespace Quest.Api.Modules
         {
             Load(builder, Assembly.Load("Quest.Lib"));
             Load(builder, Assembly.Load("Quest.Common"));
-            Load(builder, Assembly.Load("Quest.OS"));
+            Load(builder, Assembly.Load("Quest.Lib.OS"));
         }
 
         private void Load(ContainerBuilder builder, Assembly asm)

@@ -82,5 +82,10 @@ namespace Quest.Lib.ServiceBus
         {
             Broadcast(message);            
         }
+
+        public T SendMessageAndWait<T>(IServiceBusMessage message, string destqueue, string srcqueue = null) where T : class
+        {
+            throw new NotImplementedException();
+        }
     }
 }

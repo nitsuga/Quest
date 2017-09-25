@@ -86,6 +86,7 @@
     <PackageReference Include="ProjNET4GeoAPI" Version="1.3.0.4" />
     <PackageReference Include="PushSharp.Core" Version="1.0.0" />
     <PackageReference Include="RTree" Version="1.0.2.1" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@
       "instanceScope": "per-dependency"
     },
     {
-      "type": "Quest.Lib.ServiceBus.ActiveMqClient",
+      "type": "Quest.Lib.ServiceBus.ActiveMqClientAsync",
       "services": [
         {
           "type": "Quest.Common.ServiceBus.IServiceBusClient,Quest.Common"

@@ -11,27 +11,25 @@ namespace Quest.Common.Messages
     {
         /// <summary>
         ///     Indicates that this device is compatible with a specific Quest API version. As the Quest Api grows this
+        ///     will change
         /// </summary>
         
-        public string QuestApi { get; set; }
+        public int QuestApi { get; set; }
 
         /// <summary>
         ///     This is a unique identity for this device
-        /// </summary>
-        
+        /// </summary>        
         public string DeviceIdentity { get; set; }
 
         /// <summary>
         ///     a language locale of the device. defaults to en-GB if left empty
-        /// </summary>
-        
-        public string Locale { get; set; }
+        /// </summary>        
+        public string Locale { get; set; } = "en-GB";
 
         /// <summary>
-        ///     a unique id to be passed to the delivery provider
+        ///     a unique id to be passed to the delivery provider, such as GCM or Apple
         ///     <seealso cref="NotificationTypeId" />
         /// </summary>
-        
         public string NotificationId { get; set; }
 
         /// <summary>
@@ -50,34 +48,23 @@ namespace Quest.Common.Messages
 
         /// <summary>
         ///     password of the user
-        /// </summary>
-        
+        /// </summary>        
         public string Password { get; set; }
 
         /// <summary>
-        ///     username of the user
-        /// </summary>
-        
+        ///     operating system of the device
+        /// </summary>        
         public string OSVersion { get; set; }
 
         /// <summary>
-        ///     username of the user
-        /// </summary>
-        
+        ///     Make of device
+        /// </summary>        
         public string DeviceMake { get; set; }
 
         /// <summary>
-        ///     username of the user
-        /// </summary>
-        
+        ///     Model of device
+        /// </summary>        
         public string DeviceModel { get; set; }
-
-        /// <summary>
-        ///     username of the user
-        /// </summary>
-        
-        public string DeviceProduct { get; set; }
-
 
         public override string ToString()
         {
@@ -85,6 +72,4 @@ namespace Quest.Common.Messages
                 $"Logon DeviceIdentity={DeviceIdentity} NotificationTypeId={NotificationTypeId} NotificationId={NotificationId}";
         }
     }
-
-    
 }

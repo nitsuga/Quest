@@ -78,14 +78,25 @@ namespace Quest.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Logon([FromForm] LoginRequest request)
         {
-            var result = request.Submit<LoginResponse>(_messageCache);
+            var response = request.Submit<LoginResponse>(_messageCache);
 
-            var identity = await GetClaimsIdentity(request);
-            if (identity == null)
-            {
-//                _logger.LogInformation($"Invalid username ({applicationUser.UserName}) or password ({applicationUser.Password})");
+           if (response.Success == false)
                 return Unauthorized();
-            }
+
+            // get here if authorised
+
+            // add some standard claims
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, request.Username),
+
+                // the session token is used as the unique id for this jwt token
+                // this claim is used by all calls so the backend knows we are legit.
+                new Claim(JwtRegisteredClaimNames.Jti, response.SessionToken),
+                new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64)
+            };
+
+            var identity = new ClaimsIdentity(new GenericIdentity(request.Username, "Token"), claims);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -100,20 +111,6 @@ namespace Quest.Api.Controllers
                 signingCredentials: creds);
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            // Serialize and return the response
-            var response = new LoginResponse
-            {
-                AccessToken = encodedJwt,
-                ValidTo = jwt.ValidTo,
-                Callsign ="A102",
-                Message ="Logged on",
-                QuestApi ="1.0",
-                RequiresCallsign =true,
-                Status = new Quest.Common.Messages.StatusCode { Code = "AOR", Description = "Available on Radio" },
-                Success=true,
-                Timestamp = ToUnixEpochDate(DateTime.UtcNow)
-            };
 
             var json = JsonConvert.SerializeObject(response, _serializerSettings);
             return new OkObjectResult(json);
