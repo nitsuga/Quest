@@ -16,6 +16,32 @@ namespace Quest.Api.Controllers
             _messageCache = messageCache;
         }
 
+        /// <summary>
+        /// Logon to the device manager in order to receive alerts and perform device queries
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("Logon")]
+        public LoginResponse Logon([FromForm] LoginRequest request)
+        {
+            var response = request.Submit<LoginResponse>(_messageCache);
+
+            LoginResponse result;
+            try
+            {
+                result = request.Submit<LoginResponse>(_messageCache);
+            }
+            catch (Exception ex)
+            {
+                return new LoginResponse() { Success = false, Message = ex.Message };
+
+            }
+            finally
+            {
+            }
+            return result;
+        }
+
         [HttpPost("Logout")]
         public LogoutResponse Logout([FromBody]LogoutRequest request)
         {

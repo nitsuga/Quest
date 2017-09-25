@@ -14,9 +14,7 @@ namespace Quest.Common.Messages
         ///     This token to be passed in all subsequent calls
         ///     Include in the header as Authentication = Bearer /AccessToken/
         /// </summary>
-        public string AccessToken;
-
-        public string SessionToken;
+        public string SessionId;
 
         public DateTime ValidTo;
 
@@ -35,7 +33,7 @@ namespace Quest.Common.Messages
         /// <summary>
         ///     The version of Quest that this server is implementing
         /// </summary>        
-        public string QuestApi { get; set; }
+        public int QuestApi { get; set; }
                 
         public StatusCode Status { get; set; }
 

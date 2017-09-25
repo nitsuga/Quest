@@ -11,7 +11,6 @@
             Success = true;
         }
 
-
         /// <summary>
         ///     The request id in which this is respponding to
         /// </summary>

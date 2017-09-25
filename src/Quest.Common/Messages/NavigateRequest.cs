@@ -45,7 +45,7 @@ namespace Quest.Common.Messages
 
         public override string ToString()
         {
-            return string.Format("NavigateRequest ", AuthToken);
+            return string.Format("NavigateRequest ", SessionId);
         }
     }
 

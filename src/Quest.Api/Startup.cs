@@ -23,6 +23,7 @@ using Quest.Lib.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quest.Common.ServiceBus;
 using Quest.Api.Options;
+using Quest.Api.Filters;
 
 namespace Quest.Api
 {
@@ -92,7 +93,6 @@ namespace Quest.Api
 
             if (IsAuthEnabled)
             {
-
                 // Use policy auth.
                 services.AddAuthorization(options =>
                 {
@@ -151,6 +151,7 @@ namespace Quest.Api
             {
                 // UseFullTypeNameInSchemaIds replacement for .NET Core
                 options.CustomSchemaIds(x => x.FullName);
+                options.OperationFilter<AuthorizationHeaderFilter>();
             });
 
             // Add any Autofac modules or registrations.

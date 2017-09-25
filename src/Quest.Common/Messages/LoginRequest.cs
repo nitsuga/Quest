@@ -43,13 +43,7 @@ namespace Quest.Common.Messages
         /// <summary>
         ///     username of the user
         /// </summary>
-        
         public string Username { get; set; }
-
-        /// <summary>
-        ///     password of the user
-        /// </summary>        
-        public string Password { get; set; }
 
         /// <summary>
         ///     operating system of the device

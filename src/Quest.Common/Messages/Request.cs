@@ -11,15 +11,15 @@ namespace Quest.Common.Messages
     {
         public Request()
         {
-            AuthToken = "0000-0000-0000-0000";
+            SessionId = "0000-0000-0000-0000";
 
             RequestId = Guid.NewGuid().ToString();
         }
 
         /// <summary>
-        ///     authorisation token passed during login. (blank during login)
+        /// Session token passed back during login. (blank during login)
         /// </summary>
-        public string AuthToken { get; set; }
+        public string SessionId { get; set; }
 
         /// <summary>
         ///     Every request is stamped with a unique request id and every response will contain the corresponding
@@ -32,4 +32,24 @@ namespace Quest.Common.Messages
             return "Request";
         }
     }
+
+    public class ApiRequest : MessageBase
+    {
+        public ApiRequest()
+        {
+            RequestId = Guid.NewGuid().ToString();
+        }
+
+        /// <summary>
+        ///     Every request is stamped with a unique request id and every response will contain the corresponding
+        ///     request id.
+        /// </summary>
+        public string RequestId { get; set; }
+
+        public override string ToString()
+        {
+            return "Request";
+        }
+    }
+
 }

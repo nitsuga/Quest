@@ -37,38 +37,6 @@ namespace Quest.Api.Controllers
 
         }
 
-        /// <summary>
-        /// IMAGINE BIG RED WARNING SIGNS HERE!
-        /// You'd want to retrieve claims through your claims provider
-        /// in whatever way suits you, the below is purely for demo purposes!
-        /// </summary>
-        private Task<ClaimsIdentity> GetClaimsIdentity(LoginRequest user)
-        {
-            if (user.Username == "QuestDevice" && user.Password == "f593d801-bb3b-47ae-b288-2498463a7c14")
-            {
-
-                // todo
-                // var result = request.Submit<LoginResponse>(_messageCache);
-
-                // get session token from quest and pout this as a claim so that subsequent
-
-                // or send token to quest and then use that
-
-                //var claims = _security.GetAppClaims(user.UserName).Select(x => new Claim(x.ClaimType, x.ClaimValue)).ToList();
-
-                var claims = new List<Claim>();
-
-                claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Username));
-                claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-                claims.Add(new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64));
-
-                return Task.FromResult(new ClaimsIdentity(new GenericIdentity(user.Username, "Token"), claims));
-            }
-
-            // Credentials are invalid, or account doesn't exist
-            return Task.FromResult<ClaimsIdentity>(null);
-        }
-
         /// <returns>Date converted to seconds since Unix epoch (Jan 1, 1970, midnight UTC).</returns>
         private static long ToUnixEpochDate(DateTime date)
           => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
@@ -76,27 +44,33 @@ namespace Quest.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Logon([FromForm] LoginRequest request)
+        public async Task<IActionResult> Access([FromQuery] string username, [FromQuery]string password)
         {
-            var response = request.Submit<LoginResponse>(_messageCache);
 
-           if (response.Success == false)
+            // should call authenication service here
+            //var response = request.Submit<LoginResponse>(_messageCache);
+
+            // go look up the username / password in a different way!!
+            if (!(username == "fred" && password == "fred"))
+            {
                 return Unauthorized();
+            }
+
 
             // get here if authorised
 
             // add some standard claims
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, request.Username),
+                new Claim(JwtRegisteredClaimNames.Sub, username),
 
                 // the session token is used as the unique id for this jwt token
                 // this claim is used by all calls so the backend knows we are legit.
-                new Claim(JwtRegisteredClaimNames.Jti, response.SessionToken),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64)
             };
 
-            var identity = new ClaimsIdentity(new GenericIdentity(request.Username, "Token"), claims);
+            var identity = new ClaimsIdentity(new GenericIdentity(username, "Token"), claims);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -112,7 +86,7 @@ namespace Quest.Api.Controllers
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            var json = JsonConvert.SerializeObject(response, _serializerSettings);
+            var json = JsonConvert.SerializeObject(new { Token= encodedJwt }, _serializerSettings);
             return new OkObjectResult(json);
         }
 

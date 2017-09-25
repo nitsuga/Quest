@@ -24,7 +24,7 @@ namespace Quest.Lib.Device
 {
     public class DeviceHandler
     {
-        private const string Version = "1";
+        private const int Version = 1;
 
 #if APPLE_MSG
         private ApnsServiceBroker _apnsBroker;
@@ -107,14 +107,7 @@ namespace Quest.Lib.Device
         public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore)
         {
             var callsign = "";
-            var sc = new StatusCode();
-
-            // go look up the username / password in a different way!!
-            if (!(request.Username == "QuestDevice" && request.Password == "f593d801-bb3b-47ae-b288-2498463a7c14"))
-            {
-                return new LoginResponse { Success = false, Message = "Login failed" };
-            }
-
+            var sc = new StatusCode() { Code="???", Description = "Pending" };
 
             var resrecord = devStore.Get(request.DeviceIdentity);
             if (resrecord != null) {
@@ -255,15 +248,15 @@ namespace Quest.Lib.Device
                 RequiresCallsign = false,
                 Callsign = callsign,
                 Status = sc,
-                Success = true,
-                SessionToken = resrecord.AuthToken,
+                Success = true, 
+                SessionId = resrecord.AuthToken,
                 Message = "successfully logged on"
             };
         }
 
         public LogoutResponse Logout(LogoutRequest request, IDeviceStore devStore)
         {
-            var resrecord = devStore.GetByToken(request.AuthToken);
+            var resrecord = devStore.GetByToken(request.SessionId);
 
             if (resrecord != null)
             {
@@ -295,7 +288,7 @@ namespace Quest.Lib.Device
             var oldCallsign = "";
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                 {
                     return new CallsignChangeResponse
@@ -350,7 +343,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new RefreshStateResponse
                     {
@@ -388,7 +381,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new AckAssignedEventResponse
                     {
@@ -430,7 +423,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new PositionUpdateResponse
                     {
@@ -459,7 +452,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new MakePatientObservationResponse
                     {
@@ -484,7 +477,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new PatientDetailsResponse
                     {
@@ -524,7 +517,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new GetEntityTypesResponse
                     {
@@ -931,7 +924,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new GetHistoryResponse
                     {
@@ -1320,7 +1313,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new GetStatusCodesResponse
                     {
@@ -1386,7 +1379,7 @@ namespace Quest.Lib.Device
         {
             using (var db = new QuestContext())
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.AuthToken);
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
                     return new SetStatusResponse
                     {
