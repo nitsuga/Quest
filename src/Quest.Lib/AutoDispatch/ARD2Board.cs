@@ -191,7 +191,7 @@ namespace Quest.Lib.AutoDispatch
         {
             // get resource
             var res = (from r in Resources where r.Callsign == am.Resource.Callsign select r).FirstOrDefault();
-            var inc = (from i in Incidents where i.Incidentid == am.Incident.Incidentid select i).FirstOrDefault();
+            var inc = (from i in Incidents where i.IncidentID == am.Incident.Incidentid select i).FirstOrDefault();
 
             bool isReassignment = res.BusyEnroute == true;
 

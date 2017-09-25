@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
 using Quest.Lib.Trace;
@@ -18,6 +17,7 @@ using Quest.Lib.Routing.Speeds;
 using Quest.Common.Messages;
 using NetTopologySuite.Geometries;
 using GeoAPI.Geometries;
+using Quest.Lib.Research.DataModelResearch;
 
 namespace Quest.Lib.Research.Job
 {
@@ -62,18 +62,15 @@ namespace Quest.Lib.Research.Job
             if (File.Exists(filename))
                 File.Delete(filename);
 
-            List<IncidentRouteView> routes = new List<IncidentRouteView>();
-            using (var db = new QuestResearchEntities())
+            List<IncidentRoutes> routes = new List<IncidentRoutes>();
+            using (var db = new QuestDataContext())
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                db.Database.CommandTimeout = int.MaxValue;
-
                 Logger.Write("Getting routes", GetType().Name);
-                routes = db.IncidentRouteViews
+                routes = db.IncidentRoutes
                     
                     //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161130004872 && x.IsBadGPS == false)
-                    .Where(x => x.IncidentRouteID >= 1405137 && x.IsBadGPS == false)
-                    .Where(x => x.ActualDuration != null && x.IsBadGPS == false)
+                    .Where(x => x.IncidentRouteId >= 1405137 && x.IsBadGps == false)
+                    .Where(x => x.ActualDuration != null && x.IsBadGps == false)
                     .Take(10000)
                     .ToList();
             }
@@ -108,10 +105,10 @@ namespace Quest.Lib.Research.Job
         /// <param name="route"></param>
         /// <param name="file"></param>
         /// <param name="edgeCalculators"></param>
-        void CalculateEstimates(StreamWriter file, IncidentRouteView route, int index)
+        void CalculateEstimates(StreamWriter file, IncidentRoutes route, int index)
         {
             //            Logger.Write($"Loading track", GetType().Name);
-            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteID}");
+            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteId}");
 
             if (track.Fixes.Count == 0)
                 return;
@@ -166,7 +163,7 @@ namespace Quest.Lib.Research.Job
 
             var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
 
-            var csvLine = $"{route.IncidentRouteID},{how},{dow},{(int)actualDuration},{track.VehicleType},{estimate.Rows[0].Elements[0].Duration.Value},{estimate.Rows[0].Elements[0].DurationInTraffic.Value},{estimate.Rows[0].Elements[0].Distance.Value}";
+            var csvLine = $"{route.IncidentRouteId},{how},{dow},{(int)actualDuration},{track.VehicleType},{estimate.Rows[0].Elements[0].Duration.Value},{estimate.Rows[0].Elements[0].DurationInTraffic.Value},{estimate.Rows[0].Elements[0].Distance.Value}";
             Debug.Print(csvLine);
             file.WriteLine(csvLine);
         }

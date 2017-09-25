@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Quest.Lib.MapMatching;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
 using Quest.Common.Messages;
@@ -19,6 +18,8 @@ using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -143,13 +144,10 @@ namespace Quest.Lib.Research.Job
         private static List<long> GetIncidents()
         {
             List<long> incidents;
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
-
                 incidents = context.IncidentRoutes
-                    .Where(x=>x.IsBadGPS==false)
+                    .Where(x=>x.IsBadGps==false)
                     .Select(x => (long) x.IncidentId)
                     .Distinct()
                     .Take(10000)
@@ -161,14 +159,11 @@ namespace Quest.Lib.Research.Job
         private static List<long> GetIncidentRoutes()
         {
             List<long> incidents;
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
-
                 incidents = context.IncidentRoutes
-                    .Where(x=>x.IsBadGPS==false)
-                    .Select(x => (long)x.IncidentRouteID)
+                    .Where(x=>x.IsBadGps==false)
+                    .Select(x => (long)x.IncidentRouteId)
                     .Distinct()
                     .Take(10000)
                     .ToList();
@@ -314,7 +309,7 @@ namespace Quest.Lib.Research.Job
 
         private static void AnalyseTrackSpeeds(List<Track> tracks, AtsParms parms)
         {
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
                 foreach (var track in tracks)
                 {
@@ -331,7 +326,7 @@ namespace Quest.Lib.Research.Job
                     }
                     var sqlc = bulk.ToString();
                     if (sqlc.Length > 0)
-                        context.Database.ExecuteSqlCommand(sqlc);
+                        context.Execute(sqlc);
 
                     track.CalculateEstimateSpeeds();
 
@@ -352,7 +347,7 @@ namespace Quest.Lib.Research.Job
 
 
                     if (bulk.ToString().Length > 0)
-                        context.Database.ExecuteSqlCommand(bulk.ToString());
+                        context.Execute(bulk.ToString());
 
                 }
             }

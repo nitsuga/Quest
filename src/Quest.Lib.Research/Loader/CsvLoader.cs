@@ -2,8 +2,9 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using Quest.Lib.Research.Model;
 using System.IO;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Loader
 {
@@ -16,7 +17,7 @@ namespace Quest.Lib.Research.Loader
             {
                 using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "\t" }))
                 {
-                    using (var db = new QuestResearchEntities())
+                    using (var db = new QuestDataContext())
                     {
                         // skip header
                         while (headers > 0)
@@ -40,7 +41,7 @@ namespace Quest.Lib.Research.Loader
                             string sqlToExec;
                             try
                             {
-                                sqlToExec = processRow(data);
+                                sqlToExec = processRow(data.CurrentRecord);
 
                             }
                             catch (Exception)
@@ -63,7 +64,11 @@ namespace Quest.Lib.Research.Loader
 
                             try
                             {
-                                var rows = db.Database.ExecuteSqlCommand(batch.ToString());
+                                int rows=0;
+
+                                //TODO: make sure this returns the number of rows affected
+                                db.Execute(batch.ToString(), (x)=> { rows = x.GetInt32(0); });
+
                                 writeRowcount += rows;
                                 batch.Clear();
                                 Debug.WriteLine($"{filename} {readRowcount} {skipped} {writeRowcount} {rows}");
@@ -76,7 +81,7 @@ namespace Quest.Lib.Research.Loader
                         }
 
                         if (batch.ToString().Length > 0)
-                            db.Database.ExecuteSqlCommand(batch.ToString());
+                            db.Execute(batch.ToString());
 
                     }
                 }

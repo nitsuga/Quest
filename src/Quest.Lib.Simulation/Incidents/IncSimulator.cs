@@ -67,23 +67,23 @@ namespace Quest.Lib.Simulation.Incidents
                 {
                     IncidentId = i.IncidentId,
                     CallStart = i.CallStart,
-                    AMPDSTime = i.AMPDSTime,
+                    AMPDSTime = i.Ampdstime,
                     Easting = i.Easting,
                     Northing = i.Northing,
-                    AMPDSCode = i.AMPDSCode,
+                    AMPDSCode = i.Ampdscode,
                     Category = i.Category,
                     WasConveyed = i.WasConveyed,
                     WasDispatched = i.WasDispatched,
-                    OutsideLAS = i.OutsideLAS,
+                    OutsideLAS = i.OutsideLas,
                     UpdateTime = i.CallStart,
                     UpdateType = SimIncidentUpdate.UpdateTypes.CallStart
                 };
 
                 SetTimedMessage($"INCNEW-{i.IncidentId}", i.CallStart, inc);
 
-                if (i.AMPDSTime != null)
+                if (i.Ampdstime != null)
                 {
-                    inc.UpdateTime = i.AMPDSTime;
+                    inc.UpdateTime = i.Ampdstime;
                     inc.UpdateType = SimIncidentUpdate.UpdateTypes.AMPDS;
                     SetTimedMessage($"INCAMPDS-{i.IncidentId}", inc.UpdateTime, inc);
                 }

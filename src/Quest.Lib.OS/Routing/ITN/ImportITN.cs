@@ -311,7 +311,7 @@ namespace Quest.Lib.OS.Routing.ITN
 
                                         string cmd3 = $"exec AddRoadLink @fid='{data.Fid}', @roadtype='{data.DescriptiveTerm}', @natureOfRoad='{data.NatureOfRoad}',  @WKT='{wkt}',  @FromFid='{data.Starthref}',  @FromGrade={data.StartGrade}, @ToFid='{data.Endhref}', @ToGrade={data.EndGrade} ";
                                         AddCommand(cmd3, data.Fid);
-                                        //entities.Database.ExecuteSqlCommand(cmd3);
+                                        //entities.Execute(cmd3);
 
 
                                         break;
@@ -327,7 +327,7 @@ namespace Quest.Lib.OS.Routing.ITN
 
                                             string cmd = $"exec AddRoadNode @fid='{data.Fid}', @X={(int) x}, @Y={(int) y};";
                                             AddCommand(cmd, data.Fid); 
-                                            //entities.Database.ExecuteSqlCommand(cmd);
+                                            //entities.Execute(cmd);
                                         }
 
 
@@ -347,7 +347,7 @@ namespace Quest.Lib.OS.Routing.ITN
 
                                             string cmd1 = $"exec AddRoadNetworkMember @roadfid='{data.Fid}', @networkfid='{networkfid}';";
                                             AddCommand(cmd1, data.Fid+networkfid);
-                                            //entities.Database.ExecuteSqlCommandAsync(cmd1);
+                                            //entities.ExecuteAsync(cmd1);
 
                                         }
 
@@ -363,7 +363,7 @@ namespace Quest.Lib.OS.Routing.ITN
                                         string cmd2 =
                                             $"exec AddRoadRouteInfo @fid='{data.Fid}', @instruction='{data.Instruction}', @FromFid='{data.Starthref}', @ToFid='{data.Endhref}';";
                                         AddCommand(cmd2, data.Fid);
-                                        //entities.Database.ExecuteSqlCommand(cmd2);
+                                        //entities.Execute(cmd2);
 
                                         break;
                                     case "gml:coordinates":
@@ -539,7 +539,7 @@ namespace Quest.Lib.OS.Routing.ITN
             using (var entities = new QuestOSContext())
             {
                 //TODO: EF work
-                //entities.Database.ExecuteSqlCommand("exec AddRoadIndexes");
+                //entities.Execute("exec AddRoadIndexes");
             }
         }
 
@@ -548,7 +548,7 @@ namespace Quest.Lib.OS.Routing.ITN
             using (var entities = new QuestOSContext())
             {
                 //TODO: EF work
-                //entities.Database.ExecuteSqlCommand("exec MakeStaticRoadinks");
+                //entities.Execute("exec MakeStaticRoadinks");
             }
         }
 
@@ -557,7 +557,7 @@ namespace Quest.Lib.OS.Routing.ITN
             using (var entities = new QuestOSContext())
             {
                 //TODO: EF work
-                //entities.Database.ExecuteSqlCommand("exec PopulateJunctions");
+                //entities.Execute("exec PopulateJunctions");
             }
         }
 

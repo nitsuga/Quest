@@ -23,6 +23,7 @@ namespace Quest.Lib.Simulation.DataModelSim
         public int? GroupId { get; set; }
 
         public Destinations DefaultDestination { get; set; }
+        public VehicleTypes VehicleType { get; set; }
         public ICollection<SimulationResults> SimulationResultsAmbResource { get; set; }
         public ICollection<SimulationResults> SimulationResultsFrresource { get; set; }
     }

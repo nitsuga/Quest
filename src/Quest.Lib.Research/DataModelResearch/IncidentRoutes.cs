@@ -8,6 +8,7 @@ namespace Quest.Lib.Research.DataModelResearch
         public IncidentRoutes()
         {
             IncidentRouteEstimate = new HashSet<IncidentRouteEstimate>();
+            RoadSpeedItem = new HashSet<RoadSpeedItem>();
         }
 
         public int IncidentRouteId { get; set; }
@@ -21,5 +22,6 @@ namespace Quest.Lib.Research.DataModelResearch
         public bool? IsBadGps { get; set; }
 
         public ICollection<IncidentRouteEstimate> IncidentRouteEstimate { get; set; }
+        public ICollection<RoadSpeedItem> RoadSpeedItem { get; set; }
     }
 }

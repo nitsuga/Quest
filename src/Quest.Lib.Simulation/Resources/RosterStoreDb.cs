@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Simulation;
+using Quest.Lib.Simulation.DataModelSim;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Quest.Lib.Simulation.Resources
 
         public void LoadRoster(DateTime from, DateTime to)
         {
-            using (var db = new Model.QuestSimEntities())
+            using (var db = new QuestSimContext())
             {
                 _roster = db.VehicleViews
                         .ToList()

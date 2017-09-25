@@ -4,9 +4,9 @@ using System.Diagnostics;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Processor;
-using Quest.Lib.Simulation.Model;
 using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
+using Quest.Lib.Simulation.DataModelSim;
 
 namespace Quest.Lib.Simulation.Resources
 {
@@ -53,7 +53,7 @@ namespace Quest.Lib.Simulation.Resources
         {
             LogMessage($"Low watermark, loading {quantity} Resources", TraceEventType.Warning);
 
-            using (var SimData = new QuestDataEntities())
+            using (var SimData = new QuestSimContext())
             {
                 int quantity = this.quantity;
 

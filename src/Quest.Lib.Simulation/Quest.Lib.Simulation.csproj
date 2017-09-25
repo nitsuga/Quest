@@ -7,10 +7,13 @@
   <ItemGroup>
     <Compile Remove="Model\**" />
     <Compile Remove="Old\**" />
+    <Compile Remove="Suggestions\**" />
     <EmbeddedResource Remove="Model\**" />
     <EmbeddedResource Remove="Old\**" />
+    <EmbeddedResource Remove="Suggestions\**" />
     <None Remove="Model\**" />
     <None Remove="Old\**" />
+    <None Remove="Suggestions\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +26,8 @@
     <Compile Remove="Interfaces\ISimPart.cs" />
     <Compile Remove="Interfaces\IUserOut.cs" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
+    <Compile Remove="Resources\ResSimulator.cs" />
+    <Compile Remove="Resources\RosterStoreDb.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,12 +36,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.3" />
+    <PackageReference Include="NCrontab.Advanced" Version="1.2.3.3" />
     <PackageReference Include="NEST" Version="5.5.0" />
     <PackageReference Include="NetTopologySuite" Version="1.14.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Quest.Lib.Research\Quest.Lib.Research.csproj" />
     <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj" />
   </ItemGroup>
 

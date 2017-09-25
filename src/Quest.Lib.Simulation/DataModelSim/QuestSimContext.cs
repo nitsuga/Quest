@@ -6,11 +6,10 @@ namespace Quest.Lib.Simulation.DataModelSim
 {
     public partial class QuestSimContext : DbContext
     {
-        public virtual DbSet<Ampdscodes> Ampdscodes { get; set; }
-        public virtual DbSet<CadLinkIncidents> CadLinkIncidents { get; set; }
         public virtual DbSet<Coverage> Coverage { get; set; }
         public virtual DbSet<Destinations> Destinations { get; set; }
         public virtual DbSet<Determinants> Determinants { get; set; }
+        public virtual DbSet<OnsceneStats> OnsceneStats { get; set; }
         public virtual DbSet<Profile> Profile { get; set; }
         public virtual DbSet<ProfileParameter> ProfileParameter { get; set; }
         public virtual DbSet<ProfileParameterType> ProfileParameterType { get; set; }
@@ -21,16 +20,9 @@ namespace Quest.Lib.Simulation.DataModelSim
         public virtual DbSet<SimulationResults> SimulationResults { get; set; }
         public virtual DbSet<SimulationRun> SimulationRun { get; set; }
         public virtual DbSet<SimulationStats> SimulationStats { get; set; }
-        public virtual DbSet<StationCatchment> StationCatchment { get; set; }
+        public virtual DbSet<VehicleRoster> VehicleRoster { get; set; }
         public virtual DbSet<Vehicles> Vehicles { get; set; }
         public virtual DbSet<VehicleTypes> VehicleTypes { get; set; }
-
-        // Unable to generate entity type for table 'dbo.IncidentType'. Please see the warning messages.
-        // Unable to generate entity type for table 'dbo.VehicleRoster'. Please see the warning messages.
-        // Unable to generate entity type for table 'dbo.ResponseProfiles'. Please see the warning messages.
-        // Unable to generate entity type for table 'dbo.freda_determinants'. Please see the warning messages.
-        // Unable to generate entity type for table 'dbo.Personnel'. Please see the warning messages.
-        // Unable to generate entity type for table 'dbo.OnsceneStats'. Please see the warning messages.
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -43,90 +35,6 @@ namespace Quest.Lib.Simulation.DataModelSim
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Ampdscodes>(entity =>
-            {
-                entity.HasKey(e => e.AmpdsKey);
-
-                entity.ToTable("AMPDScodes");
-
-                entity.HasIndex(e => new { e.Ampdscode, e.Version })
-                    .HasName("IX_ampdscodes");
-
-                entity.Property(e => e.AmpdsKey)
-                    .HasColumnName("ampdsKey")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Ampdscode)
-                    .IsRequired()
-                    .HasColumnName("ampdscode")
-                    .HasMaxLength(10)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Category)
-                    .HasColumnName("category")
-                    .HasColumnType("char(2)");
-
-                entity.Property(e => e.Chiefcomplaint)
-                    .IsRequired()
-                    .HasColumnName("chiefcomplaint")
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Chiefcomplaintcode).HasColumnName("chiefcomplaintcode");
-
-                entity.Property(e => e.DefaultDohCategory).HasColumnType("char(1)");
-
-                entity.Property(e => e.DefaultDohSubcategory).HasColumnType("char(2)");
-
-                entity.Property(e => e.DefaultDohSubcategoryFull)
-                    .HasMaxLength(10)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.DefaultLascategory)
-                    .HasColumnName("DefaultLASCategory")
-                    .HasColumnType("char(2)");
-
-                entity.Property(e => e.DefaultLascategoryFull)
-                    .HasColumnName("DefaultLASCategoryFull")
-                    .HasMaxLength(10)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasColumnName("description")
-                    .HasMaxLength(200)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Enddate)
-                    .HasColumnName("enddate")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.Startdate)
-                    .HasColumnName("startdate")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.Version).HasColumnName("version");
-            });
-
-            modelBuilder.Entity<CadLinkIncidents>(entity =>
-            {
-                entity.HasKey(e => e.CadLinkId);
-
-                entity.HasIndex(e => e.Timestamp)
-                    .HasName("tstamp_index");
-
-                entity.HasIndex(e => e.XmlData)
-                    .HasName("ix_xml");
-
-                entity.Property(e => e.Timestamp)
-                    .HasColumnName("timestamp")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.XmlData)
-                    .IsRequired()
-                    .HasColumnType("xml");
-            });
-
             modelBuilder.Entity<Coverage>(entity =>
             {
                 entity.Property(e => e.CoverageMap).IsRequired();
@@ -187,6 +95,42 @@ namespace Quest.Lib.Simulation.DataModelSim
                 entity.Property(e => e.Paramedics)
                     .HasColumnName("paramedics")
                     .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<OnsceneStats>(entity =>
+            {
+                entity.HasKey(e => e.CdfId)
+                    .ForSqlServerIsClustered(false);
+
+                entity.HasIndex(e => new { e.CdfType, e.Hour, e.VehicleType, e.Ampds })
+                    .HasName("idx_onscene")
+                    .IsUnique()
+                    .ForSqlServerIsClustered();
+
+                entity.Property(e => e.CdfId).ValueGeneratedNever();
+
+                entity.Property(e => e.Ampds)
+                    .HasColumnName("ampds")
+                    .HasMaxLength(10);
+
+                entity.Property(e => e.Cdf)
+                    .HasColumnName("cdf")
+                    .HasColumnType("xml");
+
+                entity.Property(e => e.CdfType).HasColumnName("cdfType");
+
+                entity.Property(e => e.Count).HasColumnName("count");
+
+                entity.Property(e => e.Hour).HasColumnName("hour");
+
+                entity.Property(e => e.Mean).HasColumnName("mean");
+
+                entity.Property(e => e.Stddev).HasColumnName("stddev");
+
+                entity.Property(e => e.VehicleType)
+                    .HasColumnName("vehicleType")
+                    .HasMaxLength(20)
                     .IsUnicode(false);
             });
 
@@ -356,29 +300,31 @@ namespace Quest.Lib.Simulation.DataModelSim
                     .HasConstraintName("FK_SimulationStats_SimulationRun");
             });
 
-            modelBuilder.Entity<StationCatchment>(entity =>
+            modelBuilder.Entity<VehicleRoster>(entity =>
             {
-                entity.Property(e => e.Area)
-                    .HasMaxLength(50)
+                entity.HasIndex(e => new { e.Period, e.Minutesactual, e.VehicleTypeId })
+                    .HasName("ix_period");
+
+                entity.Property(e => e.Callsign)
+                    .IsRequired()
+                    .HasColumnName("callsign")
+                    .HasMaxLength(10)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Code)
-                    .HasColumnName("code")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.Property(e => e.Easting).HasColumnName("easting");
 
-                entity.Property(e => e.Complex)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.Property(e => e.Minutesactual).HasColumnName("minutesactual");
 
-                entity.Property(e => e.Fid)
-                    .HasColumnName("FID")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.Property(e => e.Northing).HasColumnName("northing");
 
-                entity.Property(e => e.StationName)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.Property(e => e.Period).HasColumnType("datetime");
+
+                entity.Property(e => e.StationId).HasColumnType("char(2)");
+
+                entity.HasOne(d => d.VehicleType)
+                    .WithMany(p => p.VehicleRoster)
+                    .HasForeignKey(d => d.VehicleTypeId)
+                    .HasConstraintName("FK_VehicleRoster_VehicleTypes");
             });
 
             modelBuilder.Entity<Vehicles>(entity =>
@@ -397,6 +343,12 @@ namespace Quest.Lib.Simulation.DataModelSim
                     .WithMany(p => p.Vehicles)
                     .HasForeignKey(d => d.DefaultDestinationId)
                     .HasConstraintName("FK_Vehicles_Destinations");
+
+                entity.HasOne(d => d.VehicleType)
+                    .WithMany(p => p.Vehicles)
+                    .HasForeignKey(d => d.VehicleTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Vehicles_VehicleTypes");
             });
 
             modelBuilder.Entity<VehicleTypes>(entity =>

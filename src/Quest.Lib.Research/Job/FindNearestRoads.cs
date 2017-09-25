@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using Quest.Lib.Coords;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Routing;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
@@ -19,6 +18,8 @@ using Quest.Lib.Processor;
 using Autofac;
 using Quest.Lib.ServiceBus;
 using Quest.Common.ServiceBus;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -81,11 +82,8 @@ namespace Quest.Lib.Research.Job
             Task.Run(() => Writer());
 
             // get all the records
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
-
                 var total = context.Avls.Count(x => x.Process == true);
                 var max = context.Avls.Where(x => x.Process == true).Max(x => x.RawAvlsId);
                 var min = context.Avls.Where(x => x.Process == true).Min(x => x.RawAvlsId);
@@ -126,7 +124,7 @@ namespace Quest.Lib.Research.Job
 
         private void Writer()
         {
-            using (var context2 = new QuestResearchEntities())
+            using (var context2 = new QuestDataContext())
             {
                 while (!_quiting)
                 {
@@ -147,7 +145,7 @@ namespace Quest.Lib.Research.Job
                         }
                         try
                         {
-                            context2.Database.ExecuteSqlCommand(s.ToString());
+                            context2.Execute(s.ToString());
                         }
                         catch (Exception)
                         {
@@ -170,15 +168,12 @@ namespace Quest.Lib.Research.Job
             Logger.Write(msg, GetType().Name);
             var s = new StringBuilder();
 
-            using (var context2 = new QuestResearchEntities())
+            using (var context2 = new QuestDataContext())
             {
-                context2.Database.CommandTimeout = 36000;
-                context2.Configuration.ValidateOnSaveEnabled = false;
-                context2.Configuration.ProxyCreationEnabled = false;
                 int itemsAppended = 0;
                 var items =
                     context2.Avls
-                        .Where(x => x.RawAvlsId >= p.From && x.RawAvlsId < (p.From + p.BatchSize) && x.Process);
+                        .Where(x => x.RawAvlsId >= p.From && x.RawAvlsId < (p.From + p.BatchSize) && (x.Process ?? false) == true);
                 foreach (var r in items) // for each GPS fix..
                 {
                     try

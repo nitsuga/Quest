@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using Quest.Common.Messages;
 using Quest.Lib.MapMatching;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Trace;
 using Quest.Lib.Processor;
@@ -13,6 +12,7 @@ using Quest.Lib.ServiceBus;
 using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Lib.Research.DataModelResearch;
 
 namespace Quest.Lib.Research.Job
 {
@@ -86,10 +86,8 @@ namespace Quest.Lib.Research.Job
         private static List<long> GetIncidents()
         {
             List<long> incidents;
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
 
                 incidents = context.Avls
                     .Where(x => x.RawAvlsId>= 320473511 && x.IncidentId!=null) // 2016-12-02

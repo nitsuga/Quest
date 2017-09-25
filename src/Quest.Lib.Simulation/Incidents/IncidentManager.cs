@@ -1,5 +1,5 @@
 ﻿using Quest.Common.Simulation;
-using Quest.Lib.Simulation.Model;
+using Quest.Lib.Simulation.DataModelSim;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,7 +25,7 @@ namespace Quest.Lib.Simulation.Incidents
             return LiveIncidents.FirstOrDefault(x => x.IncidentId == incidentId);
         }
 
-        public List<SimulationIncident> GetIncidents(long fromIncidentId, int take, DateTime from, DateTime to)
+        public List<SimulationIncidents> GetIncidents(long fromIncidentId, int take, DateTime from, DateTime to)
         {
             return _store.GetIncidents(fromIncidentId, take, from, to);
         }

@@ -31,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Quest.Common\Quest.Common.csproj" />
     <ProjectReference Include="..\Quest.Lib.OS\Quest.Lib.OS.csproj" />
+    <ProjectReference Include="..\Quest.Lib.Research\Quest.Lib.Research.csproj" />
     <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj" />
   </ItemGroup>
 

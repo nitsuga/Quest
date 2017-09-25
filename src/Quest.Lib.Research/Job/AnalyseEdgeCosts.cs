@@ -5,7 +5,6 @@ using System.Threading;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using Quest.Lib.MapMatching;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
 using Quest.Lib.Routing.Speeds;
@@ -18,6 +17,8 @@ using Quest.Lib.Processor;
 using Quest.Lib.DependencyInjection;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -69,19 +70,15 @@ namespace Quest.Lib.Research.Job
             if (File.Exists(filename))
                 File.Delete(filename);
 
-            List<IncidentRouteView> routes = new List<IncidentRouteView>();
-            using (var db = new QuestResearchEntities())
+            List<IncidentRoutes> routes = new List<IncidentRoutes>();
+            using (var db = new QuestDataContext())
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                db.Database.CommandTimeout = int.MaxValue;
-
                 Logger.Write("Getting routes", GetType().Name);
                 // get 10000 "good" routes from November 2016. These routes have been excluded from the summary speed tables
                 // and so are effectvely unseen
-                routes = db.IncidentRouteViews
-                    
+                routes = db.IncidentRoutes                    
                     //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
-                    .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGPS == false)
+                    .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGps == false)
                     .Take(100000)
                     .ToList();
             }
@@ -118,24 +115,22 @@ namespace Quest.Lib.Research.Job
         /// <param name="route"></param>
         /// <param name="file"></param>
         /// <param name="edgeCalculators"></param>
-        void CalculateEstimates(StreamWriter file, List<IRoadSpeedCalculator> edgeCalculators, IncidentRouteView route, int index)
+        void CalculateEstimates(StreamWriter file, List<IRoadSpeedCalculator> edgeCalculators, IncidentRoutes route, int index)
         {
             //            Logger.Write($"Loading track", GetType().Name);
-            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteID}");
+            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteId}");
 
             if (track.Fixes.Count == 0)
                 return;
 
             List<RoadSpeedItem> mapmatchdata;
 
-            using (var db = new QuestResearchEntities())
+            using (var db = new QuestDataContext())
             {
-                db.Database.CommandTimeout = int.MaxValue;
-                db.Configuration.ProxyCreationEnabled = false;
                 // get map match route as well
-                mapmatchdata = db.RoadSpeedItems
+                mapmatchdata = db.RoadSpeedItem
                 
-                .Where(x => x.IncidentRouteId == route.IncidentRouteID)
+                .Where(x => x.IncidentRouteId == route.IncidentRouteId)
                 .OrderBy(x => x.DateTime)
                 .ToList();
             }
@@ -178,19 +173,21 @@ namespace Quest.Lib.Research.Job
             }
         }
 
-        void CalculateStartEnd(Track track, IncidentRouteView r)
+        void CalculateStartEnd(Track track, IncidentRoutes r)
         {
-            using (var db = new QuestResearchEntities())
+            using (var db = new QuestDataContext())
             {
-                db.Database.CommandTimeout = int.MaxValue;
                 var starttime = track.Fixes.First().Timestamp;
                 var endtime = track.Fixes.Last().Timestamp;
                 var duration = (endtime - starttime).TotalSeconds;
-                db.UpdateIncidentDuration(r.IncidentRouteID, starttime, endtime, (int)duration);
+
+                //TODO: fix SP execution
+                db.Execute($"exec UpdateIncidentDuration {r.IncidentRouteId}, {starttime}, {endtime}, {(int)duration}");
+                //db.UpdateIncidentDuration(r.IncidentRouteID, starttime, endtime, (int)duration);
             }
         }
 
-        void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRouteView r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
+        void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRoutes r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
         {
 //            Logger.Write($"CalculateEstimateUsingOriginalTrack", GetType().Name);
             try
@@ -226,7 +223,7 @@ namespace Quest.Lib.Research.Job
                 {
                     //var apath = MakePathFromRoadSpeedItems(mapmatchdata);
                     var id = edgeCalculator.GetId();
-                    file.WriteLine($"{r.IncidentRouteID},{how},{2},{id},{(int)duration},{(int)distance},{links},{(int)actualDuration},{track.VehicleType},0,0,0,0,0,0,0,0,0,0,0,\"\",\"\",{sx},{sy},{ex},{ey},0,0,0,0" );
+                    file.WriteLine($"{r.IncidentRouteId},{how},{2},{id},{(int)duration},{(int)distance},{links},{(int)actualDuration},{track.VehicleType},0,0,0,0,0,0,0,0,0,0,0,\"\",\"\",{sx},{sy},{ex},{ey},0,0,0,0" );
                 }
                 catch (Exception)
                 {
@@ -239,7 +236,7 @@ namespace Quest.Lib.Research.Job
             }
         }
 
-        void CalculateEstimateUsingRoutingEngine(StreamWriter file, Track track, IncidentRouteView route, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
+        void CalculateEstimateUsingRoutingEngine(StreamWriter file, Track track, IncidentRoutes route, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)
         {
             try
             {
@@ -327,7 +324,7 @@ namespace Quest.Lib.Research.Job
                             newPath = MakePathFromRoadSpeedItems(engineroute.Connections.Select(x=>x.Edge).ToList());
                         }
 
-                        file.WriteLine($"{route.IncidentRouteID},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\",{sx},{sy},{ex},{ey},{totalAngleDelta},{deg45c_l},{deg60c_l},{deg90c_l},{deg45c_r},{deg60c_r},{deg90c_r},{rc}");
+                        file.WriteLine($"{route.IncidentRouteId},{how},{1},{id},{(int)engineroute.Duration},{(int)engineroute.Distance},{links},{(int)actualDuration},{track.VehicleType},{qA[0]},{qA[1]},{qA[2]},{qA[3]},{qB[0]},{qB[1]},{qB[2]},{qB[3]},\"{origPath}\",\"{newPath}\",{sx},{sy},{ex},{ey},{totalAngleDelta},{deg45c_l},{deg60c_l},{deg90c_l},{deg45c_r},{deg60c_r},{deg90c_r},{rc}");
                     }
                     catch (Exception)
                     {

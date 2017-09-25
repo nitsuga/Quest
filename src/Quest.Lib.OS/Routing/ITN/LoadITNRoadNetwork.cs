@@ -39,7 +39,7 @@ namespace Quest.Lib.OS.Routing.ITN
                         var sql2 = $"INSERT[dbo].[RoadLinkEdgeLink]([SourceRoadLinkEdge], [TargetRoadLinkEdge]) VALUES({edge.RoadLinkEdgeId}, {link.RoadLinkEdgeId});";
 
                         sql = sql + sql2;
-                        //db.Database.ExecuteSqlCommand(sql2);
+                        //db.Execute(sql2);
                     }
 
                     i++;

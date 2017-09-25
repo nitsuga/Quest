@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Quest.Lib.Research.Model;
 using Quest.Common.Messages;
 using Quest.Lib.Visuals;
 using FeatureCollection = GeoJSON.Net.Feature.FeatureCollection;
 using Autofac;
+using Quest.Lib.Research.DataModelResearch;
 
 namespace Quest.Lib.Research
 {
@@ -12,7 +12,7 @@ namespace Quest.Lib.Research
     {
         public List<Visual> GetVisualsCatalogue(ILifetimeScope scope, GetVisualsCatalogueRequest request)
         {
-            using (var db = new QuestResearchEntities())
+            using (var db = new QuestDataContext())
             {
                 var query = db.Avls
                     .Where(x => request.DateFrom <= x.AvlsDateTime.Value)

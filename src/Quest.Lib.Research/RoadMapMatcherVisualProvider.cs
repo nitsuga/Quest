@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Quest.Lib.Research.Model;
 using Quest.Common.Messages;
 using Quest.Lib.Visuals;
 using Autofac;
+using Quest.Lib.Research.DataModelResearch;
 
 namespace Quest.Lib.Research
 {
@@ -14,9 +14,9 @@ namespace Quest.Lib.Research
 
         public List<Visual> GetVisualsCatalogue(ILifetimeScope scope, GetVisualsCatalogueRequest request)
         {
-            using (var db = new QuestResearchEntities())
+            using (var db = new QuestDataContext())
             {
-                IQueryable<IncidentRoute> query = db.IncidentRoutes
+                IQueryable<IncidentRoutes> query = db.IncidentRoutes
                     .Where(x => request.DateFrom <= x.StartTime)
                     .Where(x => request.DateTo >= x.EndTime);
 
@@ -32,10 +32,10 @@ namespace Quest.Lib.Research
                     { 
                         Source = "MapMatcher",
                         Name = $"{x.IncidentId}:{x.Callsign}",
-                        Id = x.IncidentRouteID.ToString(),
+                        Id = x.IncidentRouteId.ToString(),
                         VisualType ="Route,Fixes"
                     },
-                    Timeline = new List<TimelineData> { new TimelineData (x.IncidentRouteID, x.StartTime, x.EndTime, $"{x.IncidentId}:{x.Callsign}", "") },
+                    Timeline = new List<TimelineData> { new TimelineData (x.IncidentRouteId, x.StartTime, x.EndTime, $"{x.IncidentId}:{x.Callsign}", "") },
                 }).ToList();
             }
 

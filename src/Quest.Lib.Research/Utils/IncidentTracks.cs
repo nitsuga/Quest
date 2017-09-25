@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Quest.Lib.MapMatching;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using Quest.Lib.Research.DataModelResearch;
 
 namespace Quest.Lib.Research.Utils
 {
@@ -21,18 +21,15 @@ namespace Quest.Lib.Research.Utils
         public Track GetTrack(string urn, int skip = 0)
         {
             int id = int.Parse(urn);
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
 
-                var routeinfo = context.IncidentRouteViews.FirstOrDefault(x => x.IncidentRouteID == id);
+                var routeinfo = context.IncidentRoutes.FirstOrDefault(x => x.IncidentRouteId == id);
 
-                var fixes = context.Avls
-                    
+                var fixes = context.Avls                    
                     .Where(x => x.IncidentId == routeinfo.IncidentId)
                     .Where(x => x.Callsign.Trim() == routeinfo.Callsign.Trim())
-                    .Where(x => x.Process)                  // Process flag must be set
+                    //.Where(x => x.Process)                  // Process flag must be set
                     .OrderBy(x => x.AvlsDateTime)
                     .Skip(skip)
                     .ToList();
@@ -57,15 +54,12 @@ namespace Quest.Lib.Research.Utils
             long incident = long.Parse(urn);
             var tracks = new List<String>();
 
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
-
-                var routeinfo = context.IncidentRouteViews.Where(x => x.IncidentId == incident);
+                var routeinfo = context.IncidentRoutes.Where(x => x.IncidentId == incident);
                 foreach (var c in routeinfo)
                 {
-                    var track = $"db.inc:{c.IncidentRouteID}";
+                    var track = $"db.inc:{c.IncidentRouteId}";
                     tracks.Add(track);
                 }
             }
@@ -74,10 +68,10 @@ namespace Quest.Lib.Research.Utils
             return tracks;
         }
 
-        private static Track MakeTrack(long incidentId, string callsign, List<Avl> fixes, int? vehicleType)
+        private static Track MakeTrack(long incidentId, string callsign, List<Avls> fixes, int? vehicleType)
         {
             // remove bad coordinates
-            List<Avl> fixesfiltered = fixes.Where(x => x.LocationX > -7 && (x.LocationX != -1 && x.LocationY != -1)).ToList();
+            List<Avls> fixesfiltered = fixes.Where(x => x.LocationX > -7 && (x.LocationX != -1 && x.LocationY != -1)).ToList();
 
 
             var track = new Track
@@ -94,7 +88,7 @@ namespace Quest.Lib.Research.Utils
             return track;
         }
 
-        private static List<Fix> MakeFixes(IEnumerable<Avl> fixes)
+        private static List<Fix> MakeFixes(IEnumerable<Avls> fixes)
         {
             return fixes.OrderBy(x => x.AvlsDateTime).Select(x =>
                 new Fix()

@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 using Quest.Lib.Constants;
 using Quest.Lib.MapMatching;
 using Quest.Lib.MapMatching.RouteMatcher;
-using Quest.Lib.Research.Model;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
 using Quest.Common.Messages;
@@ -26,6 +25,8 @@ using Quest.Lib.Trace;
 using Autofac;
 using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -99,12 +100,12 @@ namespace Quest.Lib.Research.Job
             {
                 var matcher = scope.ResolveNamed<IMapMatcher>(request.MapMatcher);
                 Logger.Write($"Starting new run");
-                using (var context = new QuestResearchEntities())
+                using (var context = new QuestDataContext())
                 {
                     var myparams = request.Parameters.Replace("'", "''");
                     var cmd = $" SET NOCOUNT ON; INSERT [dbo].[IncidentRouteRun]([Parameters], [Timestamp]) VALUES('{myparams}', '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}');SELECT scope_identity()\n";
-                    context.Database.ExecuteSqlCommand(cmd);
-                    runid = context.IncidentRouteRuns.Max(x => x.IncidentRouteRunId);
+                    context.Execute(cmd);
+                    runid = context.IncidentRouteRun.Max(x => x.IncidentRouteRunId);
                     Logger.Write($"Run id {runid}");
                 }
 
@@ -279,7 +280,7 @@ namespace Quest.Lib.Research.Job
             var builder = new StringBuilder();
             try
             {
-                using (QuestResearchEntities context = new QuestResearchEntities())
+                using (var context = new QuestDataContext())
                 {
                     if (result.Results != null && result.Results.Count > 0)
                     {
@@ -291,10 +292,11 @@ namespace Quest.Lib.Research.Job
                                 builder.Append(cmd);
                             }
                         }
-                        context.Database.ExecuteSqlCommand(builder.ToString());
+
+                        context.Execute(builder.ToString());
                     }
                     var cmd1 = $"update IncidentRoutes set scanned = 1, IsBadGPS=0 where IncidentRouteId = {incidentRouteId};\n";
-                    context.Database.ExecuteSqlCommand(cmd1);
+                    context.Execute(cmd1);
                 }
 
             }
@@ -303,20 +305,20 @@ namespace Quest.Lib.Research.Job
                 Logger.Write(ex.ToString(), "MapMatcher");
                 Logger.Write(builder.ToString(), "MapMatcher");
 
-                using (QuestResearchEntities context = new QuestResearchEntities())
+                using (var context = new QuestDataContext())
                 {
                     var cmd1 = $"update IncidentRoutes set scanned = 0, IsBadGPS=0 where IncidentRouteId = {incidentRouteId};\n";
-                    context.Database.ExecuteSqlCommand(cmd1);
+                    context.Execute(cmd1);
                 }
             }
         }
 
         private static void MarkRouteBad(int incidentRouteId)
         {
-            using (QuestResearchEntities context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
                 var cmd1 = $"update IncidentRoutes set scanned = 1, IsBadGPS=1 where IncidentRouteId = {incidentRouteId};\n";
-                context.Database.ExecuteSqlCommand(cmd1);
+                context.Execute(cmd1);
             }
         }
 
@@ -328,22 +330,19 @@ namespace Quest.Lib.Research.Job
         private static List<int> GetIncidentRoutes(bool notScanned)
         {
             List<int> incidents;
-            using (var context = new QuestResearchEntities())
+            using (var context = new QuestDataContext())
             {
-                context.Database.CommandTimeout = 36000;
-                context.Configuration.ProxyCreationEnabled = false;
-
                 if (notScanned)
                     incidents = context.IncidentRoutes
                         .Where(x => x.Scanned == false)
                         // remove this to process everything
                         //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000)
-                        .Select(x => x.IncidentRouteID)
+                        .Select(x => x.IncidentRouteId)
                         .OrderBy(x => x)
                         .ToList();
                 else
                     incidents = context.IncidentRoutes
-                        .Select(x => x.IncidentRouteID)
+                        .Select(x => x.IncidentRouteId)
                         .OrderBy(x => x)
                         .ToList();
             }

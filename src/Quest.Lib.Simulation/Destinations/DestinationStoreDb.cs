@@ -1,14 +1,24 @@
-﻿using Quest.Common.Simulation;
+﻿using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using Quest.Common.Simulation;
 using Quest.Lib.DataModel;
+using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Routing;
+using Quest.Lib.Simulation.DataModelSim;
+using Quest.Lib.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
 namespace Quest.Lib.Simulation.Destinations
 {
+    [Obsolete]
     public class DestinationStoreDb : IDestinationStore
     {
+
+        public string Filename { get; set; }
         private RoutingData _data;
 
         List<SimDestination> _allDestinations;
@@ -19,30 +29,30 @@ namespace Quest.Lib.Simulation.Destinations
             _allDestinations = GetAllDestinations();
         }
 
+
         private List<SimDestination> GetAllDestinations()
         {
             while (!_data.IsInitialised)
                 Thread.Sleep(1);
 
-            using (var db = new QuestEntities())
+            using (var db = new QuestSimContext())
             {
-                var d = db.DestinationViews
+                var d = db.Destinations
                     .ToList()
                     .Select(x =>
                     {
-                        var pos = new GeoAPI.Geometries.Coordinate(x.X ?? 0, x.Y ?? 0);
+                        var pos = new GeoAPI.Geometries.Coordinate(0,0);
                         var edge = _data.GetEdgeFromPoint(pos);
                         return new SimDestination
                         {
-                            ID = x.DestinationID.ToString(),
-                            IsHospital = x.IsHospital ?? false,
-                            IsAandE = x.IsAandE ?? false,
-                            IsRoad = x.IsRoad ?? false,
-                            IsStandby = x.IsStandby ?? false,
-                            IsStation = x.IsStation ?? false,
+                            ID = x.DestinationId.ToString(),
+                            IsHospital = x.IsHospital,
+                            IsRoad = x.IsRoad ,
+                            IsStandby = x.IsStandby ,
+                            IsStation = x.IsStation ,
                             Name = x.Destination,
-                            X = x.X ?? 0,
-                            Y = x.Y ?? 0,
+                            X = 0,
+                            Y = 0,
                             RoadPosition = edge
                         };
                     })
@@ -67,5 +77,6 @@ namespace Quest.Lib.Simulation.Destinations
                 .ToList();
             return d;
         }
+
     }
 }

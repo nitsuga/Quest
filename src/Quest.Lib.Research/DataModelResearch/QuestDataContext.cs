@@ -14,10 +14,10 @@ namespace Quest.Lib.Research.DataModelResearch
         public virtual DbSet<IncidentRoutes> IncidentRoutes { get; set; }
         public virtual DbSet<Incidents> Incidents { get; set; }
         public virtual DbSet<RoadSpeed> RoadSpeed { get; set; }
+        public virtual DbSet<RoadSpeedItem> RoadSpeedItem { get; set; }
         public virtual DbSet<RoadSpeedMatrixHoD> RoadSpeedMatrixHoD { get; set; }
         public virtual DbSet<RoadSpeedMatrixHoW> RoadSpeedMatrixHoW { get; set; }
 
-        // Unable to generate entity type for table 'dbo.RoadSpeedItem'. Please see the warning messages.
         // Unable to generate entity type for table 'dbo.IncidentRouteRoadSpeedsData'. Please see the warning messages.
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -189,6 +189,26 @@ namespace Quest.Lib.Research.DataModelResearch
             {
                 entity.HasIndex(e => e.RoadLinkEdgeId)
                     .HasName("NonClusteredIndex-20170126-202534");
+            });
+
+            modelBuilder.Entity<RoadSpeedItem>(entity =>
+            {
+                entity.HasIndex(e => e.RoadLinkEdgeId)
+                    .HasName("RoadspeedItem_idx2");
+
+                entity.HasIndex(e => new { e.DateTime, e.RoadLinkEdgeId, e.IncidentRouteId, e.Speed })
+                    .HasName("RoadspeedItem_idx1");
+
+                entity.HasIndex(e => new { e.IncidentRouteId, e.DateTime, e.RoadLinkEdgeId, e.Speed })
+                    .HasName("RoadspeedItem_idx3");
+
+                entity.Property(e => e.DateTime).HasColumnType("datetime");
+
+                entity.HasOne(d => d.IncidentRoute)
+                    .WithMany(p => p.RoadSpeedItem)
+                    .HasForeignKey(d => d.IncidentRouteId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_RoadSpeedItem_IncidentRoutes1");
             });
 
             modelBuilder.Entity<RoadSpeedMatrixHoD>(entity =>

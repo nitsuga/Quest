@@ -9,6 +9,7 @@ namespace Quest.Lib.DataModel
     {
         /// <summary>
         ///  dotnet ef dbcontext scaffold "Server=localhost,999;Database=QuestNLPG;user=sa;pwd=M3Gurdy*" Microsoft.EntityFrameworkCore.SqlServer -f -o DataModelNLPG
+        ///  dotnet ef dbcontext scaffold "Server=localhost,999;Database=QuestData;user=sa;pwd=M3Gurdy*" Microsoft.EntityFrameworkCore.SqlServer -f -o DataModelResearch
         /// </summary>
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
