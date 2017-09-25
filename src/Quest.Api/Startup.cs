@@ -61,6 +61,56 @@ namespace Quest.Api
 
             // Register the IConfiguration instance which JwtIssuerOptions binds against.
             services.Configure<JwtIssuerOptions>(Configuration.GetSection("JwtIssuerOptions"));
+            
+            if (IsAuthEnabled)
+            {
+                // Use policy auth.
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("DataAdminReader", policy => policy.RequireClaim("specialrole", "QuestDataAccess"));
+                    options.AddPolicy("DataAdminWriter", policy => policy.RequireClaim("specialrole", "QuestDataAccess"));
+                });
+
+                // Get options from app settings
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtIssuerOptions:Key"]));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(jwtoptions =>
+                {
+                    jwtoptions.SaveToken = true;
+                    jwtoptions.ClaimsIssuer = Configuration["JwtIssuerOptions:Issuer"];
+                    jwtoptions.Audience = Configuration["JwtIssuerOptions:Audience"];
+                    jwtoptions.Authority = Configuration["JwtIssuerOptions:Authority"];
+                    jwtoptions.RequireHttpsMetadata = false;
+                    jwtoptions.Configuration = new Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration
+                    {
+                         
+                    };
+                    jwtoptions.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["JwtIssuerOptions:Issuer"],
+
+                        ValidateAudience = true,
+                        ValidAudience = Configuration["JwtIssuerOptions:Audience"],
+
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+
+                        RequireExpirationTime = true,
+                        ValidateLifetime = true,
+
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+            }
+            //    else
+            //    {
+            //        options.AddPolicy("DataAdminReader", policy => policy.RequireAssertion(x => true));
+            //        options.AddPolicy("DataAdminWriter", policy => policy.RequireAssertion(x => true));
+            //    }
+            //});
 
             services.AddMvc(config =>
             {
@@ -90,52 +140,6 @@ namespace Quest.Api
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
             });
-
-            if (IsAuthEnabled)
-            {
-                // Use policy auth.
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("DataAdminReader", policy => policy.RequireClaim("specialrole", "QuestDataAccess"));
-                    options.AddPolicy("DataAdminWriter", policy => policy.RequireClaim("specialrole", "QuestDataAccess"));
-                });
-
-                // Get options from app settings
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtIssuerOptions:Key"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(jwtoptions =>
-                {
-                    jwtoptions.SaveToken = true;
-                    jwtoptions.ClaimsIssuer = Configuration["JwtIssuerOptions:Issuer"];
-                    jwtoptions.Audience = Configuration["JwtIssuerOptions:Audience"];
-                    jwtoptions.Authority = Configuration["JwtIssuerOptions:Authority"];
-                    jwtoptions.RequireHttpsMetadata = false;
-                    jwtoptions.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["JwtIssuerOptions:Issuer"],
-
-                        ValidateAudience = true,
-                        ValidAudience = Configuration["JwtIssuerOptions:Audience"],
-
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = key,
-
-                        RequireExpirationTime = true,
-                        ValidateLifetime = true,
-
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
-            }
-            //    else
-            //    {
-            //        options.AddPolicy("DataAdminReader", policy => policy.RequireAssertion(x => true));
-            //        options.AddPolicy("DataAdminWriter", policy => policy.RequireAssertion(x => true));
-            //    }
-            //});
 
             services.AddSwaggerGen(c =>
         {
