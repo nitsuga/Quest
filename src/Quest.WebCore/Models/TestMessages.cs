@@ -63,7 +63,7 @@ namespace Quest.WebCore.Services
 
         public void MakeTestMessage()
         {
-            LoginRequest = new LoginRequest() { QuestApi = 1, Locale = "en-GB", Username = "marcus", Password = "secret", DeviceIdentity = "SOMEIDENTITY", NotificationTypeId = 2, NotificationId = "GCM TOKEN" };
+            LoginRequest = new LoginRequest() { QuestApi = 1, Locale = "en-GB", Username = "marcus", DeviceIdentity = "SOMEIDENTITY", NotificationTypeId = 2, NotificationId = "GCM TOKEN" };
             CallsignChangeRequest = new CallsignChangeRequest() { Callsign = "G460" };
         }
     }

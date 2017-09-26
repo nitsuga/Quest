@@ -22,16 +22,6 @@ namespace Quest.Core
         public static IServiceProvider ServiceProvider { get; private set; }
         public static IContainer ApplicationContainer { get; private set; }
 
-        private static Dictionary<string, string> switchMappings = new Dictionary<string, string>
-            {
-                {"-config", "config" },
-                {"-c", "config" },
-                {"-session", "session" },
-                {"-components", "components" },
-                {"-exec", "exec" },
-                {"-args", "args" },
-            };
-
         // to run the simulator
         // -components=simulation.json -exec=RosterSimulator
 
@@ -71,52 +61,22 @@ namespace Quest.Core
                 Logger.Write($"-- GNU General Public License for more details.", TraceEventType.Information, "Quest.Cmd");
                 Logger.Write($"-----------------------------------------", TraceEventType.Information, "Quest.Cmd");
 
-                // load settings file 
-                var configFile = Parameters.GetParameter(args, "-config", null);
-                if (configFile != null)
-                    Logger.Write($"config file: {configFile}", TraceEventType.Information, "Quest.Cmd");
-                else
-                    Logger.Write($"config file: not set", TraceEventType.Information, "Quest.Cmd");
 
-                var sessionOverride = Parameters.GetParameter(args, "-session", "0");
+                // load settings file 
 
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 var enc1252 = Encoding.GetEncoding(1252);
 
-                // load components file unless overriden on the command line
-                var components = Parameters.GetParameter(args, "-components", "components.json");
-                if (components != null)
-                    Logger.Write($"components file: {components}", TraceEventType.Information, "Quest.Cmd");
-                else
-                    Logger.Write($"components file: not set", TraceEventType.Information, "Quest.Cmd");
-
-
-                // load module names to execute 
-                var modules = Parameters.GetParameter(args, "-exec", null);
-                if (!string.IsNullOrEmpty(configFile) && !string.IsNullOrEmpty(modules))
-                {
-                    Logger.Write("usage: Quest.Cmd [-config:CONFIGFILENAME] [-components:COMPFILE] [-exec:MODULES]", TraceEventType.Error, "Quest.Cmd");
-                    Logger.Write("Specify either a -config or -exec but not both together", TraceEventType.Error, "Quest.Cmd");
-                    return;
-                }
-
-                var config = GetConfiguration(configFile, components, args, switchMappings);
+                var config = GetConfiguration();
                 var global = config.GetSection("global");
+
+                //config["JwtIssuerOptions:Issuer"];
+
 
                 var serviceCollection = new ServiceCollection();
 
                 // load components into repository
                 ServiceProvider = ConfigureServices(serviceCollection, config);
-
-                if (args.Length == 0 && string.IsNullOrEmpty(configFile) && string.IsNullOrEmpty(modules))
-                {
-                    Logger.Write("usage: Quest.Cmd [-config:CONFIGFILENAME] [-components:COMPFILE] [-exec:MODULES]", TraceEventType.Error, "Quest.Cmd");
-                    Logger.Write("Specifying CONFIGFILE", TraceEventType.Error, "Quest.Cmd");
-
-                    var all = ApplicationContainer.Resolve<IEnumerable<IProcessor>>();
-
-                    return;
-                }
 
                 // get the processor runner
                 var runner = ApplicationContainer.Resolve<ProcessRunner>();
@@ -128,14 +88,14 @@ namespace Quest.Core
 
                 // get list of modules to run from the config file which can be in the config or set 
                 // explicitly in the ProcessRunnerConfig properties via autofac property injection
-                var modulesToRun = GetProcessorsList(config, modules);
+                var modulesToRun = GetProcessorsList(config);
                 if (modulesToRun.Count == 0 && runner.settings.modules.Count == 0)
                 {
                     Logger.Write($"No modules found to execute. Make sure you specify either -exec or a config file (by setting parameters on ProcessRunner) that contains modules to run", TraceEventType.Error, "Quest.Cmd");
                     return;
                 }
 
-                var session = GetSession(config, sessionOverride);
+                var session = GetSession(config);
                 runner.settings.session = session;
                 runner.settings.modules.AddRange(modulesToRun);
 
@@ -163,20 +123,13 @@ namespace Quest.Core
         /// <param name="configFile"></param>
         /// <param name="components"></param>
         /// <returns></returns>
-        internal static IConfiguration GetConfiguration(string configFile, string components, string[] args, Dictionary<string, string> switchMappings)
+        internal static IConfiguration GetConfiguration()
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables()
-                .AddCommandLine(args, switchMappings)
-                .AddJsonFile("appsettings.json", true);
-            //.AddCommandLine(args, GetSwitchMappings(switchMappings));
-
-            if (!string.IsNullOrEmpty(configFile))
-                configBuilder.AddJsonFile(configFile);
-
-            if (!string.IsNullOrEmpty(components))
-                configBuilder.AddJsonFile(components);
+                .AddJsonFile("appsettings.json", true)
+                .AddJsonFile("components.json", true);
 
             IConfiguration config = configBuilder.Build();
 
@@ -221,12 +174,12 @@ namespace Quest.Core
         /// <param name="config"></param>
         /// <param name="sessionOverride"></param>
         /// <returns></returns>
-        internal static string GetSession(IConfiguration config, string sessionOverride)
+        internal static string GetSession(IConfiguration config)
         {
             var global = config.GetSection("global");
             var session = global["session"];
             if (session == null || session.Length == 0)
-                session = sessionOverride;
+                session = "";
             return session;
         }
 
@@ -236,14 +189,11 @@ namespace Quest.Core
         /// <param name="config"></param>
         /// <param name="exec">; separated list of modules to load</param>
         /// <returns></returns>
-        internal static List<string> GetProcessorsList(IConfiguration config, string exec)
+        internal static List<string> GetProcessorsList(IConfiguration config)
         {
             List<string> modules = new List<string>();
 
             var p = config.GetSection("Processors");
-
-            if (!string.IsNullOrEmpty(exec))
-                modules.AddRange(exec.Split(';'));
 
             foreach (var item in p.GetChildren())
             {

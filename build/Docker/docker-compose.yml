@@ -89,11 +89,27 @@ services:
     #volumes:
     #  - ./volume_quest:/usr/Data
 
+    
+    
+    ########################################
+  q_device:
+    image: gluteusmaximus/quest.core:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    command: ["-exec=DeviceManager","-components=Data/components.json"]
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volume_quest:/app
+
+  
   ########################################
   q_search:
-# #   build: 
-#    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "searchdatabase"
@@ -104,7 +120,7 @@ services:
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
     volumes:
-      - ./volume_quest:/usr/Data
+      - ./volume_quest:/app
      ########################################
 
      ########################################
@@ -177,29 +193,8 @@ services:
     volumes:
       - ./volume_quest:/usr/Data
       
-      
-  ########################################
-  q_device:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    depends_on:
-      - "activemq"
-      - "searchdatabase"
-    command: ["-exec=DeviceManager","-components=Data/components.json"]
-    environment:
-      - ActiveMQ=activemq:tcp://activemq:61616
-      - ElasticUser=elastic
-      - ElasticPwd=changeme
-      - ElasticUrls=http://searchdatabase:9200
-    volumes:
-      - ./volume_quest:/usr/Data
-      
-      
   ###  Telephony ###
   q_eisec:
- #   build: 
-    #   context: ./quest-cmd
     image: gluteusmaximus/quest.cmd:latest
     command: ["-exec=EisecServer","-components=Data/components.json"]
     depends_on:

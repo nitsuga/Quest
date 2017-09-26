@@ -2,16 +2,13 @@
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Threading;
 
 namespace Quest.Lib.Telephony.AspectCTIPS
 {
-    [Export(typeof(ICADChannel))]
     public class CollabChannel : ICADChannel 
     {
-
         public event System.EventHandler<DialRequest> Dial;
         public event System.EventHandler<SetDataRequest> SetData;
 

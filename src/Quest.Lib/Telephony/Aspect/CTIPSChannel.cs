@@ -5,6 +5,7 @@ using www.aspect.com.unifiedip.edk.commondata._2009._08;
 using System.Timers;
 using Quest.Lib.Trace;
 using Quest.Common.Messages;
+using System.ServiceModel;
 
 namespace Quest.Lib.Telephony.AspectCTIPS
 {
@@ -272,12 +273,14 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
             string strURL = Config.ClientCallbackURL;
             Uri baseAddress1 = new Uri(strURL);
+            //_host = new ServiceHost(_eventHandler, baseAddress1);
+            //WSHttpBinding mybinding = new WSHttpBinding();
             _host = new ServiceHost(_eventHandler, baseAddress1);
-            WSHttpBinding mybinding = new WSHttpBinding();
-            mybinding.Security.Mode = SecurityMode.None;
-            mybinding.ReliableSession.Enabled = false;
-            mybinding.ReliableSession.Ordered = false;
-            mybinding.ReliableSession.InactivityTimeout = TimeSpan.MaxValue;
+            BasicHttpBinding mybinding = new BasicHttpBinding();
+            //mybinding.Security.Mode = SecurityMode.None;
+            //mybinding.ReliableSession.Enabled = false;
+            //mybinding.ReliableSession.Ordered = false;
+            //mybinding.ReliableSession.InactivityTimeout = TimeSpan.MaxValue;
             mybinding.ReceiveTimeout = TimeSpan.MaxValue;
             _host.AddServiceEndpoint(typeof(CTIEventService), mybinding, baseAddress1);
 
@@ -334,25 +337,28 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             // for now we're modifing a standard WSHttpBinding so it will stay open 
             // for ever without any activity (timeout = System.TimeSpan.MaxValue)
             // and were using a Reliable Ordered session to preserve message ordering 
-            WSHttpBinding binding = new WSHttpBinding();
+            // WSHttpBinding binding = new WSHttpBinding();
+            BasicHttpBinding binding = new BasicHttpBinding();
+
+
             if (Config.CTIPortalServiceAddress.StartsWith("http:"))
             {
                 binding.ReceiveTimeout = System.TimeSpan.MaxValue;         // d.hh:mm:ss.ff
-                binding.ReliableSession.Enabled = false;
-                binding.ReliableSession.Ordered = false;
-                binding.Security.Mode = SecurityMode.None;
-                binding.ReliableSession.InactivityTimeout = System.TimeSpan.MaxValue;
+                //binding.ReliableSession.Enabled = false;
+                //binding.ReliableSession.Ordered = false;
+                binding.Security.Mode =  BasicHttpSecurityMode.None;
+                //binding.ReliableSession.InactivityTimeout = System.TimeSpan.MaxValue;
                 binding.ReceiveTimeout = TimeSpan.MaxValue;
             }
             else if (Config.CTIPortalServiceAddress.StartsWith("https:"))
             {
-                binding.Security.Mode = SecurityMode.Transport;
+                binding.Security.Mode = BasicHttpSecurityMode.Transport; // SecurityMode.Transport;
                 binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
                 binding.Security.Transport.ProxyCredentialType = HttpProxyCredentialType.None;
-                binding.Security.Transport.Realm = "";
-                binding.ReliableSession.Enabled = false;
-                binding.ReliableSession.Ordered = false;
-                binding.ReliableSession.InactivityTimeout = TimeSpan.MaxValue;
+                //binding.Security.Transport.Realm = "";
+                //binding.ReliableSession.Enabled = false;
+                //binding.ReliableSession.Ordered = false;
+                //binding.ReliableSession.InactivityTimeout = TimeSpan.MaxValue;
                 binding.ReceiveTimeout = TimeSpan.MaxValue;
             }
 

@@ -12,13 +12,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Quest.Lib.Telephony.StormLink
+namespace Quest.Lib.Telephony.CommandPoint
 {
-    public class StormTelephonyServer : ServiceBusProcessor
+    public class CPTelephonyServer : ServiceBusProcessor
     {
-
         public int port { get; set; }
-
 
         /// <summary>
         /// format the CLI into a normal telephone number without 0wxyz or wxyz
@@ -51,7 +49,7 @@ namespace Quest.Lib.Telephony.StormLink
         private List<RemoteTcpipConnection> connections = new List<RemoteTcpipConnection>();
 
         IServiceBusClient _serviceBusClient;
-        public StormTelephonyServer(
+        public CPTelephonyServer(
             ILifetimeScope scope,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
@@ -131,6 +129,7 @@ namespace Quest.Lib.Telephony.StormLink
 
                             }
                         }
+
                         break;
                 }
             }
@@ -184,6 +183,7 @@ namespace Quest.Lib.Telephony.StormLink
             }
 
             t = _tracker[details.CallId];
+
 
             string s = Properties.Resources.StormDetails + "\r\n";
 
@@ -291,6 +291,8 @@ namespace Quest.Lib.Telephony.StormLink
             };
 
             _tracker.Add(details.CallId, t);
+
+
         }
 
         private string GetTelephoneNumber(string cli)
