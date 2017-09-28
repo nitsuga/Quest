@@ -19,6 +19,8 @@ using Quest.Lib.OS.DataModelOS;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.OS.DataModelNLPG;
+using Microsoft.Extensions.Logging;
+using Quest.Lib.Device;
 
 namespace Quest.Core
 {
@@ -77,8 +79,6 @@ namespace Quest.Core
 
                 var serviceCollection = new ServiceCollection();
 
-                var r = new Quest.Lib.DataModel.AspNetRoles();
-
                 // load components into repository
                 ServiceProvider = ConfigureServices(serviceCollection, config);
 
@@ -87,6 +87,12 @@ namespace Quest.Core
                     foreach(var service in component.Services)
                         Logger.Write($"Loaded {service.Description}");
                 }
+
+                var loggerFactory = ServiceProvider.GetService<ILoggerFactory>();
+                loggerFactory
+                    .AddConsole()
+                    .AddDebug();
+
 
                 // get the processor runner
                 var runner = ApplicationContainer.Resolve<ProcessRunner>();
@@ -169,10 +175,23 @@ namespace Quest.Core
         {
             services.AddMemoryCache();
 
+            var x = config.GetConnectionString("Quest");
+
+            services.AddDbContext<QuestContext>(options => options.UseSqlServer(x));
+            services.AddDbContext<QuestOSContext>(options => options.UseSqlServer(config.GetConnectionString("QuestOS")));
+            services.AddDbContext<QuestDataContext>(options => options.UseSqlServer(config.GetConnectionString("QuestData")));
+            services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
+            services.AddDbContext<QuestNLPGContext>(options => options.UseSqlServer(config.GetConnectionString("QuestNLPG")));
+
+            LoggerFactory factory = new LoggerFactory();
+            services.AddSingleton((ILoggerFactory)factory);
+            services.AddLogging();
+
+
             var builder = new ContainerBuilder();
 
             // Register the ConfigurationModule with Autofac.
-           builder.RegisterModule(new ConfigurationModule(config));
+            builder.RegisterModule(new ConfigurationModule(config));
 
             // register other libraries for autoinjection
             List<string> libraries = new List<string>();
@@ -182,13 +201,8 @@ namespace Quest.Core
             builder.RegisterModule(new AutofacModule(libraries));
 
             builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
-            builder.Populate(services);
 
-            services.AddDbContext<QuestContext>(options => options.UseSqlServer(config.GetConnectionString("Quest")));
-            services.AddDbContext<QuestOSContext>(options => options.UseSqlServer(config.GetConnectionString("QuestOS")));
-            services.AddDbContext<QuestDataContext>(options => options.UseSqlServer(config.GetConnectionString("QuestData")));
-            services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
-            services.AddDbContext<QuestNLPGContext>(options => options.UseSqlServer(config.GetConnectionString("QuestNLPG")));
+            builder.Populate(services);
 
             ApplicationContainer = builder.Build();
 

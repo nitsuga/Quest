@@ -42,6 +42,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Log out of Quest
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("Logout")]
         public LogoutResponse Logout([FromBody]LogoutRequest request)
         {
@@ -61,6 +66,13 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Request a callsign change. If the device is being managed by Quest then
+        /// the request is always granted. If the device is being managed by a CAD then
+        /// the request is forwarded on to the CAD for processing.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("CallsignChange")]
         public CallsignChangeResponse CallsignChange([FromBody]CallsignChangeRequest request)
         {

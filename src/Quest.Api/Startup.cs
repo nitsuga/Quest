@@ -1,29 +1,29 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using System;
+using System.Text;
+using System.IO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using Autofac.Configuration;
 using Autofac;
-using Quest.Lib.Trace;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Autofac.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.IO;
-using Quest.Api.Modules;
-using Quest.Api.Middleware;
-using Quest.Lib.ServiceBus;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
+using Quest.Lib.ServiceBus;
 using Quest.Api.Options;
 using Quest.Api.Filters;
+using Quest.Api.Modules;
+using Quest.Api.Middleware;
 
 namespace Quest.Api
 {

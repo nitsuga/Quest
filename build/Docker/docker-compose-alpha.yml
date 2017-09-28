@@ -1,0 +1,115 @@
+version: '3'
+
+services:
+
+ ### External components ###
+  database:
+    build: 
+      context: ./quest-data
+    image: gluteusmaximus/quest-database:latest
+    volumes:
+          - ./volumes/alpha/volume_data:/tmp/data1
+          - ./volumes/alpha/volume_os:/tmp/data2
+          - ./volumes/alpha/volume_research:/tmp/data3
+    expose:
+        - "1433"
+    ports:
+      - "999:1433"
+    environment:
+      -  ACCEPT_EULA=Y
+      -  SA_PASSWORD=M3Gurdy*
+# requires version 3      
+#    deploy:
+#        mode: global
+#        restart_policy:
+#            condition: on-failure
+#            delay: 5s
+#            max_attempts: 3
+#            window: 120s
+#            condition: on-failure
+            
+  activemq:
+    image: webcenter/activemq
+    expose:
+        - "61616"
+        - "8161"
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+
+  searchdatabase:
+    build: 
+      context: ./elasticsearch-phonetic
+    image: gluteusmaximus/quest-searchdatabase:latest
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./volumes/alpha/volume_search:/usr/share/elasticsearch/data
+
+  mapserver:
+    build: 
+      context: ./quest-mapserver
+    image: gluteusmaximus/quest-mapserver:latest
+    volumes:
+      - ./volumes/alpha/volume_map:/maps
+    ports: 
+      - "8090:80"
+
+  ########################################
+  web:
+    image: gluteusmaximus/quest.web:latest
+    depends_on:
+      - "database"
+      - "activemq"
+      - "searchdatabase"
+      - "api"
+    command: ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+    ports: 
+      - "8133:80"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+       
+    ########################################
+  api:
+    image: gluteusmaximus/quest.api:latest
+    depends_on:
+      - "backend"
+    ports:
+      - "8125:80"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+    volumes:
+      - ./volumes/alpha/volume_api:/app/config
+      
+    
+    ########################################
+  backend:
+    image: gluteusmaximus/quest.core:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      # Modules=DeviceManager;SecurityManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
+      #- Modules=DeviceManager;SecurityManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;RoutingManager
+      - Modules=DeviceManager;SecurityManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+  
+#volumes:
+#  volume_quest:
+#  volume_search:
+#  volume_data:
+#  volume_os:
+#  volume_research:
+#  volume_map:

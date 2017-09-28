@@ -41,3 +41,5 @@ src/.vs/Quest/v15/sqlite3/storage.ide
 /build/Docker/quest-core/bin
 /build/Docker/quest-api/bin
 /build/Docker/volume_search/nodes/0
+build/Docker/volumes/alpha/volume_data/Quest.mdf
+build/Docker/volumes/alpha/volume_data/Quest_log.ldf

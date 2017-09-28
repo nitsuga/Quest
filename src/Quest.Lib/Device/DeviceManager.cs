@@ -47,30 +47,28 @@ namespace Quest.Lib.Device
         {
             // create a list of actions associated with each object type arriving from the queue
             MsgHandler.AddHandler<AssignDeviceRequest>(AssignDeviceHandler);
-            MsgHandler.AddHandler("LoginRequest", LoginRequestHandler);
-            MsgHandler.AddHandler("LogoutRequest", LogoutRequestHandler);
-            MsgHandler.AddHandler("AckAssignedEventRequest", AckAssignedEventRequestHandler);
-            MsgHandler.AddHandler("CallsignChangeRequest", CallsignChangeRequestHandler);
-            MsgHandler.AddHandler("RefreshStateRequest", RefreshStateHandler);
-            MsgHandler.AddHandler("GetEntityTypesRequest", GetEntityTypesRequestHandler);
-            MsgHandler.AddHandler("GetHistoryRequest", GetHistoryRequestHandler);
-            MsgHandler.AddHandler("GetStatusCodesRequest", GetStatusCodesRequestHandler);
-            MsgHandler.AddHandler("MakePatientObservationRequest", MakePatientObservationRequestHandler);
-            MsgHandler.AddHandler("MapItemsRequest", GetMapItemsRequestHandler);
-            MsgHandler.AddHandler("PatientDetailsRequest", PatientDetailsRequestHandler);
-            MsgHandler.AddHandler("PositionUpdateRequest", PositionUpdateRequestHandler);
-            MsgHandler.AddHandler("SetStatusRequest", SetStatusRequestHandler);
-            MsgHandler.AddHandler("BeginDump", BeginDumpHandler);
-            MsgHandler.AddHandler("CPEventStatusList", CPEventStatusListHandler);
-            MsgHandler.AddHandler("CallDisconnectStatusList", CallDisconnectStatusListHandler);
-
-            var answer = _devStore.Get("kjh");
+            MsgHandler.AddHandler<LoginRequest>(LoginRequestHandler);
+            MsgHandler.AddHandler<LogoutRequest>(LogoutRequestHandler);
+            MsgHandler.AddHandler<AckAssignedEventRequest>(AckAssignedEventRequestHandler);
+            MsgHandler.AddHandler<CallsignChangeRequest>(CallsignChangeRequestHandler);
+            MsgHandler.AddHandler<RefreshStateRequest>(RefreshStateHandler);
+            MsgHandler.AddHandler<GetEntityTypesRequest>(GetEntityTypesRequestHandler);
+            MsgHandler.AddHandler<GetHistoryRequest>(GetHistoryRequestHandler);
+            MsgHandler.AddHandler<GetStatusCodesRequest>(GetStatusCodesRequestHandler);
+            MsgHandler.AddHandler<MakePatientObservationRequest>(MakePatientObservationRequestHandler);
+            MsgHandler.AddHandler<MapItemsRequest>(GetMapItemsRequestHandler);
+            MsgHandler.AddHandler<PatientDetailsRequest>(PatientDetailsRequestHandler);
+            MsgHandler.AddHandler<PositionUpdateRequest>(PositionUpdateRequestHandler);
+            MsgHandler.AddHandler<SetStatusRequest>(SetStatusRequestHandler);
+            MsgHandler.AddHandler<BeginDump>(BeginDumpHandler);
+            MsgHandler.AddHandler<CPEventStatusList>(CPEventStatusListHandler);
+            MsgHandler.AddHandler<CallDisconnectStatusList>(CallDisconnectStatusListHandler);
         }
 
         protected override void OnStart()
         {
             Initialise();
-            Logger.Write("DeviceTracker initialised","Device");
+            Logger.Write("DeviceManager initialised","Device");
         }
        
 
@@ -225,7 +223,6 @@ namespace Quest.Lib.Device
         }
 
         /// <summary>
-        ///     handle resource updates from GT.
         ///     Detects resource changing to DSP (Dispatched) and sends incident details to callsign
         ///     Detects resource changing to status and sends status update to callsign
         /// </summary>

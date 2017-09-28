@@ -136,9 +136,11 @@ services:
     depends_on:
       - "activemq"
       - "searchdatabase"
-    command: ["-exec=SearchManager","-components=Data/components.json"]
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=SearchManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
@@ -151,33 +153,33 @@ services:
   q_visuals:
  #   build: 
     #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "searchdatabase"
-    command: ["-exec=VisualsManager","-components=Data/components.json"]
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=VisualsManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
     volumes:
       - ./volume_quest:/usr/Data
 
-  
-
-      
+        
   ########################################
   q_mapmatcher:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "searchdatabase"
-    command: ["-exec=MapMatcherManager","-components=Data/components.json"]
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=MapMatcherManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
@@ -186,15 +188,15 @@ services:
       
   ########################################
   q_indexer:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "searchdatabase"
-    command: ["-exec=IndexerManager","-components=Data/components.json"]
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=IndexerManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
@@ -203,34 +205,39 @@ services:
       
   ###  Telephony ###
   q_eisec:
-    image: gluteusmaximus/quest.cmd:latest
-    command: ["-exec=EisecServer","-components=Data/components.json"]
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "q_search"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=EisecServer
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
     volumes:
       - ./volume_quest:/usr/Data
 
   q_eisecsim:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: ["-exec=EisecSimulator","-components=Data/components.json"]
+    image: gluteusmaximus/quest.core:latest
     depends_on:
       - "activemq"
       - "q_eisec"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=EisecSimulator
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
     volumes:
       - ./volume_quest:/usr/Data
   
   q_calltracker:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: [ "-exec=CallTracker","-components=Data/components.json" ]
+    image: gluteusmaximus/quest.core:latest
     volumes:
       - ./volume_quest:/usr/Data
     depends_on:
@@ -238,25 +245,26 @@ services:
       - "activemq"
       - "q_eisec"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=CallTracker
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
       
   q_aspectcti:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: [ "-exec=AspectServer","-components=Data/components.json" ]
+    image: gluteusmaximus/quest.core:latest
     volumes:
       - ./volume_quest:/usr/Data
     depends_on:
       - "activemq"
     environment:
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=AspectServer
 
   q_stormtel:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: [ "-exec=StormTelephonyServer","-components=Data/components.json" ]
+    image: gluteusmaximus/quest.core:latest
     volumes:
       - ./volume_quest:/usr/Data
     depends_on:
@@ -264,15 +272,18 @@ services:
       - "activemq"
       - "q_eisec"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=StormTelephonyServer
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
 
 
   ### Simulation ###
   q_simulation:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: [ "-exec=IncSimulator;ResSimulator;TimedEventManager;CadSimulator","-components=Data/components.json" ]
+    image: gluteusmaximus/quest.core:latest
     volumes:
       - ./volume_quest:/usr/Data
     depends_on:
@@ -280,15 +291,18 @@ services:
       - "activemq"
       - "q_routing"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=IncSimulator;ResSimulator;TimedEventManager;CadSimulator
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
  
 
   ########################################
   q_routing:
- #   build: 
-    #   context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    command: [ "-exec=RoutingManager","-components=Data/components.json" ]
+     image: gluteusmaximus/quest.core:latest
     volumes:
       - ./volume_quest:/usr/Data
     depends_on:
@@ -296,5 +310,11 @@ services:
       - "activemq"
       - "q_search"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=RoutingManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
       

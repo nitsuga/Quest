@@ -11,14 +11,12 @@ namespace Quest.Common.Messages
     {
         /// <summary>
         ///     The old callsign
-        /// </summary>
-        
+        /// </summary>        
         public string OldCallsign { get; set; }
 
         /// <summary>
         ///     the new callsign assigned to this device
-        /// </summary>
-        
+        /// </summary>        
         public string NewCallsign { get; set; }
     }
 }

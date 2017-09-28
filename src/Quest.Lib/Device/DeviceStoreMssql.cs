@@ -27,7 +27,6 @@ namespace Quest.Lib.Device
             });
         }
 
-
         public QuestDevice GetByToken(string token)
         {
             return _dbFactory.Execute<QuestContext, QuestDevice>((db) =>

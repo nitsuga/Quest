@@ -18,6 +18,7 @@ using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using PushSharp.Google;
 using Quest.Lib.Data;
+using PushSharp.Apple;
 
 namespace Quest.Lib.Device
 {
@@ -25,15 +26,14 @@ namespace Quest.Lib.Device
     {
         IDatabaseFactory _dbFactory;
 
-        public string deletedStatus { get; set; } = "OOS";
+        public string deletedStatus { get; set; } = "";
 
-        public string triggerStatus { get; set; } = "DSP";
+        public string triggerStatus { get; set; } = "";
 
         private const int Version = 1;
 
-#if APPLE_MSG
         private ApnsServiceBroker _apnsBroker;
-#endif
+
         private GcmServiceBroker _gcmBroker;
 
         private int _deleteStatusId;
@@ -53,7 +53,6 @@ namespace Quest.Lib.Device
         {
             _dbFactory = dbFactory;
         }
-
 
         public void Update(QuestDevice device)
         {
@@ -263,6 +262,12 @@ namespace Quest.Lib.Device
             };
         }
 
+        /// <summary>
+        /// Log out of Quest
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="devStore"></param>
+        /// <returns></returns>
         public LogoutResponse Logout(LogoutRequest request, IDeviceStore devStore)
         {
             var resrecord = devStore.GetByToken(request.SessionId);
@@ -292,6 +297,11 @@ namespace Quest.Lib.Device
             };
         }
     
+        /// <summary>
+        /// Request a callsign change
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public CallsignChangeResponse CallsignChange(CallsignChangeRequest request)
         {
             var oldCallsign = "";
