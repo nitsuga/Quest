@@ -62,9 +62,9 @@ namespace Quest.Lib.Utils
 
                 try
                 {
-                    using (var db = new QuestContext())
+                    return _dbFactory.Execute<QuestContext, string>((db) =>
                     {
-                        var v = db.Variable.FirstOrDefault( x=>x.Variable1 == variable);
+                        var v = db.Variable.FirstOrDefault(x => x.Variable1 == variable);
 
                         if (v == null)
                         {
@@ -82,7 +82,8 @@ namespace Quest.Lib.Utils
                         _cache.Add(variable, v.Value);
                         _lastPhysicalRead = DateTime.Now;
                         retval = v.Value;
-                    }
+                        return retval;
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -91,7 +92,6 @@ namespace Quest.Lib.Utils
                 finally
                 {
                 }
-                return retval;
             }
         }
 

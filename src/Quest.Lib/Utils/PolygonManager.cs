@@ -9,8 +9,6 @@ using NetTopologySuite.Index.Quadtree;
 using NetTopologySuite.IO;
 using Quest.Lib.Trace;
 using Newtonsoft.Json;
-using System.IO;
-using CsvHelper;
 
 namespace Quest.Lib.Utils
 {

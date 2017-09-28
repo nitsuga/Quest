@@ -10,7 +10,6 @@ using Apache.NMS.ActiveMQ;
 using Apache.NMS.ActiveMQ.Commands;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Quest.Lib.Processor;
 using Quest.Common.ServiceBus;
 
 namespace Quest.Lib.ServiceBus

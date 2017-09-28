@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using Autofac.Builder;
+using Quest.Lib.Trace;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -11,9 +13,10 @@ namespace Quest.Lib.DependencyInjection
     /// </summary>
     public class AutofacModule : Autofac.Module
     {
-        string[] _assemblies;
+        IEnumerable<string> _assemblies;
 
-        public AutofacModule(string[] assemblies)
+
+        public AutofacModule(IEnumerable<string> assemblies)
         {
             _assemblies = assemblies;
         }
@@ -22,24 +25,27 @@ namespace Quest.Lib.DependencyInjection
         {
             foreach (var asm in _assemblies)
             {
+                Logger.Write($"Scanning assembly {asm} for components");
                 Load(builder, Assembly.Load(asm));
             }
         }
 
         protected void Load(ContainerBuilder builder, Assembly asm)
         {
+            int count = 0;
             foreach (var t in asm.GetTypes())
-            {
-                RegisterType(builder, t);
-            }
+                count+=RegisterType(builder, t);
+            Logger.Write($".. registered {count} types");
         }
 
-        static void RegisterType(ContainerBuilder builder, Type t)
+        static int RegisterType(ContainerBuilder builder, Type t)
         {
-
+            int count = 0;
             var attribute = t.CustomAttributes.FirstOrDefault(x => x.AttributeType.GetInterface("IInjectionAttribute") != null);
             if (attribute != null)
             {
+                Logger.Write($".. registering type {t.FullName}");
+                count++;
                 var data = CustomAttributeData.GetCustomAttributes(t);
 
                 Type theinterface = null;
@@ -91,13 +97,9 @@ namespace Quest.Lib.DependencyInjection
                             b = b.InstancePerLifetimeScope();
                             break;
                     }
-
-
                 }
-
             }
-
+            return count;
         }
-
     }
 }

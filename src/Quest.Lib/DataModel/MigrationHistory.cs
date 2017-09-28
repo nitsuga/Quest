@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Quest.Lib.DataModel
+﻿namespace Quest.Lib.DataModel
 {
     public partial class MigrationHistory
     {

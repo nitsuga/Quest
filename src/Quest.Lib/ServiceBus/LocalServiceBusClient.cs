@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using Quest.Common.Messages;
-using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Quest.Lib.OS.DataModelNLPG
+﻿namespace Quest.Lib.OS.DataModelNLPG
 {
     public partial class Nlpg
     {

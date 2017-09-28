@@ -56,15 +56,8 @@ services:
     ports: 
       - "8090:80"
 
-#  quest.cmd:
-# #   build: 
-#       context: E:/data/questX/QuestServer/Quest.Cmd
-#    image: gluteusmaximus/quest.cmd
-
   ########################################
   q_web:
-# #   build: 
-#    #   context: ./quest-cmd
     image: gluteusmaximus/quest.web:latest
     depends_on:
       - "database"
@@ -86,10 +79,37 @@ services:
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
-    #volumes:
-    #  - ./volume_quest:/usr/Data
-
+   
     
+    ########################################
+  q_api:
+    image: gluteusmaximus/quest.api:latest
+    depends_on:
+      - "activemq"
+      - "q_device"
+    ports:
+      - "8125:80"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+    volumes:
+      - ./volume_api:/app/config
+      
+
+  q_security:
+    image: gluteusmaximus/quest.core:latest
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=SecurityManager
+    volumes:
+      - ./volume_quest:/app/config
+
     
     ########################################
   q_device:
@@ -97,14 +117,17 @@ services:
     depends_on:
       - "activemq"
       - "searchdatabase"
-    command: ["-exec=DeviceManager","-components=Data/components.json"]
+      - "q_security"
     environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
+      - Modules=DeviceManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
     volumes:
-      - ./volume_quest:/app
+      - ./volume_quest:/app/config
 
   
   ########################################
@@ -142,21 +165,6 @@ services:
       - ./volume_quest:/usr/Data
 
   
-  q_security:
-    build: 
-       context: ./quest-cmd
-    image: gluteusmaximus/quest.cmd:latest
-    depends_on:
-      - "activemq"
-      - "searchdatabase"
-    command: ["-exec=SecurityManager","-components=/usr/Data/components.json"]
-    environment:
-      - ActiveMQ=activemq:tcp://activemq:61616
-      - ElasticUser=elastic
-      - ElasticPwd=changeme
-      - ElasticUrls=http://searchdatabase:9200
-    volumes:
-      - ./volume_quest:/usr/Data
 
       
   ########################################

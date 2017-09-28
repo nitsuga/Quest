@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
 using System.Linq;
@@ -7,38 +8,45 @@ namespace Quest.Lib.Resource
 {
     public class ResourceStoreMssql : IResourceStore
     {
+        IDatabaseFactory _dbFactory;
+
+        public ResourceStoreMssql(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public QuestResource Get(int fleetno)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == fleetno);
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
                 return res;
-            }
+            });
         }
 
         public QuestResource Get(string callsign)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 var dbinc = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
                 return res;
-            }
+            });
         }
 
         public int GetOffroadStatusId()
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, int>((db) =>
             {
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
                 return status.ResourceStatusId;
-            }
+            });
         }
         
         public QuestResource Update(ResourceUpdate item)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == item.FleetNo);
                 if (dbinc == null)
@@ -50,11 +58,11 @@ namespace Quest.Lib.Resource
                     //dbinc.Created = new DateTime((item.Timestamp + 62135596800) * 10000000);
                 }
 
-               //TODO:
+                //TODO:
                 db.SaveChanges();
                 var inc = Cloner.CloneJson<QuestResource>(dbinc);
                 return inc;
-            }
+            });
         }
     }
 }

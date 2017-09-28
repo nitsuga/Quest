@@ -15,12 +15,18 @@ namespace Quest.Lib.OS.Routing.ITN
 {
     public class ItnRoutingData
     {
-        
-        public static void SaveItnRoadNetwork()
+        private IDatabaseFactory _dbFactory;
+
+        public ItnRoutingData(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
+        public void SaveItnRoadNetwork()
         {
             IEnumerable<RoadLinkEdgeTemp> network = LoadItnRoadNetwork();
             int i = 0;
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 db.Execute("truncate table RoadLinkEdgeLink");
                 db.Execute("truncate table RoadLinkEdge");
@@ -51,23 +57,20 @@ namespace Quest.Lib.OS.Routing.ITN
                         //db.SaveChanges();
                 }
                 db.Execute(sql);
-            }
+            });
             
         }
 
         /// <summary>
         ///     Loads routing data into memory. the data willbe available through the Locations array
         /// </summary>
-        private static IEnumerable<RoadLinkEdgeTemp> LoadItnRoadNetwork()
+        private IEnumerable<RoadLinkEdgeTemp> LoadItnRoadNetwork()
         {
-            var edges = new List<RoadLinkEdgeTemp>();
-            try
-            {
-
-                var reader = new WKTReader();
-                var linkId=0;
-                using (var context = new QuestContext())
+                return _dbFactory.Execute<QuestContext, IEnumerable<RoadLinkEdgeTemp>>((db) =>
                 {
+                    var edges = new List<RoadLinkEdgeTemp>();
+                    var reader = new WKTReader();
+                    var linkId = 0;
                     var locs = LoadNodes();
                     var links = LoadLinks();
 
@@ -102,7 +105,7 @@ namespace Quest.Lib.OS.Routing.ITN
                         if (!(current.ToOneWay ?? false))
                         {
                             linkId++;
-                            var con1 = new RoadLinkEdgeTemp(linkId, current.RoadLinkId, current.RoadName, current.RoadTypeId, geom,  t, current.FromGrade, current.ToGrade);
+                            var con1 = new RoadLinkEdgeTemp(linkId, current.RoadLinkId, current.RoadName, current.RoadTypeId, geom, t, current.FromGrade, current.ToGrade);
                             f.OutEdges.Add(con1);
                             edges.Add(con1);
                         }
@@ -111,19 +114,14 @@ namespace Quest.Lib.OS.Routing.ITN
 
                         // deal with bidirectional roads by duplicating the roadlink, but give it a unique ID.
                         linkId++;
-                        var con2 = new RoadLinkEdgeTemp(linkId, current.RoadLinkId, current.RoadName, current.RoadTypeId, (LineString)geom.Reverse(),  f, current.ToGrade, current.FromGrade);
+                        var con2 = new RoadLinkEdgeTemp(linkId, current.RoadLinkId, current.RoadName, current.RoadTypeId, (LineString)geom.Reverse(), f, current.ToGrade, current.FromGrade);
                         t.OutEdges.Add(con2);
                         edges.Add(con2);
                     }
 
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write(ex.ToString(),"LoadItn");
-            }
+                    return edges;
 
-            return edges;
+                });
         }
 
         private static Dictionary<int, RoutingLocation> LoadNodes()

@@ -10,6 +10,7 @@ using Quest.Common.Messages;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Security
 {
@@ -20,13 +21,16 @@ namespace Quest.Lib.Security
     public class SecurityManager : ServiceBusProcessor
     {
         private readonly ILifetimeScope _scope;
+        IDatabaseFactory _dbFactory;
 
         public SecurityManager(
             ILifetimeScope scope,
+            IDatabaseFactory dbFactory,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
+            _dbFactory = dbFactory;
             _scope = scope;
         }
 
@@ -83,10 +87,10 @@ namespace Quest.Lib.Security
         /// <returns></returns>
         private List<AuthorisationClaim> GetAppClaims(string name)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<AuthorisationClaim>>((db) =>
             {
                 return GetAppClaims(name, db);
-            }
+            });
         }
 
         private List<AuthorisationClaim> GetAppClaims(string name, QuestContext db)
@@ -150,20 +154,20 @@ namespace Quest.Lib.Security
             if (checkExists)
                 CheckExists(claimType, claimValue);
 
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<AuthorisationClaim>>((db) =>
             {
                 var claimList1 = db.GetClaims(parentClaimType, parentClaimValue).ToList();
                 var claimList2 = db.GetClaims(claimType, claimValue).ToList();
 
                 var query = from claim1 in claimList1
-                    from claim2 in claimList2
-                    where
-                        (claim1.SecuredItemName == claim2.SecuredItemName && claim1.SecuredValue == claim2.SecuredValue)
-                    select
-                        new AuthorisationClaim() {ClaimType = claim2.SecuredItemName, ClaimValue = claim2.SecuredValue};
+                            from claim2 in claimList2
+                            where
+                                            (claim1.SecuredItemName == claim2.SecuredItemName && claim1.SecuredValue == claim2.SecuredValue)
+                            select
+                                            new AuthorisationClaim() { ClaimType = claim2.SecuredItemName, ClaimValue = claim2.SecuredValue };
 
                 return query.ToList();
-            }
+            });
         }
 
 
@@ -175,7 +179,7 @@ namespace Quest.Lib.Security
         /// <param name="claimValue"></param>
         private void CheckExists(string claimType, string claimValue)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 if (
                     !db.SecuredItems.Any(x => x.SecuredItemName == claimType && x.SecuredValue == claimValue))
@@ -185,12 +189,12 @@ namespace Quest.Lib.Security
                             .FirstOrDefault(x => x.SecuredItemName == "specialrole" && x.SecuredValue == "WebService");
                     if (ws == null)
                     {
-                        ws = new SecuredItems {SecuredItemName = "specialrole", SecuredValue = "WebService"};
+                        ws = new SecuredItems { SecuredItemName = "specialrole", SecuredValue = "WebService" };
                         db.SecuredItems.Add(ws);
                         db.SaveChanges();
                     }
 
-                    var item = new SecuredItems {SecuredItemName = claimType, SecuredValue = claimValue};
+                    var item = new SecuredItems { SecuredItemName = claimType, SecuredValue = claimValue };
                     db.SecuredItems.Add(item);
                     db.SaveChanges();
 
@@ -202,7 +206,7 @@ namespace Quest.Lib.Security
                     db.SecuredItemLinks.Add(link);
                     db.SaveChanges();
                 }
-            }
+            });
         }
 
 
@@ -214,7 +218,7 @@ namespace Quest.Lib.Security
         {
             List<SecurityItem> returnItem;
 
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<SecurityItem>>((db) =>
             {
                 returnItem =
                     db.SecuredItems.Select(
@@ -226,8 +230,8 @@ namespace Quest.Lib.Security
                                 SecuredValue = x.SecuredValue,
                                 Priority = x.Priority
                             }).ToList();
-            }
-            return returnItem;
+                return returnItem;
+            });
         }
 
 #if false
@@ -235,7 +239,7 @@ namespace Quest.Lib.Security
         {
             SecurityNetwork returnItem=new SecurityNetwork();
 
-            using (var db = new QuestContext())
+                        return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 db.Configuration.ProxyCreationEnabled = false;
                 returnItem.Items = db.SecuredItems.ToList();
@@ -252,7 +256,7 @@ namespace Quest.Lib.Security
         public List<SecurityItemLink> GetAllSecuredItemLinks()
         {
             List<SecurityItemLink> returnItem;
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<SecurityItemLink>>((db) =>
             {
                 returnItem =
                     db.SecuredItemLinks.Select(
@@ -263,8 +267,8 @@ namespace Quest.Lib.Security
                                 SecuredItemIDChild = x.SecuredItemIdchild,
                                 SecuredItemIDParent = x.SecuredItemIdparent
                             }).ToList();
-            }
-            return returnItem;
+                return returnItem;
+            });
         }
     }
 

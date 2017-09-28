@@ -15,6 +15,7 @@ using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing
 {
@@ -24,6 +25,14 @@ namespace Quest.Lib.Routing
     [Serializable]
     public class RoutingData
     {
+
+        IDatabaseFactory _dbFactory;
+
+        public RoutingData(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         /// <summary>
         ///     The <see cref="IsInitialised" /> property's name.
         /// </summary>
@@ -95,7 +104,7 @@ namespace Quest.Lib.Routing
             try
             {
                 Logger.Write($"Loading road network...", TraceEventType.Information, "Routing Data");
-                using (var db = new QuestContext())
+                return _dbFactory.Execute<QuestContext, int>((db) =>
                 {
                     foreach (var current in db.RoadLinkEdge)
                     {
@@ -106,7 +115,7 @@ namespace Quest.Lib.Routing
                         // add into the quadtree
                         ConnectionIndex.Insert(con.Envelope, con);
                         Bounds.ExpandToInclude(con.Envelope);
-                        Dict.Add(current.RoadLinkEdgeId,con);
+                        Dict.Add(current.RoadLinkEdgeId, con);
                     }
 
                     // patch up outlinks
@@ -119,7 +128,7 @@ namespace Quest.Lib.Routing
 
                     Logger.Write($"Loading road network complete - {Dict.Count} road links", TraceEventType.Information, "Routing Data");
                     return Dict.Count;
-                }
+                });
             }
                 // ReSharper disable once UnusedVariable
             catch(Exception ex)

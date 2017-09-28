@@ -9,7 +9,6 @@ namespace Quest.Api
         public static void Main(string[] args)
         {
             // set env. variable ActiveMQ to specify the message q
-
             var configuration = new ConfigurationBuilder()
               .AddCommandLine(args)
               .Build();

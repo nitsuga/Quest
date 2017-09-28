@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing.Speeds
 {
@@ -25,8 +26,12 @@ namespace Quest.Lib.Routing.Speeds
     /// </summary>
     public class SpeedDataHoD : SpeedDataMatrix
     {
-        public SpeedDataHoD()
+        IDatabaseFactory _dbFactory;
+
+        public SpeedDataHoD(IDatabaseFactory dbFactory)
         {
+            _dbFactory = dbFactory;
+
             // load the data and set the flag when done
             Task.Run(() =>
             {
@@ -44,7 +49,7 @@ namespace Quest.Lib.Routing.Speeds
 
             try
             {
-                using (var context = new QuestContext())
+                _dbFactory.Execute<QuestContext>((db) =>
                 {
                     Logger.Write("calling RoadSpeedMatrixHoDSummaries", GetType().Name);
 #if false
@@ -61,13 +66,13 @@ namespace Quest.Lib.Routing.Speeds
                     }
 
 #else
-                    RMax = context.RoadSpeedMatrixHoD.Max(x => x.RoadTypeId);
-                    EastingMax = context.RoadSpeedMatrixHoD.Max(x => x.GridX);
-                    NorthingMax = context.RoadSpeedMatrixHoD.Max(x => x.GridY);
-                    EastingMin = context.RoadSpeedMatrixHoD.Min(x => x.GridX);
-                    NorthingMin = context.RoadSpeedMatrixHoD.Min(x => x.GridY);
-                    VMax = context.RoadSpeedMatrixHoD.Max(x => x.VehicleId);
-                    Hourmax = context.RoadSpeedMatrixHoD.Max(x => x.HourOfDay);
+                    RMax = db.RoadSpeedMatrixHoD.Max(x => x.RoadTypeId);
+                    EastingMax = db.RoadSpeedMatrixHoD.Max(x => x.GridX);
+                    NorthingMax = db.RoadSpeedMatrixHoD.Max(x => x.GridY);
+                    EastingMin = db.RoadSpeedMatrixHoD.Min(x => x.GridX);
+                    NorthingMin = db.RoadSpeedMatrixHoD.Min(x => x.GridY);
+                    VMax = db.RoadSpeedMatrixHoD.Max(x => x.VehicleId);
+                    Hourmax = db.RoadSpeedMatrixHoD.Max(x => x.HourOfDay);
 #endif
                     var dimx = 1 + (EastingMax - EastingMin) / Cellsize;
                     var dimy = 1 + (NorthingMax - NorthingMin) / Cellsize;
@@ -76,7 +81,7 @@ namespace Quest.Lib.Routing.Speeds
 
                     Logger.Write("calling RoadSpeedMatrixHoDs", GetType().Name);
 
-                    foreach (var reader in context.RoadSpeedMatrixHoD)
+                    foreach (var reader in db.RoadSpeedMatrixHoD)
                     {
                         var x = (reader.GridX - EastingMin) / Cellsize;
                         var y = (reader.GridY - NorthingMin) / Cellsize;
@@ -87,7 +92,7 @@ namespace Quest.Lib.Routing.Speeds
 
                         Data[x, y, reader.VehicleId - 1, reader.RoadTypeId, reader.HourOfDay] = s;
                     }
-                }
+                });
 
                 Lowerx = Data.GetLowerBound(0);
                 Upperx = Data.GetUpperBound(0);

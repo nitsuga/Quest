@@ -35,11 +35,24 @@ namespace Quest.Api
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+
+            // set up default listening ports
+            var appsettings = Environment.GetEnvironmentVariable("ApplicationConfig");
+            if (string.IsNullOrEmpty(appsettings))
+                appsettings = "appsettings.json";
+
+            var components = Environment.GetEnvironmentVariable("ComponentsConfig");
+            if (string.IsNullOrEmpty(components))
+                components = "components.json";
+
+            Logger.Write($"Using ApplicationConfig={appsettings}");
+            Logger.Write($"Using ComponentsConfig={components}");
+            
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddJsonFile("components.json", optional: false)
+                .AddJsonFile(appsettings, optional: false, reloadOnChange: true)
+                //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile(components, optional: false)
                 .AddEnvironmentVariables();
 
             Configuration = configBuilder.Build();

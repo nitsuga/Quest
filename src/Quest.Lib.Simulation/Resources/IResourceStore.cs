@@ -1,5 +1,4 @@
 ﻿using Quest.Common.Simulation;
-using System;
 using System.Collections.Generic;
 
 namespace Quest.Lib.Simulation.Resources

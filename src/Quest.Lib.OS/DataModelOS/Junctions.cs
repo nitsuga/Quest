@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Quest.Lib.OS.DataModelOS
+﻿namespace Quest.Lib.OS.DataModelOS
 {
     public partial class Junctions
     {

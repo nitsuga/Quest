@@ -8,7 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\Quest.Api.xml</DocumentationFile>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0 NOSEC</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0</DefineConstants>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>1701;1702;1705;1591;1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

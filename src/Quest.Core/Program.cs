@@ -12,8 +12,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Threading;
-using Quest.Lib.Processor;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Quest.Lib.DataModel;
+using Quest.Lib.OS.DataModelOS;
+using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Simulation.DataModelSim;
+using Quest.Lib.OS.DataModelNLPG;
 
 namespace Quest.Core
 {
@@ -70,13 +75,18 @@ namespace Quest.Core
                 var config = GetConfiguration();
                 var global = config.GetSection("global");
 
-                //config["JwtIssuerOptions:Issuer"];
-
-
                 var serviceCollection = new ServiceCollection();
+
+                var r = new Quest.Lib.DataModel.AspNetRoles();
 
                 // load components into repository
                 ServiceProvider = ConfigureServices(serviceCollection, config);
+
+                foreach( var component in ApplicationContainer.ComponentRegistry.Registrations)
+                {
+                    foreach(var service in component.Services)
+                        Logger.Write($"Loaded {service.Description}");
+                }
 
                 // get the processor runner
                 var runner = ApplicationContainer.Resolve<ProcessRunner>();
@@ -125,11 +135,24 @@ namespace Quest.Core
         /// <returns></returns>
         internal static IConfiguration GetConfiguration()
         {
+            // override config if env variable is set
+            var cfgFile = Environment.GetEnvironmentVariable("ComponentsConfig");
+            if (string.IsNullOrEmpty(cfgFile))
+                cfgFile = "components.json";
+
+            // override app config if env variable is set
+            var appFile = Environment.GetEnvironmentVariable("ApplicationConfig");
+            if (string.IsNullOrEmpty(appFile))
+                appFile = "appsettings.json";
+
+            Logger.Write($"Using ApplicationConfig={appFile}");
+            Logger.Write($"Using ComponentsConfig={cfgFile}");
+
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables()
-                .AddJsonFile("appsettings.json", true)
-                .AddJsonFile("components.json", true);
+                .AddJsonFile(appFile, false)
+                .AddJsonFile(cfgFile, false);
 
             IConfiguration config = configBuilder.Build();
 
@@ -137,7 +160,7 @@ namespace Quest.Core
         }
 
         /// <summary>
-        /// load components into repository
+        /// load components into dependency injection container
         /// </summary>
         /// <param name="services"></param>
         /// <param name="config"></param>
@@ -146,24 +169,31 @@ namespace Quest.Core
         {
             services.AddMemoryCache();
 
-            // Register the ConfigurationModule with Autofac.
-            var module = new ConfigurationModule(config);
-
             var builder = new ContainerBuilder();
-            builder.RegisterModule(module);
 
-            // Add any Autofac modules or registrations.
-            // builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.Research", "Quest.Lib.Simulation" }));
-            builder.RegisterModule(new AutofacModule(new string[] { "Quest.Lib", "Quest.Lib.OS" }));
+            // Register the ConfigurationModule with Autofac.
+           builder.RegisterModule(new ConfigurationModule(config));
 
-            var dataAccess = Assembly.GetExecutingAssembly();
+            // register other libraries for autoinjection
+            List<string> libraries = new List<string>();
+            var p = config.GetSection("libraries");
+            foreach (var item in p.GetChildren())
+                libraries.Add(item.Value);
+            builder.RegisterModule(new AutofacModule(libraries));
 
             builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
-
             builder.Populate(services);
+
+            services.AddDbContext<QuestContext>(options => options.UseSqlServer(config.GetConnectionString("Quest")));
+            services.AddDbContext<QuestOSContext>(options => options.UseSqlServer(config.GetConnectionString("QuestOS")));
+            services.AddDbContext<QuestDataContext>(options => options.UseSqlServer(config.GetConnectionString("QuestData")));
+            services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
+            services.AddDbContext<QuestNLPGContext>(options => options.UseSqlServer(config.GetConnectionString("QuestNLPG")));
+
             ApplicationContainer = builder.Build();
 
             var provider = new AutofacServiceProvider(ApplicationContainer);
+            
             return provider;
 
         }
@@ -176,10 +206,18 @@ namespace Quest.Core
         /// <returns></returns>
         internal static string GetSession(IConfiguration config)
         {
-            var global = config.GetSection("global");
-            var session = global["session"];
-            if (session == null || session.Length == 0)
-                session = "";
+            var session = Environment.GetEnvironmentVariable("Session");
+            if (!string.IsNullOrEmpty(session))
+            {
+                Logger.Write($"Using Session={session}");
+            }
+            else
+            {
+                var global = config.GetSection("global");
+                session = global["session"];
+                if (session == null || session.Length == 0)
+                    session = "";
+            }
             return session;
         }
 
@@ -192,6 +230,14 @@ namespace Quest.Core
         internal static List<string> GetProcessorsList(IConfiguration config)
         {
             List<string> modules = new List<string>();
+
+            // override app config if env variable is set
+            var envmodules = Environment.GetEnvironmentVariable("Modules");
+            if (!string.IsNullOrEmpty(envmodules))
+            {
+                Logger.Write($"Using Modules={envmodules}");
+                modules.AddRange(envmodules.Split(";"));
+            }               
 
             var p = config.GetSection("Processors");
 

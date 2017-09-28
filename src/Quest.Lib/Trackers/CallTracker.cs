@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Linq;
-using System.Data;
 using Quest.Lib.DataModel;
 using Quest.Common.Messages;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Trackers
 {
     public class CallTracker : ServiceBusProcessor
     {
+        private IDatabaseFactory _dbFactory;
+
         public CallTracker(
+            IDatabaseFactory dbFactory,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
+            _dbFactory = dbFactory;
         }
 
         protected override void OnPrepare()
@@ -33,9 +37,9 @@ namespace Quest.Lib.Trackers
         {
         }
 
-        static public void recordcallEnd(CallEnd msg)
+        public void recordcallEnd(CallEnd msg)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
 
                 var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
@@ -46,13 +50,13 @@ namespace Quest.Lib.Trackers
                     call.IsClosed = true;
                     db.SaveChanges();
                 }
-            }
+            });
         }
 
-        static public Response CallEventHandler(NewMessageArgs t)
+        public Response CallEventHandler(NewMessageArgs t)
         {
             CallEvent msg = t.Payload as CallEvent;
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
                 if (call == null)
@@ -69,14 +73,14 @@ namespace Quest.Lib.Trackers
                     call.TimeAnswered = DateTime.Now;
 
                 call.Updated = DateTime.Now;
-                db.SaveChanges();                
-            }
+                db.SaveChanges();
+            });
             return null;
         }
 
-        static public void recordcallerdetails(CallLookupResponse msg)
+        public void recordcallerdetails(CallLookupResponse msg)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var call = (from c in db.Call where c.SwitchId == msg.CallId select c).FirstOrDefault();
                 if (call != null)
@@ -101,7 +105,7 @@ namespace Quest.Lib.Trackers
                     call.Status = msg.Status;
                     db.SaveChanges();
                 }
-            }
+            });
         }
     }
 }

@@ -9,7 +9,6 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Utilities;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Quest.Lib.Search.Elastic
 {

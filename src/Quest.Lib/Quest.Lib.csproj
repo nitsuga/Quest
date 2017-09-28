@@ -52,6 +52,7 @@
     <Compile Remove="Trackers\AlarmTracker.cs" />
     <Compile Remove="Trackers\CommandPointTracker.cs" />
     <Compile Remove="Utils\RouteLine.cs" />
+    <Compile Remove="Utils\SettingsHelper.cs" />
     <Compile Remove="Visuals\ResourceVisuals.cs" />
     <Compile Remove="Visuals\RoadMapMatcherVisualProvider.cs" />
   </ItemGroup>

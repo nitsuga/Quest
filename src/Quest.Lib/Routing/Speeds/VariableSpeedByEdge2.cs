@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GeoAPI.Geometries;
 using Quest.Common.Messages;
 using Quest.Lib.Constants;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using System.Threading;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing.Speeds
 {
@@ -29,9 +29,15 @@ namespace Quest.Lib.Routing.Speeds
 
         private SpeedDataHoW _speeddata;
         private ConstantSpeedCalculator _constspeeddata;
+        private IDatabaseFactory _dbFactory;
 
-        public VariableSpeedByEdge(SpeedDataHoW speeddata, ConstantSpeedCalculator constspeeddata, RoutingData routingdata)
+        public VariableSpeedByEdge(
+            IDatabaseFactory dbFactory,
+            SpeedDataHoW speeddata, 
+            ConstantSpeedCalculator constspeeddata, 
+            RoutingData routingdata)
         {
+            _dbFactory = dbFactory;
             _speeddata = speeddata;
             _constspeeddata = constspeeddata;
             _routingdata = routingdata;
@@ -52,12 +58,12 @@ namespace Quest.Lib.Routing.Speeds
                 Logger.Write("Need 64bit arhitecture for this estimator", GetType().Name, System.Diagnostics.TraceEventType.Error);
             }
 
-            using (var context = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 Logger.Write("Loading road speeds", GetType().Name);
                 // count roadlinks
                 var speeds =
-                    context.RoadSpeed
+                    db.RoadSpeed
                         .ToArray()
                         .GroupBy(x => x.RoadLinkEdgeId ?? 0);
 
@@ -77,7 +83,7 @@ namespace Quest.Lib.Routing.Speeds
 
                 Logger.Write("Estimation of missing speeds completed", GetType().Name);
 
-            }
+            });
 
         }
         

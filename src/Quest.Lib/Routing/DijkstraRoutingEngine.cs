@@ -29,14 +29,15 @@ namespace Quest.Lib.Routing
         /// </summary>
         private RoutingData _data;
         private ILifetimeScope _scope;
+        private CoverageMapManager _coverageMap;
 
         public List<int> IgnoreRoadTypes { get; set; }
 
-        public DijkstraRoutingEngine(RoutingData data, ILifetimeScope scope)
+        public DijkstraRoutingEngine(RoutingData data, ILifetimeScope scope, CoverageMapManager coverageMap)
         {
             _data = data;
             _scope = scope;
-
+            _coverageMap = coverageMap;
         }
 
         public RoutingData Data => _data;
@@ -56,9 +57,6 @@ namespace Quest.Lib.Routing
                     Thread.Sleep(250);
 
                 if (request == null) throw new ArgumentNullException(nameof(request));
-                //var watch = new Stopwatch();
-                //watch.Start();
-
 
                 IRoadSpeedCalculator speedCalc = _scope.ResolveNamed<IRoadSpeedCalculator>(request.RoadSpeedCalculator);
 
@@ -368,7 +366,7 @@ namespace Quest.Lib.Routing
         public CoverageMap CalculateCoverage(RouteRequestCoverage request)
         {
 
-            var map = CoverageMapUtil.GetStandardMap(request.TileSize)
+            var map = _coverageMap.GetStandardMap(request.TileSize)
                 .Clone()
                 .ClearData()
                 .Name(request.Name);

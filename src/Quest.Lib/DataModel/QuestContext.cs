@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Quest.Lib.DataModel
 {
@@ -44,13 +42,8 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<Variable> Variable { get; set; }
         public virtual DbSet<Vehicle> Vehicle { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public QuestContext(DbContextOptions<QuestContext> options) : base(options)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer(@"Server=localhost,999;Database=Quest;user=sa;pwd=M3Gurdy*");
-            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Quest.Lib.Research.DataModelResearch
 {
@@ -20,13 +18,12 @@ namespace Quest.Lib.Research.DataModelResearch
 
         // Unable to generate entity type for table 'dbo.IncidentRouteRoadSpeedsData'. Please see the warning messages.
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public QuestDataContext(DbContextOptions<QuestDataContext> options) : base(options)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer(@"Server=localhost,999;Database=QuestData;user=sa;pwd=M3Gurdy*");
-            }
+        }
+
+        public QuestDataContext()
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Quest.Lib.Simulation.DataModelSim
+﻿namespace Quest.Lib.Simulation.DataModelSim
 {
     public partial class Determinants
     {

@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Linq;
 using Nest;
 using Newtonsoft.Json.Linq;
-using PushSharp.Common;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
@@ -18,12 +17,18 @@ using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using PushSharp.Google;
-using Quest.Lib.ServiceBus;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Device
 {
     public class DeviceHandler
     {
+        IDatabaseFactory _dbFactory;
+
+        public string deletedStatus { get; set; } = "OOS";
+
+        public string triggerStatus { get; set; } = "DSP";
+
         private const int Version = 1;
 
 #if APPLE_MSG
@@ -32,8 +37,6 @@ namespace Quest.Lib.Device
         private GcmServiceBroker _gcmBroker;
 
         private int _deleteStatusId;
-
-        public string triggerStatus { get; set; }
 
         private int DeleteStatusId
         {
@@ -46,9 +49,15 @@ namespace Quest.Lib.Device
             }
         }
 
+        public DeviceHandler(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
+
         public void Update(QuestDevice device)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // locate record and create or update
                 var resrecord = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
@@ -95,7 +104,7 @@ namespace Quest.Lib.Device
 
                 db.SaveChanges();
 
-            } // using
+            });
         }
 
         /// <summary>
@@ -286,7 +295,7 @@ namespace Quest.Lib.Device
         public CallsignChangeResponse CallsignChange(CallsignChangeRequest request)
         {
             var oldCallsign = "";
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, CallsignChangeResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -321,16 +330,16 @@ namespace Quest.Lib.Device
 
                 //TODO: Save to Elastic
                 db.SaveChanges();
-            }
 
-            return new CallsignChangeResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                OldCallsign = oldCallsign,
-                NewCallsign = request.Callsign,
-                Message = "successful"
-            };
+                return new CallsignChangeResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = true,
+                    OldCallsign = oldCallsign,
+                    NewCallsign = request.Callsign,
+                    Message = "successful"
+                };
+            });
         }
 
         /// <summary>
@@ -341,7 +350,7 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public RefreshStateResponse RefreshState(RefreshStateRequest request, NotificationSettings settings, IIncidentStore incStore)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, RefreshStateResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -365,7 +374,7 @@ namespace Quest.Lib.Device
                 // send incident details if currently assigned
                 if (inc != null)
                 {
-                    var devices = new List<DataModel.Devices> {deviceRecord};
+                    var devices = new List<DataModel.Devices> { deviceRecord };
                     SendEventNotification(devices, inc, settings, "Refresh");
                 }
 
@@ -374,12 +383,12 @@ namespace Quest.Lib.Device
                 SendCallsignNotification(deviceRecord.Resource.Callsign.Callsign1, settings, "Refresh");
 
                 return new RefreshStateResponse();
-            }
+            });
         }
 
         public AckAssignedEventResponse AckAssignedEvent(AckAssignedEventRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, AckAssignedEventResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -416,12 +425,12 @@ namespace Quest.Lib.Device
                     Success = true,
                     Message = "successful"
                 };
-            }
+            });
         }
 
         public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, PositionUpdateResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -435,22 +444,23 @@ namespace Quest.Lib.Device
                 deviceRecord.Latitude = (float?)request.Vector.Latitude ?? 0;
                 deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
                 deviceRecord.LastUpdate = DateTime.UtcNow;
-                deviceRecord.PositionAccuracy = (float) request.Vector.HDoP;
+                deviceRecord.PositionAccuracy = (float)request.Vector.HDoP;
 
                 //TODO: Save to Elastic
                 db.SaveChanges();
-            }
-            return new PositionUpdateResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                Message = "successful"
-            };
+                return new PositionUpdateResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = true,
+                    Message = "successful"
+                };
+
+            });
         }
 
         public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, MakePatientObservationResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -464,18 +474,18 @@ namespace Quest.Lib.Device
                 // save audit record
                 //TODO: Save to Elastic
                 db.SaveChanges();
-            }
-            return new MakePatientObservationResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                Message = "successful"
-            };
+                return new MakePatientObservationResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = true,
+                    Message = "successful"
+                };
+            });
         }
 
         public PatientDetailsResponse PatientDetails(PatientDetailsRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, PatientDetailsResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -510,12 +520,12 @@ namespace Quest.Lib.Device
                 };
 
                 return response;
-            }
+            });
         }
 
         public GetEntityTypesResponse GetEntityTypes(GetEntityTypesRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, GetEntityTypesResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -539,7 +549,7 @@ namespace Quest.Lib.Device
                     Success = true,
                     Message = "successful"
                 };
-            }
+            });
         }
 
         public MapItemsResponse GetMapItems(MapItemsRequest request)
@@ -560,12 +570,12 @@ namespace Quest.Lib.Device
                 Message = "successful"
             };
 
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // make a note of the current revision
                 var resmax = db.Resource.Max(x => x.Revision);
-                response.CurrRevision = (long)resmax+1;
-            }
+                response.CurrRevision = (long)resmax + 1;
+            });
 
             response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
 
@@ -589,12 +599,9 @@ namespace Quest.Lib.Device
                 // work out which have been deleted - these are in not in new_resource but are in original_resources                
                 foreach (var i1 in originalResource)
                 {
-                    if (i1 != null)
-                    {
-                        var i = (int) i1;
+                        var i = i1;
                         if (!newResource.Contains(i))
                             response.DeleteResources.Add(i);
-                    }
                 }
 
                 // truncate for efficiency                
@@ -638,7 +645,7 @@ namespace Quest.Lib.Device
 
         private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
             {
                 var d = db.Destinations
                     .Where(x => ((hospitals == true && x.IsHospital == true))
@@ -662,18 +669,18 @@ namespace Quest.Lib.Device
                             Y = point.Y
                         };
 
-                        }
+                    }
                     )
                     .ToList();
 
                 foreach (var res in d)
                 {
-                    var latlng = LatLongConverter.OSRefToWGS84(res.X,res.Y);
+                    var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
                     res.X = latlng.Longitude;
                     res.Y = latlng.Latitude;
                 }
                 return d;
-            }
+            });
         }
 
         IEnumerable<DataModel.Resource> ResourceAtRevision(QuestContext db, long revision)
@@ -684,7 +691,7 @@ namespace Quest.Lib.Device
 
         private List<int> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<int>>((db) =>
             {
                 var results = new List<int>();
 
@@ -715,12 +722,12 @@ namespace Quest.Lib.Device
                 }
 
                 return results;
-            }
+            });
         }
 
         public List<EventMapItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<EventMapItem>>((db) =>
             {
                 var results = new List<DataModel.Incident>();
 
@@ -749,15 +756,15 @@ namespace Quest.Lib.Device
                                 Priority = inc.Priority,
                                 Status = inc.Status,
                                 Created = inc.Created?.ToString("hh:MM") ?? "?",
-                                LastUpdated =inc.LastUpdated,
+                                LastUpdated = inc.LastUpdated,
                                 //AssignedResources = inc.AssignedResources,
                                 AZ = inc.Az,
                                 Determinant = inc.Determinant,
                                 DeterminantDescription = inc.DeterminantDescription,
-                                Location= inc.Location,
+                                Location = inc.Location,
                                 LocationComment = inc.LocationComment,
-                                PatientAge =inc.PatientAge,
-                                PatientSex =inc.PatientSex,
+                                PatientAge = inc.PatientAge,
+                                PatientSex = inc.PatientSex,
                                 ProblemDescription = inc.ProblemDescription
                             };
 
@@ -767,12 +774,12 @@ namespace Quest.Lib.Device
                 }
 
                 return features;
-            }
+            });
         }
 
         private List<ResourceItem> GetDeviceResources(long revision, bool avail = false, bool busy = false)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<ResourceItem>>((db) =>
             {
                 var features = new List<ResourceItem>();
 
@@ -791,9 +798,9 @@ namespace Quest.Lib.Device
                                 {
                                     ID = res.DeviceId.ToString(),
                                     revision = res.Revision ?? 0,
-                                    X = res.Longitude??0,
-                                    Y = res.Latitude??0,
-                                    Callsign = res.DeviceCallsign??$"DV{res.DeviceId}",
+                                    X = res.Longitude ?? 0,
+                                    Y = res.Latitude ?? 0,
+                                    Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
                                     lastUpdate = res.LastUpdate,
                                     StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
                                     Status = res.ResourceStatus.Status,
@@ -822,7 +829,7 @@ namespace Quest.Lib.Device
                         db.Devices
                             .Where(
                                 x =>
-                                    x.ResourceStatus.Busy == true && 
+                                    x.ResourceStatus.Busy == true &&
                                     x.Latitude != null && x.Longitude != null)
                             .Where(x => x.Revision > revision)
                             .ToList()
@@ -875,12 +882,12 @@ namespace Quest.Lib.Device
                 }
 
                 return features;
-            }
+            });
         }
 
         private List<ResourceItem> GetStandardResources(long revision, bool avail = false, bool busy = false)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, List<ResourceItem>>((db) =>
             {
                 var results = new List<DataModel.Resource>();
 
@@ -917,12 +924,12 @@ namespace Quest.Lib.Device
                     features.Add(resFeature);
                 }
                 return features;
-            }
+            });
         }
 
         public GetHistoryResponse GetHistory(GetHistoryRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, GetHistoryResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -942,7 +949,7 @@ namespace Quest.Lib.Device
                 };
 
                 return response;
-            }
+            });
         }
 
         public AssignDeviceResponse AssignDevice(AssignDeviceRequest request, NotificationSettings settings, IIncidentStore incStore)
@@ -1048,13 +1055,13 @@ namespace Quest.Lib.Device
         public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
             IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // make sure callsign exists
                 var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
                 if (callsign == null)
                 {
-                    callsign = new Callsign {Callsign1 = resourceUpdate.Callsign};
+                    callsign = new Callsign { Callsign1 = resourceUpdate.Callsign };
                     db.Callsign.Add(callsign);
                     db.SaveChanges();
                 }
@@ -1103,7 +1110,7 @@ namespace Quest.Lib.Device
                 //res.Comment = resourceUpdate.Comment;
                 res.Destination = resourceUpdate.Destination;
                 res.Direction = 0; //resourceUpdate.Direction;
-                res.Emergency = resourceUpdate.Emergency?"Y":"N";
+                res.Emergency = resourceUpdate.Emergency ? "Y" : "N";
                 res.Eta = null; // resourceUpdate.ETA;
                 res.EventType = resourceUpdate.EventType;
                 res.FleetNo = resourceUpdate.FleetNo;
@@ -1147,7 +1154,7 @@ namespace Quest.Lib.Device
                 var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
                 ResourceItem ri = GetResourceItemFromView(rv);
 
-                var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude??0));
+                var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude ?? 0));
 
                 if (config != null)
                 {
@@ -1175,10 +1182,10 @@ namespace Quest.Lib.Device
 
                 if (requireEventNotification)
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
-                
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item=ri });
 
-            }
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
+
+            });
         }
 
         private ResourceItem GetResourceItemFromView(DataModel.Resource res)
@@ -1213,15 +1220,14 @@ namespace Quest.Lib.Device
 
         private void GetDeleteStatusId()
         {
-            var deletedStatus = SettingsHelper.GetVariable("DeviceManager.DeletedStatus", "OOS");
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var ds = db.ResourceStatus.FirstOrDefault(x => x.Status == deletedStatus);
                 if (ds != null)
                 {
                     _deleteStatusId = ds.ResourceStatusId;
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -1232,7 +1238,7 @@ namespace Quest.Lib.Device
         /// <param name="msgSource"></param>
         public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
                 if (!i.Any()) return;
@@ -1241,15 +1247,15 @@ namespace Quest.Lib.Device
                     x.ResourceStatusId = DeleteStatusId;
                     x.LastUpdated = DateTime.UtcNow;
                     db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceId});
+                    msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = x.ResourceId });
                 }
-            }
+            });
         }
 
 
         public void CPEventStatusListHandler( CPEventStatusList item, NotificationSettings settings)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 foreach (var i in item.Items)
                 {
@@ -1264,13 +1270,13 @@ namespace Quest.Lib.Device
                     }
                     db.SaveChanges();
                 }
-            }
+            });
         }
 
         public void CallDisconnectStatusListHandler( CallDisconnectStatusList item,
             NotificationSettings settings)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 foreach (var i in item.Items)
                 {
@@ -1281,14 +1287,14 @@ namespace Quest.Lib.Device
                     }
                     db.SaveChanges();
                 }
-            }
+            });
         }
 
 
         public void BeginDump( BeginDump item, NotificationSettings settings)
         {
             Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // remove all incidents
                 db.Incident.RemoveRange(db.Incident);
@@ -1301,7 +1307,7 @@ namespace Quest.Lib.Device
                 db.ResourceStatusHistory.RemoveRange(db.ResourceStatusHistory);
 
                 db.SaveChanges();
-            }
+            });
         }
 
 #endregion
@@ -1311,7 +1317,7 @@ namespace Quest.Lib.Device
 
         public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, GetStatusCodesResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -1366,7 +1372,7 @@ namespace Quest.Lib.Device
                     Success = true,
                     Message = "successful"
                 };
-            }
+            });
         }
 
         /// <summary>
@@ -1377,7 +1383,7 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public SetStatusResponse SetStatusRequest(SetStatusRequest request, NotificationSettings settings)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, SetStatusResponse>((db) =>
             {
                 var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
                 if (deviceRecord == null)
@@ -1415,7 +1421,7 @@ namespace Quest.Lib.Device
                         {
                             Code = deviceRecord.ResourceStatus.Status,
                             Description = GetStatusDescription(deviceRecord.ResourceStatus.Available ?? false, deviceRecord.ResourceStatus.Busy ?? false, deviceRecord.ResourceStatus.BusyEnroute ?? false, deviceRecord.ResourceStatus.Rest ?? false),
-                    };
+                        };
                     }
 
                     var newStatusRecord = db.ResourceStatus.FirstOrDefault(x => x.Status == request.StatusCode);
@@ -1461,7 +1467,7 @@ namespace Quest.Lib.Device
                         Message = "successful"
                     };
                 }
-            }
+            });
         }
 
         private string GetStatusDescription(DataModel.ResourceStatus status)
@@ -1493,7 +1499,7 @@ namespace Quest.Lib.Device
 
         private void SendCallsignNotification(string callsign, NotificationSettings settings, string reason)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // find associated devices with this resource callsign
                 var devices = db
@@ -1510,7 +1516,7 @@ namespace Quest.Lib.Device
                 }
 
                 SendCallsignNotification(devices, callsign, settings, reason);
-            }
+            });
         }
 
         private void SendCallsignNotification(List<DataModel.Devices> devices, string callsign,
@@ -1537,13 +1543,13 @@ namespace Quest.Lib.Device
         private void SendEventNotification(string callsign, string serial, NotificationSettings settings,
             string reason, IIncidentStore incStore)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // make sure callsign exists
                 var callsignRec = db.Callsign.FirstOrDefault(x => x.Callsign1 == callsign);
                 if (callsignRec == null)
                 {
-                    callsignRec = new Callsign {Callsign1 = callsign};
+                    callsignRec = new Callsign { Callsign1 = callsign };
                     db.Callsign.Add(callsignRec);
                     db.SaveChanges();
                 }
@@ -1572,7 +1578,7 @@ namespace Quest.Lib.Device
                 }
 
                 SendEventNotification(devices, inc, settings, reason);
-            }
+            });
         }
 
 
@@ -1623,7 +1629,7 @@ namespace Quest.Lib.Device
         /// <param name="reason"></param>
         private void SendStatusNotification(string callsign, NotificationSettings settings, string reason)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // find corresponding resource;
                 var resource = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
@@ -1657,7 +1663,7 @@ namespace Quest.Lib.Device
 
                 if (devices.Count > 0)
                     NotifyDevices(devices, request, settings, reason);
-            }
+            });
         }
 
         //TODO: Implement device notifications using a Notification service

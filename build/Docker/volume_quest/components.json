@@ -1,5 +1,5 @@
 {
-  "Name": "Search Service",
+  "Name": "Quest",
   "defaultAssembly": "Quest.Lib",
   "components": [
     {
@@ -7,8 +7,8 @@
       "injectProperties": true,
       "instanceScope": "single-instance",
       "properties": {
-        "ElasticUrls": "http://activemq:9200",
-        "LocalAreasFile": "Data/IndexData/local_area_names.json",
+        "ElasticUrls": "http://127.0.0.1:9200",
+        "LocalAreasFile": "Data/IndexData/local_area_names.shp",
         "User": "elastic",
         "Password": "changeme",
         "DefaultIndex": "locations",
@@ -147,7 +147,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/BikePoint?app_id={tfl_app_id}&app_key={tfl_app_key}"
+        "URL": "https://api.tfl.gov.uk/BikePoint?app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
       }
     },
     {
@@ -175,7 +175,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/StopPoint/Mode/{0}?page={1}&app_id={tfl_app_id}&app_key={tfl_app_key}"
+        "URL": "https://api.tfl.gov.uk/StopPoint/Mode/{0}?page={1}&app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
       }
     },
     {
@@ -189,7 +189,7 @@
       "injectProperties": true,
       "instanceScope": "per-dependency",
       "properties": {
-        "URL": "https://api.tfl.gov.uk/line/mode/tube/status?app_id={tfl_app_id}&app_key={tfl_app_key}"
+        "URL": "https://api.tfl.gov.uk/line/mode/tube/status?app_id=c6e8ebeb&app_key=2db60e64f5c372c5b9ceb4f41b386e3d"
       }
     },
     {
@@ -274,110 +274,6 @@
       "instanceScope": "single-instance"
     },
     {
-      "type": "Quest.Lib.Research.RoadMapMatcherVisualProvider,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Visuals.IVisualProvider",
-          "key": "MapMatcher"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "per-dependency"
-    },
-    {
-      "type": "Quest.Lib.Research.ResourceVisuals,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Visuals.IVisualProvider",
-          "key": "ResourceVisuals"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "per-dependency"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.AnalyseAvlsQuality,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "AnalyseAvlsQuality"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.FindNearestRoads,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "FindNearestRoads"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.FindNearestRoads,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "FindNearestRoads"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.AnalyseEdgeCosts,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "AnalyseEdgeCosts"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.MapMatcherProcessor,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "MapMatcherManager"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.MapMatcherAll,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "MapMatcherAll"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.MapMatcherWorker,Quest.Lib.Research",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "MapMatcherWorker"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
-      "type": "Quest.Lib.Research.Job.MapMatcherUtil,Quest.Lib.Research",
-      "injectProperties": true,
-      "instanceScope": "single-instance"
-    },
-    {
       "type": "Quest.Lib.ServiceBus.MessageHandler",
       "injectProperties": true,
       "instanceScope": "per-dependency"
@@ -413,13 +309,38 @@
         "IgnoreRoadTypes": [ 9 ]
       }
     },
-
+    {
+      "type": "Quest.Lib.MapMatching.HMMViterbi.HmmViterbiMapMatcher",
+      "services": [
+        {
+          "type": "Quest.Lib.MapMatching.RouteMatcher.IMapMatcher",
+          "key": "HmmViterbiMapMatcher"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
     {
       "type": "Quest.Lib.MapMatching.HMMViterbi.HmmViterbiMapMatcherUnOp",
       "services": [
         {
           "type": "Quest.Lib.MapMatching.RouteMatcher.IMapMatcher",
-          "key": "HmmViterbiMapMatcher"
+          "key": "HmmViterbiMapMatcherUnOp"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
+    {
+      "type": "Quest.Lib.MapMatching.MapMatcherManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "MapMatcherManager"
         }
       ],
       "injectProperties": true,
@@ -467,8 +388,6 @@
         "debug": false
       }
     },
-
-
     {
       "type": "Quest.Lib.Routing.Speeds.LASRoadTypeSpeedCalculator",
       "services": [
@@ -517,9 +436,6 @@
       "properties": {
       }
     },
-
-
-
     {
       "type": "Quest.Lib.Routing.Speeds.VariableSpeedHoW",
       "services": [
@@ -617,7 +533,7 @@
       }
     },
     {
-      "type": "Quest.Cmd.ProcessRunner,Quest.Cmd",
+      "type": "Quest.Core.ProcessRunner,Quest.Core",
       "injectProperties": true,
       "instanceScope": "single-instance",
       "properties": {
@@ -637,7 +553,7 @@
         "defaultengine": "DijkstraRoutingEngine",
         "doCoverage": "false",
         "doEta": "false",
-        "tilesize": 250,
+        "tilesize": 500,
         "roadSpeedCalculator": "VariableSpeedHoD",
         "enrFrequencySeconds": 10,
         "resFrequencySeconds": 10,
@@ -645,20 +561,20 @@
         "coverageExportDirectory": ""
       }
     },
-    {
-      "type": "Quest.Lib.Telephony.AspectCTIPS.AspectServer",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "AspectServer"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "channelConfig": "Data\\Aspect\\Channels.xml"
-      }
-    },
+    //{
+    //  "type": "Quest.Lib.Telephony.AspectCTIPS.AspectServer",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "AspectServer"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance",
+    //  "properties": {
+    //    "channelConfig": "Data\\Aspect\\Channels.xml"
+    //  }
+    //},
     {
       "type": "Quest.Lib.Telephony.StormLink.StormTelephonyServer",
       "services": [
@@ -685,7 +601,7 @@
         "AppleIsProduction": false,
         "AppleP12Certificate": "",
         "AppleP12Password": "",
-        "GCMKey": "",
+        "GCMKey": "AIzaSyC9WT1cTt4uQqfatIpSVxPYq6zvopjX1yo",
         "targetSound": "default"
       }
     },
@@ -713,69 +629,6 @@
       "injectProperties": true,
       "instanceScope": "single-instance",
       "properties": {
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.Incidents.IncSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "IncSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "quantity": 10,
-        "lowWatermark": 9,
-        "startTime": "1/1/2015",
-        "endTime": "1/1/2016"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.Resources.ResSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "ResSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "quantity": 100,
-        "lowWatermark": 10,
-        "startTime": "1/1/2015",
-        "endTime": "1/1/2016"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.Cad.CadSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "CadSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "defaultengine": "DijkstraRoutingEngine"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.TimedEventManager,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "TimedEventManager"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "startTime": "1/1/2015",
-        "speed": 1
       }
     },
     {
@@ -842,6 +695,176 @@
       "properties": {
       }
     }
+    
+    /////////////////////////////////////////////////////////////////////
+
+    //{
+    //  "type": "Quest.Lib.Research.RoadMapMatcherVisualProvider,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Visuals.IVisualProvider",
+    //      "key": "MapMatcher"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "per-dependency"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.ResourceVisuals,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Visuals.IVisualProvider",
+    //      "key": "ResourceVisuals"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "per-dependency"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.AnalyseAvlsQuality,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "AnalyseAvlsQuality"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.FindNearestRoads,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "FindNearestRoads"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.FindNearestRoads,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "FindNearestRoads"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.AnalyseEdgeCosts,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "AnalyseEdgeCosts"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.MapMatcherAll,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "MapMatcherAll"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.MapMatcherWorker,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "MapMatcherWorker"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.MapMatcherUtil,Quest.Lib.Research",
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //},
+    //{
+    //  "type": "Quest.Lib.Simulation.Incidents.IncSimulator,Quest.Lib.Simulation",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "IncSimulator"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance",
+    //  "properties": {
+    //    "quantity": 10,
+    //    "lowWatermark": 9,
+    //    "startTime": "1/1/2015",
+    //    "endTime": "1/1/2016"
+    //  }
+    //},
+    //{
+    //  "type": "Quest.Lib.Simulation.Resources.ResSimulator,Quest.Lib.Simulation",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "ResSimulator"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance",
+    //  "properties": {
+    //    "quantity": 100,
+    //    "lowWatermark": 10,
+    //    "startTime": "1/1/2015",
+    //    "endTime": "1/1/2016"
+    //  }
+    //},
+    //{
+    //  "type": "Quest.Lib.Simulation.Cad.CadSimulator,Quest.Lib.Simulation",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "CadSimulator"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance",
+    //  "properties": {
+    //    "defaultengine": "DijkstraRoutingEngine"
+    //  }
+    //},
+    //{
+    //  "type": "Quest.Lib.Simulation.TimedEventManager,Quest.Lib.Simulation",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "TimedEventManager"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance",
+    //  "properties": {
+    //    "startTime": "1/1/2015",
+    //    "speed": 1
+    //  }
+    //},
+    //{
+    //  "type": "Quest.Lib.Research.Job.CompareWithGoogle,Quest.Lib.Research",
+    //  "services": [
+    //    {
+    //      "type": "Quest.Lib.Processor.IProcessor",
+    //      "key": "CompareWithGoogle"
+    //    }
+    //  ],
+    //  "injectProperties": true,
+    //  "instanceScope": "single-instance"
+    //}
 
   ]
 }

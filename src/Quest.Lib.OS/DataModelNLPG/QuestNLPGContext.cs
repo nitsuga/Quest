@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Quest.Lib.OS.DataModelNLPG
 {
@@ -22,13 +20,12 @@ namespace Quest.Lib.OS.DataModelNLPG
         // Unable to generate entity type for table 'NLPG.Trailer'. Please see the warning messages.
         // Unable to generate entity type for table 'NLPG.Header'. Please see the warning messages.
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public QuestNLPGContext(DbContextOptions<QuestNLPGContext> options) : base(options)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer(@"Server=localhost,999;Database=QuestNLPG;user=sa;pwd=M3Gurdy*");
-            }
+        }
+
+        public QuestNLPGContext()
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

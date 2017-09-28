@@ -12,15 +12,24 @@ using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Resource
 {
     public class ResourceHandler
     {
+        public string deletedStatus { get; set; } = "OOS";
+        public string triggerStatus { get; set; } = "DSP";
+
+        private IDatabaseFactory _dbFactory;
         private const string Version = "1.0.0";
         private int _deleteStatusId;
 
-        public string triggerStatus { get; set; }
+
+        public ResourceHandler(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         private int DeleteStatusId
         {
@@ -44,13 +53,13 @@ namespace Quest.Lib.Resource
         public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
             IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // make sure callsign exists
                 var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
                 if (callsign == null)
                 {
-                    callsign = new Callsign {Callsign1 = resourceUpdate.Callsign};
+                    callsign = new Callsign { Callsign1 = resourceUpdate.Callsign };
                     db.Callsign.Add(callsign);
                     db.SaveChanges();
                 }
@@ -99,7 +108,7 @@ namespace Quest.Lib.Resource
                 //res.Comment = resourceUpdate.Comment;
                 res.Destination = resourceUpdate.Destination;
                 res.Direction = 0; //resourceUpdate.Direction;
-                res.Emergency = resourceUpdate.Emergency?"Y":"N";
+                res.Emergency = resourceUpdate.Emergency ? "Y" : "N";
                 res.Eta = null; // resourceUpdate.ETA;
                 res.EventType = resourceUpdate.EventType;
                 res.FleetNo = resourceUpdate.FleetNo;
@@ -129,8 +138,8 @@ namespace Quest.Lib.Resource
                         requireEventNotification = true;
 #endif
 
-                        // save a status history if the status has changed
-                        var history = new ResourceStatusHistory
+                    // save a status history if the status has changed
+                    var history = new ResourceStatusHistory
                     {
                         ResourceId = res.ResourceId,
                         ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
@@ -145,7 +154,7 @@ namespace Quest.Lib.Resource
                 //var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
                 ResourceItem ri = GetResourceItemFromView(res);
 
-                var point = new PointGeoShape(new GeoCoordinate(res.Latitude ?? 0, res.Longitude??0));
+                var point = new PointGeoShape(new GeoCoordinate(res.Latitude ?? 0, res.Longitude ?? 0));
 
                 if (config != null)
                 {
@@ -176,9 +185,9 @@ namespace Quest.Lib.Resource
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
 #endif
 
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item=ri });
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
 
-            }
+            });
         }
 
         private ResourceItem GetResourceItemFromView( DataModel.Resource res)
@@ -213,15 +222,14 @@ namespace Quest.Lib.Resource
 
         private void GetDeleteStatusId()
         {
-            var deletedStatus = SettingsHelper.GetVariable("DeviceManager.DeletedStatus", "OOS");
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var ds = db.ResourceStatus.FirstOrDefault(x => x.Status == deletedStatus);
                 if (ds != null)
                 {
                     _deleteStatusId = ds.ResourceStatusId;
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -232,7 +240,7 @@ namespace Quest.Lib.Resource
         /// <param name="msgSource"></param>
         public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
                 if (!i.Any()) return;
@@ -241,16 +249,13 @@ namespace Quest.Lib.Resource
                     x.ResourceStatusId = DeleteStatusId;
                     x.LastUpdated = DateTime.UtcNow;
                     db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() {ResourceId = x.ResourceId});
+                    msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = x.ResourceId });
                 }
-            }
+            });
         }
 
         public void ResourceLogon(ResourceLogon item, NotificationSettings settings)
         {
-            using (var db = new QuestContext())
-            {
-            }
         }
 
         private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)

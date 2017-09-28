@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Quest.Lib.ServiceBus;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
-using Quest.Api.Model;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Security.Principal;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Quest.Api.Options;
-using Quest.Common.Messages;
-using Quest.Api.Extensions;
 
 namespace Quest.Api.Controllers
 {
@@ -44,7 +39,7 @@ namespace Quest.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Access([FromQuery] string username, [FromQuery]string password)
+        public AuthResult Access([FromQuery] string username, [FromQuery]string password)
         {
 
             // should call authenication service here
@@ -53,7 +48,7 @@ namespace Quest.Api.Controllers
             // go look up the username / password in a different way!!
             if (!(username == "fred" && password == "fred"))
             {
-                return Unauthorized();
+                return new AuthResult { Token = "", Message="Failed", Success=false };
             }
 
 
@@ -86,9 +81,18 @@ namespace Quest.Api.Controllers
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            var json = JsonConvert.SerializeObject(new { Token= encodedJwt }, _serializerSettings);
-            return new OkObjectResult(json);
+            return new AuthResult { Token = encodedJwt, Message="OK", Success=true };
+            //var json = JsonConvert.SerializeObject(new AuthResult { Token= encodedJwt }, _serializerSettings);
+            //return new OkObjectResult(json);
         }
 
+    }
+
+
+    public class AuthResult
+    {
+        public string Token;
+        public string Message;
+        public bool Success;
     }
 }

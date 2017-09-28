@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Quest.Common.Messages
+﻿namespace Quest.Common.Messages
 {
     public class Notification : MessageBase
     {

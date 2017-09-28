@@ -8,17 +8,27 @@ using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using Quest.Lib.DependencyInjection;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing
 {
-    internal class EtaCalculator
+    [Injection]
+    public class EtaCalculator
     {
+        private IDatabaseFactory _dbFactory;
+
+        public EtaCalculator(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         private static DateTime _fromTimeStampEnroute = DateTime.MinValue;
 
         /// <summary>
         ///     calculate the time enroute for enroute vehicles
         /// </summary>
-        public static void CalculateEnrouteTime(IRouteEngine routingEngine, RoutingData routingdata, string speedCalc)
+        public void CalculateEnrouteTime(IRouteEngine routingEngine, RoutingData routingdata, string speedCalc)
         {
             try
             {
@@ -75,32 +85,26 @@ namespace Quest.Lib.Routing
         ///     get enroute vehicles for ETA calcs.
         /// </summary>
         /// <returns></returns>
-        private static DataModel.Resource[] GetEnrouteResources()
+        private DataModel.Resource[] GetEnrouteResources()
         {
-            DataModel.Resource[] result = null;
-            try
+            return _dbFactory.Execute<QuestContext, DataModel.Resource[]>((db) =>
             {
-                using (var db = new QuestContext())
-                {
-                    using (new TransactionScope(TransactionScopeOption.Required,
-                        new TransactionOptions {IsolationLevel = IsolationLevel.ReadUncommitted}))
-                    {
-                        var vehEnroute = from r in db.Resource
-                            where r.LastUpdated > _fromTimeStampEnroute && r.ResourceStatus.BusyEnroute == true
-                            select r;
+                DataModel.Resource[] result = null;
 
-                        result = vehEnroute.ToArray();
-                        var dateTime = (from x in db.Resource select x.LastUpdated).Max();
-                        if (dateTime != null)
-                            _fromTimeStampEnroute = (DateTime) dateTime;
-                    }
+                using (new TransactionScope(TransactionScopeOption.Required,
+                    new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
+                {
+                    var vehEnroute = from r in db.Resource
+                                     where r.LastUpdated > _fromTimeStampEnroute && r.ResourceStatus.BusyEnroute == true
+                                     select r;
+
+                    result = vehEnroute.ToArray();
+                    var dateTime = (from x in db.Resource select x.LastUpdated).Max();
+                    if (dateTime != null)
+                        _fromTimeStampEnroute = (DateTime)dateTime;
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write(ex);
-            }
-            return result;
+                return result;
+            });
         }
 
         /// <summary>
@@ -110,7 +114,7 @@ namespace Quest.Lib.Routing
         /// <param name="resEta"></param>
         /// <param name="resourceId"></param>
         /// <param name="vehicleType"></param>
-        private static DateTime UpdateResourceEta(IRouteEngine routingEngine, 
+        private DateTime UpdateResourceEta(IRouteEngine routingEngine, 
             RoutingData routingdata, int resourceId, string vehicleType,
             DateTime? resEta, double positionX, double positionY, 
             double destinationX, double destinationY, string speedCalc)
@@ -158,7 +162,7 @@ namespace Quest.Lib.Routing
                 else
                 {
                     // update the resource
-                    using (var db = new QuestContext())
+                    _dbFactory.Execute<QuestContext>((db) =>
                     {
                         try
                         {
@@ -171,7 +175,7 @@ namespace Quest.Lib.Routing
                         {
                             Logger.Write(ex);
                         }
-                    }
+                    });
                 }
             }
 

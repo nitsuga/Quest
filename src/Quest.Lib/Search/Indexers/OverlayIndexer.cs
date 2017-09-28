@@ -10,11 +10,19 @@ using ProjNet.CoordinateSystems.Transformations;
 using NetTopologySuite.IO;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Search.Indexers
 {
     internal class OverlayIndexer : ElasticIndexer
     {
+        private IDatabaseFactory _dbFactory;
+
+        public OverlayIndexer(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public override void StartIndexing(BuildIndexSettings config)
         {
             if (config == null)
@@ -43,7 +51,7 @@ namespace Quest.Lib.Search.Indexers
             ICoordinateTransformation trans = ctFact.CreateFromCoordinateSystems(from, wgs84);
             WKTReader _reader = new WKTReader();
 
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var descriptor = GetBulkRequest(config);
 
@@ -84,7 +92,7 @@ namespace Quest.Lib.Search.Indexers
                                 Location = point,
                                 Poly = GeomUtils.GetPolygon(geom, trans),
                                 Created = DateTime.UtcNow,
-                                Status="Active"
+                                Status = "Active"
                             };
 
 
@@ -104,7 +112,7 @@ namespace Quest.Lib.Search.Indexers
                     }
 
                 }
-            }
+            });
         }
     }
 }

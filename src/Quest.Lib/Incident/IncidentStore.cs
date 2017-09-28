@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
 using System;
@@ -8,19 +9,26 @@ namespace Quest.Lib.Incident
 {
     public class IncidentStoreMsssql : IIncidentStore
     {
+        IDatabaseFactory _dbFactory;
+
+        public IncidentStoreMsssql(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public QuestIncident Get(string id)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, QuestIncident>((db) =>
             {
                 var dbinc = db.Incident.FirstOrDefault(x => x.Serial == id);
                 var inc = Cloner.CloneJson<QuestIncident>(dbinc);
                 return inc;
-            }
+            });
         }
 
         public QuestIncident Update(IncidentUpdate item)
         {
-            using (var db = new QuestContext())
+            return _dbFactory.Execute<QuestContext, QuestIncident>((db) =>
             {
                 var dbinc = db.Incident.FirstOrDefault(x => x.Serial == item.Serial);
                 if (dbinc == null)
@@ -52,12 +60,12 @@ namespace Quest.Lib.Incident
                 var inc = Cloner.CloneJson<QuestIncident>(dbinc);
 
                 return inc;
-            }
+            });
         }
 
         public void Close(string serial)
         {
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 var i = db.Incident.Where(x => x.Serial == serial).ToList();
                 if (i.Any())
@@ -68,9 +76,7 @@ namespace Quest.Lib.Incident
                         db.SaveChanges();
                     }
                 }
-            }
+            });
         }
-    }
-
-    
+    }    
 }

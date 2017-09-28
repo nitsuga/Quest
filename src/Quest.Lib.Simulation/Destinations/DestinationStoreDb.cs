@@ -1,12 +1,6 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
-using Quest.Common.Simulation;
-using Quest.Lib.DataModel;
-using Quest.Lib.Research.DataModelResearch;
+﻿using Quest.Common.Simulation;
 using Quest.Lib.Routing;
 using Quest.Lib.Simulation.DataModelSim;
-using Quest.Lib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

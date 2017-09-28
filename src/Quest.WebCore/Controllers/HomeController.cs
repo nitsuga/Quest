@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Quest.WebCore.Services;
 using Quest.WebCore.Models;
-using Microsoft.AspNetCore.Identity;
 using Nest;
 using Quest.Common.Messages;
 using System.Text;

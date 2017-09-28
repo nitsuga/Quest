@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nest;
-using Quest.Lib.DataModel;
+﻿using System.Collections.Generic;
 using Quest.Lib.Search.Elastic;
-using Quest.Lib.Utils;
-using Quest.Common.Messages;
-using Quest.Lib.Trace;
 
 namespace Quest.Lib.Search.Indexers
 {

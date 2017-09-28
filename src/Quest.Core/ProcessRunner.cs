@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Quest.Common.Messages;
 using Quest.Lib.Processor;
-using Quest.Lib.Search.Elastic;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
@@ -23,6 +22,8 @@ namespace Quest.Core
 
     public class ProcessRunner : IProcessRunner
     {
+        private Dictionary<string, IProcessor> AllProcessors = new Dictionary<string, IProcessor>();
+
         public ProcessRunnerConfig settings { get; set; }
 
         public ProcessRunner(ProcessRunnerConfig settings)
@@ -37,14 +38,18 @@ namespace Quest.Core
         /// <returns></returns>
         public bool PrepareProcessors(IServiceProvider container, IContainer applicationContainer, IConfiguration config)
         {
-            Dictionary<string, IProcessor> AllProcessors = new Dictionary<string, IProcessor>();
 
             foreach (var proc in settings.modules)
             {
-                Logger.Write($"Creating {proc}", GetType().Name);
-                var t = System.IO.Directory.GetCurrentDirectory();
-                IProcessor procInstance = applicationContainer.ResolveNamed<IProcessor>(proc);
-                AllProcessors.Add(proc, procInstance);
+                if (applicationContainer.IsRegisteredWithName<IProcessor>(proc))
+                {
+                    Logger.Write($"Creating {proc}", GetType().Name);
+                    var t = System.IO.Directory.GetCurrentDirectory();
+                    IProcessor procInstance = applicationContainer.ResolveNamed<IProcessor>(proc);
+                    AllProcessors.Add(proc, procInstance);
+                }
+                else
+                    Logger.Write($"Failed to find processor: {proc}", GetType().Name, System.Diagnostics.TraceEventType.Error);
             }
 
             foreach (var proc in AllProcessors)
@@ -73,11 +78,10 @@ namespace Quest.Core
             var queue = $"ProcessRunner_{settings.session}";
             Logger.Write($"{settings.session}:ProcessRunner: Attaching to queue {queue}", GetType().Name);
 
-            foreach (var proc in settings.modules)
+            foreach (var proc in AllProcessors)
             {
                 Logger.Write($"Starting {proc}", GetType().Name);
-                IProcessor procInstance = applicationContainer.ResolveNamed<IProcessor>(proc);
-                procInstance.Start();
+                proc.Value.Start();
             }
         }
     }

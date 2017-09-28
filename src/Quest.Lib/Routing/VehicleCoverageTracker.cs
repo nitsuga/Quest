@@ -8,13 +8,14 @@ using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing
 {
     /// <summary>
     ///     class is responsible for interatively managing a coverage map for a specific definition
     /// </summary>
-    public class VehicleCoverageTracker<T> 
+    public class VehicleCoverageTracker
     {
         /// <summary>
         ///     a list of coverage maps and positions by callsign
@@ -23,8 +24,7 @@ namespace Quest.Lib.Routing
 
         public CoverageMap CombinedMap;
         public CoverageMapDefinition Definition;
-        public T Manager;
-
+        public IDatabaseFactory dbFactory;
         public string Name;
 
         public CoverageMap GetCoverage(IRouteEngine routingEngine)
@@ -255,22 +255,22 @@ namespace Quest.Lib.Routing
             List<DataModel.Resource> resources = null;
 
             // calculate available 
-            using (var db = new QuestContext())
+            return dbFactory.Execute<QuestContext, List<DataModel.Resource>>((db) =>
             {
                 using (
                     var scope = new TransactionScope(TransactionScopeOption.Required,
-                        new TransactionOptions {IsolationLevel = IsolationLevel.ReadUncommitted}))
+                        new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
                 {
                     var results = from result in db.Resource
-                        where
-                            result.ResourceStatus.Available == true
-//                            && vehicleCodes.Contains(result.ResourceType)
-                            && result.Latitude != null
-                        select result;
+                                  where
+                                      result.ResourceStatus.Available == true
+                                      //                            && vehicleCodes.Contains(result.ResourceType)
+                                      && result.Latitude != null
+                                  select result;
                     resources = results.ToList();
                 }
-            }
-            return resources;
+                return resources;
+            });
         }
 
         private class CacheEntry

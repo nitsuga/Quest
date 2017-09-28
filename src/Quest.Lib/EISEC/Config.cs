@@ -32,7 +32,7 @@ namespace Quest.Lib.EISEC
             {
                 T config;
 
-                filename = SettingsHelper.SubstituteDataDirectory(filename);
+                filename = ""; //SettingsHelper.SubstituteDataDirectory(filename);
 
                 if (!File.Exists(filename))
                     return null;
@@ -67,7 +67,7 @@ namespace Quest.Lib.EISEC
         {
             var formatter = new XmlSerializer(typeof(EisecConfig));
 
-            filename = SettingsHelper.SubstituteDataDirectory(filename);
+            filename = ""; // SettingsHelper.SubstituteDataDirectory(filename);
 
             using (var fs = new FileStream(filename, FileMode.Create))
             {

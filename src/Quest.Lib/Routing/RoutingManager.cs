@@ -14,6 +14,7 @@ using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Autofac;
 using Quest.Common.ServiceBus;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Routing
 {
@@ -67,21 +68,29 @@ namespace Quest.Lib.Routing
         /// <summary>
         ///     list of vehicle coverage trackers
         /// </summary>
-        private readonly List<VehicleCoverageTracker<RoutingManager>> _vehicleCoverageTrackerList = new List<VehicleCoverageTracker<RoutingManager>>();
+        private readonly List<VehicleCoverageTracker> _vehicleCoverageTrackerList = new List<VehicleCoverageTracker>();
 
+        private IDatabaseFactory _dbFactory;
+        private EtaCalculator _etaCalculator;
+        private CoverageMapManager _coverageMap;
         #endregion
 
         #region public Methods
 
         public RoutingManager(
             ILifetimeScope scope,
+            IDatabaseFactory dbFactory,
+            EtaCalculator etaCalculator,
             RoutingData routingdata,
             IServiceBusClient serviceBusClient,
             TimedEventQueue eventQueue,
+            CoverageMapManager coverageMap,
             MessageHandler msgHandler) : base(eventQueue, serviceBusClient, msgHandler)
         {
             _scope = scope;
             _routingdata = routingdata;
+            _dbFactory = dbFactory;
+            _coverageMap = coverageMap;
         }
 
         protected override void OnPrepare()
@@ -120,7 +129,7 @@ namespace Quest.Lib.Routing
             // build list and start tracker engines
             MakeTrackerList();
 
-            _operationalArea = CoverageMapUtil.GetOperationalArea(tilesize);
+            _operationalArea = _coverageMap.GetOperationalArea(tilesize);
 
             if (doCoverage && _operationalArea!=null)
             {
@@ -169,7 +178,7 @@ namespace Quest.Lib.Routing
                         if (!_stopping && counter % enrFrequencySeconds == 0)
                         {
                             var routingEngine = GetRoutingEngine(defaultengine);
-                            EtaCalculator.CalculateEnrouteTime(routingEngine, _routingdata, roadSpeedCalculator);
+                            _etaCalculator.CalculateEnrouteTime(routingEngine, _routingdata, roadSpeedCalculator);
                         }
                     }
                     catch (Exception ex)
@@ -242,10 +251,10 @@ namespace Quest.Lib.Routing
                         Logger.Write(ex);
                     }
 
-                    using (var db = new QuestContext())
+                    _dbFactory.Execute<QuestContext>((db) =>
                     {
                         db.CleanCoverage();
-                    }
+                    });
 
                 } while (!_stopping);
             }
@@ -341,7 +350,7 @@ namespace Quest.Lib.Routing
             var request = t.Payload as GetCoverageRequest;
             if (request != null)
             {
-                using (var db = new QuestContext())
+                return _dbFactory.Execute<QuestContext, GetCoverageResponse>((db) =>
                 {
                     var r = new GetCoverageResponse();
                     var results = db.GetVehicleCoverage(Convert.ToInt16(request.vehtype)).First();
@@ -368,7 +377,7 @@ namespace Quest.Lib.Routing
                     Logger.Write("Routing Manager: GetCoverageHandler returning GetCoverageResponse",
                         TraceEventType.Information, "Routing Manager");
                     return r;
-                }
+                });
             }
             var result = new GetCoverageResponse { Message = "Unable to unpack the request", Success = false };
             return result;
@@ -406,20 +415,20 @@ namespace Quest.Lib.Routing
         private void MakeTrackerList()
         {
             Logger.Write("Making coverage tracking list", TraceEventType.Information, "Routing Manager");
-            using (var db = new QuestContext())
+            _dbFactory.Execute<QuestContext>((db) =>
             {
                 // add in programmable ones.
                 var maps = from c in db.CoverageMapDefinition where c.VehicleCodes.Length > 0 select c;
 
                 foreach (var m in maps)
-                    _vehicleCoverageTrackerList.Add(new VehicleCoverageTracker<RoutingManager>
-                    {
+                    _vehicleCoverageTrackerList.Add(new VehicleCoverageTracker
+                    { 
+                        dbFactory = _dbFactory,
                         Name = m.Name,
                         CombinedMap = null,
-                        Definition = m,
-                        Manager = this
+                        Definition = m
                     });
-            }
+            });
             Logger.Write($"Coverage tracking list has {_vehicleCoverageTrackerList.Count} items", TraceEventType.Information, "Routing Manager");
 
         }
@@ -434,7 +443,7 @@ namespace Quest.Lib.Routing
         }
 
         private void CalculateResCoverages(string engine, Dictionary<string, CoverageMap> target,
-            List<VehicleCoverageTracker<RoutingManager>> vehiclemaps, CoverageMap incCoverage)
+            List<VehicleCoverageTracker> vehiclemaps, CoverageMap incCoverage)
         {
             var routingEngine = GetRoutingEngine(engine);
 
@@ -488,7 +497,7 @@ namespace Quest.Lib.Routing
             }
         }
 
-        private List<TrialCoverageResponse> CalculateTrialCoverages(List<VehicleCoverageTracker<RoutingManager>> vehiclemaps,
+        private List<TrialCoverageResponse> CalculateTrialCoverages(List<VehicleCoverageTracker> vehiclemaps,
             List<VehicleOverride> overrides, Dictionary<string, CoverageMap> standardCoverages, string engine)
         {
             var routingEngine = GetRoutingEngine(engine);
@@ -599,40 +608,32 @@ namespace Quest.Lib.Routing
         /// <param name="name"></param>
         private CoverageMap CalculateStandardIncidentCoverage(string name, int tilesize)
         {
-            var map = CoverageMapUtil.GetStandardMap(tilesize).Clone().Name(name);
-            map.ClearData();
-
-            try
+            return _dbFactory.Execute<QuestContext, CoverageMap>((db) =>
             {
-                using (var db = new QuestContext())
+                var map = _coverageMap.GetStandardMap(tilesize).Clone().Name(name);
+                map.ClearData();
+
+                var results = db.GetIncidentDensity().ToList();
+
+                foreach (var v in results)
                 {
-                    var results = db.GetIncidentDensity().ToList();
+                    if (v.CellX == null)
+                        v.CellX = 0;
 
-                    foreach (var v in results)
+                    if (v.CellY == null)
+                        v.CellY = 0;
+
+                    var i = (int)v.CellX + (int)(v.CellY * map.Columns);
+                    if (i >= 0 && i < map.Data.Length)
                     {
-                        if (v.CellX == null)
-                            v.CellX = 0;
-
-                        if (v.CellY == null)
-                            v.CellY = 0;
-
-                        var i = (int) v.CellX + (int) (v.CellY*map.Columns);
-                        if (i >= 0 && i < map.Data.Length)
-                        {
-                            var i1 = v.Quantity & 0xff;
-                            if (i1 != null) map.Data[i] = (byte) i1;
-                        }
+                        var i1 = v.Quantity & 0xff;
+                        if (i1 != null) map.Data[i] = (byte)i1;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write(ex);
-            }
 
-            map.Percent = Math.Round(map.Coverage(_operationalArea)*100, 1);
-
-            return map;
+                map.Percent = Math.Round(map.Coverage(_operationalArea) * 100, 1);
+                return map;
+            });
         }
 
         /// <summary>
@@ -664,11 +665,11 @@ namespace Quest.Lib.Routing
         ///     output the coverage map in ArgGrid format
         /// </summary>
         /// <param name="map"></param>
-        private static void ExportToDatabase(CoverageMap map)
+        private void ExportToDatabase(CoverageMap map)
         {
             try
             {
-                using (var db = new QuestContext())
+                _dbFactory.Execute<QuestContext>((db) =>
                 {
                     try
                     {
@@ -693,7 +694,7 @@ namespace Quest.Lib.Routing
                     {
                         Logger.Write(ex);
                     }
-                }
+                });
             }
             catch
             {

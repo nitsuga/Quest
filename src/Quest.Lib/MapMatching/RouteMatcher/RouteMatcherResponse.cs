@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Quest.Lib.Routing;
-using Quest.Common.Messages;
-using GeoAPI.Geometries;
-using Quest.Common.Messages;
-
-namespace Quest.Lib.MapMatching.RouteMatcher
+﻿namespace Quest.Lib.MapMatching.RouteMatcher
 {
     //public class RouteMatcherResponse
     //{

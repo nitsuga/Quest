@@ -63,6 +63,8 @@ namespace Quest.Lib.Device
             MsgHandler.AddHandler("BeginDump", BeginDumpHandler);
             MsgHandler.AddHandler("CPEventStatusList", CPEventStatusListHandler);
             MsgHandler.AddHandler("CallDisconnectStatusList", CallDisconnectStatusListHandler);
+
+            var answer = _devStore.Get("kjh");
         }
 
         protected override void OnStart()

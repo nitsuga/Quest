@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
-using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.ServiceBus
 {

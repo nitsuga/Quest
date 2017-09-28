@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Quest.Lib.Research.DataModelResearch
+﻿namespace Quest.Lib.Research.DataModelResearch
 {
     public partial class RoadSpeedMatrixHoD
     {
