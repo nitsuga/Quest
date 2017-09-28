@@ -47,5 +47,43 @@ namespace Quest.Lib.Incident
             persist.Close(item.Serial);
             msgSource.Broadcast(new IncidentDatabaseUpdate() { serial = item.Serial });
         }
+
+    //    public void CallDisconnectStatusListHandler(CallDisconnectStatusList item,
+    //NotificationSettings settings)
+    //    {
+    //        _dbFactory.Execute<QuestContext>((db) =>
+    //        {
+    //            foreach (var i in item.Items)
+    //            {
+    //                var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
+    //                if (inc != null)
+    //                {
+    //                    inc.DisconnectTime = i.DisconnectTime;
+    //                }
+    //                db.SaveChanges();
+    //            }
+    //        });
+    //    }
+
+
+    //    public void CPEventStatusListHandler(CPEventStatusList item, NotificationSettings settings)
+    //    {
+    //        _dbFactory.Execute<QuestContext>((db) =>
+    //        {
+    //            foreach (var i in item.Items)
+    //            {
+    //                var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
+    //                if (inc != null)
+    //                {
+    //                    inc.PatientAge = i.Age;
+    //                    inc.PatientSex = i.Sex;
+    //                    inc.CallerTelephone = i.CallerTelephone;
+    //                    inc.LocationComment = i.LocationComment;
+    //                    inc.ProblemDescription = i.ProblemDescription;
+    //                }
+    //                db.SaveChanges();
+    //            }
+    //        });
+    //    }
     }
 }

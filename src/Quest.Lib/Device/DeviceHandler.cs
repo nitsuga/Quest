@@ -32,10 +32,6 @@ namespace Quest.Lib.Device
 
         private const int Version = 1;
 
-        private ApnsServiceBroker _apnsBroker;
-
-        private GcmServiceBroker _gcmBroker;
-
         private int _deleteStatusId;
 
         private int DeleteStatusId
@@ -353,7 +349,7 @@ namespace Quest.Lib.Device
         }
 
         /// <summary>
-        ///     get the status of the device. can be used at startup of the device so it has the right details.
+        /// Get the status of the device. can be used at startup of the device so it has the right details.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="settings"></param>
@@ -1053,151 +1049,6 @@ namespace Quest.Lib.Device
 
 #region CAD Message Handling
 
-        /// <summary>
-        ///     handle resource updates from GT.
-        ///     Detects resource changing to DSP (Dispatched) and sends incident details to callsign
-        ///     Detects resource changing to status and sends status update to callsign
-        /// </summary>
-        /// <param name="resourceUpdate"></param>
-        /// <param name="settings"></param>
-        /// <param name="client"></param>
-        /// <param name="msgSource"></param>
-        public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
-            IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // make sure callsign exists
-                var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
-                if (callsign == null)
-                {
-                    callsign = new Callsign { Callsign1 = resourceUpdate.Callsign };
-                    db.Callsign.Add(callsign);
-                    db.SaveChanges();
-                }
-
-                // find corresponding status;
-                var status = db.ResourceStatus.FirstOrDefault(x => x.Status == resourceUpdate.Status);
-                if (status == null)
-                {
-                    status = new DataModel.ResourceStatus
-                    {
-                        Status = resourceUpdate.Status,
-                        Rest = false,
-                        Offroad = false,
-                        NoSignal = false,
-                        BusyEnroute = false,
-                        Busy = false,
-                        Available = false
-                    };
-                    db.ResourceStatus.Add(status);
-                    db.SaveChanges();
-                }
-
-                int? originalStatusId = null;
-                int? originalTypeId = null;
-                long? originalRevision = null;
-
-                // find corresponding resource;
-                var res = db.Resource.FirstOrDefault(x => x.CallsignId == callsign.CallsignId);
-                if (res == null)
-                {
-                    originalTypeId = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
-                    res = new DataModel.Resource();
-                    db.Resource.Add(res);
-                }
-                else
-                {
-                    originalTypeId = res.ResourceTypeId;
-                    originalStatusId = res.ResourceStatusId;
-                    originalRevision = res.Revision;
-                }
-
-                // save the new resource record
-                res.Agency = resourceUpdate.Agency;
-                res.CallsignId = callsign.CallsignId;
-                res.Class = resourceUpdate.Class;
-                //res.Comment = resourceUpdate.Comment;
-                res.Destination = resourceUpdate.Destination;
-                res.Direction = 0; //resourceUpdate.Direction;
-                res.Emergency = resourceUpdate.Emergency ? "Y" : "N";
-                res.Eta = null; // resourceUpdate.ETA;
-                res.EventType = resourceUpdate.EventType;
-                res.FleetNo = resourceUpdate.FleetNo;
-                res.Latitude = (float?)resourceUpdate.Latitude;
-                res.Longitude = (float?)resourceUpdate.Longitude;
-                res.LastUpdated = resourceUpdate.UpdateTime;
-                res.Agency = resourceUpdate.Agency;
-                res.Serial = resourceUpdate.Incident;
-                res.Speed = resourceUpdate.Speed;
-                res.ResourceTypeId = originalTypeId;
-                res.Skill = resourceUpdate.Skill;
-                res.Sector = "";
-                res.ResourceStatusPrevId = res.ResourceStatusId;
-                res.ResourceStatusId = status.ResourceStatusId;
-
-
-                // detect changes in status to DSP
-                var requireEventNotification = false;
-                var requireStatusNotification = false;
-
-                // detect change in status
-                if (originalStatusId != status.ResourceStatusId)
-                {
-                    requireStatusNotification = true;
-                    if (status.Status == triggerStatus)
-                        requireEventNotification = true;
-
-                    // save a status history if the status has changed
-                    var history = new ResourceStatusHistory
-                    {
-                        ResourceId = res.ResourceId,
-                        ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
-                        // use current status if status not known
-                        Revision = originalRevision ?? 0
-                    };
-
-                    db.ResourceStatusHistory.Add(history);
-                }
-                db.SaveChanges();
-
-                var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
-                ResourceItem ri = GetResourceItemFromView(rv);
-
-                var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude ?? 0));
-
-                if (config != null)
-                {
-                    // save in elastic
-                    var indextext = resourceUpdate.Callsign + " " + res.FleetNo + " " + resourceUpdate.ResourceType + " " +
-                                    resourceUpdate.Status;
-                    var add = new LocationDocument
-                    {
-                        ID = "RES " + resourceUpdate.FleetNo,
-                        Type = "Res",
-                        Source = "Quest",
-                        indextext = indextext,
-                        Description = indextext,
-                        Location = new GeoLocation(rv.Latitude ?? 0, rv.Longitude ?? 0),
-                        Point = point,
-                        Created = DateTime.UtcNow
-                    };
-                    var descriptor = ElasticIndexer.GetBulkRequest(config);
-                    ElasticIndexer.AddIndexItem(add, descriptor);
-                    ElasticIndexer.CommitBultRequest(config, descriptor);
-                }
-
-                if (requireStatusNotification)
-                    SendStatusNotification(resourceUpdate.Callsign, settings, "Update");
-
-                if (requireEventNotification)
-                    SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
-
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
-
-            });
-        }
-
         private ResourceItem GetResourceItemFromView(DataModel.Resource res)
         {
             return new ResourceItem
@@ -1240,85 +1091,7 @@ namespace Quest.Lib.Device
             });
         }
 
-        /// <summary>
-        ///     delete resource marks the resource as the status specificed in the "DeviceManager.DeletedStatus" setting
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="settings"></param>
-        /// <param name="msgSource"></param>
-        public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
-                if (!i.Any()) return;
-                foreach (var x in i)
-                {
-                    x.ResourceStatusId = DeleteStatusId;
-                    x.LastUpdated = DateTime.UtcNow;
-                    db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = x.ResourceId });
-                }
-            });
-        }
 
-
-        public void CPEventStatusListHandler( CPEventStatusList item, NotificationSettings settings)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                foreach (var i in item.Items)
-                {
-                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
-                    if (inc != null)
-                    {
-                        inc.PatientAge = i.Age;
-                        inc.PatientSex = i.Sex;
-                        inc.CallerTelephone = i.CallerTelephone;
-                        inc.LocationComment = i.LocationComment;
-                        inc.ProblemDescription = i.ProblemDescription;
-                    }
-                    db.SaveChanges();
-                }
-            });
-        }
-
-        public void CallDisconnectStatusListHandler( CallDisconnectStatusList item,
-            NotificationSettings settings)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                foreach (var i in item.Items)
-                {
-                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
-                    if (inc != null)
-                    {
-                        inc.DisconnectTime = i.DisconnectTime;
-                    }
-                    db.SaveChanges();
-                }
-            });
-        }
-
-
-        public void BeginDump( BeginDump item, NotificationSettings settings)
-        {
-            Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // remove all incidents
-                db.Incident.RemoveRange(db.Incident);
-
-                db.SaveChanges();
-
-                // set all resource
-                db.Resource.RemoveRange(db.Resource.Where(x => !x.Devices.Any()));
-
-                db.ResourceStatusHistory.RemoveRange(db.ResourceStatusHistory);
-
-                db.SaveChanges();
-            });
-        }
 
 #endregion
 
@@ -1550,8 +1323,7 @@ namespace Quest.Lib.Device
         /// <param name="serial"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        private void SendEventNotification(string callsign, string serial, NotificationSettings settings,
-            string reason, IIncidentStore incStore)
+        private void SendEventNotification(string callsign, string serial, NotificationSettings settings, string reason, IIncidentStore incStore)
         {
             _dbFactory.Execute<QuestContext>((db) =>
             {
@@ -1591,9 +1363,7 @@ namespace Quest.Lib.Device
             });
         }
 
-
-        private void SendEventNotification(List<DataModel.Devices> devices, QuestIncident inc,
-            NotificationSettings settings, string reason)
+        private void SendEventNotification(List<DataModel.Devices> devices, QuestIncident inc, NotificationSettings settings, string reason)
         {
             if (devices == null || !devices.Any())
                 return;
@@ -1676,8 +1446,6 @@ namespace Quest.Lib.Device
             });
         }
 
-        //TODO: Implement device notifications using a Notification service
-
         /// <summary>
         /// This notifies the device of an event
         /// </summary>
@@ -1685,40 +1453,17 @@ namespace Quest.Lib.Device
         /// <param name="evt"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        private void NotifyDevices(IEnumerable<DataModel.Devices> devices, IDeviceNotification evt,
-            NotificationSettings settings, string reason)
+        private void NotifyDevices(IEnumerable<Devices> devices, IDeviceNotification evt, NotificationSettings settings, string reason)
         {
             try
             {
-                RegisterWithPushServices(settings);
-
                 // send push notifications
                 foreach (var target in devices)
                     if (target.IsEnabled == true && !string.IsNullOrEmpty(target.DeviceIdentity))
                     {
-                        try
-                        {
-                            switch (target.NotificationTypeId)
-                            {
-                                case 0:
-                                    break;
-
-                                case 1:
-#if APPLE_MSG
-                                    PushToApple( target.NotificationId, evt);
-#endif
-                                    break;
-
-                                case 2:
-                                    PushToGoogle(target.NotificationId, evt, reason);
-                                    break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Write($"error sending notification: {ex}",
-                                TraceEventType.Information, "Quest");
-                        }
+                        //TODO: Send message to Notification Manager
+                        // Address = Apple:34874892792
+                        //target.NotificationTypeId, target.NotificationId, evt, reason
                     }
             }
             catch (Exception ex)
@@ -1728,270 +1473,8 @@ namespace Quest.Lib.Device
             }
             finally
             {
-                //Thread.Sleep(1000);
-
-                //StopPushServices(true);
-                //Logger.Write(string.Format("finished closing notification channels"), TraceEventType.Information, "Quest");
             }
         }
-
-        private void StopPushServices(bool wait)
-        {
-            try
-            {
-#if APPLE_MSG
-                if (_apnsBroker != null)
-                {
-                    _apnsBroker.Stop(wait);
-                    _apnsBroker = null;
-                }
-#endif
-                if (_gcmBroker != null)
-                {
-                    _gcmBroker.Stop(wait);
-                    _gcmBroker = null;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"Failed to stop push object: {ex}",
-                    TraceEventType.Error, "Quest");
-            }
-        }
-
-#if APPLE_MSG
-        private void PushToApple(string deviceToken, IdeviceNotification notification)
-        {
-            var evt = notification as EventNotification;
-            if (evt != null)
-            {
-                var sound = "default";
-                Logger.Write(
-                    $"Sending Apple notification: {evt.EventId} token {deviceToken} sound '{sound}'", TraceEventType.Information, "Quest");
-                if (sound.Length == 0)
-                    push.QueueNotification(new AppleNotification()
-                        .ForDeviceToken(deviceToken)
-                        .WithAlert("New event"));
-                else
-                    push.QueueNotification(new AppleNotification()
-                        .ForDeviceToken(deviceToken)
-                        .WithAlert("New event")
-                        .WithSound(sound));
-
-                return;
-            }
-
-            var status = notification as StatusNotification;
-            if (status != null)
-            {
-                var sound = "default";
-                //Logger.Write(string.Format("Sending Apple notification: {0} event callsign {1} token code {2} token callsign {3} sound '{4}'", evt.EventId, evt.Callsign, DeviceToken, evt.Callsign, sound), TraceEventType.Information, "Quest");
-                if (sound.Length == 0)
-                    push.QueueNotification(new AppleNotification()
-                        .ForDeviceToken(deviceToken)
-                        .WithAlert("Status now " + status.Status.Description));
-                else
-                    push.QueueNotification(new AppleNotification()
-                        .ForDeviceToken(deviceToken)
-                        .WithAlert("Status now " + status.Status.Description)
-                        .WithSound(sound));
-            }
-        }
-#endif
-
-        private void PushToGoogle(string deviceToken, IDeviceNotification notification,
-            string reason)
-        {
-            var evt = notification as EventNotification;
-
-            var ticks = DateTime.UtcNow.Ticks;
-
-            var unixtime = (ticks/1000L - 62135596800000L).ToString();
-
-            var msg = $"Sending GCM notification: {notification} token {deviceToken}";
-            Logger.Write(msg, TraceEventType.Information, "Quest");
-            Debug.WriteLine(msg);
-
-
-            if (evt != null)
-            {
-                //https://console.developers.google.com/project/865069987651/apiui/credential?authuser=0
-                //OPS project AIzaSyC9WT1cTt4uQqfatIpSVxPYq6zvopjX1yo   for 86.29.75.151 & 194.223.243.235 (HEMS server)
-
-#if false
-                evt.PatientAge = "53";
-                evt.Sex = "M";
-                evt.LocationComment = "inside indian restaurant";
-                evt.Notes = "patient colapsed w/ chest pains, difficulty breathing. previous inc. of chest pain known.";
-#endif
-                var data = new JObject
-                {
-                    {"Reason", reason},
-                    {"Timestamp", unixtime},
-                    {"ContentType", "EventNotification"},
-                    {"Priority", evt.Priority},
-                    {"AZGrid", evt.AZGrid},
-                    {"CallOrigin", evt.CallOrigin ?? ""},
-                    {"Determinant", evt.Determinant},
-                    {"Dispatched", evt.Created ?? ""},
-                    {"EventId", evt.EventId},
-                    {"Latitude", evt.Latitude.ToString()},
-                    {"Location", Crypto.Encrypt(evt.Location)},
-                    {"LocationComment", Crypto.Encrypt(evt.LocationComment)},
-                    {"Longitude", evt.Longitude.ToString()},
-                    {"Notes", Crypto.Encrypt(evt.Notes)},
-                    {"PatientAge", (evt.PatientAge ?? "").Trim()},
-                    {"Sex", (evt.Sex ?? "").Trim()},
-                    {"Updated", evt.Updated ?? ""}
-                };
-
-                _gcmBroker.QueueNotification(new GcmNotification { RegistrationIds = new List<string> {deviceToken}, Data = data });
-                return;
-            }
-
-            var status = notification as StatusNotification;
-            if (status != null)
-            {
-                //https://console.developers.google.com/project/865069987651/apiui/credential?authuser=0
-                //OPS project AIzaSyC9WT1cTt4uQqfatIpSVxPYq6zvopjX1yo   for 86.29.75.151 & 194.223.243.235 (HEMS server)
-
-                var data = new JObject
-                {
-                    {"Reason", reason},
-                    {"Timestamp", unixtime},
-                    {"ContentType", "StatusNotification"},
-                    {"Code", status.Status.Code},
-                    {"Description", status.Status.Description},
-                };
-
-                _gcmBroker.QueueNotification(new GcmNotification { RegistrationIds = new List<string> { deviceToken }, Data = data });
-
-                return;
-            }
-
-            var csn = notification as CallsignNotification;
-            if (csn != null)
-            {
-                var data = new JObject
-                {
-                    {"Reason", reason},
-                    {"Timestamp", unixtime},
-                    {"ContentType", "CallsignNotification"},
-                    {"Callsign", csn.Callsign},
-                };
-
-                _gcmBroker.QueueNotification(new GcmNotification { RegistrationIds = new List<string> { deviceToken }, Data = data });
-            }
-        }
-
-        private void RegisterWithPushServices(NotificationSettings settings)
-        {
-            try
-            {
-                Logger.Write("Registering with PUSH services", 
-                    TraceEventType.Information, "Quest");
-
-#if APPLE_MSG
-
-                if (settings.AppleP12Certificate.Length > 0)
-                {
-                    //Registering the Apple Service and sending an iOS Notification
-                    var appleCert = File.ReadAllBytes(settings.AppleP12Certificate);
-                    var apnsConfig = new ApnsConfiguration(settings.AppleIsProduction? ApnsConfiguration.ApnsServerEnvironment.Production: ApnsConfiguration.ApnsServerEnvironment.Sandbox, appleCert, settings.AppleP12Password);
-                    _apnsBroker = new ApnsServiceBroker(apnsConfig);
-                    _apnsBroker.Start();
-                }
-#endif
-
-                if (settings.GCMKey.Length > 0)
-                {
-                    var gcmConfig = new GcmConfiguration("GCM-SENDER-Id", settings.GCMKey, null);
-
-                    // Create a new broker
-                    _gcmBroker = new GcmServiceBroker(gcmConfig);
-                    _gcmBroker.Start();
-                }
-
-                //push.OnChannelCreated += push_OnChannelCreated;
-                //push.OnChannelDestroyed += push_OnChannelDestroyed;
-                //push.OnChannelException += push_OnChannelException;
-                //push.OnDeviceSubscriptionChanged += push_OnDeviceSubscriptionChanged;
-                //push.OnDeviceSubscriptionExpired += push_OnDeviceSubscriptionExpired;
-                //_gcmBroker.OnNotificationFailed += (notification, exception) => push_OnNotificationFailed(null,notification,exception);
-                //push.OnNotificationRequeue += push_OnNotificationRequeue;
-                //push.OnNotificationSent += push_OnNotificationSent;
-                //push.OnServiceException += push_OnServiceException;
-
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"Apple registration failed: {ex}",
-                    TraceEventType.Error, "Quest");
-           }
-        }
-
-        //private void push_OnServiceException(object sender, Exception error)
-        //{
-        //    Logger.Write($"push_OnServiceException: {error}", LoggingPolicy.Category.Trace.ToString(),
-        //        0, 0, TraceEventType.Error, "Quest");
-        //    StopPushServices(true);
-        //}
-
-        //private void push_OnNotificationSent(object sender, INotification notification)
-        //{
-        //    Logger.Write(
-        //        $"push_OnNotificationSent: {notification} IsValidDeviceRegistrationId {notification.IsValidDeviceRegistrationId()}", 
-        //        TraceEventType.Error, "Quest");
-        //}
-
-        //private void push_OnNotificationRequeue(object sender, NotificationRequeueEventArgs e)
-        //{
-        //    Logger.Write($"push_OnNotificationRequeue: {e.Notification}",
-        //        TraceEventType.Error, "Quest");
-        //}
-
-        //private void push_OnNotificationFailed(object sender, INotification notification, Exception error)
-        //{
-        //    Logger.Write($"push_OnNotificationFailed: {error} {notification}",
-        //        TraceEventType.Error, "Quest");
-        //    StopPushServices(true);
-        //}
-
-        //private void push_OnDeviceSubscriptionExpired(object sender, string expiredSubscriptionId,
-        //    DateTime expirationDateUtc, INotification notification)
-        //{
-        //    Logger.Write(
-        //        $"push_OnDeviceSubscriptionExpired: {expiredSubscriptionId} expired {expirationDateUtc}", TraceEventType.Error, "Quest");
-        //    StopPushServices(true);
-        //}
-
-        //private void push_OnDeviceSubscriptionChanged(object sender, string oldSubscriptionId,
-        //    string newSubscriptionId, INotification notification)
-        //{
-        //    Logger.Write(
-        //        $"push_OnDeviceSubscriptionChanged: old {oldSubscriptionId} new {newSubscriptionId} notification {notification}", 
-        //        TraceEventType.Error, "Quest");
-        //}
-
-        //private void push_OnChannelException(object sender, IPushChannel pushChannel, Exception error)
-        //{
-        //    Logger.Write($"push_OnChannelException: {error}", LoggingPolicy.Category.Trace.ToString(),
-        //        0, 0, TraceEventType.Error, "Quest");
-        //    StopPushServices(true);
-        //}
-
-        //private void push_OnChannelDestroyed(object sender)
-        //{
-        //    Logger.Write("push_OnChannelDestroyed", TraceEventType.Error,
-        //        "Quest");
-        //}
-
-        //private void push_OnChannelCreated(object sender, IPushChannel pushChannel)
-        //{
-        //    Logger.Write($"push_OnChannelCreated: {pushChannel}",
-        //        TraceEventType.Error, "Quest");
-        //}
 
 #endregion
     }

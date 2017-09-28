@@ -73,5 +73,21 @@ namespace Quest.Lib.Incident
             return null;
         }
 
+        //TODO: CPEventStatusListHandler
+        private Response CPEventStatusListHandler(NewMessageArgs t)
+        {
+            var item = t.Payload as CPEventStatusList;
+            //_incidentHandler.CPEventStatusListHandler(item, _notificationSettings);
+            return null;
+        }
+
+        //TODO: CallDisconnectStatusListHandler
+        private Response CallDisconnectStatusListHandler(NewMessageArgs t)
+        {
+            var item = t.Payload as CallDisconnectStatusList;
+            //_incidentHandler.CallDisconnectStatusListHandler(item, _notificationSettings);
+            return null;
+        }
+
     }
 }

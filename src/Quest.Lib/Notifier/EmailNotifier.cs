@@ -12,14 +12,13 @@ namespace Quest.Lib.Notifier
         private int _port;
 
 
-        public void Send(string address, string replyto, INotificationMessage message)
+        public void Send(INotificationMessage message)
         {
-            Logger.Write($"Sending email to {address} {message.Subject}", 
-                TraceEventType.Information, "EmailNotifier");
+            Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, this.GetType().Name);
 
             var smtpmessage = new MailMessage(
-                replyto,
-                address,
+                "",
+                message.Address,
                 message.Subject,
                 message.Body
                 );

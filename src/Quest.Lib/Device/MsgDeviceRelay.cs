@@ -1,52 +1,71 @@
-﻿#define NO_APPLE
-#define XCAN_SEND_NOTIFICATIONS_TO_RESOURCES
-
-//TODO: Implement resource notifications using a Notification service
-#define xCAN_SEND_NOTIFICATIONS_TO_RESOURCES
-
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Nest;
+using Newtonsoft.Json.Linq;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
+using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
+using Quest.Lib.Resource;
+using PushSharp.Google;
 using Quest.Lib.Data;
-using Quest.Lib.Trace;
-using System.Diagnostics;
+using PushSharp.Apple;
 
-namespace Quest.Lib.Resource
+namespace Quest.Lib.Device
 {
-    public class ResourceHandler
+    public class MsgDeviceRelay
     {
-        public string deletedStatus { get; set; } = "OOS";
-        public string triggerStatus { get; set; } = "DSP";
-
-        private IDatabaseFactory _dbFactory;
-        private const string Version = "1.0.0";
-        private int _deleteStatusId;
-
-
-        public ResourceHandler(IDatabaseFactory dbFactory)
+        public MsgDeviceRelay()
         {
-            _dbFactory = dbFactory;
         }
 
-        private int DeleteStatusId
-        {
-            get
-            {
-                if (_deleteStatusId == 0)
-                    GetDeleteStatusId();
-                return _deleteStatusId;
 
-            }
+        public void Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore)
+        {
+        }
+
+        public void Logout(LogoutRequest request, IDeviceStore devStore)
+        {
+        }
+    
+        public void CallsignChange(CallsignChangeRequest request)
+        {
+        }
+
+        public void AckAssignedEvent(AckAssignedEventRequest request)
+        {
+        }
+
+        public void PositionUpdate(PositionUpdateRequest request)
+        {
+        }
+
+        public void MakePatientObservation(MakePatientObservationRequest request)
+        {
         }
 
         /// <summary>
+        ///     Status request by device
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        public void SetStatusRequest(SetStatusRequest request, NotificationSettings settings)
+        {
+        }
+
+#if false
+#region CAD Message Handling
+
+        /// <summary>
+        ///     handle resource updates from GT.
         ///     Detects resource changing to DSP (Dispatched) and sends incident details to callsign
         ///     Detects resource changing to status and sends status update to callsign
         /// </summary>
@@ -128,19 +147,17 @@ namespace Quest.Lib.Resource
                 res.ResourceStatusPrevId = res.ResourceStatusId;
                 res.ResourceStatusId = status.ResourceStatusId;
 
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
+
+                // detect changes in status to DSP
                 var requireEventNotification = false;
                 var requireStatusNotification = false;
-#endif
 
                 // detect change in status
                 if (originalStatusId != status.ResourceStatusId)
                 {
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                     requireStatusNotification = true;
                     if (status.Status == triggerStatus)
                         requireEventNotification = true;
-#endif
 
                     // save a status history if the status has changed
                     var history = new ResourceStatusHistory
@@ -155,10 +172,10 @@ namespace Quest.Lib.Resource
                 }
                 db.SaveChanges();
 
-                //var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
-                ResourceItem ri = GetResourceItemFromView(res);
+                var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
+                ResourceItem ri = GetResourceItemFromView(rv);
 
-                var point = new PointGeoShape(new GeoCoordinate(res.Latitude ?? 0, res.Longitude ?? 0));
+                var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude ?? 0));
 
                 if (config != null)
                 {
@@ -172,7 +189,7 @@ namespace Quest.Lib.Resource
                         Source = "Quest",
                         indextext = indextext,
                         Description = indextext,
-                        Location = new GeoLocation(res.Latitude ?? 0, res.Longitude ?? 0),
+                        Location = new GeoLocation(rv.Latitude ?? 0, rv.Longitude ?? 0),
                         Point = point,
                         Created = DateTime.UtcNow
                     };
@@ -181,20 +198,18 @@ namespace Quest.Lib.Resource
                     ElasticIndexer.CommitBultRequest(config, descriptor);
                 }
 
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                 if (requireStatusNotification)
                     SendStatusNotification(resourceUpdate.Callsign, settings, "Update");
 
                 if (requireEventNotification)
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
-#endif
 
                 msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
 
             });
         }
 
-        private ResourceItem GetResourceItemFromView( DataModel.Resource res)
+        private ResourceItem GetResourceItemFromView(DataModel.Resource res)
         {
             return new ResourceItem
             {
@@ -204,7 +219,7 @@ namespace Quest.Lib.Resource
                 Y = res.Latitude ?? 0,
                 Callsign = res.Callsign.Callsign1,
                 lastUpdate = res.LastUpdated,
-                StatusCategory = GetStatusDescription(res.ResourceStatus),
+                StatusCategory = GetStatusDescription(res),
                 Status = res.ResourceStatus.Status,
                 PrevStatus = res.ResourceStatusPrev.Status,
                 VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
@@ -220,7 +235,7 @@ namespace Quest.Lib.Resource
                 Available = res.ResourceStatus.Available ?? false,
                 Busy = res.ResourceStatus.Busy ?? false,
                 BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
-                //ResourceTypeGroup = res.ResourceTypeGroup,
+                ResourceTypeGroup = res.ResourceType.ResourceTypeGroup,
             };
         }
 
@@ -258,29 +273,46 @@ namespace Quest.Lib.Resource
             });
         }
 
-        public void ResourceLogon(ResourceLogon item, NotificationSettings settings)
+
+        public void CPEventStatusListHandler( CPEventStatusList item, NotificationSettings settings)
         {
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                foreach (var i in item.Items)
+                {
+                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
+                    if (inc != null)
+                    {
+                        inc.PatientAge = i.Age;
+                        inc.PatientSex = i.Sex;
+                        inc.CallerTelephone = i.CallerTelephone;
+                        inc.LocationComment = i.LocationComment;
+                        inc.ProblemDescription = i.ProblemDescription;
+                    }
+                    db.SaveChanges();
+                }
+            });
         }
 
-        private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
+        public void CallDisconnectStatusListHandler( CallDisconnectStatusList item,
+            NotificationSettings settings)
         {
-            if (available == true)
-                return "Available";
-            if (enroute == true)
-                return "Enroute";
-            if (busy == true)
-                return "Busy";
-            if (rest == true)
-                return "Rest";
-            return "Offroad";
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                foreach (var i in item.Items)
+                {
+                    var inc = db.Incident.FirstOrDefault(x => x.Serial == i.Serial);
+                    if (inc != null)
+                    {
+                        inc.DisconnectTime = i.DisconnectTime;
+                    }
+                    db.SaveChanges();
+                }
+            });
         }
 
-        private string GetStatusDescription(DataModel.ResourceStatus status)
-        {
-            return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
-        }
 
-        public void BeginDump(BeginDump item, NotificationSettings settings)
+        public void BeginDump( BeginDump item, NotificationSettings settings)
         {
             Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
             _dbFactory.Execute<QuestContext>((db) =>
@@ -298,6 +330,10 @@ namespace Quest.Lib.Resource
                 db.SaveChanges();
             });
         }
+
+#endregion
+#endif
+
     }
 
 }

@@ -2,13 +2,14 @@
 {
     public interface INotifier
     {
-        void Send(string address, string replyto, INotificationMessage message);
+        void Send(INotificationMessage message);
     }
 
     public interface INotificationMessage
     {
+        string Method { get; set; }
+        string Address { get; set; }
         string Subject { get; set; }
         string Body { get; set; }
-        //public String[] Attachments;
     }
 }

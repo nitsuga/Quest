@@ -15,13 +15,13 @@ using Quest.Api.Options;
 namespace Quest.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class LogonController : Controller
+    public class AuthController : Controller
     {
         private AsyncMessageCache _messageCache;
         private readonly JsonSerializerSettings _serializerSettings;
         private JwtIssuerOptions _jwtOptions;
 
-        public LogonController( IOptions<JwtIssuerOptions> jwtOptions, AsyncMessageCache messageCache)
+        public AuthController( IOptions<JwtIssuerOptions> jwtOptions, AsyncMessageCache messageCache)
         {
             _jwtOptions = jwtOptions.Value;
             _messageCache = messageCache;

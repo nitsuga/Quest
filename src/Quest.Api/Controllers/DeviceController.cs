@@ -89,6 +89,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Get the status of the device. can be used at startup of the device so it has the right details.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("RefreshState")]
         public RefreshStateResponse RefreshState([FromBody]RefreshStateRequest request)
         {
@@ -108,6 +113,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Acknowledge event assignment
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("AckAssignedEvent")]
         public AckAssignedEventResponse AckAssignedEvent([FromBody]AckAssignedEventRequest request)
         {
@@ -127,6 +137,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// send location update to the CAD/Quest
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("PositionUpdate")]
         public PositionUpdateResponse PositionUpdate([FromBody]PositionUpdateRequest request)
         {
@@ -146,6 +161,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Make a paient observation
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("MakePatientObservation")]
         public MakePatientObservationResponse MakePatientObservation([FromBody]MakePatientObservationRequest request)
         {
@@ -164,6 +184,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Request patient details
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("PatientDetails")]
         public PatientDetailsResponse PatientDetails([FromBody]PatientDetailsRequest request)
         {
@@ -180,6 +205,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Request a status change
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("SetStatus")]
         public SetStatusResponse SetStatus([FromBody]SetStatusRequest request)
         {
@@ -195,6 +225,11 @@ namespace Quest.Api.Controllers
             return result;
         }
 
+        /// <summary>
+        /// get a list of valid status codes
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("GetStatusCodes")]
         public GetStatusCodesResponse GetStatusCodes([FromBody]GetStatusCodesRequest request)
         {

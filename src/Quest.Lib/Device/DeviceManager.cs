@@ -60,9 +60,6 @@ namespace Quest.Lib.Device
             MsgHandler.AddHandler<PatientDetailsRequest>(PatientDetailsRequestHandler);
             MsgHandler.AddHandler<PositionUpdateRequest>(PositionUpdateRequestHandler);
             MsgHandler.AddHandler<SetStatusRequest>(SetStatusRequestHandler);
-            MsgHandler.AddHandler<BeginDump>(BeginDumpHandler);
-            MsgHandler.AddHandler<CPEventStatusList>(CPEventStatusListHandler);
-            MsgHandler.AddHandler<CallDisconnectStatusList>(CallDisconnectStatusListHandler);
         }
 
         protected override void OnStart()
@@ -228,25 +225,7 @@ namespace Quest.Lib.Device
         /// </summary>
         /// <param name="t"></param>
       
-        private Response BeginDumpHandler(NewMessageArgs t)
-        {
-            var item = t.Payload as BeginDump;
-            _deviceHandler.BeginDump(item, _notificationSettings);
-            return null;
-        }
 
-        private Response CPEventStatusListHandler(NewMessageArgs t)
-        {
-            var item = t.Payload as CPEventStatusList;
-            _deviceHandler.CPEventStatusListHandler(item, _notificationSettings);
-            return null;
-        }
 
-        private Response CallDisconnectStatusListHandler(NewMessageArgs t)
-        {
-            var item = t.Payload as CallDisconnectStatusList;
-            _deviceHandler.CallDisconnectStatusListHandler(item, _notificationSettings);
-            return null;
-        }
     }
 }

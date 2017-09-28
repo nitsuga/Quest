@@ -42,6 +42,7 @@ namespace Quest.Lib.Resource
             MsgHandler.AddHandler("DeleteResource", DeleteResourceHandler);
             MsgHandler.AddHandler("ResourceLogon", ResourceLogonHandler);
             MsgHandler.AddHandler("ResourceUpdate", ResourceUpdateHandler);
+            MsgHandler.AddHandler<BeginDump>(BeginDumpHandler);
         }
 
         protected override void OnStart()
@@ -90,6 +91,12 @@ namespace Quest.Lib.Resource
             return null;
         }
 
+        private Response BeginDumpHandler(NewMessageArgs t)
+        {
+            var item = t.Payload as BeginDump;
+            _resourceHandler.BeginDump(item, _notificationSettings);
+            return null;
+        }
 
     }
 }

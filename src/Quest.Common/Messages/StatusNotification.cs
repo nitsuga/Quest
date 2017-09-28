@@ -6,13 +6,11 @@ namespace Quest.Common.Messages
     
     public class StatusNotification : IDeviceNotification
     {
-         public StatusCode Status;
+        public StatusCode Status;
 
         public override string ToString()
         {
             return $"StatusNotification: {Status.Code}";
         }
-    }
-
-    
+    }    
 }
