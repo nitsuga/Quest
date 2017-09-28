@@ -1363,7 +1363,7 @@ namespace Quest.Lib.Device
             });
         }
 
-        private void SendEventNotification(List<DataModel.Devices> devices, QuestIncident inc, NotificationSettings settings, string reason)
+        private void SendEventNotification(List<Devices> devices, QuestIncident inc, NotificationSettings settings, string reason)
         {
             if (devices == null || !devices.Any())
                 return;
@@ -1453,7 +1453,7 @@ namespace Quest.Lib.Device
         /// <param name="evt"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        private void NotifyDevices(IEnumerable<Devices> devices, IDeviceNotification evt, NotificationSettings settings, string reason)
+        private void NotifyDevices(IEnumerable<Devices> devices, INotificationMessage evt, NotificationSettings settings, string reason)
         {
             try
             {

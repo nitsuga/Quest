@@ -7,7 +7,7 @@ namespace Quest.Common.Messages
     /// </summary>
     [Serializable]
     
-    public class EventNotification : IDeviceNotification
+    public class EventNotification : INotificationMessage
     {
         
         public string Priority { get; set; }

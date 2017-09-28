@@ -4,7 +4,7 @@ namespace Quest.Common.Messages
 {
     [Serializable]
     
-    public class CallsignNotification : IDeviceNotification
+    public class CallsignNotification : INotificationMessage
     {
         
         public string Callsign { get; set; }

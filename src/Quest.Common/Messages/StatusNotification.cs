@@ -4,7 +4,7 @@ namespace Quest.Common.Messages
 {
     [Serializable]
     
-    public class StatusNotification : IDeviceNotification
+    public class StatusNotification : INotificationMessage
     {
         public StatusCode Status;
 

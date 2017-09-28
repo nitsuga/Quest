@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Mail;
 using Quest.Lib.Trace;
+using Quest.Common.Messages;
 
 namespace Quest.Lib.Notifier
 {
@@ -12,7 +13,7 @@ namespace Quest.Lib.Notifier
         private int _port;
 
 
-        public void Send(INotificationMessage message)
+        public void Send(Notification message)
         {
             Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, this.GetType().Name);
 
@@ -20,7 +21,7 @@ namespace Quest.Lib.Notifier
                 "",
                 message.Address,
                 message.Subject,
-                message.Body
+                message.Body.ToString()
                 );
 
             smtpmessage.IsBodyHtml = true;

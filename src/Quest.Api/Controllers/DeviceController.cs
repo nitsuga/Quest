@@ -24,8 +24,6 @@ namespace Quest.Api.Controllers
         [HttpPost("Logon")]
         public LoginResponse Logon([FromForm] LoginRequest request)
         {
-            var response = request.Submit<LoginResponse>(_messageCache);
-
             LoginResponse result;
             try
             {
