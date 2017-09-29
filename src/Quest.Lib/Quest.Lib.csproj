@@ -50,6 +50,8 @@
     <Compile Remove="Search\Elastic\IndexGroup.cs" />
     <Compile Remove="ServiceBus\MessageCache.cs" />
     <Compile Remove="Telephony\Aspect\CollabChannel.cs" />
+    <Compile Remove="Telephony\Avaya\CollabChannel.cs" />
+    <Compile Remove="Telephony\Avaya\TSAPIHandler.cs" />
     <Compile Remove="Trackers\AlarmTracker.cs" />
     <Compile Remove="Trackers\CommandPointTracker.cs" />
     <Compile Remove="Utils\RouteLine.cs" />
@@ -60,6 +62,14 @@
 
   <ItemGroup>
     <None Remove="Properties\Settings.settings" />
+    <None Remove="Telephony\Aspect\CSTA.vb" />
+    <None Remove="Telephony\Aspect\IPCTI.vb" />
+    <None Remove="Telephony\Aspect\ITsapi.vb" />
+    <None Remove="Telephony\Aspect\TSAPI.vb" />
+    <None Remove="Telephony\Avaya\CSTA.vb" />
+    <None Remove="Telephony\Avaya\IPCTI.vb" />
+    <None Remove="Telephony\Avaya\ITsapi.vb" />
+    <None Remove="Telephony\Avaya\TSAPI.vb" />
   </ItemGroup>
 
   <ItemGroup>
