@@ -34,7 +34,7 @@ namespace Quest.Common.Messages
         ///     The version of Quest that this server is implementing
         /// </summary>        
         public int QuestApi { get; set; }
-                
+
         public StatusCode Status { get; set; }
 
         /// <summary>

@@ -10,7 +10,7 @@ namespace Quest.Common.Messages
         public Nullable<int> ResourceId { get; set; }
         public string AuthToken { get; set; }
         public string DeviceIdentity { get; set; }
-        public Nullable<int> NotificationTypeId { get; set; }
+        public string NotificationTypeId { get; set; }
         public string NotificationId { get; set; }
         public Nullable<System.DateTime> LastUpdate { get; set; }
         public Nullable<System.DateTime> LastStatusUpdate { get; set; }

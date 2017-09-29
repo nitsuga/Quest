@@ -45,7 +45,7 @@
       "properties": {
         // This is the GCM key (Quest project id in
         // https://console.developers.google.com/cloud-resource-manager
-        "GCMKey": "quest-1500359345085"
+        "GCMKey": "1500359345085"
       }
     },
     {

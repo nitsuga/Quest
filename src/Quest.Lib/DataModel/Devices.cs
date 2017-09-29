@@ -10,7 +10,7 @@ namespace Quest.Lib.DataModel
         public int? ResourceId { get; set; }
         public string AuthToken { get; set; }
         public string DeviceIdentity { get; set; }
-        public int? NotificationTypeId { get; set; }
+        public string NotificationTypeId { get; set; }
         public string NotificationId { get; set; }
         public DateTime? LastUpdate { get; set; }
         public DateTime? LastStatusUpdate { get; set; }

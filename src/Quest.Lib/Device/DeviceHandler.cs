@@ -268,7 +268,7 @@ namespace Quest.Lib.Device
                 resrecord.LastUpdate = DateTime.UtcNow;
                 resrecord.AuthToken = null;
                 resrecord.NotificationId = "";
-                resrecord.NotificationTypeId = 0;
+                resrecord.NotificationTypeId = "";
 
                 devStore.Update(resrecord);
 

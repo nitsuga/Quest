@@ -22,7 +22,7 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("Logon")]
-        public async Task<LoginResponse> Logon([FromForm] LoginRequest request)
+        public async Task<LoginResponse> Logon([FromBody] LoginRequest request)
         {
             try
             {

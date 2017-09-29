@@ -34,11 +34,11 @@ namespace Quest.Common.Messages
 
         /// <summary>
         ///     defines the method notification
-        ///     1=apple 2=android (GCM) 3=chrome 4=amazon 5=windows phone 6=windows eight 7=blackberry 8=firefox
+        ///     e.g. GCM, APN
         ///     <seealso cref="https://github.com/Redth/PushSharp" />
         /// </summary>
         
-        public int NotificationTypeId { get; set; }
+        public string NotificationTypeId { get; set; }
 
         /// <summary>
         ///     username of the user
