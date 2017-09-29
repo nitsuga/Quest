@@ -47,7 +47,7 @@ namespace Quest.Lib.ServiceBus
                 };
 
                 // send the message
-                MsgSource.Broadcast(obj);
+                MsgSource.Broadcast(obj, metadata);
                 Logger.Write($"Broadcase Message Ok", "Web");
 
                 // now wait for the response to arrive (via the anonymous event handler above)

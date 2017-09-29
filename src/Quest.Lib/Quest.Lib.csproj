@@ -48,6 +48,7 @@
     <Compile Remove="Routing\StandbyCoverage.cs" />
     <Compile Remove="Search\AddressSearch.cs" />
     <Compile Remove="Search\Elastic\IndexGroup.cs" />
+    <Compile Remove="ServiceBus\MessageCache.cs" />
     <Compile Remove="Telephony\Aspect\CollabChannel.cs" />
     <Compile Remove="Trackers\AlarmTracker.cs" />
     <Compile Remove="Trackers\CommandPointTracker.cs" />

@@ -19,6 +19,36 @@
       }
     },
     {
+      "type": "Quest.Lib.Notifier.NotificationManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "NotificationManager"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
+    {
+      // https://github.com/Redth/PushSharp/wiki/How-to-Configure-&-Send-GCM-Google-Cloud-Messaging-Push-Notifications-using-PushSharp
+      "type": "Quest.Lib.Notifier.GCMNotifier",
+      "services": [
+        {
+          "type": "Quest.Lib.Notifier.INotifier",
+          "key": "GCM" // This is the Method name when sending a message
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        // This is the GCM key (Quest project id in
+        // https://console.developers.google.com/cloud-resource-manager
+        "GCMKey": "quest-1500359345085"
+      }
+    },
+    {
       "type": "Quest.Lib.Search.Elastic.IndexerManager",
       "services": [
         {
