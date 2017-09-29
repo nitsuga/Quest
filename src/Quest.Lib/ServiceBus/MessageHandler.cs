@@ -108,10 +108,10 @@ namespace Quest.Lib.ServiceBus
                 if (handler != null)
                 {
                     Logger.Write($"Dispatch message {e.Payload.GetType().Name}", TraceEventType.Information, GetType().Name);
-                    response = handler(e);
+                    response = handler(e);                    
                 }
 
-                Action<MessageBase> handler2;
+                Action<MessageBase> handler2=null;
                 // look up a suitable handler for this messge based on its type
                 _msg2Handlers.TryGetValue(e.Payload.GetType().Name, out handler2);
 

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
-using Quest.Api.Extensions;
+using System.Threading.Tasks;
 
 namespace Quest.Api.Controllers
 {
@@ -22,22 +22,19 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("Logon")]
-        public LoginResponse Logon([FromForm] LoginRequest request)
+        public async Task<LoginResponse> Logon([FromForm] LoginRequest request)
         {
-            LoginResponse result;
             try
             {
-                result = request.Submit<LoginResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<LoginResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new LoginResponse() { Success = false, Message = ex.Message };
-
             }
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -46,22 +43,19 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("Logout")]
-        public LogoutResponse Logout([FromBody]LogoutRequest request)
+        public async Task<LogoutResponse> Logout([FromBody]LogoutRequest request)
         {
-            LogoutResponse result;
             try
             {
-                result = request.Submit<LogoutResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<LogoutResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new LogoutResponse() { Success = false, Message = ex.Message };
-
             }
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -72,19 +66,16 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("CallsignChange")]
-        public CallsignChangeResponse CallsignChange([FromBody]CallsignChangeRequest request)
+        public async Task<CallsignChangeResponse> CallsignChange([FromBody]CallsignChangeRequest request)
         {
-            CallsignChangeResponse result;
             try
             {
-                result = request.Submit<CallsignChangeResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<CallsignChangeResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new CallsignChangeResponse() { Success = false, Message = ex.Message };
-
             }
-            return result;
         }
 
         /// <summary>
@@ -93,12 +84,11 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("RefreshState")]
-        public RefreshStateResponse RefreshState([FromBody]RefreshStateRequest request)
+        public async Task<RefreshStateResponse> RefreshState([FromBody]RefreshStateRequest request)
         {
-            RefreshStateResponse result;
             try
             {
-                result = request.Submit<RefreshStateResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<RefreshStateResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -108,7 +98,6 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -117,12 +106,11 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("AckAssignedEvent")]
-        public AckAssignedEventResponse AckAssignedEvent([FromBody]AckAssignedEventRequest request)
+        public async Task<AckAssignedEventResponse> AckAssignedEvent([FromBody]AckAssignedEventRequest request)
         {
-            AckAssignedEventResponse result;
             try
             {
-                result = request.Submit<AckAssignedEventResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<AckAssignedEventResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -132,7 +120,6 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -141,12 +128,11 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("PositionUpdate")]
-        public PositionUpdateResponse PositionUpdate([FromBody]PositionUpdateRequest request)
+        public async Task<PositionUpdateResponse> PositionUpdate([FromBody]PositionUpdateRequest request)
         {
-            PositionUpdateResponse result;
             try
             {
-                result = request.Submit<PositionUpdateResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<PositionUpdateResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -156,7 +142,6 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -165,12 +150,11 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("MakePatientObservation")]
-        public MakePatientObservationResponse MakePatientObservation([FromBody]MakePatientObservationRequest request)
+        public async Task<MakePatientObservationResponse> MakePatientObservation([FromBody]MakePatientObservationRequest request)
         {
-            MakePatientObservationResponse result;
             try
             {
-                result = request.Submit<MakePatientObservationResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<MakePatientObservationResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -179,7 +163,6 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
 
         /// <summary>
@@ -188,19 +171,16 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("PatientDetails")]
-        public PatientDetailsResponse PatientDetails([FromBody]PatientDetailsRequest request)
+        public async Task<PatientDetailsResponse> PatientDetails([FromBody]PatientDetailsRequest request)
         {
-            PatientDetailsResponse result;
             try
             {
-                result = request.Submit<PatientDetailsResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<PatientDetailsResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new PatientDetailsResponse() { Success = false, Message = ex.Message };
-
             }
-            return result;
         }
 
         /// <summary>
@@ -209,18 +189,16 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("SetStatus")]
-        public SetStatusResponse SetStatus([FromBody]SetStatusRequest request)
+        public async Task<SetStatusResponse> SetStatus([FromBody]SetStatusRequest request)
         {
-            SetStatusResponse result;
             try
             {
-                result = request.Submit<SetStatusResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<SetStatusResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new SetStatusResponse() { Success = false, Message = ex.Message };
             }
-            return result;
         }
 
         /// <summary>
@@ -229,44 +207,39 @@ namespace Quest.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("GetStatusCodes")]
-        public GetStatusCodesResponse GetStatusCodes([FromBody]GetStatusCodesRequest request)
+        public async Task<GetStatusCodesResponse> GetStatusCodes([FromBody]GetStatusCodesRequest request)
         {
-            GetStatusCodesResponse result;
             try
             {
-                result = request.Submit<GetStatusCodesResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<GetStatusCodesResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new GetStatusCodesResponse() { Success = false, Message = ex.Message };
             }
-            return result;
         }
 
         [HttpPost("GetEntityTypes")]
-        public GetEntityTypesResponse GetEntityTypes([FromBody]GetEntityTypesRequest request)
+        public async Task<GetEntityTypesResponse> GetEntityTypes([FromBody]GetEntityTypesRequest request)
         {
-            GetEntityTypesResponse result;
             try
             {
-                result = request.Submit<GetEntityTypesResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<GetEntityTypesResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
                 return new GetEntityTypesResponse() { Success = false, Message = ex.Message };
 
             }
-            return result;
         }
 
         [HttpPost("GetMapItems")]
         [HttpPost]
-        public MapItemsResponse GetMapItems([FromBody]MapItemsRequest request)
+        public async Task<MapItemsResponse> GetMapItems([FromBody]MapItemsRequest request)
         {
-            MapItemsResponse result;
             try
             {
-                result = request.Submit<MapItemsResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -275,16 +248,14 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
 
         [HttpPost("GetHistory")]
-        public GetHistoryResponse GetHistory([FromBody]GetHistoryRequest request)
+        public async Task<GetHistoryResponse> GetHistory([FromBody]GetHistoryRequest request)
         {
-            GetHistoryResponse result;
             try
             {
-                result = request.Submit<GetHistoryResponse>(_messageCache);
+                return await _messageCache.SendAndWaitAsync<GetHistoryResponse>(request, new TimeSpan(0, 0, 10));
             }
             catch (Exception ex)
             {
@@ -294,7 +265,6 @@ namespace Quest.Api.Controllers
             finally
             {
             }
-            return result;
         }
     }
 }

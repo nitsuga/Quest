@@ -10,7 +10,6 @@ using Nest;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
-using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;

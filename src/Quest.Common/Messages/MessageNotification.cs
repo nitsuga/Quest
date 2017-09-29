@@ -2,13 +2,10 @@
 
 namespace Quest.Common.Messages
 {
-    [Serializable]
-    
+    [Serializable]    
     public class MessageNotification : INotificationMessage
     {
-        
-        public MessageBody messageBody { get; set; }
+        public String Text { get; set; }
+        public int Priority { get; set; }
     }
-
-    
 }

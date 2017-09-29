@@ -5,8 +5,6 @@ using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
-using System;
-using System.Threading.Tasks;
 
 namespace Quest.Lib.Notifier
 {
@@ -45,15 +43,6 @@ namespace Quest.Lib.Notifier
         {
         }
 
-        private Response NotifyHandler(NewMessageArgs t)
-        {
-            var notification = t.Payload as Notification;
-
-            if (notification != null)
-                Send(notification);
-            return null;
-        }
-
         /// <summary>
         ///     Send a message to one or more targets
         /// </summary>
@@ -61,31 +50,25 @@ namespace Quest.Lib.Notifier
         /// <param name="addresses">target addresses in the form address[,address...] where address is like mailto:someone@home.com</param>
         /// <param name="replyto">a return address if the target wishes to respond</param>
         /// <param name="message"></param>
-        public void Send(Notification message)
+        private Response NotifyHandler(NewMessageArgs t)
         {
-            if (message == null)
-                return;
+            var message = t.Payload as Notification;
 
-            Task.Run(() => SendAsync(message));
-        }
-
-        /// <summary>
-        ///     Send a message to a target
-        /// </summary>
-        /// <param name="container">MEF Composition container</param>
-        /// <param name="address">target address in the form mailto:someone@home.com</param>
-        /// <param name="replyto">a return address if the target wishes to respond</param>
-        /// <param name="message"></param>
-        public async Task SendAsync(Notification message)
-        {
             if (message == null)
-                return;
+                return new NotificationResponse { Message = "Null Message", Success = false, RequestId = message.RequestId };
+
+            if (string.IsNullOrEmpty(message.Method))
+                return new NotificationResponse { Message = "No 'Method' defined", Success = false, RequestId = message.RequestId };
+
+            if (!_scope.IsRegisteredWithKey<INotifier>(message.Method))
+                return new NotificationResponse { Message = $"Method {message.Method} unrecognised.", Success = false, RequestId = message.RequestId };
 
             var processor = _scope.ResolveNamed<INotifier>(message.Method);
             if (processor != null)
-            {
-                await Task.Run(() => processor.Send(message));
-            }
+                return processor.Send(message);
+            else
+                return new NotificationResponse { Message = $"Could not load method {message.Method}", Success = false, RequestId = message.RequestId };
+
         }
     }
 }

@@ -4,6 +4,6 @@ namespace Quest.Lib.Notifier
 {
     public interface INotifier
     {
-        void Send(Notification message);
+        NotificationResponse Send(Notification message);
     }
 }

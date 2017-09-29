@@ -13,7 +13,7 @@ namespace Quest.Lib.Notifier
         private int _port;
 
 
-        public void Send(Notification message)
+        public NotificationResponse Send(Notification message)
         {
             Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, this.GetType().Name);
 
@@ -65,10 +65,13 @@ namespace Quest.Lib.Notifier
                 client.SendCompleted += client_SendCompleted;
 
                 client.Send(smtpmessage);
+
+                return new NotificationResponse { Message = $"Message sent", Success = true, RequestId = message.RequestId };
             }
             catch (Exception ex)
             {
                 Logger.Write($"Exception caught in CreateMessageWithAttachment(): {ex}", GetType().Name);
+                return new NotificationResponse { Message = $"Method {GetType().Name} failed: {ex.Message}", Success = false, RequestId = message.RequestId };
             }
         }
 

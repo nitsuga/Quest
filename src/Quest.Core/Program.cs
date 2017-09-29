@@ -20,7 +20,6 @@ using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.OS.DataModelNLPG;
 using Microsoft.Extensions.Logging;
-using Quest.Lib.Device;
 
 namespace Quest.Core
 {

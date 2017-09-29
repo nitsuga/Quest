@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net.Mail;
+﻿using System.Diagnostics;
 using Quest.Lib.Trace;
 using PushSharp.Apple;
 using Quest.Common.Messages;
@@ -25,9 +22,10 @@ namespace Quest.Lib.Notifier
 
         }
 
-        public void Send(Notification message)
+        public NotificationResponse Send(Notification message)
         {
             Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, this.GetType().Name);
+            return new NotificationResponse { Message = $"Method {GetType().Name} not implemented", Success = false, RequestId = message.RequestId };
         }
 
         //private void PushToApple(string deviceToken, IDeviceNotification notification)

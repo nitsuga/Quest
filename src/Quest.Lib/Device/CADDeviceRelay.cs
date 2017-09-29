@@ -1,22 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using Nest;
-using Newtonsoft.Json.Linq;
-using Quest.Common.Messages;
-using Quest.Lib.DataModel;
-using Quest.Lib.Search.Elastic;
-using Quest.Lib.Utils;
-using Quest.Lib.Trace;
-using Quest.Common.ServiceBus;
+﻿using Quest.Common.Messages;
 using Quest.Lib.Notifier;
-using Quest.Lib.Incident;
 using Quest.Lib.Resource;
-using PushSharp.Google;
-using Quest.Lib.Data;
-using PushSharp.Apple;
 
 namespace Quest.Lib.Device
 {
