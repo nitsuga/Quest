@@ -46,8 +46,9 @@
         // This is the GCM key (Quest project id in
         // https://console.developers.google.com/cloud-resource-manager
 		// https://console.developers.google.com/iam-admin/settings/project?project=quest-1500359345085
-        "GCMKey": "1500359345085"
-      }
+        "Key": "AAAAyHOPkRA:APA91bEovytBmdhbBUVDTZs8G-FvmiQSndrqLryDtNHPCdF3hB5BJUWQtsAUk5g_jVZBl-ORzT8wRMM9ckvRFRzxKNgjswNb_H8I_LbHyaSf6x8F8VegVNki1MOpjyWcY-l6ghts0wch",
+        "SenderId": "860932247824"
+		}
     },
     {
       "type": "Quest.Lib.Search.Elastic.IndexerManager",

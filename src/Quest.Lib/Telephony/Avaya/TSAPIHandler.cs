@@ -9,7 +9,6 @@ namespace Quest.Lib.Telephony.Avaya
 
     public class CallArgs : System.EventArgs
     {
-        public object parent;
         public uint callid;
         public string cli;
         public string vdn;
@@ -18,13 +17,15 @@ namespace Quest.Lib.Telephony.Avaya
 
     public class TSAPIHandler
     {
+        public event EventHandler<CallArgs> NewCall;
+		public event EventHandler<CallArgs> Ringing;
+		public event EventHandler<CallArgs> Connected;
+		public event EventHandler<CallArgs> Disconnected;
 
         // Define the instance variables referenced throughout the class
         private UInt32 acsHandle = 0;
         private UInt32 numInvokeId;
         private char[] chDevice;
-        private string strSource = "Diba";
-        private string strLog = "Application";
         private Csta.EventBuf_t eventBuf = new Csta.EventBuf_t();
         private UInt32 activeCallId;
         private char[] activeDeviceId;
@@ -35,15 +36,11 @@ namespace Quest.Lib.Telephony.Avaya
         private string activeCallingDeviceId;
         private bool m_messagesWaiting;
 
-        private object _parent;
-
-		public TSAPIHandler(object parent)
+        public TSAPIHandler()
         {
             // Add the delegate event for checking the TServer buffer
-            this.TServerBufferPoll += TsHandler;
-            _parent = parent;
+            TServerBufferPoll += TsHandler;
         }
-
 
         // The public method to open the ACS stream
         public bool open(string loginId, string passwd, string serverId)
@@ -298,20 +295,19 @@ namespace Quest.Lib.Telephony.Avaya
             activeConnectionCallId = connectionCallId.ToString();
             activeConnectionDeviceId = connectionDeviceId;
             activeConnectionDeviceIdType = connectionDeviceIdType.ToString();
-            activeCallingDeviceId = callingDeviceId.Trim(char(0));
+            activeCallingDeviceId = callingDeviceId.Trim('\0');
 
             calledDeviceId = NumericsOnly(calledDeviceId);
             callingDeviceId = NumericsOnly(callingDeviceId);
             connectionDeviceId = NumericsOnly(connectionDeviceId);
 
-            calledDeviceId = String.ri.Right(calledDeviceId., 4);
+            calledDeviceId = calledDeviceId.Substring(calledDeviceId.Length - 4);
 
             CallArgs callDetails = new CallArgs();
             callDetails.callid = connectionCallId;
             callDetails.cli = callingDeviceId;
             callDetails.vdn = connectionDeviceId;
             callDetails.extension = connectionDeviceId;
-            callDetails.parent = _parent;
 
             string msg = string.Format("CSTA_DELIVERED id={0} cause={1} dest={2} destType={3} cli={4}", connectionCallId, eventCause, calledDeviceId, connectionDeviceId, callingDeviceId);
             Logger.Write(msg, TraceEventType.Information, "TSAPI");
@@ -344,7 +340,6 @@ namespace Quest.Lib.Telephony.Avaya
             }
             return sb.ToString();
         }
-
 
         // The private method to fire if a CSTA_ESTABLISHED event type is received
         private void isConnected()
@@ -426,7 +421,6 @@ namespace Quest.Lib.Telephony.Avaya
             callDetails.cli = callingDeviceId;
             callDetails.vdn = calledDeviceId;
             callDetails.extension = connectionDeviceId;
-            callDetails.parent = _parent;
 
             string msg = string.Format("CSTA_ESTABLISHED id={0} cli={1} vdn={2} ext={3} cause={4}", connectionCallId, callingDeviceId, calledDeviceId, connectionDeviceId, eventCause);
 
@@ -486,7 +480,6 @@ namespace Quest.Lib.Telephony.Avaya
             callDetails.cli = releasingDeviceId;
             callDetails.vdn = "";
             callDetails.extension = "";
-            callDetails.parent = _parent;
 
             string msg = string.Format("CSTA_CONNECTION_CLEARED id={0} device={1} type={2} type={3} cause={4}", connectionCallId, releasingDeviceId, releasingDeviceIdType, connectionDeviceIdType, eventCause);
             Logger.Write(msg, TraceEventType.Information, "TSAPI");
@@ -639,7 +632,7 @@ namespace Quest.Lib.Telephony.Avaya
             activeCall.deviceID.device = device;
             activeCall.devIDType = (Csta.ConnectionID_Device_t)deviceType;
 
-            int holdCall = Csta.cstaHoldCall(acsHandle, numInvokeId, activeCall, false, privData);
+            int holdCall = Csta.cstaHoldCall(acsHandle, numInvokeId, ref activeCall, false, ref privData);
         }
 
         // The public method to retrieve a held call
@@ -659,7 +652,7 @@ namespace Quest.Lib.Telephony.Avaya
             activeCall.deviceID.device = device;
             activeCall.devIDType = (Csta.ConnectionID_Device_t)deviceType;
 
-            int retrieveCall = Csta.cstaRetrieveCall(acsHandle, numInvokeId, activeCall, privData);
+            int retrieveCall = Csta.cstaRetrieveCall(acsHandle, numInvokeId, ref activeCall, ref privData);
         }
 
         // The public method to pick up an delivered call
@@ -677,7 +670,7 @@ namespace Quest.Lib.Telephony.Avaya
             activeCall.deviceID.device = device;
             activeCall.devIDType = (Csta.ConnectionID_Device_t)deviceType;
 
-            int answerCall = Csta.cstaAnswerCall(acsHandle, numInvokeId, activeCall, privData);
+            int answerCall = Csta.cstaAnswerCall(acsHandle, numInvokeId, ref activeCall, ref privData);
         }
 
         // The public method to clear an active call
@@ -695,7 +688,7 @@ namespace Quest.Lib.Telephony.Avaya
             activeCall.deviceID.device = device;
             activeCall.devIDType = (Csta.ConnectionID_Device_t)deviceType;
 
-            int clearConnection = Csta.cstaClearConnection(acsHandle, numInvokeId, activeCall, privData);
+            int clearConnection = Csta.cstaClearConnection(acsHandle, numInvokeId, ref activeCall, ref privData);
         }
 
         // The public method to initiate an outgoing call
@@ -711,17 +704,10 @@ namespace Quest.Lib.Telephony.Avaya
 
             try
             {
-                int makeCall = Csta.cstaMakeCall(acsHandle, numInvokeId, chDevice, calledDevice, privData);
+                int makeCall = Csta.cstaMakeCall(acsHandle, numInvokeId, chDevice, calledDevice, ref privData);
             }
             catch (System.Exception eMakeCall)
             {
-                // If we can't get back a confirmation record the error and inform the user
-                //MessageBox.Show("There was a TServer error. Logging the incident and continuing the application.", "TServer Error")
-                if (!EventLog.SourceExists(strSource))
-                {
-                    EventLog.CreateEventSource(strSource, strLog);
-                }
-                EventLog.WriteEntry(strSource, eMakeCall.Message.ToString(), EventLogEntryType.Warning, 234);
                 return;
             }
         }
@@ -735,7 +721,7 @@ namespace Quest.Lib.Telephony.Avaya
             privData.length = 4;
             privData.data = "N".ToCharArray();
 
-            int pollMwi = Csta.cstaQueryMsgWaitingInd(acsHandle, numInvokeId, chDevice, privData);
+            int pollMwi = Csta.cstaQueryMsgWaitingInd(acsHandle, numInvokeId, chDevice, ref privData);
         }
 
         // Define the generic TServer buffer event handler
@@ -762,17 +748,10 @@ namespace Quest.Lib.Telephony.Avaya
             int polledEvent = 0;
             try
             {
-                polledEvent = Csta.acsGetEventPoll(acsHandle, eventBuf, eventBufSize, privData, numEvents);
+                polledEvent = Csta.acsGetEventPoll(acsHandle, ref eventBuf, ref eventBufSize, ref privData, ref numEvents);
             }
             catch (System.Exception eEventPoll)
             {
-                // If we can't get back a confirmation record the error and inform the user
-                //MessageBox.Show("There was a TServer error. Logging the incident and continuing the application.", "TServer Error")
-                if (!EventLog.SourceExists(strSource))
-                {
-                    EventLog.CreateEventSource(strSource, strLog);
-                }
-                EventLog.WriteEntry(strSource, eEventPoll.Message.ToString(), EventLogEntryType.Warning, 234);
                 return;
             }
 

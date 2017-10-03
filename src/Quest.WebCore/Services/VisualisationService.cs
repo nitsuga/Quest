@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Quest.Common.Messages;
 using System;
 using Quest.Lib.ServiceBus;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
@@ -15,9 +16,9 @@ namespace Quest.WebCore.Services
 
     public class VisualisationService
     {
-        MessageCache _msgClientCache;
+        AsyncMessageCache _msgClientCache;
 
-        public VisualisationService(MessageCache msgClientCache)
+        public VisualisationService(AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
         }
@@ -28,35 +29,35 @@ namespace Quest.WebCore.Services
 #endif
 
 
-        public GetVisualsCatalogueResponse GetCatalogue(GetVisualsCatalogueRequest request)
+        public async Task<GetVisualsCatalogueResponse> GetCatalogue(GetVisualsCatalogueRequest request)
         {
 #if CALLVMDIRECT
             var args = new NewMessageArgs { Payload = request };
             return (GetVisualsCatalogueResponse)_manager.GetVisualsCatalogueHandler(args);
 #else
-            return _msgClientCache.SendAndWait<GetVisualsCatalogueResponse>(request, new TimeSpan(0, 0, 0, 10));
+            return await _msgClientCache.SendAndWaitAsync<GetVisualsCatalogueResponse>(request, new TimeSpan(0, 0, 0, 10));
 #endif
         }
 
-        public GetVisualsDataResponse GetVisualsData(List<string> visuals)
+        public async Task<GetVisualsDataResponse> GetVisualsData(List<string> visuals)
         {
             GetVisualsDataRequest request = new GetVisualsDataRequest() {Ids = visuals };
 #if CALLVMDIRECT
             var args = new NewMessageArgs { Payload = request };
             return (GetVisualsDataResponse)_manager.GetVisualsData(args);
 #else
-            return _msgClientCache.SendAndWait<GetVisualsDataResponse>(request, new TimeSpan(0, 0, 0, 10));
+            return await _msgClientCache.SendAndWaitAsync<GetVisualsDataResponse>(request, new TimeSpan(0, 0, 0, 10));
 #endif
         }
 
-        public QueryVisualResponse Query(string provider, string parameters)
+        public async Task<QueryVisualResponse> Query(string provider, string parameters)
         {
             QueryVisualRequest request = new QueryVisualRequest() { Provider = provider, Query = parameters};
 #if CALLVMDIRECT
             var args = new NewMessageArgs { Payload = request };
             return (QueryVisualResponse)_manager.QueryVisual(args);
 #else
-            return _msgClientCache.SendAndWait<QueryVisualResponse>(request, new TimeSpan(0, 0, 0, 10));
+            return await _msgClientCache.SendAndWaitAsync<QueryVisualResponse>(request, new TimeSpan(0, 0, 0, 10));
 #endif
         }
 

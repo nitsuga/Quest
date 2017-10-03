@@ -48,9 +48,7 @@ namespace Quest.Lib.Processor
         public override void Prepare(ProcessingUnitId id, IConfiguration config)
         {
             // get subclass name and start up mesage queue
-            Queue = $"{id.Name}_{id.Session}_{id.Instance}";
-
-            LogMessage($"Attaching {Id.Name} to queue {Queue}");
+            Queue = $"{id.Name}";
 
             ServiceBusClient.Initialise(Queue);
             ServiceBusClient.NewMessage += (s, e) => MsgHandler.ProcessMessage(ServiceBusClient, e);
@@ -73,9 +71,6 @@ namespace Quest.Lib.Processor
         private Response StartProcessorHandler(NewMessageArgs t)
         {
             var request = t.Payload as StartProcessingRequest;
-
-            if (request.Id.Session != Id.Session)
-                return null;
 
             if (request.Id.Instance != Id.Instance)
                 return null;
@@ -111,8 +106,12 @@ namespace Quest.Lib.Processor
         /// <param name="message"></param>
         protected void SetTimedMessage(string key, DateTime fireTime, MessageBase message)
         {
+            var session = Environment.GetEnvironmentVariable("Session");
+            if (string.IsNullOrEmpty(session))
+                session = "0";
+
             var msg = new TimedEventRequest() { Key = key, FireTime = fireTime, Message = message };
-            var queue = $"TimedEventManager_{Id.Session}_{Id.Instance}";
+            var queue = $"{Queue}-TEM-{session}";
 
                 PublishMetaData metadata = new PublishMetaData()
                 {
@@ -120,7 +119,7 @@ namespace Quest.Lib.Processor
                     ReplyTo = "",
                     RoutingKey = "",
                     Source = queue,
-                    Destination = queue
+                    Destination = ""
                 };
 
             ServiceBusClient.Broadcast(msg, metadata);

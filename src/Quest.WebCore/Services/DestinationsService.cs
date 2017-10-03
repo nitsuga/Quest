@@ -4,6 +4,7 @@ using GeoJSON.Net.Geometry;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using Quest.Mobile.Models;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
@@ -14,13 +15,13 @@ namespace Quest.WebCore.Services
     public class DestinationService
     {
 
-        MessageCache _messageCache;
+        AsyncMessageCache _messageCache;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messageCache"></param>
-        public DestinationService(MessageCache messageCache)
+        public DestinationService(AsyncMessageCache messageCache)
         {
             _messageCache = messageCache;
         }
@@ -36,7 +37,7 @@ namespace Quest.WebCore.Services
         /// <param name="standby"></param>
         /// <param name="station"></param>
         /// <returns></returns>
-        public DestinationFeatureCollection GetDestinations(bool hosp = false, bool standby = false, bool station = false)
+        public async Task<DestinationFeatureCollection> GetDestinations(bool hosp = false, bool standby = false, bool station = false)
         {
             MapItemsRequest request = new MapItemsRequest()
             {
@@ -50,7 +51,7 @@ namespace Quest.WebCore.Services
                 Stations = station
             };
 
-            var results = _messageCache.SendAndWait<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+            var results = await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
 
             var features = new List<DestinationFeature>();
 
@@ -58,13 +59,11 @@ namespace Quest.WebCore.Services
             {
                 var feature = GetDestinationUpdateFeature(res);
                 features.Add(feature);
-
             }
 
             var result = new DestinationFeatureCollection();
             result.Features.AddRange(features.ToArray());
             return result;
-
         }
 
 

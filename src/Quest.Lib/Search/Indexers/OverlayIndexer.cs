@@ -75,7 +75,7 @@ namespace Quest.Lib.Search.Indexers
 
                             if (centre == null)
                             {
-                                Logger.Write($"{this.GetType().Name}: Failed {overlay.OverlayName} {item.Description} has no centroid, maybe invalid geometry.", GetType().Name);
+                                Logger.Write($"{GetType().Name}: Failed {overlay.OverlayName} {item.Description} has no centroid, maybe invalid geometry.", GetType().Name);
                                 config.Skipped++;
                                 continue;
                             }
@@ -108,7 +108,7 @@ namespace Quest.Lib.Search.Indexers
                     }
                     catch (Exception ex)
                     {
-                        Logger.Write($"{this.GetType().Name}: Failed {overlay.OverlayName} {ex}", GetType().Name);
+                        Logger.Write($"{GetType().Name}: Failed {overlay.OverlayName} {ex}", GetType().Name);
                     }
 
                 }

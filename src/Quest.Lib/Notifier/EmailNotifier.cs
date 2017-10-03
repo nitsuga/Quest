@@ -15,7 +15,7 @@ namespace Quest.Lib.Notifier
 
         public NotificationResponse Send(Notification message)
         {
-            Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, this.GetType().Name);
+            Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, GetType().Name);
 
             var smtpmessage = new MailMessage(
                 "",

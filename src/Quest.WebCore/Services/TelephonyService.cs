@@ -7,9 +7,9 @@ namespace Quest.WebCore.Services
     public class TelephonyService
     {
         private int _callid;
-        MessageCache _msgClientCache;
+        AsyncMessageCache _msgClientCache;
 
-        public TelephonyService(MessageCache msgClientCache)
+        public TelephonyService(AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
         }

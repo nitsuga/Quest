@@ -2,14 +2,15 @@
 using Quest.Lib.ServiceBus;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
     public class SecurityService
     {
-        MessageCache _msgClientCache;
+        AsyncMessageCache _msgClientCache;
 
-        public SecurityService(MessageCache msgClientCache)
+        public SecurityService(AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
         }
@@ -18,13 +19,13 @@ namespace Quest.WebCore.Services
         /// Get claims for the current user
         /// </summary>
         /// <returns></returns>
-        public List<AuthorisationClaim> GetAppClaims(string username)
+        public async Task<List<AuthorisationClaim>> GetAppClaims(string username)
         {
             if (username != null)
             {
                 SecurityGetAppClaimsRequest request = new SecurityGetAppClaimsRequest { Username = username };
                 
-                var result = _msgClientCache.SendAndWait<SecurityGetAppClaimsResponse>(request, new TimeSpan(0, 0, 10));
+                var result = await _msgClientCache.SendAndWaitAsync<SecurityGetAppClaimsResponse>(request, new TimeSpan(0, 0, 10));
                 if (result == null)
                     return null;
                 return result.Claims;
@@ -37,10 +38,10 @@ namespace Quest.WebCore.Services
             return Lib.Security.SecurityExtensions.HasClaim(claims, claim, value);
         }
 
-        public SecurityNetwork GetNetwork()
+        public async Task<SecurityNetwork> GetNetwork()
         {
             SecurityGetNetworkRequest request = new SecurityGetNetworkRequest ();
-            var result = _msgClientCache.SendAndWait<SecurityGetNetworkResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<SecurityGetNetworkResponse>(request, new TimeSpan(0, 0, 10));
             return result.Network;
         }
     }

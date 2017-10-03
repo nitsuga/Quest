@@ -786,11 +786,11 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
             _agents.Add(agentId, stationAddress);
 
-            Logger.Write(string.Format("Channel {0} Added agent {1}<-->{2} total associations={3} ", this.ToString(), agentId, stationAddress, _agents.Count), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} Added agent {1}<-->{2} total associations={3} ", ToString(), agentId, stationAddress, _agents.Count), TraceEventType.Information, "CTIPSChannel");
             Logger.Write(string.Format("--- Agent List --- "), TraceEventType.Information, "CTIPSChannel");
             foreach (var a in _agents)
             {
-                Logger.Write(string.Format("Channel {0}       agent {1}<-->{2}", this.ToString(), a.Key, a.Value), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0}       agent {1}<-->{2}", ToString(), a.Key, a.Value), TraceEventType.Information, "CTIPSChannel");
             }
         }
         

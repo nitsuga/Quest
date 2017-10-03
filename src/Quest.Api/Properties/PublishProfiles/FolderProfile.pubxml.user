@@ -8,4 +8,231 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_PublishTargetUrl>E:\Dropbox\Quest\Git\Quest\src\Quest.Api\..\..\build\Docker\quest-api\bin</_PublishTargetUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <File Include="Accord.dll">
+      <publishTime>08/20/2017 22:42:54</publishTime>
+    </File>
+    <File Include="Accord.dll.config">
+      <publishTime>08/20/2017 22:42:54</publishTime>
+    </File>
+    <File Include="Accord.Math.Core.dll">
+      <publishTime>08/20/2017 22:42:52</publishTime>
+    </File>
+    <File Include="Accord.Math.dll">
+      <publishTime>08/20/2017 22:42:52</publishTime>
+    </File>
+    <File Include="Accord.Statistics.dll">
+      <publishTime>08/20/2017 22:42:56</publishTime>
+    </File>
+    <File Include="Apache.NMS.ActiveMQ.dll">
+      <publishTime>12/15/2016 06:16:24</publishTime>
+    </File>
+    <File Include="Apache.NMS.dll">
+      <publishTime>10/17/2015 11:31:54</publishTime>
+    </File>
+    <File Include="appsettings.Development.json">
+      <publishTime>09/21/2017 17:25:37</publishTime>
+    </File>
+    <File Include="appsettings.json">
+      <publishTime>09/29/2017 07:33:46</publishTime>
+    </File>
+    <File Include="Autofac.Configuration.dll">
+      <publishTime>09/07/2016 16:26:38</publishTime>
+    </File>
+    <File Include="Autofac.dll">
+      <publishTime>07/25/2017 05:11:08</publishTime>
+    </File>
+    <File Include="Autofac.Extensions.DependencyInjection.dll">
+      <publishTime>07/19/2017 16:34:34</publishTime>
+    </File>
+    <File Include="components.json">
+      <publishTime>09/25/2017 15:36:28</publishTime>
+    </File>
+    <File Include="CsvHelper.dll">
+      <publishTime>09/09/2016 14:59:46</publishTime>
+    </File>
+    <File Include="Elasticsearch.Net.dll">
+      <publishTime>07/21/2017 17:18:46</publishTime>
+    </File>
+    <File Include="GeoAPI.dll">
+      <publishTime>11/16/2015 11:53:58</publishTime>
+    </File>
+    <File Include="GeoJSON.Net.dll">
+      <publishTime>08/14/2017 01:08:04</publishTime>
+    </File>
+    <File Include="Ionic.Zip.Reduced.dll">
+      <publishTime>08/18/2011 11:59:04</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.Relational.Design.dll">
+      <publishTime>09/08/2017 22:02:30</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.SqlServer.Design.dll">
+      <publishTime>09/08/2017 22:02:30</publishTime>
+    </File>
+    <File Include="Microsoft.Spatial.dll">
+      <publishTime>08/14/2017 20:37:54</publishTime>
+    </File>
+    <File Include="Nest.dll">
+      <publishTime>07/21/2017 17:18:46</publishTime>
+    </File>
+    <File Include="NetTopologySuite.dll">
+      <publishTime>11/16/2015 22:35:28</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.GeoTools.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.MsSqlSpatial.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.PostGis.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.ShapeFile.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="NetTopologySuite.IO.ShapeFile.Extended.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="Newtonsoft.Json.dll">
+      <publishTime>06/18/2017 13:57:10</publishTime>
+    </File>
+    <File Include="PowerCollections.dll">
+      <publishTime>11/16/2015 22:35:28</publishTime>
+    </File>
+    <File Include="ProjNet.dll">
+      <publishTime>09/17/2014 11:38:24</publishTime>
+    </File>
+    <File Include="PushSharp.Amazon.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Apple.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Blackberry.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Common.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Firefox.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Google.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="PushSharp.Windows.dll">
+      <publishTime>09/03/2017 01:58:06</publishTime>
+    </File>
+    <File Include="Quest.Api.deps.json">
+      <publishTime>10/02/2017 13:13:46</publishTime>
+    </File>
+    <File Include="Quest.Api.dll">
+      <publishTime>10/02/2017 13:13:44</publishTime>
+    </File>
+    <File Include="Quest.Api.pdb">
+      <publishTime>10/02/2017 13:13:44</publishTime>
+    </File>
+    <File Include="Quest.Api.PrecompiledViews.dll">
+      <publishTime>10/02/2017 13:13:46</publishTime>
+    </File>
+    <File Include="Quest.Api.PrecompiledViews.pdb">
+      <publishTime>10/02/2017 13:13:46</publishTime>
+    </File>
+    <File Include="Quest.Api.runtimeconfig.json">
+      <publishTime>10/02/2017 13:13:47</publishTime>
+    </File>
+    <File Include="Quest.Api.xml">
+      <publishTime>10/02/2017 13:13:44</publishTime>
+    </File>
+    <File Include="Quest.Common.dll">
+      <publishTime>10/01/2017 20:08:37</publishTime>
+    </File>
+    <File Include="Quest.Common.pdb">
+      <publishTime>10/01/2017 20:08:37</publishTime>
+    </File>
+    <File Include="Quest.Lib.dll">
+      <publishTime>10/02/2017 12:59:47</publishTime>
+    </File>
+    <File Include="Quest.Lib.dll.config">
+      <publishTime>09/14/2017 16:50:47</publishTime>
+    </File>
+    <File Include="Quest.Lib.OS.dll">
+      <publishTime>10/02/2017 12:59:51</publishTime>
+    </File>
+    <File Include="Quest.Lib.OS.dll.config">
+      <publishTime>09/14/2017 16:50:46</publishTime>
+    </File>
+    <File Include="Quest.Lib.OS.pdb">
+      <publishTime>10/02/2017 12:59:51</publishTime>
+    </File>
+    <File Include="Quest.Lib.pdb">
+      <publishTime>10/02/2017 12:59:47</publishTime>
+    </File>
+    <File Include="Quest.Lib.Research.dll">
+      <publishTime>10/02/2017 12:59:49</publishTime>
+    </File>
+    <File Include="Quest.Lib.Research.dll.config">
+      <publishTime>09/24/2017 07:52:51</publishTime>
+    </File>
+    <File Include="Quest.Lib.Research.pdb">
+      <publishTime>10/02/2017 12:59:49</publishTime>
+    </File>
+    <File Include="RTree.dll">
+      <publishTime>02/09/2013 11:22:50</publishTime>
+    </File>
+    <File Include="runtimes/unix/lib/netstandard2.0/System.Private.ServiceModel.dll">
+      <publishTime>07/25/2017 13:59:44</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/netstandard2.0/System.Net.Http.WinHttpHandler.dll">
+      <publishTime>07/19/2017 10:01:30</publishTime>
+    </File>
+    <File Include="runtimes/win7/lib/netstandard2.0/System.Private.ServiceModel.dll">
+      <publishTime>07/25/2017 13:59:44</publishTime>
+    </File>
+    <File Include="SharpKml.dll">
+      <publishTime>07/30/2016 07:47:50</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.dll">
+      <publishTime>04/20/2017 19:13:20</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.Swagger.dll">
+      <publishTime>04/20/2017 19:13:22</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.SwaggerGen.dll">
+      <publishTime>04/20/2017 19:13:22</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.SwaggerUI.dll">
+      <publishTime>04/20/2017 19:13:24</publishTime>
+    </File>
+    <File Include="System.Net.Http.WinHttpHandler.dll">
+      <publishTime>07/19/2017 10:01:30</publishTime>
+    </File>
+    <File Include="System.ServiceModel.Http.dll">
+      <publishTime>07/25/2017 13:59:50</publishTime>
+    </File>
+    <File Include="System.ServiceModel.NetTcp.dll">
+      <publishTime>07/25/2017 13:59:50</publishTime>
+    </File>
+    <File Include="System.ServiceModel.Primitives.dll">
+      <publishTime>07/25/2017 13:59:52</publishTime>
+    </File>
+    <File Include="Tfl.Api.Common.dll">
+      <publishTime>09/29/2017 14:35:53</publishTime>
+    </File>
+    <File Include="Tfl.Api.Common.dll.config">
+      <publishTime>09/25/2017 15:10:26</publishTime>
+    </File>
+    <File Include="Tfl.Api.Common.pdb">
+      <publishTime>09/29/2017 14:35:53</publishTime>
+    </File>
+    <File Include="Tfl.Api.Presentation.Entities.dll">
+      <publishTime>07/23/2017 07:12:17</publishTime>
+    </File>
+    <File Include="web.config">
+      <publishTime>10/02/2017 13:13:47</publishTime>
+    </File>
+  </ItemGroup>
 </Project>

@@ -88,7 +88,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
             IsRunning = false;
 
-            Logger.Write(string.Format("Channel {0} initialising ", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} initialising ", ToString()), TraceEventType.Information, "CTIPSChannel");
         }
 
         void _cadChannel_SetData(object sender, SetDataRequest e)
@@ -184,11 +184,11 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
             if (!Config.Enabled)
             {
-                Logger.Write(string.Format("Channel {0} will not start. not enabled.", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0} will not start. not enabled.", ToString()), TraceEventType.Information, "CTIPSChannel");
                 return;
             }
 
-           Logger.Write(string.Format("Channel {0} starting", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+           Logger.Write(string.Format("Channel {0} starting", ToString()), TraceEventType.Information, "CTIPSChannel");
 
             try
             {
@@ -212,13 +212,13 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             _heatbeattimer.Start();
             IsRunning = true;
 
-            Logger.Write(string.Format("Channel {0} heartbeat timer set to {1} milliseconds", this.ToString(), _heatbeattimer.Interval), TraceEventType.Information, "CTIPSChannel");
-            Logger.Write(string.Format("Channel {0} heartbeat started", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} heartbeat timer set to {1} milliseconds", ToString(), _heatbeattimer.Interval), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} heartbeat started", ToString()), TraceEventType.Information, "CTIPSChannel");
         }
 
         void GetCurrentAssociations()
         {
-            Logger.Write(string.Format("Channel {0} Getting current agent mapping", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} Getting current agent mapping", ToString()), TraceEventType.Information, "CTIPSChannel");
             _eventHandler.FlushAgents();
 
             ClientProxy.Snapshot(
@@ -236,7 +236,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Logger.Write(string.Format("Channel {0} heartbeat fired due to inactivity on channel!", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} heartbeat fired due to inactivity on channel!", ToString()), TraceEventType.Information, "CTIPSChannel");
 
             // oops - restart everything
             Stop();
@@ -245,7 +245,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
         public void Stop()
         {
-            Logger.Write(string.Format("Channel {0} stopping", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} stopping", ToString()), TraceEventType.Information, "CTIPSChannel");
 
             try
             {
@@ -254,21 +254,21 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             }
             catch(Exception ex)
             {
-                Logger.Write(string.Format("Channel {0} failed to stopped: {1}", this.ToString(), ex), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0} failed to stopped: {1}", ToString(), ex), TraceEventType.Information, "CTIPSChannel");
             }
             finally
             {
                 // this causes us to attempt to open the channel again.
                 IsRunning = false;
             }
-            Logger.Write(string.Format("Channel {0} stopped", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} stopped", ToString()), TraceEventType.Information, "CTIPSChannel");
         }
 
         internal int StartListeningService()
         {
-            Logger.Write(string.Format("Channel {0} setting up listen service", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} setting up listen service", ToString()), TraceEventType.Information, "CTIPSChannel");
 
-            _eventHandler = new CTIEventHandler(this.ToString(), _cadChannel);
+            _eventHandler = new CTIEventHandler(ToString(), _cadChannel);
             _eventHandler.HeartbeatEvent += _eventHandler_HeartbeatEvent;
 
             string strURL = Config.ClientCallbackURL;
@@ -291,16 +291,16 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             }
             catch (Exception ex)
             {
-                Logger.Write(string.Format("Channel {0} error starting channel {1}", this.ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0} error starting channel {1}", ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
                 throw;
             }
-            Logger.Write(string.Format("Channel {0} listen service established", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} listen service established", ToString()), TraceEventType.Information, "CTIPSChannel");
             return 0;
         }
 
         void _eventHandler_HeartbeatEvent(object sender, EventArgs e)
         {
-            Logger.Write(string.Format("Channel {0} got heartbeat from CTI Server, timer reset", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} got heartbeat from CTI Server, timer reset", ToString()), TraceEventType.Information, "CTIPSChannel");
             // reset our timer..
             _heatbeattimer.Stop();
             _heatbeattimer.Start();
@@ -308,7 +308,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
         internal int StopListeningService()
         {
-            Logger.Write(string.Format("Channel {0} stopping client connection", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} stopping client connection", ToString()), TraceEventType.Information, "CTIPSChannel");
             if (_host != null)
             {
                 try
@@ -318,7 +318,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
                 catch (Exception ex)
                 {
                     _host.Abort();
-                    Logger.Write(string.Format("Channel {0} error stopping channel {1}", this.ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
+                    Logger.Write(string.Format("Channel {0} error stopping channel {1}", ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
                 }
                 _host = null;
                 return 0;
@@ -331,7 +331,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
         /// </summary>
         public void StartOutbound()
         {
-            Logger.Write(string.Format("Channel {0} starting client connection to CTI server @ {1}", this.ToString(), Config.CTIPortalServiceAddress), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} starting client connection to CTI server @ {1}", ToString(), Config.CTIPortalServiceAddress), TraceEventType.Information, "CTIPSChannel");
 
             // Setup the binding and address info to create a CTIPS client connection
             // for now we're modifing a standard WSHttpBinding so it will stay open 
@@ -392,13 +392,13 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             }
             catch (FaultException<CTIPortalServiceFault> fe)
             {
-                Logger.Write(string.Format("Channel {0} client connection failed: {1}", this.ToString(), fe.ToString()), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0} client connection failed: {1}", ToString(), fe.ToString()), TraceEventType.Information, "CTIPSChannel");
 
                 throw new Exception(fe.Message);
             }
             catch (Exception ex)
             {
-                Logger.Write(string.Format("Channel {0} client connection failed: {1}", this.ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
+                Logger.Write(string.Format("Channel {0} client connection failed: {1}", ToString(), ex.ToString()), TraceEventType.Information, "CTIPSChannel");
 
                 ClientChannel = null;
                 ClientProxy = null;
@@ -406,7 +406,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
                 throw new Exception(ex.InnerException.Message);
             }
 
-            Logger.Write(string.Format("Channel {0} client connection established with session id {1}", this.ToString(), SessionId), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} client connection established with session id {1}", ToString(), SessionId), TraceEventType.Information, "CTIPSChannel");
 
         }
 
@@ -415,22 +415,22 @@ namespace Quest.Lib.Telephony.AspectCTIPS
         /// </summary>
         public void RegisterForEvents()
         {
-            Logger.Write(string.Format("Channel {0} registering for \"agent\" events", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} registering for \"agent\" events", ToString()), TraceEventType.Information, "CTIPSChannel");
             AddMessageClassArgs msgArgs = new AddMessageClassArgs();
             msgArgs.SessionId = SessionId;
             msgArgs.TenantId = Config.TenantId;
             msgArgs.MessageClass = CTIMessageClass.EventCategoryAgent;
             ClientProxy.AddMessageClass(msgArgs);
 
-            Logger.Write(string.Format("Channel {0} registering for \"call\" events", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} registering for \"call\" events", ToString()), TraceEventType.Information, "CTIPSChannel");
             msgArgs.MessageClass = CTIMessageClass.EventCategoryCall;
             ClientProxy.AddMessageClass(msgArgs);
         
-            Logger.Write(string.Format("Channel {0} registering for \"route\" events", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} registering for \"route\" events", ToString()), TraceEventType.Information, "CTIPSChannel");
             msgArgs.MessageClass = CTIMessageClass.EventCategoryRoute;
             ClientProxy.AddMessageClass(msgArgs);
         
-            Logger.Write(string.Format("Channel {0} registering for \"system\" events", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+            Logger.Write(string.Format("Channel {0} registering for \"system\" events", ToString()), TraceEventType.Information, "CTIPSChannel");
             msgArgs.MessageClass = CTIMessageClass.EventCategorySystem;
             ClientProxy.AddMessageClass(msgArgs);
         }
@@ -444,7 +444,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             {
                 if (ClientProxy != null)
                 {
-                    Logger.Write(string.Format("Channel {0} stopping client connection to CTI server", this.ToString()), TraceEventType.Information, "CTIPSChannel");
+                    Logger.Write(string.Format("Channel {0} stopping client connection to CTI server", ToString()), TraceEventType.Information, "CTIPSChannel");
                     CloseConnectionArgs cca = new CloseConnectionArgs();
                     cca.SessionId = SessionId;
                     ClientProxy.CloseConnection(cca);

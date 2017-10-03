@@ -18,7 +18,7 @@ namespace Quest.WebCore.Controllers
 {
     public class HomeController : Controller
     {
-        private MessageCache _messageCache;
+        private AsyncMessageCache _messageCache;
         private ResourceService _resourceService;
         private IncidentService _incidentService;
         private DestinationService _destinationService;
@@ -27,7 +27,7 @@ namespace Quest.WebCore.Controllers
         private TelephonyService _telephonyService;
         private SecurityService _securityService;
 
-        public HomeController(MessageCache messageCache,
+        public HomeController(AsyncMessageCache messageCache,
                 ResourceService resourceService,
                 IncidentService incidentService,
                 DestinationService destinationService,
@@ -48,17 +48,17 @@ namespace Quest.WebCore.Controllers
             _securityService = securityService;
         }
 
-        HomeViewModel DefaultHomeViewModel()
+        async Task<HomeViewModel> DefaultHomeViewModel()
         {
             var user = HttpContext.User.Identity.Name;
 
             if (user == null)
                 user = "Guest";
 
-            var claims = _securityService.GetAppClaims(user);
+            var claims = await _securityService.GetAppClaims(user);
             //var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-            var groupResult = _searchService.GetIndexGroups();
+            var groupResult = await _searchService.GetIndexGroups();
 
             HomeViewModel model = new HomeViewModel
             {
@@ -72,7 +72,7 @@ namespace Quest.WebCore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            HomeViewModel model = DefaultHomeViewModel();
+            HomeViewModel model = await DefaultHomeViewModel();
             return View(model);
         }
 
@@ -84,9 +84,9 @@ namespace Quest.WebCore.Controllers
         }
 
         
-        public ActionResult TestRoutes()
+        public async Task<ActionResult> TestRoutes()
         {
-            HomeViewModel model = DefaultHomeViewModel();
+            HomeViewModel model = await DefaultHomeViewModel();
             return View(model);
 
         }
@@ -137,11 +137,11 @@ namespace Quest.WebCore.Controllers
         
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]
-        public ActionResult Route(string from, string to, string roadSpeedCalculator, string vehicle, int hour)
+        public async Task<ActionResult> Route(string from, string to, string roadSpeedCalculator, string vehicle, int hour)
         {
             try
             {
-                var route = _routeService.Route(from, to, roadSpeedCalculator, vehicle, hour, User.Identity.Name);
+                var route = await _routeService.Route(from, to, roadSpeedCalculator, vehicle, hour, User.Identity.Name);
 
                 if (route == null || route.Items.Count == 0)
                     return new ContentResult
@@ -200,7 +200,7 @@ namespace Quest.WebCore.Controllers
         
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]
-        public ActionResult SemanticSearch(string searchText, int searchMode, bool includeAggregates, int skip, int take, double w, double s, double e, double n, bool boundsfilter, string filterterms, string displayGroup, string indexGroup)
+        public async Task<ActionResult> SemanticSearch(string searchText, int searchMode, bool includeAggregates, int skip, int take, double w, double s, double e, double n, bool boundsfilter, string filterterms, string displayGroup, string indexGroup)
         {
             try
             {
@@ -233,7 +233,7 @@ namespace Quest.WebCore.Controllers
                     indexGroup = indexGroup
                 };
 
-                var searchResult = _searchService.SemanticSearch(request);
+                var searchResult = await _searchService.SemanticSearch(request);
 
                 var data = GetDisplaySearchResult(searchResult);
 
@@ -302,11 +302,11 @@ namespace Quest.WebCore.Controllers
 
         
         [HttpGet]
-        public ActionResult InformationSearch(double lng, double lat)
+        public async Task<ActionResult> InformationSearch(double lng, double lat)
         {
             var request = new InfoSearchRequest() { lat = lat, lng = lng };
             Debug.WriteLine($"Searching at lat: {lat}, long: {lng}");
-            var searchResult = _searchService.InfoSearch(request);
+            var searchResult = await _searchService.InfoSearch(request);
             var jsonp = GetDisplaySearchResult(searchResult);
             var js = JsonConvert.SerializeObject(jsonp);
             var result = new ContentResult

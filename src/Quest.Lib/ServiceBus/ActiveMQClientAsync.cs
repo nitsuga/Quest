@@ -32,6 +32,7 @@ namespace Quest.Lib.ServiceBus
         public string server { get; set; } = "activemq:tcp://127.0.0.1:61616";
         public int TTL = 10;
         public bool Persistent = false;
+        public string Environment { get; set; } = "";
 
         public ServiceStatus Status
         {
@@ -49,7 +50,12 @@ namespace Quest.Lib.ServiceBus
         /// <param name="queueName">The queue name on which we will listen</param>
         public void Initialise(string queueName)
         {
-            QueueName = queueName;
+            var env = System.Environment.GetEnvironmentVariable("Session");
+            if (string.IsNullOrEmpty(env))
+                env = "0";
+            Environment = env;
+            QueueName = Environment + "-" + queueName;
+            topic = Environment + "-" + topic;
 
             Task.Factory.StartNew(() => ProcessMessages());
 
@@ -76,7 +82,7 @@ namespace Quest.Lib.ServiceBus
             {
                 try
                 {
-                    var env = Environment.GetEnvironmentVariable("ActiveMQ");
+                    var env = System.Environment.GetEnvironmentVariable("ActiveMQ");
                     if (env != null)
                     {
                         Logger.Write($"Overriding ActiveMQ address with {env}", GetType().Name);
@@ -92,7 +98,7 @@ namespace Quest.Lib.ServiceBus
                     TimeSpan receiveTimeout = new TimeSpan(0, 0, 0, 30);
 
                     using (IConnection connection = amqfactory.CreateConnection())
-                    using (ISession session = connection.CreateSession( AcknowledgementMode.ClientAcknowledge ))
+                    using (ISession qsess = connection.CreateSession( AcknowledgementMode.ClientAcknowledge ))
                     {
                         // Start the connection so that messages will be processed.
                         connection.Start();
@@ -100,13 +106,13 @@ namespace Quest.Lib.ServiceBus
                         List<Task> tasks = new List<Task>();
 
                         // read topic 
-                        tasks.Add(ListenOnTopic(session, topic));
+                        tasks.Add(ListenOnTopic(qsess));
 
                         // read queue
-                        tasks.Add(ListenOnQueue(session));
+                        tasks.Add(ListenOnQueue(qsess));
 
                         //writer..
-                        tasks.Add(Writer(session, receiveTimeout, topic));
+                        tasks.Add(Writer(qsess, receiveTimeout, topic));
 
                         // wait for tasks to complete
                         Task.WaitAll(tasks.ToArray());
@@ -121,14 +127,13 @@ namespace Quest.Lib.ServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private Task ListenOnTopic(ISession session, string topic)
+        private Task ListenOnTopic(ISession qsess)
         {
             var t = Task.Factory.StartNew(() =>
             {
-                var queue = new ActiveMQQueue(QueueName);
-                IDestination destination = session.GetTopic(topic);
+                IDestination destination = qsess.GetTopic(topic);
                 // Create a consumer and producer
-                using (IMessageConsumer topic_consumer = session.CreateConsumer(destination))
+                using (IMessageConsumer topic_consumer = qsess.CreateConsumer(destination))
                 {
                     topic_consumer.Listener += OnTopicMessage;
                     while (true)
@@ -157,7 +162,7 @@ namespace Quest.Lib.ServiceBus
                 }
             };
 
-            var env = Environment.GetEnvironmentVariable("ActiveMQ");
+            var env = System.Environment.GetEnvironmentVariable("ActiveMQ");
             if (env != null)
             {
                 Logger.Write($"Overriding ActiveMQ address with {env}", GetType().Name);
@@ -193,13 +198,13 @@ namespace Quest.Lib.ServiceBus
             }
         }
 
-        private Task ListenOnQueue(ISession session)
+        private Task ListenOnQueue(ISession qsess)
         {
             var t2 = Task.Factory.StartNew(() =>
             {
                 var queue = new ActiveMQQueue(QueueName);
                 // Create a consumer and producer
-                using (IMessageConsumer queue_consumer = session.CreateConsumer(queue))
+                using (IMessageConsumer queue_consumer = qsess.CreateConsumer(queue))
                 {
                     // clear existing messages
                     while (queue_consumer.ReceiveNoWait() != null) ;

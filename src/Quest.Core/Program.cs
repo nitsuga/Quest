@@ -28,21 +28,17 @@ namespace Quest.Core
         public static IServiceProvider ServiceProvider { get; private set; }
         public static IContainer ApplicationContainer { get; private set; }
 
-        // to run the simulator
-        // -components=simulation.json -exec=RosterSimulator
-
-        // to run the full stack
-        // -exec=SearchManager;SecurityManager;RoutingManager;MapMatcherManager;VisualsManager;DeviceManager;IndexerManager
-
-        // -exec=SecurityManager;DeviceManager
+        // Set the Modules environment variable to specify which components to run
+        //
+        // to run the full web stack set Modules to:
+        // SecurityManager;DeviceManager;NotificationManager;SearchManager;RoutingManager;MapMatcherManager;VisualsManager;IndexerManager
 
         // for research, use these
-        // -exec=MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 -components=components.json
-
-        // -exec=MapMatcherWorker -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 /taskid=0 /runid=69 /startrouteid=1254133 /endrouteid=1254136
-
-        // -exec=AnalyseEdgeCosts
-
+        // MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 -components=components.json
+        // MapMatcherWorker -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 /taskid=0 /runid=69 /startrouteid=1254133 /endrouteid=1254136
+        // AnalyseEdgeCosts
+        // to run the simulator
+        // simulation.json -exec=RosterSimulator
 
         static void Main(string[] args)
         {
@@ -92,7 +88,6 @@ namespace Quest.Core
                     .AddConsole()
                     .AddDebug();
 
-
                 // get the processor runner
                 var runner = ApplicationContainer.Resolve<ProcessRunner>();
                 if (runner == null)
@@ -110,8 +105,6 @@ namespace Quest.Core
                     return;
                 }
 
-                var session = GetSession(config);
-                runner.settings.session = session;
                 runner.settings.modules.AddRange(modulesToRun);
 
                 // prepare processors ready for action
@@ -209,29 +202,6 @@ namespace Quest.Core
             
             return provider;
 
-        }
-
-        /// <summary>
-        /// get the session id
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="sessionOverride"></param>
-        /// <returns></returns>
-        internal static string GetSession(IConfiguration config)
-        {
-            var session = Environment.GetEnvironmentVariable("Session");
-            if (!string.IsNullOrEmpty(session))
-            {
-                Logger.Write($"Using Session={session}");
-            }
-            else
-            {
-                var global = config.GetSection("global");
-                session = global["session"];
-                if (session == null || session.Length == 0)
-                    session = "";
-            }
-            return session;
         }
 
         /// <summary>

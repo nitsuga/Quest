@@ -3,15 +3,16 @@ using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
     public class RouteService 
     {
         SearchService _searchService;
-        MessageCache _msgClientCache;
+        AsyncMessageCache _msgClientCache;
 
-        public RouteService(SearchService searchService, MessageCache msgClientCache)
+        public RouteService(SearchService searchService, AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
             _searchService = searchService;
@@ -31,24 +32,24 @@ namespace Quest.WebCore.Services
             return i;
         }
 
-        public RoutingResponse Route(RouteRequest request)
+        public async Task<RoutingResponse> Route(RouteRequest request)
         {
-            var result = _msgClientCache.SendAndWait<RoutingResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<RoutingResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 
-        public RoutingResponse Route(string from, string to, string roadSpeedCalculator, string vehicle, int hour, string username)
+        public async Task<RoutingResponse> Route(string from, string to, string roadSpeedCalculator, string vehicle, int hour, string username)
         {
             if (roadSpeedCalculator == "")
                 roadSpeedCalculator = "VariableSpeedCalculator";
 
-            var f = _searchService.SimpleSearch(from, username);
+            var f = await _searchService.SimpleSearch(from, username);
             if (f == null || f.Documents.Count == 0)
             {
                 throw new ApplicationException("Cant find the start location");
             }
 
-            var t = _searchService.SimpleSearch(to, username);
+            var t = await _searchService.SimpleSearch(to, username);
             if (t.Documents.Count == 0)
             {
                 throw new ApplicationException("Cant find the end location");
@@ -69,13 +70,13 @@ namespace Quest.WebCore.Services
                 VehicleType = vehicle
             };
 
-            var route = Route(request);
+            var route = await Route(request);
             return route;
         }
 
-        public GetCoverageResponse GetVehicleCoverage(GetCoverageRequest request)
+        public async Task<GetCoverageResponse> GetVehicleCoverage(GetCoverageRequest request)
         {
-            var result = _msgClientCache.SendAndWait<GetCoverageResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<GetCoverageResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 

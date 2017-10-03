@@ -17,7 +17,6 @@ namespace Quest.Core
         }
 
         public List<string> modules { get; set; }
-        public string session { get; set; }
     }
 
     public class ProcessRunner : IProcessRunner
@@ -55,7 +54,7 @@ namespace Quest.Core
             foreach (var proc in AllProcessors)
             {
                 Logger.Write($"Preparing {proc.Key}", GetType().Name);
-                proc.Value.Prepare(new ProcessingUnitId { Session = settings.session, Name = proc.Key }, config);
+                proc.Value.Prepare(new ProcessingUnitId { Name = proc.Key }, config);
             }
 
             Logger.Write($"Waiting for processors to complete preparation", GetType().Name);
@@ -75,8 +74,8 @@ namespace Quest.Core
 
         public void Start(IServiceProvider container, IContainer applicationContainer)
         {
-            var queue = $"ProcessRunner_{settings.session}";
-            Logger.Write($"{settings.session}:ProcessRunner: Attaching to queue {queue}", GetType().Name);
+            var queue = $"ProcessRunner";
+            Logger.Write($"Attaching to queue {queue}", GetType().Name);
 
             foreach (var proc in AllProcessors)
             {

@@ -185,10 +185,6 @@ namespace Quest.Api
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-
-            var sb = ApplicationContainer.Resolve<IServiceBusClient>();
-            var cache = ApplicationContainer.Resolve<AsyncMessageCache>();
-
             return new AutofacServiceProvider(this.ApplicationContainer);
         }
 

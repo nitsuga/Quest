@@ -5,6 +5,7 @@ using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
+using System;
 
 namespace Quest.Lib.Notifier
 {
@@ -33,7 +34,7 @@ namespace Quest.Lib.Notifier
         protected override void OnStart()
         {
             Initialise();
-            Logger.Write("NotificationManager initialised", "Device");
+            Logger.Write("NotificationManager initialised", GetType().Name);
         }
 
         /// <summary>
@@ -54,21 +55,28 @@ namespace Quest.Lib.Notifier
         {
             var message = t.Payload as Notification;
 
-            if (message == null)
-                return new NotificationResponse { Message = "Null Message", Success = false, RequestId = message.RequestId };
+            try
+            {
+                if (message == null)
+                    return new NotificationResponse { Message = "Null Message", Success = false };
 
-            if (string.IsNullOrEmpty(message.Method))
-                return new NotificationResponse { Message = "No 'Method' defined", Success = false, RequestId = message.RequestId };
+                if (string.IsNullOrEmpty(message.Method))
+                    return new NotificationResponse { Message = "No 'Method' defined", Success = false, RequestId = message.RequestId };
 
-            if (!_scope.IsRegisteredWithKey<INotifier>(message.Method))
-                return new NotificationResponse { Message = $"Method {message.Method} unrecognised.", Success = false, RequestId = message.RequestId };
+                if (!_scope.IsRegisteredWithKey<INotifier>(message.Method))
+                    return new NotificationResponse { Message = $"Method {message.Method} unrecognised.", Success = false, RequestId = message.RequestId };
 
-            var processor = _scope.ResolveNamed<INotifier>(message.Method);
-            if (processor != null)
-                return processor.Send(message);
-            else
-                return new NotificationResponse { Message = $"Could not load method {message.Method}", Success = false, RequestId = message.RequestId };
-
+                var processor = _scope.ResolveNamed<INotifier>(message.Method);
+                if (processor != null)
+                    return processor.Send(message);
+                else
+                    return new NotificationResponse { Message = $"Could not load method {message.Method}", Success = false, RequestId = message.RequestId };
+            }
+            catch(Exception ex)
+            {
+                Logger.Write(ex);
+                return new NotificationResponse { Message = $"Failed - see server logs for the reason", Success = false};
+            }
         }
     }
 }

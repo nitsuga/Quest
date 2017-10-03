@@ -2,19 +2,20 @@
 using System;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
     public class SearchService
     {
-        MessageCache _msgClientCache;
+        AsyncMessageCache _msgClientCache;
 
-        public SearchService(MessageCache msgClientCache)
+        public SearchService(AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
         }
 
-        public SearchResponse SimpleSearch(string location, string userName)
+        public async Task<SearchResponse> SimpleSearch(string location, string userName)
         {
             // get coords of start and end
             var fromRequest = new SearchRequest()
@@ -31,32 +32,32 @@ namespace Quest.WebCore.Services
                 indexGroup = null,
             };
 
-            var f = SemanticSearch(fromRequest);
+            var f = await SemanticSearch(fromRequest);
             return f;
         }
 
-        public SearchResponse SemanticSearch(SearchRequest request)
+        public async Task<SearchResponse> SemanticSearch(SearchRequest request)
         {
-            var result = _msgClientCache.SendAndWait<SearchResponse>(request, new TimeSpan(0, 0, 10));
+            var result =await _msgClientCache.SendAndWaitAsync<SearchResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 
-        public IndexResponse Index(IndexRequest request)
+        public async Task<IndexResponse> Index(IndexRequest request)
         {
-            var result = _msgClientCache.SendAndWait<IndexResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<IndexResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 
-        public SearchResponse InfoSearch(InfoSearchRequest request)
+        public async Task<SearchResponse> InfoSearch(InfoSearchRequest request)
         {
-            var result = _msgClientCache.SendAndWait<SearchResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<SearchResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 
-        public IndexGroupResponse GetIndexGroups()
+        public async Task<IndexGroupResponse> GetIndexGroups()
         {
             IndexGroupRequest request = new IndexGroupRequest();
-            var result = _msgClientCache.SendAndWait<IndexGroupResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _msgClientCache.SendAndWaitAsync<IndexGroupResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
     }

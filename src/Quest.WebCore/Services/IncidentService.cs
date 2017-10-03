@@ -4,6 +4,7 @@ using Quest.Common.Messages;
 using Quest.Mobile.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
@@ -11,13 +12,13 @@ namespace Quest.WebCore.Services
     public class IncidentService
     {
 
-        MessageCache _messageCache;
+        AsyncMessageCache _messageCache;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messageCache"></param>
-        public IncidentService(MessageCache messageCache)
+        public IncidentService(AsyncMessageCache messageCache)
         {
             _messageCache = messageCache;
         }
@@ -25,7 +26,7 @@ namespace Quest.WebCore.Services
         {
         }
 
-        public IncidentFeatureCollection GetIncidents(bool includeCatA = false, bool includeCatB = false)
+        public async Task<IncidentFeatureCollection> GetIncidents(bool includeCatA = false, bool includeCatB = false)
         {
             MapItemsRequest request = new MapItemsRequest()
             {
@@ -39,7 +40,7 @@ namespace Quest.WebCore.Services
                 Stations = false
             };
 
-            var results = _messageCache.SendAndWait<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+            var results =await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
 
             var features = new List<IncidentFeature>();
 

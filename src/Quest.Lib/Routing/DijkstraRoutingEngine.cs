@@ -257,7 +257,7 @@ namespace Quest.Lib.Routing
             }
             catch(Exception ex)
             {
-                Logger.Write(ex.ToString(), TraceEventType.Information, this.GetType().Name);
+                Logger.Write(ex.ToString(), TraceEventType.Information, GetType().Name);
                 return null;
             }
             

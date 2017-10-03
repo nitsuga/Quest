@@ -51,8 +51,8 @@ namespace Quest.WebCore
             builder.RegisterModule(new AutofacModule());
 
             // Add application services.
-            services.AddSingleton<IServiceBusClient, ActiveMqClient>();
-            services.AddSingleton<MessageCache>();
+            //services.AddSingleton<IServiceBusClient, ActiveMqClientAsync>();
+            //services.AddSingleton<AsyncMessageCache>();
             services.AddSingleton<ResourceService>();
             services.AddSingleton<IncidentService>();
             services.AddSingleton<DestinationService>();
@@ -75,7 +75,7 @@ namespace Quest.WebCore
             if (runner != null)
             {
                 // start them off
-                runner.Start(provider, ApplicationContainer);
+                runner.Start(provider, ApplicationContainer, Configuration);
             }
             return provider;
         }
@@ -121,7 +121,6 @@ namespace Quest.WebCore
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
 
             appLifetime.ApplicationStopped.Register(() => this.ApplicationContainer.Dispose());
 

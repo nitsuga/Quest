@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
@@ -18,7 +19,7 @@ namespace Quest.WebCore
 
     public interface IProcessRunner
     {
-        void Start(IServiceProvider container, IContainer ApplicationContainer);
+        void Start(IServiceProvider container, IContainer ApplicationContainer, IConfiguration config);
     }
 
     public class ProcessRunner: IProcessRunner
@@ -30,17 +31,17 @@ namespace Quest.WebCore
             _serviceCollection = serviceCollection;
         }
 
-        public void Start(IServiceProvider container, IContainer applicationContainer)
+        public void Start(IServiceProvider container, IContainer applicationContainer, IConfiguration config)
         {
             var queue = $"WebCore";
+
             Logger.Write($"Web: Attaching to queue {queue}", GetType().Name);
 
             var serviceBusClient = container.GetService<Common.ServiceBus.IServiceBusClient>();
             serviceBusClient.Initialise(queue);
 
-            var msgCache = container.GetService<MessageCache>();
-            msgCache.Initialise(queue);
-
+            //var msgCache = container.GetService<AsyncMessageCache>();
         }
+
     }
 }

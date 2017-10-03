@@ -4,19 +4,20 @@ using GeoJSON.Net.Geometry;
 using Quest.Common.Messages;
 using Quest.Mobile.Models;
 using Quest.Lib.ServiceBus;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Services
 {
 
     public class ResourceService
     {
-        MessageCache _messageCache;
+        AsyncMessageCache _messageCache;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messageCache"></param>
-        public ResourceService(MessageCache messageCache)
+        public ResourceService(AsyncMessageCache messageCache)
         {
             _messageCache = messageCache;
         }
@@ -31,7 +32,7 @@ namespace Quest.WebCore.Services
         /// <param name="avail"></param>
         /// <param name="busy"></param>
         /// <returns></returns>
-        public ResourceFeatureCollection GetResources(bool avail = false, bool busy = false)
+        public async Task<ResourceFeatureCollection> GetResources(bool avail = false, bool busy = false)
         {
             MapItemsRequest request = new MapItemsRequest()
             {
@@ -45,7 +46,7 @@ namespace Quest.WebCore.Services
                 Stations = false
             };
 
-            var results = _messageCache.SendAndWait<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+            var results =await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
 
             var features = new List<ResourceFeature>();
             if (results != null)
@@ -140,19 +141,19 @@ namespace Quest.WebCore.Services
             return null;
         }
 
-        public AssignDeviceResponse AssignDevice(string callsign, string eventId, Boolean nearby)
+        public async Task<AssignDeviceResponse> AssignDevice(string callsign, string eventId, Boolean nearby)
         {
                 var request = new AssignDeviceRequest() { Callsign = callsign, EventId = eventId, Nearby = nearby };
                 _messageCache.BroadcastMessage(request);
-                var results = _messageCache.SendAndWait<AssignDeviceResponse>(request, new TimeSpan(0, 0, 10));
+                var results =await _messageCache.SendAndWaitAsync<AssignDeviceResponse>(request, new TimeSpan(0, 0, 10));
                 return results;
         }
 
-        public CancelDeviceResponse CancelDevice(string callsign, string eventId)
+        public async Task<CancelDeviceResponse> CancelDevice(string callsign, string eventId)
         {
             var request = new CancelDeviceRequest() { Callsign = callsign, EventId = eventId };
             _messageCache.BroadcastMessage(request);
-            var results = _messageCache.SendAndWait<CancelDeviceResponse>(request, new TimeSpan(0, 0, 10));
+            var results = await _messageCache.SendAndWaitAsync<CancelDeviceResponse>(request, new TimeSpan(0, 0, 10));
             return results;            
         }
     }

@@ -48,10 +48,12 @@
     <Compile Remove="Routing\StandbyCoverage.cs" />
     <Compile Remove="Search\AddressSearch.cs" />
     <Compile Remove="Search\Elastic\IndexGroup.cs" />
+    <Compile Remove="ServiceBus\ActiveMQClient.cs" />
+    <Compile Remove="ServiceBus\LocalServiceBusClient.cs" />
+    <Compile Remove="ServiceBus\LocalServiceBusEngine.cs" />
     <Compile Remove="ServiceBus\MessageCache.cs" />
     <Compile Remove="Telephony\Aspect\CollabChannel.cs" />
     <Compile Remove="Telephony\Avaya\CollabChannel.cs" />
-    <Compile Remove="Telephony\Avaya\TSAPIHandler.cs" />
     <Compile Remove="Trackers\AlarmTracker.cs" />
     <Compile Remove="Trackers\CommandPointTracker.cs" />
     <Compile Remove="Utils\RouteLine.cs" />

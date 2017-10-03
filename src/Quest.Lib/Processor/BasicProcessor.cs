@@ -132,8 +132,7 @@ namespace Quest.Lib.Processor
 
         public void LogMessage(string message, TraceEventType severity = TraceEventType.Information)
         {
-            string name = $"{Id.Name}:{Id.Session}/{ Id.Instance}";
-            Logger.Write(message, severity, name); 
+            Logger.Write(message, severity, GetType().Name); 
         }
     }
 }

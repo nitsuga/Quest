@@ -15,7 +15,6 @@ namespace Quest.Common.Messages
     [Serializable]
     public class ProcessingUnitId
     {
-        public string Session;
         public string Name;
         public int Instance;
     }

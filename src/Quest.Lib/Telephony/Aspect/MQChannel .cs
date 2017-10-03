@@ -23,7 +23,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
 
         public void Initialise()
         {
-            Logger.Write(string.Format("Channel {0} initialising", this.ToString()), TraceEventType.Information, "CollabChannel");
+            Logger.Write(string.Format("Channel {0} initialising", ToString()), TraceEventType.Information, "CollabChannel");
         }
 
         public void SendLogoff(string extension)

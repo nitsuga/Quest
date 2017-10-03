@@ -56,7 +56,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
             MsgHandler.AddHandler<MakeCall>(MakeCallHandler);
             try
             {
-                Logger.Write(string.Format("Controller starting", this.ToString()), TraceEventType.Information, "AspectServer");
+                Logger.Write(string.Format("Controller starting", ToString()), TraceEventType.Information, "AspectServer");
 
                 _config = SystemConfig.Load(channelConfig);
 
@@ -81,7 +81,7 @@ namespace Quest.Lib.Telephony.AspectCTIPS
                     }
                 }
 
-                Logger.Write(string.Format("Controller \"who is primary\" timer started", this.ToString()), TraceEventType.Information, "AspectServer");
+                Logger.Write(string.Format("Controller \"who is primary\" timer started", ToString()), TraceEventType.Information, "AspectServer");
                 _primarytimer.Interval = 5000;
                 _primarytimer.Elapsed += _primarytimer_Elapsed;
                 _primarytimer.Start();

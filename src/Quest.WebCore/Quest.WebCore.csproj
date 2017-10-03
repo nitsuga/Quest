@@ -27,7 +27,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\Debug</OutputPath>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Docker|AnyCPU'">
@@ -42,13 +42,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\css\vis\**" />
-    <Content Remove="wwwroot\css\vis\**" />
-    <EmbeddedResource Remove="wwwroot\css\vis\**" />
-    <None Remove="wwwroot\css\vis\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Models\IdentityModels.cs" />
     <Compile Remove="Models\LocationSearchJob.cs" />
     <Compile Remove="Services\ClientConnectionService.cs" />
@@ -57,31 +50,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\css\bootstrap-theme.css" />
-    <Content Remove="wwwroot\css\homepage.css" />
-    <Content Remove="wwwroot\css\leaflet.Icon.Pulse.css" />
-    <Content Remove="wwwroot\css\leaflet.usermarker.css" />
-    <Content Remove="wwwroot\css\site-orig.css" />
-    <Content Remove="wwwroot\css\site-orig.min.css" />
-    <Content Remove="wwwroot\css\site.css" />
-    <Content Remove="wwwroot\css\site.min.css" />
-    <Content Remove="wwwroot\js\bootstrap-toggle.js" />
-    <Content Remove="wwwroot\js\clientstore.js" />
-    <Content Remove="wwwroot\js\datepicker.en.js" />
-    <Content Remove="wwwroot\js\google.js" />
-    <Content Remove="wwwroot\js\intel.js" />
-    <Content Remove="wwwroot\js\leaflet.draw.js" />
-    <Content Remove="wwwroot\js\leaflet.heat.js" />
-    <Content Remove="wwwroot\js\leaflet.usermarker.js" />
-    <Content Remove="wwwroot\js\map.js" />
-    <Content Remove="wwwroot\js\quest.visualisation.js" />
-    <Content Remove="wwwroot\js\security.js" />
-    <Content Remove="wwwroot\js\settings.js" />
-    <Content Remove="wwwroot\js\site.js" />
-    <Content Remove="wwwroot\js\site.min.js" />
-    <Content Remove="wwwroot\js\telephony.js" />
-    <Content Remove="wwwroot\js\timeline.js" />
-    <Content Remove="wwwroot\js\vis.js" />
+    <Content Remove="Views\Shared\_LoginPartial.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Apache.NMS.ActiveMQ" Version="1.7.2" />
@@ -117,13 +90,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\css\" />
-    <Folder Include="wwwroot\js\" />
-  </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

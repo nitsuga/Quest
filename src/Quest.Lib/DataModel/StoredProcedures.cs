@@ -1,11 +1,63 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Reflection;
 
 namespace Quest.Lib.DataModel
 {
-
-    public partial class QuestContext 
+    public static class SqlExtensions
     {
+        public static DbCommand LoadStoredProc(this DbCommand cmd, string storedProcName)
+        {
+            cmd.CommandText = storedProcName;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            return cmd;
+        }
+
+        public static DbCommand WithSqlParam(this DbCommand cmd, string paramName, object paramValue)
+        {
+            if (string.IsNullOrEmpty(cmd.CommandText))
+                throw new InvalidOperationException("Call LoadStoredProc before using this method");
+
+            var param = cmd.CreateParameter();
+            param.ParameterName = paramName;
+            param.Value = paramValue;
+            cmd.Parameters.Add(param);
+            return cmd;
+        }
+
+        public static IList<T> MapToList<T>(this DbDataReader dr)
+        {
+            var objList = new List<T>();
+            var props = typeof(T).GetRuntimeProperties();
+
+            var colMapping = dr.GetColumnSchema()
+                .Where(x => props.Any(y => y.Name.ToLower() == x.ColumnName.ToLower()))
+                .ToDictionary(key => key.ColumnName.ToLower());
+
+            if (dr.HasRows)
+            {
+                while (dr.Read())
+                {
+                    T obj = Activator.CreateInstance<T>();
+                    foreach (var prop in props)
+                    {
+                        var val = dr.GetValue(colMapping[prop.Name.ToLower()].ColumnOrdinal.Value);
+                        prop.SetValue(obj, val == DBNull.Value ? null : val);
+                    }
+                    objList.Add(obj);
+                }
+            }
+            return objList;
+        }
+
+    }
+
+    public partial class QuestContext : DbContext
+    {
+
         /// <summary>
         ///  dotnet ef dbcontext scaffold "Server=localhost,999;Database=QuestNLPG;user=sa;pwd=M3Gurdy*" Microsoft.EntityFrameworkCore.SqlServer -f -o DataModelNLPG
         ///  dotnet ef dbcontext scaffold "Server=localhost,999;Database=QuestData;user=sa;pwd=M3Gurdy*" Microsoft.EntityFrameworkCore.SqlServer -f -o DataModelResearch
@@ -13,28 +65,40 @@ namespace Quest.Lib.DataModel
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        public virtual List<GetClaims_Result> GetClaims(string claimType, string claimValue)
+        public virtual IList<GetClaims_Result> GetClaims(string claimType, string claimValue)
         {
-            //var claimTypeParameter = claimType != null ?
-            //    new ObjectParameter("ClaimType", claimType) :
-            //    new ObjectParameter("ClaimType", typeof(string));
+            using (var dbc = this.Database.GetDbConnection())
+            {
+                dbc.Open();
+                using (var sqlcmd = dbc.CreateCommand())
+                {
+                    sqlcmd.LoadStoredProc("GetClaims")
+                        .WithSqlParam("@ClaimType", claimType)
+                        .WithSqlParam("@ClaimValue", claimValue);
 
-            //var claimValueParameter = claimValue != null ?
-            //    new ObjectParameter("ClaimValue", claimValue) :
-            //    new ObjectParameter("ClaimValue", typeof(string));
-
-            //return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetClaims_Result>("GetClaims", claimTypeParameter, claimValueParameter);
-
-            return null;
+                    using (var reader = sqlcmd.ExecuteReader())
+                    {
+                        var result = reader.MapToList<GetClaims_Result>();
+                        return result;
+                    }
+                }
+            }
         }
 
-        public virtual List<string> GetOperationalArea(Nullable<int> buffer)
+        public virtual string GetOperationalArea(Nullable<int> buffer)
         {
-            //var bufferParameter = buffer.HasValue ?
-            //    new ObjectParameter("Buffer", buffer) :
-            //    new ObjectParameter("Buffer", typeof(int));
-
-            //return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<string>("GetOperationalArea", bufferParameter);
+            using (var dbc = this.Database.GetDbConnection())
+            {
+                using (var sqlcmd = dbc.CreateCommand())
+                {
+                    sqlcmd.CommandText = $"EXEC [GetOperationalArea] @Buffer = {buffer}";
+                    sqlcmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    using (var reader = sqlcmd.ExecuteReader())
+                    {
+                        var result = reader.GetString(0);
+                    }
+                }
+            }
             return null;
         }
 

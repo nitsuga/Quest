@@ -96,10 +96,15 @@ namespace Quest.Lib.Security
         private List<AuthorisationClaim> GetAppClaims(string name, QuestContext db)
         {
             var results = db.GetClaims("user", name);
-            var list =  results.Select(
-                        x => new AuthorisationClaim() { ClaimType = x.SecuredItemName, ClaimValue = x.SecuredValue })
-                        .ToList();
+            if (results != null)
+            {
+                var list = results.Select(
+                            x => new AuthorisationClaim() { ClaimType = x.SecuredItemName, ClaimValue = x.SecuredValue })
+                            .ToList();
                 return list;
+            }
+            else
+                return new List<AuthorisationClaim>();
         }
 
         /// <summary>

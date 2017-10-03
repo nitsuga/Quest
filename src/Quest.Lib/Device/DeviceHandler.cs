@@ -574,7 +574,8 @@ namespace Quest.Lib.Device
             {
                 // make a note of the current revision
                 var resmax = db.Resource.Max(x => x.Revision);
-                response.CurrRevision = (long)resmax + 1;
+                
+                response.CurrRevision = (long)(resmax??0) + 1;
             });
 
             response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
@@ -686,7 +687,7 @@ namespace Quest.Lib.Device
         IEnumerable<DataModel.Resource> ResourceAtRevision(QuestContext db, long revision)
         {
             //TODO: Net Core
-            return null;
+            return new List<DataModel.Resource>();
         }
 
         private List<int> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
@@ -698,27 +699,30 @@ namespace Quest.Lib.Device
                 // work out which ones were on display at the original revision
                 if (avail && busy)
                 {
-                    results.AddRange(
-                        ResourceAtRevision(db, revision)
-                            .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
-                            .Select(x => x.ResourceId)
-                        );
+                    var resources = ResourceAtRevision(db, revision)
+                        .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
+                        .Select(x => x.ResourceId);
+                    if (resources != null)
+                        results.AddRange(resources);
                 }
                 else
                 {
                     if (avail)
-                        results.AddRange(
-                            ResourceAtRevision(db, revision)
+                    {
+                        var resources = ResourceAtRevision(db, revision)
                                 .Where(x => x.ResourceStatus.Available == true)
-                                .Select(x => x.ResourceId)
-                            );
+                                .Select(x => x.ResourceId);
+                        if (resources != null)
+                            results.AddRange(resources);
+                    }
 
                     if (busy)
-                        results.AddRange(
-                            ResourceAtRevision(db, revision)
-                                .Where(x => x.ResourceStatus.Busy == true)
-                                .Select(x => x.ResourceId)
-                            );
+                    {
+                        var resources = ResourceAtRevision(db, revision)
+                            .Where(x => x.ResourceStatus.Busy == true)
+                            .Select(x => x.ResourceId);
+                        results.AddRange(resources);
+                    }
                 }
 
                 return results;
