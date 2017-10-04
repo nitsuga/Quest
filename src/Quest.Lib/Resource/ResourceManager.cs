@@ -19,13 +19,11 @@ namespace Quest.Lib.Resource
         private ResourceHandler _resourceHandler;
         private IIncidentStore _incStore;
 #endif
-        private NotificationSettings _notificationSettings = new NotificationSettings();
 
         public ResourceManager(
             IIncidentStore incStore,
             ResourceHandler resourceHandler,
             ElasticSettings elastic,
-            NotificationSettings notificationSettings,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
@@ -33,7 +31,6 @@ namespace Quest.Lib.Resource
             _incStore = incStore;
             _elastic = elastic;
             _resourceHandler = resourceHandler;
-            _notificationSettings = notificationSettings;
         }
 
         protected override void OnPrepare()
@@ -73,28 +70,28 @@ namespace Quest.Lib.Resource
             var resourceUpdate = t.Payload as ResourceUpdate;
 
             if (resourceUpdate != null)
-                _resourceHandler.ResourceUpdate(resourceUpdate, _notificationSettings, ServiceBusClient, _config,_incStore);
+                _resourceHandler.ResourceUpdate(resourceUpdate, ServiceBusClient, _config, _incStore);
             return null;
         }
 
         private Response DeleteResourceHandler(NewMessageArgs t)
         {
             var item = t.Payload as DeleteResource;
-            _resourceHandler.DeleteResource(item, _notificationSettings, ServiceBusClient);
+            _resourceHandler.DeleteResource(item, ServiceBusClient);
             return null;
         }
 
         private Response ResourceLogonHandler(NewMessageArgs t)
         {
             var item = t.Payload as ResourceLogon;
-            _resourceHandler.ResourceLogon(item, _notificationSettings);
+            _resourceHandler.ResourceLogon(item);
             return null;
         }
 
         private Response BeginDumpHandler(NewMessageArgs t)
         {
             var item = t.Payload as BeginDump;
-            _resourceHandler.BeginDump(item, _notificationSettings);
+            _resourceHandler.BeginDump(item);
             return null;
         }
 

@@ -1,4 +1,6 @@
-﻿namespace Quest.Common.Messages
+﻿using Newtonsoft.Json;
+
+namespace Quest.Common.Messages
 {
 
     public class NotificationResponse : Response

@@ -15,21 +15,37 @@ namespace Quest.Lib.Resource
             _dbFactory = dbFactory;
         }
 
-        public QuestResource Get(int fleetno)
+        public QuestResource GetByFleetNo(string fleetno)
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == fleetno);
+                if (dbinc == null)
+                    return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
                 return res;
             });
         }
 
-        public QuestResource Get(string callsign)
+        public QuestResource GetByCallsign(string callsign)
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
                 var dbinc = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
+                if (dbinc == null)
+                    return null;
+                var res = Cloner.CloneJson<QuestResource>(dbinc);
+                return res;
+            });
+        }
+
+        public QuestResource GetByResourceId(int resourceId)
+        {
+            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
+            {
+                var dbinc = db.Resource.FirstOrDefault(x => x.ResourceId== resourceId);
+                if (dbinc == null)
+                    return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
                 return res;
             });

@@ -141,14 +141,6 @@ namespace Quest.WebCore.Services
             return null;
         }
 
-        public async Task<AssignDeviceResponse> AssignDevice(string callsign, string eventId, Boolean nearby)
-        {
-                var request = new AssignDeviceRequest() { Callsign = callsign, EventId = eventId, Nearby = nearby };
-                _messageCache.BroadcastMessage(request);
-                var results =await _messageCache.SendAndWaitAsync<AssignDeviceResponse>(request, new TimeSpan(0, 0, 10));
-                return results;
-        }
-
         public async Task<CancelDeviceResponse> CancelDevice(string callsign, string eventId)
         {
             var request = new CancelDeviceRequest() { Callsign = callsign, EventId = eventId };

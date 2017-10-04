@@ -99,9 +99,7 @@ function setupActions() {
         $("#RoutingCompareDialog").dialog("open");
         return true;
     });
-
-    route_cmp_btn
-
+    
     $("#ResultsDialog").dialog({
         position: { my: "left top", at: "left bottom", of: $("#SearchDialog").dialog("widget") },
 //        show: {effect: "fade", duration: 300},
@@ -463,11 +461,10 @@ function setupActions() {
     
 
     $("#search_input_text").on("input", function () {
-        LocationSearch({ take: 100 });
         clearTimeout(wto);
         wto = setTimeout(function () {
-            // LocationSearch();
-        }, 1000);
+            LocationSearch({ take: 100 });
+        }, 500);
     });
 
     $("#help").on("show.bs.collapse", function () {

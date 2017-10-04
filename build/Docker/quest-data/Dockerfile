@@ -1,4 +1,4 @@
-FROM microsoft/mssql-server-linux:latest
+FROM microsoft/mssql-server-linux:2017-latest
 
 ENV ACCEPT_EULA Y
 ENV SA_PASSWORD M3Gurdy*

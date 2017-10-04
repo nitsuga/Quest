@@ -24,7 +24,7 @@
       "injectProperties": true,
       "instanceScope": "single-instance",
       "parameters": {
-        "queue": "Quest.Api"
+        "queue": "Quest.Web"
       }
     },
     {

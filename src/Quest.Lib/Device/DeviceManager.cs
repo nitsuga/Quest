@@ -21,16 +21,16 @@ namespace Quest.Lib.Device
         private IDeviceStore _devStore;
         private IResourceStore _resStore;
         private IIncidentStore _incStore;
+        private ResourceHandler _resHandler;
+        private ResourceUpdate _resourceUpdate;
+        
 #endif
-        private NotificationSettings _notificationSettings = new NotificationSettings();
-
         public DeviceManager(
+            ElasticSettings elastic,
             IDeviceStore devStore,
             IResourceStore resStore,
             IIncidentStore incStore,
             DeviceHandler deviceHandler,
-            ElasticSettings elastic,
-            NotificationSettings notificationSettings,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
@@ -40,13 +40,11 @@ namespace Quest.Lib.Device
             _incStore = incStore;
             _elastic = elastic;
             _deviceHandler = deviceHandler;
-            _notificationSettings = notificationSettings;
         }
 
         protected override void OnPrepare()
         {
             // create a list of actions associated with each object type arriving from the queue
-            MsgHandler.AddHandler<AssignDeviceRequest>(AssignDeviceHandler);
             MsgHandler.AddHandler<LoginRequest>(LoginRequestHandler);
             MsgHandler.AddHandler<LogoutRequest>(LogoutRequestHandler);
             MsgHandler.AddHandler<AckAssignedEventRequest>(AckAssignedEventRequestHandler);
@@ -84,7 +82,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as LoginRequest;
             if (request != null)
             {
-                return _deviceHandler.Login(request,_resStore,_devStore);
+                return _deviceHandler.Login(request,_resStore,_devStore, _resHandler, _resourceUpdate, ServiceBusClient, _config, _incStore);
             }
             return null;
         }
@@ -114,7 +112,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as CallsignChangeRequest;
             if (request != null)
             {
-                return _deviceHandler.CallsignChange(request);
+                return _deviceHandler.CallsignChange(request, _devStore, _resStore);
             }
             return null;
         }
@@ -124,7 +122,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as RefreshStateRequest;
             if (request != null)
             {
-                return _deviceHandler.RefreshState(request, _notificationSettings,_incStore);
+                return _deviceHandler.RefreshState(request, _incStore, ServiceBusClient);
             }
             return null;
         }
@@ -204,28 +202,10 @@ namespace Quest.Lib.Device
             var request = t.Payload as SetStatusRequest;
             if (request != null)
             {
-                return _deviceHandler.SetStatusRequest(request, _notificationSettings);
+                return _deviceHandler.SetStatusRequest(request, ServiceBusClient);
             }
             return null;
         }
-
-        private Response AssignDeviceHandler(NewMessageArgs t)
-        {
-            var request = t.Payload as AssignDeviceRequest;
-            if (request != null)
-            {
-                return _deviceHandler.AssignDevice(request, _notificationSettings,_incStore);
-            }
-            return null;
-        }
-
-        /// <summary>
-        ///     Detects resource changing to DSP (Dispatched) and sends incident details to callsign
-        ///     Detects resource changing to status and sends status update to callsign
-        /// </summary>
-        /// <param name="t"></param>
-      
-
 
     }
 }

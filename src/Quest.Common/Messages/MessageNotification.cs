@@ -1,11 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Quest.Common.Messages
 {
     [Serializable]    
     public class MessageNotification : INotificationMessage
     {
-        public String Text { get; set; }
+        [JsonProperty("title")]
+        public String Title { get; set; }
+        [JsonProperty("silent")]
+        public bool Silent { get; set; }
+        [JsonProperty("message")]
+        public String Message { get; set; }
+        [JsonProperty("priority")]
         public int Priority { get; set; }
     }
 }

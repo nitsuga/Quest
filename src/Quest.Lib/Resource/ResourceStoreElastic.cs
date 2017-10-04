@@ -4,14 +4,19 @@ namespace Quest.Lib.Resource
 {
     public class ResourceStoreElastic : IResourceStore
     {
-        public QuestResource Get(int fleetno)
+        public QuestResource GetByCallsign(string callsign)
         {
-            return null;
+            throw new System.NotImplementedException();
         }
 
-        public QuestResource Get(string callsign)
+        public QuestResource GetByFleetNo(string fleetno)
         {
-            return null;
+            throw new System.NotImplementedException();
+        }
+
+        public QuestResource GetByResourceId(int resourceId)
+        {
+            throw new System.NotImplementedException();
         }
 
         public int GetOffroadStatusId()

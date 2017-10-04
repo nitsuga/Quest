@@ -653,7 +653,7 @@ namespace Quest.Lib.Northgate
                 Direction = GetValueInt("Direction", _resformat, parts),
                 Skill = GetValueString("Skill", _resformat, parts),
                 //LastUpdate = GetValueDate("LastUpdate", _resformat, parts),
-                FleetNo = GetValueInt("FleetNo", _resformat, parts),
+                FleetNo = GetValueString("FleetNo", _resformat, parts),
                 //Sector = GetValueString("Sector", _resformat, parts),
                 Incident = GetValueString("Incident", _resformat, parts),
                 Emergency = GetValueBool("Emergency", _resformat, parts),

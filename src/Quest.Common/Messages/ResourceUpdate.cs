@@ -31,7 +31,7 @@ namespace Quest.Common.Messages
         public int Direction ;
         public string Skill ;
         public DateTime UpdateTime;
-        public int FleetNo;
+        public string FleetNo;
         public string Incident;
         public bool Emergency;
         public string Destination;

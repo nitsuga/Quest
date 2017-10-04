@@ -13,6 +13,8 @@ using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using Quest.Lib.Data;
+using Quest.Common.ServiceBus;
+using Quest.Lib.Search.Elastic;
 
 namespace Quest.Lib.Device
 {
@@ -35,7 +37,6 @@ namespace Quest.Lib.Device
                 if (_deleteStatusId == 0)
                     GetDeleteStatusId();
                 return _deleteStatusId;
-
             }
         }
 
@@ -44,87 +45,36 @@ namespace Quest.Lib.Device
             _dbFactory = dbFactory;
         }
 
-        public void Update(QuestDevice device)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // locate record and create or update
-                var resrecord = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
-                if (resrecord != null)
-                {
-                    resrecord.OwnerId = device.OwnerId;
-                    resrecord.LoggedOnTime = DateTime.UtcNow;
-                    resrecord.LastUpdate = DateTime.UtcNow;
-                    resrecord.NotificationTypeId = device.NotificationTypeId;
-                    resrecord.NotificationId = device.NotificationId;
-                    resrecord.AuthToken = device.Token;
-                    resrecord.DeviceIdentity = device.DeviceIdentity;
-                    resrecord.Osversion = device.OSVersion;
-                    resrecord.DeviceMake = device.DeviceMake;
-                    resrecord.DeviceModel = device.DeviceModel;
-                }
-                else
-                {
-                    var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
-                    // new record
-                    resrecord = new DataModel.Devices
-                    {
-                        OwnerId = device.OwnerId,
-                        DeviceIdentity = device.DeviceIdentity,
-                        LoggedOnTime = DateTime.UtcNow,
-                        LastUpdate = DateTime.UtcNow,
-                        DeviceRoleId = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
-                        NotificationTypeId = device.NotificationTypeId,
-                        NotificationId = device.NotificationId,
-                        AuthToken = device.Token,
-                        IsEnabled = true,
-                        LastStatusUpdate = DateTime.UtcNow,
-                        LoggedOffTime = null,
-                        Osversion = device.OSVersion,
-                        DeviceMake = device.DeviceMake,
-                        DeviceModel = device.DeviceModel,
-                        ResourceId = null,
-                        PositionAccuracy = 0,
-                        NearbyDistance = 0,
-                    };
-
-                    db.Devices.Add(resrecord);
-                }
-
-                db.SaveChanges();
-
-            });
-        }
-
         /// <summary>
         ///     Class uses by the Quest server to process messages arriving from devices. In most cases the
         ///     device manager processes a xRequest and returns an xResponse.
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore)
+        public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore, ResourceHandler resHandler, ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
             var callsign = "";
             var sc = new StatusCode() { Code="???", Description = "Pending" };
 
-            var resrecord = devStore.Get(request.DeviceIdentity);
-            if (resrecord != null) {
-                resrecord.OwnerId = request.Username;
-                resrecord.LoggedOnTime = DateTime.UtcNow;
-                resrecord.LastUpdate = DateTime.UtcNow;
-                resrecord.NotificationTypeId = request.NotificationTypeId;
-                resrecord.NotificationId = request.NotificationId;
-                resrecord.DeviceIdentity = request.DeviceIdentity;
-                resrecord.OSVersion = request.OSVersion;
-                resrecord.DeviceMake = request.DeviceMake;
-                resrecord.DeviceModel = request.DeviceModel;
+            var devrecord = devStore.Get(request.DeviceIdentity);
+
+            if (devrecord != null) {
+                devrecord.OwnerId = request.Username;
+                devrecord.LoggedOnTime = DateTime.UtcNow;
+                devrecord.LastUpdate = DateTime.UtcNow;
+                devrecord.NotificationTypeId = request.NotificationTypeId;
+                devrecord.NotificationId = request.NotificationId;
+                devrecord.DeviceIdentity = request.DeviceIdentity;
+                devrecord.OSVersion = request.OSVersion;
+                devrecord.DeviceMake = request.DeviceMake;
+                devrecord.DeviceModel = request.DeviceModel;
             }
             else
             {
                 var offRoadStatus = resStore.GetOffroadStatusId();
 
                 // new record
-                resrecord = new QuestDevice
+                devrecord = new QuestDevice
                 {
                     OwnerId = request.Username,
                     DeviceIdentity = request.DeviceIdentity,
@@ -146,98 +96,43 @@ namespace Quest.Lib.Device
             }
 
             // make a new token. this becomes a claim (jti unique identitier
-            resrecord.AuthToken = Guid.NewGuid().ToString();
+            devrecord.AuthToken = Guid.NewGuid().ToString();
 
-            devStore.Update(resrecord);
+            devStore.Update(devrecord);
 
-#if false
-                // make sure device is paired with a callsign
-                resStore.Get()
-                Resource resource = null;
-                if (resrecord.ResourceId != null)
-                    resource = db.Resources.FirstOrDefault(x => x.ResourceId == resrecord.ResourceId);
+            QuestResource resource=null;
 
-                if (resource == null)
+            // try and use the provided fleetnumber to associate with a resource
+            if (!string.IsNullOrEmpty(request.FleetNo))
+                resource = resStore.GetByFleetNo(request.FleetNo);
+            else
+                resource = resStore.GetByResourceId(devrecord.ResourceId??0);
+
+            // the device is not associated with a resource
+            if (resource == null)
+            {
+                ResourceUpdate newresource = new ResourceUpdate
                 {
-                    // the device is not linked to a resource so make up a callsign using the device id
-                    // this might already exist in which case link to that resource using that callsign
-                    // make a suitable callsign
-                    callsign = "#" + resrecord.DeviceId.ToString("0000");
-                    var cs = db.Callsigns.FirstOrDefault(x => x.Callsign1 == callsign);
-                    if (cs == null)
-                    {
-                        cs = new Callsign {Callsign1 = callsign};
-                        db.Callsigns.Add(cs);
-                        db.SaveChanges();
-                    }
+                    Agency = "",
+                    Destination = "",
+                    Callsign = $"#{devrecord.DeviceID.ToString("0000")}",
+                    Class = "",
+                    Direction = 0,
+                    FleetNo = $"DEV-{devrecord.DeviceID}",
+                    EventType = "",
+                    Skill = "",
+                    Speed = 0
+                };
+                var resourceid = resHandler.ResourceUpdate(newresource, msgSource, config, incStore);
+                resource = resStore.GetByResourceId(devrecord.ResourceId ?? 0);
+            }
 
-                    resource = db.Resources.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-
-                    if (resource != null)
-                    {
-                        // a resource record already exists for this devices temporary callsign so use it
-                        resrecord.ResourceId = resource.ResourceId;
-                        db.SaveChanges();
-                    }
-                    else
-                    {
-                        // its a new device with a new callsign so create a resource for it
-
-                        // get suitable status
-                        var status = db.ResourceStatus.FirstOrDefault(x => x.Status == "OOS");
-                        var type = db.ResourceTypes.FirstOrDefault(x => x.ResourceType1 == "HAND");
-
-                        // create a resource record for this device
-                        if (status != null)
-                        {
-                            resource = new Resource
-                            {
-                                Agency = "",
-                                Destination = "",
-                                CallsignId = cs.CallsignId,
-                                Class = "",
-                                Comment = "device for " + request.Username,
-                                Direction = 0,
-                                Emergency = "",
-                                ETA = null,
-                                FleetNo = 0,
-                                EventType = "",
-                                LastUpdated = DateTime.UtcNow,
-                                ResourceTypeId = type.ResourceTypeId,
-                                Road = "",
-                                ResourceStatusId = status.ResourceStatusId,
-                                Sector = "",
-                                Serial = "",
-                                Skill = "",
-                                Speed = 0
-                            };
-
-                            db.Resources.Add(resource);
-                            db.SaveChanges();
-
-                            resrecord.ResourceId = resource.ResourceId;
-                            db.SaveChanges();
-
-                            //TODO: Save to Elastic
-                        }
-                        db.SaveChanges();
-                    }
-                }
-                else
-                {
-                    callsign = resource.Callsign.Callsign1;
-                }
-
-                // return status back to device
-                if (resource != null)
-                {
-                    sc = new StatusCode
-                    {
-                        Code = resource.ResourceStatu.Status,
-                        Description = GetStatusDescription(resource.ResourceStatu),
-                    };
-                }
-#endif
+            // look up the resource if the id is set
+            if (devrecord.ResourceId != resource.ResourceId)
+            {
+                devrecord.ResourceId = resource.ResourceId;
+                devStore.Update(devrecord);
+            }
 
             return new LoginResponse
             {
@@ -247,7 +142,7 @@ namespace Quest.Lib.Device
                 Callsign = callsign,
                 Status = sc,
                 Success = true, 
-                SessionId = resrecord.AuthToken,
+                SessionId = devrecord.AuthToken,
                 Message = "successfully logged on"
             };
         }
@@ -292,54 +187,42 @@ namespace Quest.Lib.Device
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public CallsignChangeResponse CallsignChange(CallsignChangeRequest request)
+        public CallsignChangeResponse CallsignChange(CallsignChangeRequest request, IDeviceStore devStore, IResourceStore resStore)
         {
             var oldCallsign = "";
-            return _dbFactory.Execute<QuestContext, CallsignChangeResponse>((db) =>
+
+            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
+
+            if (deviceRecord == null)
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                {
-                    return new CallsignChangeResponse
-                    {
-                        Success = false,
-                        Message = "invalid authentication token",
-                        RequestId = request.RequestId
-                    };
-                }
-
-                if (deviceRecord.Resource?.Callsign != null)
-                    oldCallsign = deviceRecord.Resource.Callsign.Callsign1;
-
-                if (request.Callsign != null && request.Callsign.Length >= 0)
-                {
-                    var resrecord = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == request.Callsign);
-                    if (resrecord == null)
-                    {
-                        return new CallsignChangeResponse
-                        {
-                            RequestId = request.RequestId,
-                            Success = false,
-                            Message = "unknown callsign"
-                        };
-                    }
-                    deviceRecord.ResourceId = resrecord.ResourceId;
-                }
-
-                deviceRecord.LastUpdate = DateTime.UtcNow;
-
-                //TODO: Save to Elastic
-                db.SaveChanges();
-
                 return new CallsignChangeResponse
                 {
-                    RequestId = request.RequestId,
-                    Success = true,
-                    OldCallsign = oldCallsign,
-                    NewCallsign = request.Callsign,
-                    Message = "successful"
+                    Success = false,
+                    Message = "invalid authentication token",
+                    RequestId = request.RequestId
                 };
-            });
+            }
+
+            if (deviceRecord?.ResourceId==null)
+            {
+                return new CallsignChangeResponse
+                {
+                    Success = false,
+                    Message = "device is not associated with a resource",
+                    RequestId = request.RequestId
+                };
+            }
+
+            var resource = resStore.GetByResourceId((int)deviceRecord.ResourceId);
+                            
+            return new CallsignChangeResponse
+            {
+                RequestId = request.RequestId,
+                Success = true,
+                OldCallsign = oldCallsign,
+                NewCallsign = request.Callsign,
+                Message = "requested"
+            };
         }
 
         /// <summary>
@@ -348,7 +231,7 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public RefreshStateResponse RefreshState(RefreshStateRequest request, NotificationSettings settings, IIncidentStore incStore)
+        public RefreshStateResponse RefreshState(RefreshStateRequest request, IIncidentStore incStore, IServiceBusClient serviceBusClient)
         {
             return _dbFactory.Execute<QuestContext, RefreshStateResponse>((db) =>
             {
@@ -369,19 +252,21 @@ namespace Quest.Lib.Device
                         Message = "device not linked to a resource"
                     };
 
+                //TODO: trigger message sending
+#if false
                 var inc = incStore.Get(deviceRecord.Resource.Serial);
 
                 // send incident details if currently assigned
                 if (inc != null)
                 {
                     var devices = new List<DataModel.Devices> { deviceRecord };
-                    SendEventNotification(devices, inc, settings, "Refresh");
+                    SendEventNotification(devices, inc, "Refresh", serviceBusClient);
                 }
 
                 // also send the status
-                SendStatusNotification(deviceRecord.Resource.Callsign.Callsign1, settings, "Refresh");
-                SendCallsignNotification(deviceRecord.Resource.Callsign.Callsign1, settings, "Refresh");
-
+                SendStatusNotification(deviceRecord.Resource.Callsign.Callsign1, "Refresh", serviceBusClient);
+                SendCallsignNotification(deviceRecord.Resource.Callsign.Callsign1, "Refresh", serviceBusClient);
+#endif
                 return new RefreshStateResponse();
             });
         }
@@ -812,7 +697,7 @@ namespace Quest.Lib.Device
                                     VehicleType = "Device",
                                     Destination = res.Destination,
                                     Eta = null,
-                                    FleetNo = 0,
+                                    FleetNo = "",
                                     Road = res.Road,
                                     Comment = "",
                                     Skill = res.Skill,
@@ -852,7 +737,7 @@ namespace Quest.Lib.Device
                                            VehicleType = "Device",
                                            Destination = res.Destination,
                                            Eta = null,
-                                           FleetNo = 0,
+                                           FleetNo = "",
                                            Road = res.Road,
                                            Comment = "",
                                            Skill = res.Skill,
@@ -956,45 +841,6 @@ namespace Quest.Lib.Device
             });
         }
 
-        public AssignDeviceResponse AssignDevice(AssignDeviceRequest request, NotificationSettings settings, IIncidentStore incStore)
-        {
-            var inc = incStore.Get(request.EventId);
-
-            if (inc == null)
-            {
-                Logger.Write(string.Format("Resource assigned to unknown incident " + request.EventId),
-                    TraceEventType.Information, "DeviceTracker");
-
-                //Send incident alert message to Quest informing that the incident doesn't exist                    
-                try
-                {
-                    SendAlertMessage(request.Callsign,
-                        $"Device dispatched {request.Callsign} to unknown incident {request.EventId}");
-                }
-                catch (Exception ex)
-                {
-                    Logger.Write(
-                        string.Format("ERROR: Cannot send alert for Device dispatch to unknown incident " + ex.Message),
-                        TraceEventType.Error, "DeviceTracker");
-                }
-
-                return new AssignDeviceResponse
-                {
-                    RequestId = request.RequestId,
-                    Success = false,
-                    Message = "unknown incident"
-                };
-            }
-            SendEventNotification(request.Callsign, request.EventId, settings, "Quest Assigned", incStore);
-
-            return new AssignDeviceResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                Message = "successful"
-            };
-        }
-
         /// <summary>
         ///     check if a device is the target (by callsign) or is nearby
         /// </summary>
@@ -1045,8 +891,6 @@ namespace Quest.Lib.Device
             //}
         }
 
-#region CAD Message Handling
-
         private ResourceItem GetResourceItemFromView(DataModel.Resource res)
         {
             return new ResourceItem
@@ -1088,13 +932,6 @@ namespace Quest.Lib.Device
                 }
             });
         }
-
-
-
-#endregion
-
-#region Status Handling
-
 
         public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
         {
@@ -1162,7 +999,7 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public SetStatusResponse SetStatusRequest(SetStatusRequest request, NotificationSettings settings)
+        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient)
         {
             return _dbFactory.Execute<QuestContext, SetStatusResponse>((db) =>
             {
@@ -1193,7 +1030,18 @@ namespace Quest.Lib.Device
                 }
                 else
                 {
+                    return new SetStatusResponse
+                    {
+                        RequestId = request.RequestId,
+                        NewStatusCode = null,
+                        OldStatusCode = null,
+                        Callsign = deviceRecord.DeviceCallsign,
+                        Success = true,
+                        Message = "successful"
+                    };
 
+                    //TODO: Migrate this code into the resource manager
+#if false
                     StatusCode oldStatusCode = null;
 
                     if (deviceRecord.ResourceStatusId != null)
@@ -1236,7 +1084,7 @@ namespace Quest.Lib.Device
                         db.SaveChanges();
                     }
 
-                    SendStatusNotification(deviceRecord.DeviceCallsign, settings, "Update");
+                    SendStatusNotification(deviceRecord.DeviceCallsign, "Update", serviceBusClient);
 
                     return new SetStatusResponse
                     {
@@ -1247,7 +1095,10 @@ namespace Quest.Lib.Device
                         Success = true,
                         Message = "successful"
                     };
+#endif
+
                 }
+
             });
         }
 
@@ -1274,207 +1125,5 @@ namespace Quest.Lib.Device
             return "Offroad";
         }
 
-#endregion
-
-#region GCM
-
-        private void SendCallsignNotification(string callsign, NotificationSettings settings, string reason)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // find associated devices with this resource callsign
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.Resource != null && x.Resource.Callsign.Callsign1 == callsign)
-                    .ToList();
-
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                    db.SaveChanges();
-                }
-
-                SendCallsignNotification(devices, callsign, settings, reason);
-            });
-        }
-
-        private void SendCallsignNotification(List<DataModel.Devices> devices, string callsign,
-            NotificationSettings settings, string reason)
-        {
-            if (devices == null || !devices.Any())
-                return;
-
-            var request = new CallsignNotification
-            {
-                Callsign = callsign
-            };
-            NotifyDevices(devices, request, settings, reason);
-        }
-
-
-        /// <summary>
-        ///     send an assignment to this callsign. Also sends to corresponding unmanaged callsigns if within range
-        /// </summary>
-        /// <param name="callsign"></param>
-        /// <param name="serial"></param>
-        /// <param name="settings"></param>
-        /// <param name="reason"></param>
-        private void SendEventNotification(string callsign, string serial, NotificationSettings settings, string reason, IIncidentStore incStore)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // make sure callsign exists
-                var callsignRec = db.Callsign.FirstOrDefault(x => x.Callsign1 == callsign);
-                if (callsignRec == null)
-                {
-                    callsignRec = new Callsign { Callsign1 = callsign };
-                    db.Callsign.Add(callsignRec);
-                    db.SaveChanges();
-                }
-
-                // find corresponding resource;
-                var res = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-                if (res == null)
-                    throw new ApplicationException(
-                        $"Unable to send notification, no resource exists with callsign {callsignRec}");
-
-                // create a event message to send to devices if necessary
-                var inc = incStore.Get(serial);
-
-                // find associated devices with this resource callsign
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.ResourceId == res.ResourceId)
-                    .ToList();
-
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                    db.SaveChanges();
-                }
-
-                SendEventNotification(devices, inc, settings, reason);
-            });
-        }
-
-        private void SendEventNotification(List<Devices> devices, QuestIncident inc, NotificationSettings settings, string reason)
-        {
-            if (devices == null || !devices.Any())
-                return;
-
-            if (inc == null)
-                throw new ApplicationException("Unable to send notification, incident is NULL");
-
-            if (inc.Latitude != null)
-            {
-                if (inc.Longitude!= null)
-                {
-                    var request = new EventNotification
-                    {
-                        LocationComment = inc.LocationComment ?? "",
-                        Location = inc.Location ?? "",
-                        Priority = inc.Priority ?? "",
-                        PatientAge = inc.PatientAge,
-                        AZGrid = inc.AZ ?? "",
-                        CallOrigin = inc.Created == null ? "" : inc.Created.ToString(),
-                        Determinant = inc.DeterminantDescription ?? inc.Determinant,
-                        Created = inc.Created == null ? "" : inc.Created.ToString(),
-                        EventId = inc.Serial,
-                        Latitude = (float)inc.Latitude,
-                        Longitude = (float)inc.Longitude,
-                        Sex = inc.PatientSex ?? "",
-                        Notes = inc.ProblemDescription,
-                        Reason = reason,
-                        Updated = DateTime.Now.ToString(CultureInfo.InvariantCulture)
-                    };
-
-                    Logger.Write($"Sending incident {inc.Serial} ", TraceEventType.Information, "DeviceTracker");
-
-                    NotifyDevices(devices, request, settings, reason);
-                }
-            }
-        }
-
-        /// <summary>
-        ///     send the status of this callsign to devices
-        /// </summary>
-        /// <param name="callsign"></param>
-        /// <param name="settings"></param>
-        /// <param name="reason"></param>
-        private void SendStatusNotification(string callsign, NotificationSettings settings, string reason)
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // find corresponding resource;
-                var resource = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-                if (resource == null)
-                    throw new ApplicationException(
-                        $"Unable to send notification, no resource exists with callsign {callsign}");
-
-                var request = new StatusNotification
-                {
-                    Status = new StatusCode
-                    {
-                        Code = resource.ResourceStatus.Status,
-                        Description = GetStatusDescription(resource.ResourceStatus),
-                    }
-                };
-
-                Logger.Write($"Sending status to devices for callsign {callsign} ",
-                    TraceEventType.Information, "DeviceTracker");
-
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.ResourceId == resource.ResourceId)
-                    .ToList();
-
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                }
-
-                if (devices.Count > 0)
-                    NotifyDevices(devices, request, settings, reason);
-            });
-        }
-
-        /// <summary>
-        /// This notifies the device of an event
-        /// </summary>
-        /// <param name="devices"></param>
-        /// <param name="evt"></param>
-        /// <param name="settings"></param>
-        /// <param name="reason"></param>
-        private void NotifyDevices(IEnumerable<Devices> devices, INotificationMessage evt, NotificationSettings settings, string reason)
-        {
-            try
-            {
-                // send push notifications
-                foreach (var target in devices)
-                    if (target.IsEnabled == true && !string.IsNullOrEmpty(target.DeviceIdentity))
-                    {
-                        //TODO: Send message to Notification Manager
-                        // Address = Apple:34874892792
-                        //target.NotificationTypeId, target.NotificationId, evt, reason
-                    }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"error sending notification: {ex}",
-                    TraceEventType.Information, "Quest");
-            }
-            finally
-            {
-            }
-        }
-
-#endregion
     }
-
 }

@@ -4,11 +4,6 @@ namespace Quest.Lib.DataModel
 {
     public partial class QuestContext : DbContext
     {
-        public virtual DbSet<AspNetRoles> AspNetRoles { get; set; }
-        public virtual DbSet<AspNetUserClaims> AspNetUserClaims { get; set; }
-        public virtual DbSet<AspNetUserLogins> AspNetUserLogins { get; set; }
-        public virtual DbSet<AspNetUserRoles> AspNetUserRoles { get; set; }
-        public virtual DbSet<AspNetUsers> AspNetUsers { get; set; }
         public virtual DbSet<Call> Call { get; set; }
         public virtual DbSet<Callsign> Callsign { get; set; }
         public virtual DbSet<CoverageMapDefinition> CoverageMapDefinition { get; set; }
@@ -21,9 +16,6 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<MapOverlay> MapOverlay { get; set; }
         public virtual DbSet<MapOverlayItem> MapOverlayItem { get; set; }
         public virtual DbSet<MigrationHistory> MigrationHistory { get; set; }
-        public virtual DbSet<Profile> Profile { get; set; }
-        public virtual DbSet<ProfileParameter> ProfileParameter { get; set; }
-        public virtual DbSet<ProfileParameterType> ProfileParameterType { get; set; }
         public virtual DbSet<Resource> Resource { get; set; }
         public virtual DbSet<ResourceArea> ResourceArea { get; set; }
         public virtual DbSet<ResourceStatus> ResourceStatus { get; set; }
@@ -39,7 +31,6 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<SecuredItemLinks> SecuredItemLinks { get; set; }
         public virtual DbSet<SecuredItems> SecuredItems { get; set; }
         public virtual DbSet<StationCatchment> StationCatchment { get; set; }
-        public virtual DbSet<Variable> Variable { get; set; }
         public virtual DbSet<Vehicle> Vehicle { get; set; }
 
         public QuestContext(DbContextOptions<QuestContext> options) : base(options)
@@ -48,98 +39,6 @@ namespace Quest.Lib.DataModel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<AspNetRoles>(entity =>
-            {
-                entity.HasIndex(e => e.Name)
-                    .HasName("RoleNameIndex")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(128)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(256);
-            });
-
-            modelBuilder.Entity<AspNetUserClaims>(entity =>
-            {
-                entity.HasIndex(e => e.UserId)
-                    .HasName("IX_UserId");
-
-                entity.Property(e => e.UserId)
-                    .IsRequired()
-                    .HasMaxLength(128);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserClaims)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_dbo.AspNetUserClaims_dbo.AspNetUsers_UserId");
-            });
-
-            modelBuilder.Entity<AspNetUserLogins>(entity =>
-            {
-                entity.HasKey(e => new { e.LoginProvider, e.ProviderKey, e.UserId });
-
-                entity.HasIndex(e => e.UserId)
-                    .HasName("IX_UserId");
-
-                entity.Property(e => e.LoginProvider).HasMaxLength(128);
-
-                entity.Property(e => e.ProviderKey).HasMaxLength(128);
-
-                entity.Property(e => e.UserId).HasMaxLength(128);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserLogins)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_dbo.AspNetUserLogins_dbo.AspNetUsers_UserId");
-            });
-
-            modelBuilder.Entity<AspNetUserRoles>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.RoleId });
-
-                entity.HasIndex(e => e.RoleId)
-                    .HasName("IX_RoleId");
-
-                entity.HasIndex(e => e.UserId)
-                    .HasName("IX_UserId");
-
-                entity.Property(e => e.UserId).HasMaxLength(128);
-
-                entity.Property(e => e.RoleId).HasMaxLength(128);
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.AspNetUserRoles)
-                    .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK_dbo.AspNetUserRoles_dbo.AspNetRoles_RoleId");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserRoles)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_dbo.AspNetUserRoles_dbo.AspNetUsers_UserId");
-            });
-
-            modelBuilder.Entity<AspNetUsers>(entity =>
-            {
-                entity.HasIndex(e => e.UserName)
-                    .HasName("UserNameIndex")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(128)
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Email).HasMaxLength(256);
-
-                entity.Property(e => e.LockoutEndDateUtc).HasColumnType("datetime");
-
-                entity.Property(e => e.UserName)
-                    .IsRequired()
-                    .HasMaxLength(256);
-            });
 
             modelBuilder.Entity<Call>(entity =>
             {
@@ -484,42 +383,6 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(32);
             });
 
-            modelBuilder.Entity<Profile>(entity =>
-            {
-                entity.Property(e => e.ProfileId).ValueGeneratedNever();
-
-                entity.Property(e => e.ProfileName).HasMaxLength(150);
-            });
-
-            modelBuilder.Entity<ProfileParameter>(entity =>
-            {
-                entity.Property(e => e.ProfileParameterId).ValueGeneratedNever();
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.Value).IsRequired();
-
-                entity.HasOne(d => d.Profile)
-                    .WithMany(p => p.ProfileParameter)
-                    .HasForeignKey(d => d.ProfileId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ProfileParameter_Profile");
-
-                entity.HasOne(d => d.ProfileParameterType)
-                    .WithMany(p => p.ProfileParameter)
-                    .HasForeignKey(d => d.ProfileParameterTypeId)
-                    .HasConstraintName("FK_ProfileParameter_ProfileParameterType");
-            });
-
-            modelBuilder.Entity<ProfileParameterType>(entity =>
-            {
-                entity.Property(e => e.ProfileParameterTypeId).ValueGeneratedNever();
-
-                entity.Property(e => e.Name).HasMaxLength(50);
-            });
-
             modelBuilder.Entity<Resource>(entity =>
             {
                 entity.HasIndex(e => e.CallsignId)
@@ -533,17 +396,9 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.CallsignId).HasColumnName("CallsignID");
 
-                entity.Property(e => e.Class)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.Comment).IsUnicode(false);
 
                 entity.Property(e => e.Destination).IsUnicode(false);
-
-                entity.Property(e => e.Emergency)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
 
                 entity.Property(e => e.Eta)
                     .HasColumnName("ETA")
@@ -757,19 +612,6 @@ namespace Quest.Lib.DataModel
                     .IsUnicode(false);
 
                 entity.Property(e => e.Wkt).IsUnicode(false);
-            });
-
-            modelBuilder.Entity<Variable>(entity =>
-            {
-                entity.Property(e => e.VariableId).HasColumnName("VariableID");
-
-                entity.Property(e => e.Description).HasMaxLength(250);
-
-                entity.Property(e => e.Type).HasMaxLength(50);
-
-                entity.Property(e => e.Variable1)
-                    .HasColumnName("Variable")
-                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<Vehicle>(entity =>

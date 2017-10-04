@@ -29,10 +29,10 @@ namespace Quest.Lib.ServiceBus
                 // hook up to the incoming message notifications
                 MsgSource.NewMessage += (who, args) =>
                 {
+                    Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI={args.Metadata.CorrelationId} looking for {obj.RequestId}", "Web");
                     // detect our message with the right correlation id and expected type
                     if (args.Metadata.CorrelationId == obj.RequestId && args.Payload.GetType() == typeof(T))
                     {
-                        Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI={args.Metadata.CorrelationId} looking for {obj.RequestId}", "Web");
                         result = args.Payload as T;
                         foundMessage.Set();
                     }

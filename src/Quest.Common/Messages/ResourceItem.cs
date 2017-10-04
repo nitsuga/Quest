@@ -9,7 +9,7 @@ namespace Quest.Common.Messages
         public DateTime? lastUpdate;        
         public string Destination;        
         public DateTime? Eta;        
-        public int? FleetNo;        
+        public string FleetNo;        
         public string PrevStatus;        
         public string Road;        
         public string Skill;        
@@ -17,11 +17,9 @@ namespace Quest.Common.Messages
         public int? Direction;        
         public int? Speed;        
         public string Incident;
-
         public bool Available;
         public bool Busy;
         public bool BusyEnroute;
-
         public bool PrevAvailable;
         public bool PrevBusy;
         public bool PrevBusyEnroute;

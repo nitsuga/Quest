@@ -58,6 +58,8 @@ namespace Quest.WebCore.Controllers
             var claims = await _securityService.GetAppClaims(user);
             //var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
+            
+
             var groupResult = await _searchService.GetIndexGroups();
 
             HomeViewModel model = new HomeViewModel
@@ -317,38 +319,7 @@ namespace Quest.WebCore.Controllers
             return result;
         }
 
-        
-        [HttpGet]
-        public ActionResult AssignDevice(string callsign, string eventId, Boolean nearby)
-        {
-            var builder = new StringBuilder();
-            var writer = new StringWriter(builder);
-            var ser = new JsonSerializer();
-            try
-            {
-                var result = _resourceService.AssignDevice(callsign, eventId, nearby);
-
-                ser.Serialize(writer, result);
-                var ok = new ContentResult
-                {
-                    Content = builder.ToString(),
-                    ContentType = "application/json"
-                };
-                return ok;
-            }
-            catch
-            {
-                ser.Serialize(writer, "request failed");
-                var error = new ContentResult
-                {
-                    Content = builder.ToString(),
-                    ContentType = "application/json"
-                };
-                return error;
-            }
-        }
-
-        
+ 
         [HttpGet]
         public ActionResult CancelDevice(string callsign, string eventId)
         {

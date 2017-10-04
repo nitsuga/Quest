@@ -25,12 +25,12 @@ namespace Quest.Api.Controllers
         /// <param name="subject">Subject line, might not used in all methods</param>
         /// <returns></returns>
         [HttpPost("Send")]
-        public async Task<NotificationResponse> Send([FromBody] string message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
+        public async Task<NotificationResponse> Send([FromBody] string message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject, [FromQuery]bool silent)
         {
             try
             {
                 //TODO: parse the message to find out what type it is..
-                MessageNotification msg = new MessageNotification { Text = message };
+                MessageNotification msg = new MessageNotification { Message = message, Priority =0, Silent=silent, Title=subject };
                 Notification n = new Notification { Address = address, Body = msg, Method = method, Subject = subject };
                 return await _messageCache.SendAndWaitAsync<NotificationResponse>(n, new TimeSpan(0, 0, 10));
             }

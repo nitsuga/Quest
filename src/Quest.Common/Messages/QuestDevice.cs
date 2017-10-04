@@ -15,9 +15,9 @@ namespace Quest.Common.Messages
         public Nullable<System.DateTime> LastUpdate { get; set; }
         public Nullable<System.DateTime> LastStatusUpdate { get; set; }
         public Nullable<float> PositionAccuracy { get; set; }
-        public Nullable<bool> IsEnabled { get; set; }
-        public Nullable<bool> SendNearby { get; set; }
-        public Nullable<float> NearbyDistance { get; set; }
+        public bool IsEnabled { get; set; }
+        public bool SendNearby { get; set; }
+        public float NearbyDistance { get; set; }
         public Nullable<System.DateTime> LoggedOnTime { get; set; }
         public Nullable<System.DateTime> LoggedOffTime { get; set; }
         public Nullable<int> DeviceRoleId { get; set; }

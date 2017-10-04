@@ -4,8 +4,9 @@ namespace Quest.Lib.Resource
 {
     public interface IResourceStore
     {
-        QuestResource Get(int fleetno);
-        QuestResource Get(string callsign);
+        QuestResource GetByResourceId(int resourceId);
+        QuestResource GetByFleetNo(string fleetno);
+        QuestResource GetByCallsign(string callsign);
         int GetOffroadStatusId();
         QuestResource Update(ResourceUpdate item);
     }    

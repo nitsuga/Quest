@@ -62,15 +62,16 @@ services:
     depends_on:
       - "backend"
       - "api"
+      - "mapserver"
     ports: 
-      - "8133:80"
+      - "80:80"
     environment:
       - ActiveMQ=activemq:tcp://activemq:61616
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
       - Session=Alpha
-      - ASPNETCORE_URLS=https://*:80
+      - ASPNETCORE_URLS=http://*:80
        
     ########################################
   api:
@@ -94,14 +95,14 @@ services:
     depends_on:
       - "activemq"
       - "searchdatabase"
+      - "database"
     environment:
       - ComponentsConfig=config/components.json
       - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
       - Session=Alpha
-      # Modules=DeviceManager;SecurityManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager;NotificationManager
-      #- Modules=DeviceManager;SecurityManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;RoutingManager;NotificationManager
-      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
+#      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
+      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;IndexerManager;RoutingManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200

@@ -16,6 +16,8 @@ using Quest.Lib.Incident;
 using Quest.Lib.Data;
 using Quest.Lib.Trace;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace Quest.Lib.Resource
 {
@@ -26,8 +28,7 @@ namespace Quest.Lib.Resource
 
         private IDatabaseFactory _dbFactory;
         private const string Version = "1.0.0";
-        private int _deleteStatusId;
-
+        private int _deleteStatusId;        
 
         public ResourceHandler(IDatabaseFactory dbFactory)
         {
@@ -53,10 +54,9 @@ namespace Quest.Lib.Resource
         /// <param name="settings"></param>
         /// <param name="client"></param>
         /// <param name="msgSource"></param>
-        public void ResourceUpdate(ResourceUpdate resourceUpdate, NotificationSettings settings,
-            IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
+        public int ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
-            _dbFactory.Execute<QuestContext>((db) =>
+            return _dbFactory.Execute<QuestContext, int>((db) =>
             {
                 // make sure callsign exists
                 var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == resourceUpdate.Callsign);
@@ -107,11 +107,8 @@ namespace Quest.Lib.Resource
                 // save the new resource record
                 res.Agency = resourceUpdate.Agency;
                 res.CallsignId = callsign.CallsignId;
-                res.Class = resourceUpdate.Class;
-                //res.Comment = resourceUpdate.Comment;
                 res.Destination = resourceUpdate.Destination;
                 res.Direction = 0; //resourceUpdate.Direction;
-                res.Emergency = resourceUpdate.Emergency ? "Y" : "N";
                 res.Eta = null; // resourceUpdate.ETA;
                 res.EventType = resourceUpdate.EventType;
                 res.FleetNo = resourceUpdate.FleetNo;
@@ -127,19 +124,15 @@ namespace Quest.Lib.Resource
                 res.ResourceStatusPrevId = res.ResourceStatusId;
                 res.ResourceStatusId = status.ResourceStatusId;
 
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                 var requireEventNotification = false;
                 var requireStatusNotification = false;
-#endif
 
                 // detect change in status
                 if (originalStatusId != status.ResourceStatusId)
                 {
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
                     requireStatusNotification = true;
                     if (status.Status == triggerStatus)
                         requireEventNotification = true;
-#endif
 
                     // save a status history if the status has changed
                     var history = new ResourceStatusHistory
@@ -180,15 +173,13 @@ namespace Quest.Lib.Resource
                     ElasticIndexer.CommitBultRequest(config, descriptor);
                 }
 
-#if CAN_SEND_NOTIFICATIONS_TO_RESOURCES
-                if (requireStatusNotification)
-                    SendStatusNotification(resourceUpdate.Callsign, settings, "Update");
+                SendStatusNotification(resourceUpdate.Callsign, "Update", msgSource);
 
-                if (requireEventNotification)
-                    SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
-#endif
+                SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, "C&C Assigned", incStore, msgSource);
 
                 msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
+
+                return res.ResourceId;
 
             });
         }
@@ -241,7 +232,7 @@ namespace Quest.Lib.Resource
         /// <param name="item"></param>
         /// <param name="settings"></param>
         /// <param name="msgSource"></param>
-        public void DeleteResource(DeleteResource item, NotificationSettings settings, IServiceBusClient msgSource)
+        public void DeleteResource(DeleteResource item, IServiceBusClient msgSource)
         {
             _dbFactory.Execute<QuestContext>((db) =>
             {
@@ -257,7 +248,7 @@ namespace Quest.Lib.Resource
             });
         }
 
-        public void ResourceLogon(ResourceLogon item, NotificationSettings settings)
+        public void ResourceLogon(ResourceLogon item)
         {
         }
 
@@ -279,7 +270,7 @@ namespace Quest.Lib.Resource
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
 
-        public void BeginDump(BeginDump item, NotificationSettings settings)
+        public void BeginDump(BeginDump item)
         {
             Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
             _dbFactory.Execute<QuestContext>((db) =>
@@ -297,6 +288,200 @@ namespace Quest.Lib.Resource
                 db.SaveChanges();
             });
         }
+
+        public void SendCallsignNotification(string callsign, string reason, IServiceBusClient serviceBusClient)
+        {
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                // find associated devices with this resource callsign
+                var devices = db
+                    .Devices
+                    .ToList()
+                    .Where(x => x.Resource != null && x.Resource.Callsign.Callsign1 == callsign)
+                    .ToList();
+
+                foreach (var deviceRecord in devices)
+                {
+                    // save audit record
+                    //TODO: Save to Elastic
+                    db.SaveChanges();
+                }
+
+                SendCallsignNotification(devices, callsign, reason, serviceBusClient);
+            });
+        }
+
+        private void SendCallsignNotification(List<Devices> devices, string callsign, string reason, IServiceBusClient serviceBusClient)
+        {
+            if (devices == null || !devices.Any())
+                return;
+
+            var request = new CallsignNotification
+            {
+                Callsign = callsign
+            };
+            NotifyDevices(devices, request, reason, serviceBusClient);
+        }
+
+        /// <summary>
+        ///     send an assignment to this callsign. Also sends to corresponding unmanaged callsigns if within range
+        /// </summary>
+        /// <param name="callsign"></param>
+        /// <param name="serial"></param>
+        /// <param name="settings"></param>
+        /// <param name="reason"></param>
+        public void SendEventNotification(string callsign, string serial, string reason, IIncidentStore incStore, IServiceBusClient serviceBusClient)
+        {
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                // make sure callsign exists
+                var callsignRec = db.Callsign.FirstOrDefault(x => x.Callsign1 == callsign);
+                if (callsignRec == null)
+                {
+                    callsignRec = new Callsign { Callsign1 = callsign };
+                    db.Callsign.Add(callsignRec);
+                    db.SaveChanges();
+                }
+
+                // find corresponding resource;
+                var res = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
+                if (res == null)
+                    throw new ApplicationException(
+                        $"Unable to send notification, no resource exists with callsign {callsignRec}");
+
+                // create a event message to send to devices if necessary
+                var inc = incStore.Get(serial);
+
+                // find associated devices with this resource callsign
+                var devices = db
+                    .Devices
+                    .ToList()
+                    .Where(x => x.ResourceId == res.ResourceId)
+                    .ToList();
+
+                foreach (var deviceRecord in devices)
+                {
+                    // save audit record
+                    //TODO: Save to Elastic
+                    db.SaveChanges();
+                }
+
+                SendEventNotification(devices, inc, reason, serviceBusClient);
+            });
+        }
+
+        private void SendEventNotification(List<Devices> devices, QuestIncident inc, string reason, IServiceBusClient serviceBusClient)
+        {
+            if (devices == null || !devices.Any())
+                return;
+
+            if (inc == null)
+                throw new ApplicationException("Unable to send notification, incident is NULL");
+
+            if (inc.Latitude != null)
+            {
+                if (inc.Longitude != null)
+                {
+                    var request = new EventNotification
+                    {
+                        LocationComment = inc.LocationComment ?? "",
+                        Location = inc.Location ?? "",
+                        Priority = inc.Priority ?? "",
+                        PatientAge = inc.PatientAge,
+                        AZGrid = inc.AZ ?? "",
+                        CallOrigin = inc.Created == null ? "" : inc.Created.ToString(),
+                        Determinant = inc.DeterminantDescription ?? inc.Determinant,
+                        Created = inc.Created == null ? "" : inc.Created.ToString(),
+                        EventId = inc.Serial,
+                        Latitude = (float)inc.Latitude,
+                        Longitude = (float)inc.Longitude,
+                        Sex = inc.PatientSex ?? "",
+                        Notes = inc.ProblemDescription,
+                        Reason = reason,
+                        Updated = DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                    };
+
+                    Logger.Write($"Sending incident {inc.Serial} ", TraceEventType.Information, "DeviceTracker");
+
+                    NotifyDevices(devices, request, reason, serviceBusClient);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     send the status of this callsign to devices
+        /// </summary>
+        /// <param name="callsign"></param>
+        /// <param name="settings"></param>
+        /// <param name="reason"></param>
+        public void SendStatusNotification(string callsign, string reason, IServiceBusClient serviceBusClient)
+        {
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                // find corresponding resource;
+                var resource = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
+                if (resource == null)
+                    throw new ApplicationException(
+                        $"Unable to send notification, no resource exists with callsign {callsign}");
+
+                var request = new StatusNotification
+                {
+                    Status = new StatusCode
+                    {
+                        Code = resource.ResourceStatus.Status,
+                        Description = GetStatusDescription(resource.ResourceStatus),
+                    }
+                };
+
+                Logger.Write($"Sending status to devices for callsign {callsign} ",
+                    TraceEventType.Information, "DeviceTracker");
+
+                var devices = db
+                    .Devices
+                    .ToList()
+                    .Where(x => x.ResourceId == resource.ResourceId)
+                    .ToList();
+
+                foreach (var deviceRecord in devices)
+                {
+                    // save audit record
+                    //TODO: Save to Elastic
+                }
+
+                if (devices.Count > 0)
+                    NotifyDevices(devices, request, reason, serviceBusClient);
+            });
+        }
+
+        /// <summary>
+        /// This notifies the device of an event
+        /// </summary>
+        /// <param name="devices"></param>
+        /// <param name="evt"></param>
+        /// <param name="settings"></param>
+        /// <param name="reason"></param>
+        private void NotifyDevices(IEnumerable<Devices> devices, INotificationMessage evt, string reason, IServiceBusClient serviceBusClient)
+        {
+            try
+            {
+                // send push notifications
+                foreach (var device in devices)
+                    if (device.IsEnabled == true && !string.IsNullOrEmpty(device.DeviceIdentity))
+                    {
+                        Notification n = new Notification { Address = device.NotificationId, Body = evt, Method = device.NotificationTypeId, Subject = reason };
+                        serviceBusClient.Broadcast(n);
+                    }
+            }
+            catch (Exception ex)
+            {
+                Logger.Write($"error sending notification: {ex}",
+                    TraceEventType.Information, "Quest");
+            }
+            finally
+            {
+            }
+        }
+
     }
 
 }

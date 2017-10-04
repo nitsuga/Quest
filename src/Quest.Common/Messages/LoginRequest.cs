@@ -21,6 +21,8 @@ namespace Quest.Common.Messages
         /// </summary>        
         public string DeviceIdentity { get; set; }
 
+        public string FleetNo { get; set; }
+
         /// <summary>
         ///     a language locale of the device. defaults to en-GB if left empty
         /// </summary>        
