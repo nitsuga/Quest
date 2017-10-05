@@ -18,6 +18,7 @@ using Quest.Common.Messages;
 using NetTopologySuite.Geometries;
 using GeoAPI.Geometries;
 using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -31,16 +32,22 @@ namespace Quest.Lib.Research.Job
         private RoutingData _data;
         private VariableSpeedByEdge _edgeCalculator;
         private DijkstraRoutingEngine _selectedRouteEngine;
+        private IDatabaseFactory _dbFactory;
+        private TrackLoader _trackLoader;
 
         public CompareWithGoogle(
             ILifetimeScope scope,
             RoutingData data,
+            TrackLoader trackLoader,
+            IDatabaseFactory dbFactory,
             DijkstraRoutingEngine selectedRouteEngine,
             TimedEventQueue eventQueue) : base(eventQueue)
         {
+            _dbFactory = dbFactory;
             _selectedRouteEngine = selectedRouteEngine;
             _data = data;
             _scope = scope;
+            _trackLoader = trackLoader;
         }
 
         protected override void OnPrepare()
@@ -63,17 +70,17 @@ namespace Quest.Lib.Research.Job
                 File.Delete(filename);
 
             List<IncidentRoutes> routes = new List<IncidentRoutes>();
-            using (var db = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 Logger.Write("Getting routes", GetType().Name);
                 routes = db.IncidentRoutes
-                    
+
                     //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161130004872 && x.IsBadGPS == false)
                     .Where(x => x.IncidentRouteId >= 1405137 && x.IsBadGps == false)
                     .Where(x => x.ActualDuration != null && x.IsBadGps == false)
                     .Take(10000)
                     .ToList();
-            }
+            });
 
             using (var file = new StreamWriter(filename))
             {
@@ -108,7 +115,7 @@ namespace Quest.Lib.Research.Job
         void CalculateEstimates(StreamWriter file, IncidentRoutes route, int index)
         {
             //            Logger.Write($"Loading track", GetType().Name);
-            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteId}");
+            var track = _trackLoader.GetTrack($"db.inc:{route.IncidentRouteId}");
 
             if (track.Fixes.Count == 0)
                 return;

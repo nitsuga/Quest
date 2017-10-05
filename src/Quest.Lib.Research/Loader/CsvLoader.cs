@@ -10,14 +10,14 @@ namespace Quest.Lib.Research.Loader
 {
     public static class CsvLoader
     {
-        public static void Load(string filename, int headers, Func<string[], string> processRow)
+        public static void Load(IDatabaseFactory _dbFactory, string filename, int headers, Func<string[], string> processRow)
         {
             // throw away header line
             using (StreamReader reader = File.OpenText(filename))
             {
                 using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "\t" }))
                 {
-                    using (var db = new QuestDataContext())
+                    _dbFactory.Execute<QuestDataContext>((db) =>
                     {
                         // skip header
                         while (headers > 0)
@@ -64,10 +64,10 @@ namespace Quest.Lib.Research.Loader
 
                             try
                             {
-                                int rows=0;
+                                int rows = 0;
 
                                 //TODO: make sure this returns the number of rows affected
-                                db.Execute(batch.ToString(), (x)=> { rows = x.GetInt32(0); });
+                                db.Execute(batch.ToString(), (x) => { rows = x.GetInt32(0); });
 
                                 writeRowcount += rows;
                                 batch.Clear();
@@ -83,7 +83,7 @@ namespace Quest.Lib.Research.Loader
                         if (batch.ToString().Length > 0)
                             db.Execute(batch.ToString());
 
-                    }
+                    });
                 }
             }
         }

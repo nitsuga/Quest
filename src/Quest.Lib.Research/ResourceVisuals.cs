@@ -5,14 +5,22 @@ using Quest.Lib.Visuals;
 using FeatureCollection = GeoJSON.Net.Feature.FeatureCollection;
 using Autofac;
 using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research
 {
     public class ResourceVisuals : IVisualProvider
     {
+        private IDatabaseFactory _dbFactory;
+
+        public ResourceVisuals(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public List<Visual> GetVisualsCatalogue(ILifetimeScope scope, GetVisualsCatalogueRequest request)
         {
-            using (var db = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<Visual>>((db) =>
             {
                 var query = db.Avls
                     .Where(x => request.DateFrom <= x.AvlsDateTime.Value)
@@ -27,22 +35,22 @@ namespace Quest.Lib.Research
                 return query
                     .OrderBy(x => x.AvlsDateTime.Value)
                     .ToList()
-                    .GroupBy(x=> $"{x.IncidentId}:{x.Callsign}")
+                    .GroupBy(x => $"{x.IncidentId}:{x.Callsign}")
                     .Select(x => new Visual
-                {
-                    Id = new VisualId()
-                    { 
-                        Source = "Resource",
-                        Name = $"{x.Key}",
-                        Id = $"{x.Key}",
-                        VisualType = "Fixes"
-                    },
-                    Timeline = x.OrderBy(z=>z.AvlsDateTime)
-                                .Select( y=> new TimelineData(y.RawAvlsId, y.AvlsDateTime, null, $"{y.Status}", $"{y.Status}") )
+                    {
+                        Id = new VisualId()
+                        {
+                            Source = "Resource",
+                            Name = $"{x.Key}",
+                            Id = $"{x.Key}",
+                            VisualType = "Fixes"
+                        },
+                        Timeline = x.OrderBy(z => z.AvlsDateTime)
+                                .Select(y => new TimelineData(y.RawAvlsId, y.AvlsDateTime, null, $"{y.Status}", $"{y.Status}"))
                                 .ToList(),
 
-                }).ToList();
-            }
+                    }).ToList();
+            });
 
         }
 

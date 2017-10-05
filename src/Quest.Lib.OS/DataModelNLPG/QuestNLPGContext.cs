@@ -24,10 +24,6 @@ namespace Quest.Lib.OS.DataModelNLPG
         {
         }
 
-        public QuestNLPGContext()
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Blpu>(entity =>

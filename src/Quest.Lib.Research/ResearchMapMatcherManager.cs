@@ -5,20 +5,31 @@ using Quest.Lib.Research.Utils;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Autofac;
+using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.Research
 {
-    public static class ResearchMapMatcherManager
+    [Injection]
+    public class ResearchMapMatcherManager
     {
+        private TrackLoader _trackLoader;
 
-        public static MapMatcherMatchSingleResponse QueryVisual(ILifetimeScope scope, QueryVisualRequest request)
+        public ResearchMapMatcherManager(
+            ILifetimeScope scope,
+            TrackLoader trackLoader
+            )
+        {
+            _trackLoader = trackLoader;
+        }
+
+        public MapMatcherMatchSingleResponse QueryVisual(ILifetimeScope scope, QueryVisualRequest request)
         {
             try
             {
                 dynamic parms = ExpandoUtils.MakeExpandoFromString(request.Query);
                 var expandoParms = (IDictionary<string, object>) parms;
 
-                Track track = Tracks.GetTrack((string)parms.Track, (int)parms.Skip);
+                Track track = _trackLoader.GetTrack((string)parms.Track, (int)parms.Skip);
 
                 bool isGood = track.CleanTrack((int)parms.MinSeconds, (int)parms.MinDistance, (int)parms.MaxSpeed, (int)parms.Take);
 

@@ -2,11 +2,26 @@
 using Quest.Lib.Simulation.DataModelSim;
 using System.Collections.Generic;
 using System.Linq;
+using Quest.Lib.Research.DataModelResearch;
+using System;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Simulation.Resources
 {
     public class ResourceStoreDb: IResourceStore
     {
+        private IDatabaseFactory _dbFactory;
+
+        public ResourceStoreDb(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
+        public List<Avls> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to)
+        {
+            throw new NotImplementedException();
+        }
+
         //public List<Avl> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to)
         //{
         //    using (var SimData = new QuestDataEntities())
@@ -24,18 +39,18 @@ namespace Quest.Lib.Simulation.Resources
 
         public List<SimVehicle> GetVehicles()
         {
-            using (var db = new QuestSimContext())
+            return _dbFactory.Execute<QuestSimContext, List<SimVehicle>>((db) =>
             {
                 return db.Vehicles
                         .ToList()
-                        .Select(x=> new SimVehicle
-                            {
-                                VehicleId = x.VehicleId,
-                                VehicleType = x.VehicleType.Name,
-                                Position = new GeoAPI.Geometries.Coordinate(x.Easting ?? 0, x.Northing ?? 0)
-                            })
+                        .Select(x => new SimVehicle
+                        {
+                            VehicleId = x.VehicleId,
+                            VehicleType = x.VehicleType.Name,
+                            Position = new GeoAPI.Geometries.Coordinate(x.Easting ?? 0, x.Northing ?? 0)
+                        })
                         .ToList();
-            }
+            });
         }
     }
 }

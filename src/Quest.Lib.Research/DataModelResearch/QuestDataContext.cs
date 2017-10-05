@@ -22,10 +22,6 @@ namespace Quest.Lib.Research.DataModelResearch
         {
         }
 
-        public QuestDataContext()
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Activations>(entity =>

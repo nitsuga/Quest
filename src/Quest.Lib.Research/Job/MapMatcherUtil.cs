@@ -39,16 +39,21 @@ namespace Quest.Lib.Research.Job
         private ILifetimeScope _scope;
         #endregion
 
+        private IDatabaseFactory _dbFactory;
+        private TrackLoader _trackLoader;
 
         public MapMatcherUtil(
             ILifetimeScope scope,
+            IDatabaseFactory dbFactory,
+            TrackLoader trackLoader,
             IServiceBusClient serviceBusClient,
             RoutingData data
             )
         {
             _scope = scope;
+            _dbFactory = dbFactory;
+            _trackLoader = trackLoader;
         }
-
 
         /// <summary>
         /// Analyse a multiple tracks in the database using a specified map matcher and parameters
@@ -92,22 +97,21 @@ namespace Quest.Lib.Research.Job
         /// <param name="container"></param>
         /// <param name="request"></param>
         /// <param name="jobParameters"></param>
-        private static void RoadMatcherAllCommandActionWorker(ILifetimeScope scope, MapMatcherMatchAllRequest request)
+        private void RoadMatcherAllCommandActionWorker(ILifetimeScope scope, MapMatcherMatchAllRequest request)
         {
-            int runid;
-
+            int runid=0;
             try
             {
                 var matcher = scope.ResolveNamed<IMapMatcher>(request.MapMatcher);
                 Logger.Write($"Starting new run");
-                using (var context = new QuestDataContext())
+                _dbFactory.Execute<QuestDataContext>((db) =>
                 {
                     var myparams = request.Parameters.Replace("'", "''");
                     var cmd = $" SET NOCOUNT ON; INSERT [dbo].[IncidentRouteRun]([Parameters], [Timestamp]) VALUES('{myparams}', '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}');SELECT scope_identity()\n";
-                    context.Execute(cmd);
-                    runid = context.IncidentRouteRun.Max(x => x.IncidentRouteRunId);
+                    db.Execute(cmd);
+                    runid = db.IncidentRouteRun.Max(x => x.IncidentRouteRunId);
                     Logger.Write($"Run id {runid}");
-                }
+                });
 
                 Logger.Write($"Getting incident routes");
                 // get unscanned records
@@ -194,7 +198,7 @@ namespace Quest.Lib.Research.Job
 
 
 
-        public static void RoadMatcherBatchWorker(
+        public void RoadMatcherBatchWorker(
             int taskid,
             IReadOnlyCollection<int> routeids,
             int runid,
@@ -244,10 +248,10 @@ namespace Quest.Lib.Research.Job
         }
 
 
-        public static RouteMatcherResponse ProcessRoute(int routeId, IMapMatcher matcher, IRouteEngine engine, dynamic parms)
+        public RouteMatcherResponse ProcessRoute(int routeId, IMapMatcher matcher, IRouteEngine engine, dynamic parms)
         {
             var trackuri = $"db.inc:{routeId}";
-            var track = Tracks.GetTrack(trackuri, (int)parms.Skip);
+            var track = _trackLoader.GetTrack(trackuri, (int)parms.Skip);
 
             bool isGood = track.CleanTrack((int)parms.MinSeconds, (int)parms.MinDistance, (int)parms.MaxSpeed, (int)parms.Take);
 
@@ -275,12 +279,12 @@ namespace Quest.Lib.Research.Job
         /// </summary>
         /// <param name="result"></param>
         /// <param name="runid"></param>
-        private static void SaveMatchResult(RouteMatcherResponse result, int runid, int incidentRouteId)
+        private void SaveMatchResult(RouteMatcherResponse result, int runid, int incidentRouteId)
         {
             var builder = new StringBuilder();
             try
             {
-                using (var context = new QuestDataContext())
+                _dbFactory.Execute<QuestDataContext>((db) =>
                 {
                     if (result.Results != null && result.Results.Count > 0)
                     {
@@ -293,33 +297,32 @@ namespace Quest.Lib.Research.Job
                             }
                         }
 
-                        context.Execute(builder.ToString());
+                        db.Execute(builder.ToString());
                     }
                     var cmd1 = $"update IncidentRoutes set scanned = 1, IsBadGPS=0 where IncidentRouteId = {incidentRouteId};\n";
-                    context.Execute(cmd1);
-                }
-
+                    db.Execute(cmd1);
+                });
             }
             catch(Exception ex)
             {
                 Logger.Write(ex.ToString(), "MapMatcher");
                 Logger.Write(builder.ToString(), "MapMatcher");
 
-                using (var context = new QuestDataContext())
+                _dbFactory.Execute<QuestDataContext>((db) =>
                 {
                     var cmd1 = $"update IncidentRoutes set scanned = 0, IsBadGPS=0 where IncidentRouteId = {incidentRouteId};\n";
-                    context.Execute(cmd1);
-                }
+                    db.Execute(cmd1);
+                });
             }
         }
 
-        private static void MarkRouteBad(int incidentRouteId)
+        private void MarkRouteBad(int incidentRouteId)
         {
-            using (var context = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 var cmd1 = $"update IncidentRoutes set scanned = 1, IsBadGPS=1 where IncidentRouteId = {incidentRouteId};\n";
-                context.Execute(cmd1);
-            }
+                db.Execute(cmd1);
+            });
         }
 
 
@@ -327,13 +330,13 @@ namespace Quest.Lib.Research.Job
         ///     get all Cat A incident routes (gives incident and callsign)
         /// </summary>
         /// <returns></returns>
-        private static List<int> GetIncidentRoutes(bool notScanned)
+        private List<int> GetIncidentRoutes(bool notScanned)
         {
             List<int> incidents;
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<int>>((db) =>
             {
                 if (notScanned)
-                    incidents = context.IncidentRoutes
+                    incidents = db.IncidentRoutes
                         .Where(x => x.Scanned == false)
                         // remove this to process everything
                         //.Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000)
@@ -341,12 +344,12 @@ namespace Quest.Lib.Research.Job
                         .OrderBy(x => x)
                         .ToList();
                 else
-                    incidents = context.IncidentRoutes
+                    incidents = db.IncidentRoutes
                         .Select(x => x.IncidentRouteId)
                         .OrderBy(x => x)
                         .ToList();
-            }
-            return incidents;
+                return incidents;
+            });
         }
     } // End of Class
 } //End of Namespace

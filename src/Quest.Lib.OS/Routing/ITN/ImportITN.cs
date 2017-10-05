@@ -17,6 +17,13 @@ namespace Quest.Lib.OS.Routing.ITN
 {
     public class ImportItn
     {
+        private IDatabaseFactory _dbFactory;
+
+        public ImportItn(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public int Queuesize;
         public int Threadnumber;
         private readonly int _batchsize = 15000;
@@ -48,7 +55,7 @@ namespace Quest.Lib.OS.Routing.ITN
 
         private void WriterQueue()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 int count;
                 do
@@ -56,18 +63,18 @@ namespace Quest.Lib.OS.Routing.ITN
                     try
                     {
 
-                    signal.WaitOne(new TimeSpan(0, 0, 0, 1));
-                    lock (cmds)
-                    {
-                        if (cmds.Count > 0)
+                        signal.WaitOne(new TimeSpan(0, 0, 0, 1));
+                        lock (cmds)
                         {
-                            string cmd = string.Join("\n", cmds);
-                                
-                            entities.Execute(cmd);
-                            cmds.Clear();
+                            if (cmds.Count > 0)
+                            {
+                                string cmd = string.Join("\n", cmds);
+
+                                db.Execute(cmd);
+                                cmds.Clear();
+                            }
+                            count = cmds.Count;
                         }
-                        count = cmds.Count;
-                    }
                     }
                     catch (Exception ex)
                     {
@@ -75,7 +82,7 @@ namespace Quest.Lib.OS.Routing.ITN
                         throw;
                     }
                 } while (!_stopWriter || count > 0);
-            }
+            });
         }
 
         private void Worker(object state)
@@ -527,47 +534,47 @@ namespace Quest.Lib.OS.Routing.ITN
 
         private void Clean()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 //TODO: EF work
                 //entities.CleanRoads();
-            }
+            });
         }
 
         private void AddRoadIndexes()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 //TODO: EF work
                 //entities.Execute("exec AddRoadIndexes");
-            }
+            });
         }
 
         private void MakeStaticRoadinks()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 //TODO: EF work
                 //entities.Execute("exec MakeStaticRoadinks");
-            }
+            });
         }
 
         private void PopulateJunctions()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 //TODO: EF work
                 //entities.Execute("exec PopulateJunctions");
-            }
+            });
         }
 
         private void PostProcess()
         {
-            using (var entities = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 //TODO: EF work
                 //entities.PostprocessITNLoad();
-            }
+            });
         }
 
         private enum SubRecordType

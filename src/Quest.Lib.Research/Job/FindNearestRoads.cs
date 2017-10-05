@@ -29,7 +29,7 @@ namespace Quest.Lib.Research.Job
         private readonly AutoResetEvent _are = new AutoResetEvent(false);
         private bool _quiting = false;
         private readonly List<string> _writequeue = new List<string>();
-
+        private IDatabaseFactory _dbFactory;
         #region Private Fields
         private bool _stopping;
         private ILifetimeScope _scope;
@@ -41,6 +41,7 @@ namespace Quest.Lib.Research.Job
         public FindNearestRoads(
             ILifetimeScope scope,
             RoutingData data,
+            IDatabaseFactory dbFactory,
             DijkstraRoutingEngine selectedRouteEngine,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
@@ -49,6 +50,7 @@ namespace Quest.Lib.Research.Job
             _selectedRouteEngine = selectedRouteEngine;
             _scope = scope;
             _data = data;
+            _dbFactory = dbFactory;
         }
 
         protected override void OnPrepare()
@@ -67,8 +69,7 @@ namespace Quest.Lib.Research.Job
         {
             // load in nodes and links
             Debug.Print($"Loading road network {DateTime.Now}");
-            var data = new RoutingData();
-            while (data.IsInitialised == false)
+            while (_data.IsInitialised == false)
                 Thread.Sleep(1000);
 
             var msg = "Adding nearest road links for AVLS data";
@@ -82,12 +83,12 @@ namespace Quest.Lib.Research.Job
             Task.Run(() => Writer());
 
             // get all the records
-            using (var context = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
-                var total = context.Avls.Count(x => x.Process == true);
-                var max = context.Avls.Where(x => x.Process == true).Max(x => x.RawAvlsId);
-                var min = context.Avls.Where(x => x.Process == true).Min(x => x.RawAvlsId);
-                var batchsize = (max - min)/maxtasks;
+                var total = db.Avls.Count(x => x.Process == true);
+                var max = db.Avls.Where(x => x.Process == true).Max(x => x.RawAvlsId);
+                var min = db.Avls.Where(x => x.Process == true).Min(x => x.RawAvlsId);
+                var batchsize = (max - min) / maxtasks;
                 var batch = 0;
                 for (int i = min; i < max; i += batchsize)
                 {
@@ -96,7 +97,7 @@ namespace Quest.Lib.Research.Job
                         Batch = batch++,
                         From = i,
                         BatchSize = batchsize,
-                        Routingdata = data
+                        Routingdata = _data
                     };
 
                     chunks.Add(Task.Run(() => FindNearestRoadsWorker(p)));
@@ -110,7 +111,7 @@ namespace Quest.Lib.Research.Job
                 }
                 msg = $"Unscanned records #{total} there will be {batch} batches";
                 Logger.Write(msg, GetType().Name);
-            }
+            });
 
 
             // wait for them all to finish
@@ -124,7 +125,7 @@ namespace Quest.Lib.Research.Job
 
         private void Writer()
         {
-            using (var context2 = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 while (!_quiting)
                 {
@@ -145,16 +146,16 @@ namespace Quest.Lib.Research.Job
                         }
                         try
                         {
-                            context2.Execute(s.ToString());
+                            db.Execute(s.ToString());
                         }
                         catch (Exception)
                         {
-                            
+
                             throw;
                         }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -168,23 +169,23 @@ namespace Quest.Lib.Research.Job
             Logger.Write(msg, GetType().Name);
             var s = new StringBuilder();
 
-            using (var context2 = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 int itemsAppended = 0;
                 var items =
-                    context2.Avls
+                    db.Avls
                         .Where(x => x.RawAvlsId >= p.From && x.RawAvlsId < (p.From + p.BatchSize) && (x.Process ?? false) == true);
                 foreach (var r in items) // for each GPS fix..
                 {
                     try
                     {
-                        var ll = new LatLng((double) (r.LocationY ?? 0), (double) (r.LocationX ?? 0));
+                        var ll = new LatLng((double)(r.LocationY ?? 0), (double)(r.LocationX ?? 0));
                         var en = ll.WGS84ToOSRef();
 
                         // create a point for the fix
-                        var coord = new Coordinate((float) en.Easting, (float) en.Northing);
+                        var coord = new Coordinate((float)en.Easting, (float)en.Northing);
 
-                        var pointEn = new Point(coord) {SRID = 27700};
+                        var pointEn = new Point(coord) { SRID = 27700 };
 
                         var e = pointEn.Buffer(50).EnvelopeInternal;
 
@@ -227,7 +228,7 @@ namespace Quest.Lib.Research.Job
 
                 msg = $"Batch #{p.Batch} completed";
                 Logger.Write(msg, GetType().Name);
-            }
+            });
         }
 #endif
 

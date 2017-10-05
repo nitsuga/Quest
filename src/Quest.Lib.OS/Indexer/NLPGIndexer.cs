@@ -8,11 +8,19 @@ using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Lib.OS.DataModelNLPG;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.OS.Indexer
 {
     internal class NlpgIndexer : ElasticIndexer
     {
+        private IDatabaseFactory _dbFactory;
+
+        public NlpgIndexer(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         /// <summary>
         /// Loads full NLPG from the database
         /// </summary>
@@ -24,7 +32,7 @@ namespace Quest.Lib.OS.Indexer
 
         private void Build(BuildIndexSettings config)
         {
-            using (var db = new QuestNLPGContext())
+            _dbFactory.Execute<QuestNLPGContext>((db) =>
             {
 
                 Logger.Write($"{GetType().Name}: Counting records..", GetType().Name);
@@ -42,12 +50,12 @@ namespace Quest.Lib.OS.Indexer
                 long batchSize = recordsPerPacket;
                 int concurrentBatches = 4;
 
-                config.RecordsTotal = db.Nlpg.Select(x=>x.Id).Count();
+                config.RecordsTotal = db.Nlpg.Select(x => x.Id).Count();
                 //config.Logfrequency = recordsPerPacket;
 
                 BatchIndexer.ProcessBatches(this, config, startRecord, stopRecord, batchSize,
                     concurrentBatches, ProcessBatch);
-            }
+            });
             config.Client.Refresh(new RefreshRequest(ElasticSettings.DefaultDocindex));
         }
 
@@ -55,7 +63,7 @@ namespace Quest.Lib.OS.Indexer
         {
             try
             {
-                using (var db = new QuestNLPGContext())
+                _dbFactory.Execute<QuestNLPGContext>((db) =>
                 {
                     var descriptor = GetBulkRequest(config);
 
@@ -69,7 +77,7 @@ namespace Quest.Lib.OS.Indexer
                         }
 
                         // dont index street records - these are taken care of by ITN
-                        if (r.PaoText== "STREET RECORD")
+                        if (r.PaoText == "STREET RECORD")
                         {
                             lock (config)
                             {
@@ -158,39 +166,39 @@ namespace Quest.Lib.OS.Indexer
                             locality.Add(r.LocalityName.ToUpper());
 
 
-                            var address = new LocationDocument
-                            {
-                                Created = DateTime.Now,
-                                ID = "NLPG" + r.Id,
-                                Type = IndexBuilder.AddressDocumentType.Address,
-                                Source = "NLPG",
-                                //BuildingName = r.pao_text,
-                                Description = r.GeoSingleAddressLabel.ToUpper(),
-                                indextext = Join(indextext, terms, false).Decompound(config.DecompoundList),
-                                Location = point,
-                                Point = PointfromGeoLocation(point),
-                                //Organisation = "",
-                                //Postcode = r.postcode_locator,
-                                //SubBuilding = "",
-                                Thoroughfare = new List<string> {r.StreetDescription.ToUpper()},
-                                Locality = locality,
-                                //BuildingNumbers = buildingNumbers,
-                                Areas = terms,
-                                UPRN = r.Uprn ?? 0,
-                                USRN = r.Usrn ?? 0,
-                                Status = LogicalStatus(r.LogicalStatus ?? 0),
-                                Classification = r.ClassificationCode
-                            };
-                            // add to the list of stuff to index
-                            address.indextext = address.indextext.Replace("&", " and ");
+                        var address = new LocationDocument
+                        {
+                            Created = DateTime.Now,
+                            ID = "NLPG" + r.Id,
+                            Type = IndexBuilder.AddressDocumentType.Address,
+                            Source = "NLPG",
+                            //BuildingName = r.pao_text,
+                            Description = r.GeoSingleAddressLabel.ToUpper(),
+                            indextext = Join(indextext, terms, false).Decompound(config.DecompoundList),
+                            Location = point,
+                            Point = PointfromGeoLocation(point),
+                            //Organisation = "",
+                            //Postcode = r.postcode_locator,
+                            //SubBuilding = "",
+                            Thoroughfare = new List<string> { r.StreetDescription.ToUpper() },
+                            Locality = locality,
+                            //BuildingNumbers = buildingNumbers,
+                            Areas = terms,
+                            UPRN = r.Uprn ?? 0,
+                            USRN = r.Usrn ?? 0,
+                            Status = LogicalStatus(r.LogicalStatus ?? 0),
+                            Classification = r.ClassificationCode
+                        };
+                        // add to the list of stuff to index
+                        address.indextext = address.indextext.Replace("&", " and ");
 
-                            // add item to the list of documents to index
-                            AddIndexItem(address, descriptor);
+                        // add item to the list of documents to index
+                        AddIndexItem(address, descriptor);
                     }
                     // commit anything else
                     CommitBultRequest(config, descriptor);
 
-                }
+                });
             }
             catch (Exception ex)
             {

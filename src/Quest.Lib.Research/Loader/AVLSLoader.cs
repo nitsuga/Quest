@@ -1,12 +1,13 @@
-﻿using Quest.Lib.Utils;
+﻿using Quest.Lib.Data;
+using Quest.Lib.Utils;
 
 namespace Quest.Lib.Research.Loader
 {
     public static class AvlsLoader
     {
-        public static void Load(string filename, int headers)
+        public static void Load(IDatabaseFactory _dbFactory, string filename, int headers)
         {
-            CsvLoader.Load(filename, headers, ProcessRow);
+            CsvLoader.Load(_dbFactory, filename, headers, ProcessRow);
         }
 
         static string ProcessRow(string[] data)

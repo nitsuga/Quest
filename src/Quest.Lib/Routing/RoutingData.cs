@@ -31,6 +31,16 @@ namespace Quest.Lib.Routing
         public RoutingData(IDatabaseFactory dbFactory)
         {
             _dbFactory = dbFactory;
+
+            Bounds = new Envelope();
+
+            // start a background thread to initialise the module
+            var w = new Thread(StartdataLoader)
+            {
+                IsBackground = true,
+                Name = "routing dataLoader"
+            };
+            w.Start();
         }
 
         /// <summary>
@@ -50,19 +60,6 @@ namespace Quest.Lib.Routing
         private readonly WKTReader _reader = new WKTReader();
 
         public Envelope Bounds;
-
-        public RoutingData()
-        {
-            Bounds = new Envelope();
-
-            // start a background thread to initialise the module
-            var w = new Thread(StartdataLoader)
-            {
-                IsBackground = true,
-                Name = "routing dataLoader"
-            };
-            w.Start();
-        }
 
         /// <summary>
         ///     Sets and gets the IsInitialised property.
@@ -106,6 +103,9 @@ namespace Quest.Lib.Routing
                 Logger.Write($"Loading road network...", TraceEventType.Information, "Routing Data");
                 return _dbFactory.Execute<QuestContext, int>((db) =>
                 {
+                    db.Database.AutoTransactionsEnabled = false;
+                    db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
+
                     foreach (var current in db.RoadLinkEdge)
                     {
                         var geomAny = _reader.Read(current.Wkt);

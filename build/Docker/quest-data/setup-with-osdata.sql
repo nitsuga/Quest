@@ -6,6 +6,12 @@ if db_id('Quest') is null
 	( FILENAME = N'/tmp/data1/Quest_log.ldf' )
 	 FOR ATTACH
 GO
+if db_id('QuestDev') is null
+	CREATE DATABASE [QuestDev] ON 
+	( FILENAME = N'/tmp/data1/QuestDev.mdf' ),
+	( FILENAME = N'/tmp/data1/QuestDev_log.ldf' )
+	 FOR ATTACH
+GO
 if db_id('QuestNLPG') is null
 	CREATE DATABASE [QuestNLPG] ON 
 	( FILENAME = N'/tmp/data2/QuestNLPG.mdf' ),
@@ -22,5 +28,11 @@ if db_id('QuestOsm') is null
 	CREATE DATABASE [QuestOsm] ON 
 	( FILENAME = N'/tmp/data2/QuestOsm.mdf' ),
 	( FILENAME = N'/tmp/data2/QuestOsm_log.ldf' )
+	 FOR ATTACH
+GO
+if db_id('QuestSim') is null
+	CREATE DATABASE [QuestSim] ON 
+	( FILENAME = N'/tmp/data3/QuestSim.mdf' ),
+	( FILENAME = N'/tmp/data3/QuestSim_log.ldf' )
 	 FOR ATTACH
 GO

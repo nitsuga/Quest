@@ -26,17 +26,15 @@ namespace Quest.Lib.ServiceBus
                 // create new id for this message
                 obj.RequestId = Guid.NewGuid().ToString();
 
-                // hook up to the incoming message notifications
-                MsgSource.NewMessage += (who, args) =>
+                // create a message handler which we can subscribe and then (importantly) unsubscribe to
+                // after the message has been received.
+                EventHandler<NewMessageArgs> handler = null;
+
+                handler = (sender, args) =>
                 {
-                    Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI={args.Metadata.CorrelationId} looking for {obj.RequestId}", "Web");
-                    // detect our message with the right correlation id and expected type
-                    if (args.Metadata.CorrelationId == obj.RequestId && args.Payload.GetType() == typeof(T))
-                    {
-                        result = args.Payload as T;
-                        foundMessage.Set();
-                    }
+                    MsgSourceHandler(sender, args, foundMessage, obj, ref result);
                 };
+                MsgSource.NewMessage += handler;
 
                 PublishMetaData metadata = new PublishMetaData()
                 {
@@ -53,9 +51,23 @@ namespace Quest.Lib.ServiceBus
 
                 // now wait for the response to arrive (via the anonymous event handler above)
                 foundMessage.WaitOne(timeout);
+
+                MsgSource.NewMessage -= handler; // Unsubscribe
+
             });
 
             return result;
+        }
+
+        private void MsgSourceHandler<T>(object who, NewMessageArgs args, AutoResetEvent foundMessage, Request obj, ref T result) where T : class
+        {
+            Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI={args.Metadata.CorrelationId} looking for {obj.RequestId}", "Web");
+            // detect our message with the right correlation id and expected type
+            if (args.Metadata.CorrelationId == obj.RequestId && args.Payload.GetType() == typeof(T))
+            {
+                result = args.Payload as T;
+                foundMessage.Set();
+            }
         }
 
         public void BroadcastMessage(IServiceBusMessage request)

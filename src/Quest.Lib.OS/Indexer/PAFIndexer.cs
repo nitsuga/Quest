@@ -7,11 +7,19 @@ using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Lib.OS.DataModelOS;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.OS.Indexer
 {
     internal class PafIndexer : ElasticIndexer
     {
+        private IDatabaseFactory _dbFactory;
+
+        public PafIndexer(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public override void StartIndexing(BuildIndexSettings config)
         {
             Build(config);
@@ -19,7 +27,7 @@ namespace Quest.Lib.OS.Indexer
 
         private void Build(BuildIndexSettings config)
         {
-            using (var db = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
 
                 Logger.Write($"{GetType().Name}: Counting records..", GetType().Name);
@@ -41,12 +49,12 @@ namespace Quest.Lib.OS.Indexer
 
                 BatchIndexer.ProcessBatches(this, config, startRecord, stopRecord, batchSize,
                     concurrentBatches, ProcessBatch);
-            }
+            });
         }
 
         private void ProcessBatch(BuildIndexSettings config, BatchIndexer.BatchWork work)
         {
-            using (var db = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 var total = db.Paf.Count();
                 config.RecordsTotal = total;
@@ -148,10 +156,7 @@ namespace Quest.Lib.OS.Indexer
                 // commit anything else
                 CommitBultRequest(config, descriptor);
 
-            }
-
+            });
         }
-
-
     }
 }

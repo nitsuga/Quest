@@ -36,11 +36,15 @@ namespace Quest.Lib.Research.Job
         private DijkstraRoutingEngine _selectedRouteEngine;
         #endregion
 
+        private IDatabaseFactory _dbFactory;
+        private TrackLoader _trackLoader;
 
         public AnalyseEmissionAndTransition(
             ISearchEngine searchEngine,
             ILifetimeScope scope,
+            IDatabaseFactory dbFactory,
             RoutingData data,
+            TrackLoader trackLoader,
             DijkstraRoutingEngine selectedRouteEngine,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
@@ -50,6 +54,8 @@ namespace Quest.Lib.Research.Job
             _searchEngine = searchEngine;
             _scope = scope;
             _data = data;
+            _dbFactory = dbFactory;
+            _trackLoader = trackLoader;
         }
 
         protected override void OnPrepare()
@@ -116,7 +122,7 @@ namespace Quest.Lib.Research.Job
             {
                 try
                 {
-                    var t = Tracks.GetTracks($"db.inc:{inc}");
+                    var t = _trackLoader.GetTracks($"db.inc:{inc}");
 
                     foreach (var track in t)
                     {
@@ -141,34 +147,34 @@ namespace Quest.Lib.Research.Job
         /// get a list of 1000 incidents
         /// </summary>
         /// <returns></returns>
-        private static List<long> GetIncidents()
+        private List<long> GetIncidents()
         {
             List<long> incidents;
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<long>>((db) =>
             {
-                incidents = context.IncidentRoutes
-                    .Where(x=>x.IsBadGps==false)
-                    .Select(x => (long) x.IncidentId)
+                incidents = db.IncidentRoutes
+                    .Where(x => x.IsBadGps == false)
+                    .Select(x => (long)x.IncidentId)
                     .Distinct()
                     .Take(10000)
                     .ToList();
-            }
-            return incidents;
+                return incidents;
+            });
         }
 
-        private static List<long> GetIncidentRoutes()
+        private List<long> GetIncidentRoutes()
         {
-            List<long> incidents;
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<long>>((db) =>
             {
-                incidents = context.IncidentRoutes
-                    .Where(x=>x.IsBadGps==false)
+                List<long> incidents;
+                incidents = db.IncidentRoutes
+                    .Where(x => x.IsBadGps == false)
                     .Select(x => (long)x.IncidentRouteId)
                     .Distinct()
                     .Take(10000)
                     .ToList();
-            }
-            return incidents;
+                return incidents;
+            });
         }
 
         private void AnalyseTransition(StreamWriter file, long routeid, AtsParms parms)
@@ -197,7 +203,7 @@ namespace Quest.Lib.Research.Job
             parameters.MaxSpeed = 80;
             parameters.MaxCandidates = 100;
 
-            var track = Tracks.GetTrack($"db.inc://{routeid}");
+            var track = _trackLoader.GetTrack($"db.inc://{routeid}");
 
             var request = new MapMatcherMatchSingleRequest()
             {
@@ -307,9 +313,9 @@ namespace Quest.Lib.Research.Job
             }
         }
 
-        private static void AnalyseTrackSpeeds(List<Track> tracks, AtsParms parms)
+        private void AnalyseTrackSpeeds(List<Track> tracks, AtsParms parms)
         {
-            using (var context = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 foreach (var track in tracks)
                 {
@@ -326,7 +332,7 @@ namespace Quest.Lib.Research.Job
                     }
                     var sqlc = bulk.ToString();
                     if (sqlc.Length > 0)
-                        context.Execute(sqlc);
+                        db.Execute(sqlc);
 
                     track.CalculateEstimateSpeeds();
 
@@ -347,10 +353,10 @@ namespace Quest.Lib.Research.Job
 
 
                     if (bulk.ToString().Length > 0)
-                        context.Execute(bulk.ToString());
+                        db.Execute(bulk.ToString());
 
                 }
-            }
+            });
         }
 
         public class AtsParms

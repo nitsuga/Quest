@@ -51,6 +51,9 @@ namespace Quest.Lib.Routing.Speeds
             {
                 _dbFactory.Execute<QuestContext>((db) =>
                 {
+                    db.Database.AutoTransactionsEnabled = false;
+                    db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
+
                     Logger.Write("calling RoadSpeedMatrixHoDSummaries", GetType().Name);
 #if false
                     var summaries = context.RoadSpeedMatrixHoDSummaries.FirstOrDefault();

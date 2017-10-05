@@ -7,6 +7,7 @@ using Quest.Lib.Processor;
 using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Simulation.DataModelSim;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Simulation.Resources
 {
@@ -23,13 +24,17 @@ namespace Quest.Lib.Simulation.Resources
         public DateTime endTime { get; set; }
 
         private IResourceStore _resourceStore;
+        private IDatabaseFactory _dbFactory;
+
 
         public ResSimulator(
             IResourceStore resourceStore, 
-            IServiceBusClient serviceBusClient, 
+            IServiceBusClient serviceBusClient,
+            IDatabaseFactory dbFactory,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue,serviceBusClient, msgHandler)
         {
+            _dbFactory = dbFactory;
             _resourceStore = resourceStore;
         }
     
@@ -53,7 +58,7 @@ namespace Quest.Lib.Simulation.Resources
         {
             LogMessage($"Low watermark, loading {quantity} Resources", TraceEventType.Warning);
 
-            using (var SimData = new QuestSimContext())
+            _dbFactory.Execute<QuestSimContext>((db) =>
             {
                 int quantity = this.quantity;
 
@@ -65,24 +70,24 @@ namespace Quest.Lib.Simulation.Resources
                 {
                     count--;
 
-                    ResourceUpdate msg = new ResourceUpdate() {
-                            Session=Id.Session,
-                            Callsign=i.Callsign,
-                            ResourceType = i.VehicleTypeId==1?"AEU":"FRU",
-                            Status = i.Status,
-                            Latitude = 0,
-                            Longitude = 0,
-                            Speed=i.Speed??0,
-                            Direction=i.Direction??0,
-                            Skill="",
-                            UpdateTime= i.AvlsDateTime ?? DateTime.MinValue,
-                            FleetNo = i.FleetNumber??0,
-                            Incident=i.IncidentId.ToString(),
-                            Emergency=false,
-                            Destination="",
-                            Agency="",
-                            Class="",
-                            EventType=""
+                    ResourceUpdate msg = new ResourceUpdate()
+                    {
+                        Callsign = i.Callsign,
+                        ResourceType = i.VehicleTypeId == 1 ? "AEU" : "FRU",
+                        Status = i.Status,
+                        Latitude = 0,
+                        Longitude = 0,
+                        Speed = i.Speed ?? 0,
+                        Direction = i.Direction ?? 0,
+                        Skill = "",
+                        UpdateTime = i.AvlsDateTime ?? DateTime.MinValue,
+                        FleetNo = i.FleetNumber.ToString(),
+                        Incident = i.IncidentId.ToString(),
+                        Emergency = false,
+                        Destination = "",
+                        Agency = "",
+                        Class = "",
+                        EventType = ""
                     };
 
                     if (i.X != 0)
@@ -98,10 +103,10 @@ namespace Quest.Lib.Simulation.Resources
 
                     // add a trigger for when the number of incs goes below a certain amount
                     if (count == lowWatermark)
-                        SetTimedEvent($"RESLOWWATER-{msg.UpdateTime}", msg.UpdateTime, ()=> LowWaterResources());
+                        SetTimedEvent($"RESLOWWATER-{msg.UpdateTime}", msg.UpdateTime, () => LowWaterResources());
                 }
                 LogMessage($"Low watermark, pumped {count} Resources", TraceEventType.Information);
-            }
+            });
         }
 
 

@@ -13,6 +13,7 @@ using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research.Job
 {
@@ -29,16 +30,22 @@ namespace Quest.Lib.Research.Job
         private ISearchEngine _searchEngine;
         #endregion
 
+        private IDatabaseFactory _dbFactory;
+        private TrackLoader _trackLoader;
 
         public AnalyseAvlsQuality(
             ISearchEngine searchEngine,
             ILifetimeScope scope,
             IServiceBusClient serviceBusClient,
+            IDatabaseFactory dbFactory,
             MessageHandler msgHandler,
+            TrackLoader trackLoader,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
+            _trackLoader = trackLoader;
             _searchEngine = searchEngine;
             _scope = scope;
+            _dbFactory = dbFactory;
         }
 
         protected override void OnPrepare()
@@ -62,7 +69,7 @@ namespace Quest.Lib.Research.Job
             {
                 try
                 {
-                    var t = Tracks.GetTracks($"db.inc:{inc}");
+                    var t = _trackLoader.GetTracks($"db.inc:{inc}");
 
                     AnalyseTrackSpeeds(t, settings);
 
@@ -83,19 +90,20 @@ namespace Quest.Lib.Research.Job
         /// get a list of all the incidents
         /// </summary>
         /// <returns></returns>
-        private static List<long> GetIncidents()
+        private List<long> GetIncidents()
         {
-            List<long> incidents;
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<long>>((db) =>
             {
+                List<long> incidents;
 
-                incidents = context.Avls
-                    .Where(x => x.RawAvlsId>= 320473511 && x.IncidentId!=null) // 2016-12-02
+                incidents = db.Avls
+                    .Where(x => x.RawAvlsId >= 320473511 && x.IncidentId != null) // 2016-12-02
                     .Select(x => (long)x.IncidentId)
                     .Distinct()
                     .ToList();
-            }
-            return incidents;
+
+                return incidents;
+            });
         }
 
         private static void AnalyseTrackSpeeds(IEnumerable<Track> tracks, AtsParms settings)

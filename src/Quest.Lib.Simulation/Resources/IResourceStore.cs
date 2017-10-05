@@ -1,4 +1,6 @@
 ﻿using Quest.Common.Simulation;
+using Quest.Lib.Research.DataModelResearch;
+using System;
 using System.Collections.Generic;
 
 namespace Quest.Lib.Simulation.Resources
@@ -19,6 +21,6 @@ namespace Quest.Lib.Simulation.Resources
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        //List<Avls> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to);
+        List<Avls> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to);
     }
 }

@@ -6,15 +6,24 @@ using Quest.Common.Messages;
 using Quest.Lib.Visuals;
 using Autofac;
 using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.Research
 {
     public class RoadMapMatcherVisualProvider : IVisualProvider
     {
+        private IDatabaseFactory _dbFactory;
+        private ResearchMapMatcherManager _manager;
+
+        public RoadMapMatcherVisualProvider(IDatabaseFactory dbFactory, ResearchMapMatcherManager manager)
+        {
+            _dbFactory = dbFactory;
+            _manager = manager;
+        }
 
         public List<Visual> GetVisualsCatalogue(ILifetimeScope scope, GetVisualsCatalogueRequest request)
         {
-            using (var db = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<Visual>>((db) =>
             {
                 IQueryable<IncidentRoutes> query = db.IncidentRoutes
                     .Where(x => request.DateFrom <= x.StartTime)
@@ -26,19 +35,18 @@ namespace Quest.Lib.Research
                 if (request.Incident.Any())
                     query = query.Where(x => x.IncidentId == long.Parse(request.Incident));
 
-                return query.OrderBy(x=>x.StartTime).ToList().Select(x => new Visual
+                return query.OrderBy(x => x.StartTime).ToList().Select(x => new Visual
                 {
                     Id = new VisualId()
-                    { 
+                    {
                         Source = "MapMatcher",
                         Name = $"{x.IncidentId}:{x.Callsign}",
                         Id = x.IncidentRouteId.ToString(),
-                        VisualType ="Route,Fixes"
+                        VisualType = "Route,Fixes"
                     },
-                    Timeline = new List<TimelineData> { new TimelineData (x.IncidentRouteId, x.StartTime, x.EndTime, $"{x.IncidentId}:{x.Callsign}", "") },
+                    Timeline = new List<TimelineData> { new TimelineData(x.IncidentRouteId, x.StartTime, x.EndTime, $"{x.IncidentId}:{x.Callsign}", "") },
                 }).ToList();
-            }
-
+            });
         }
 
         public GeoJSON.Net.Feature.FeatureCollection GetVisualsData(ILifetimeScope scope, GetVisualsDataRequest request)
@@ -52,7 +60,7 @@ namespace Quest.Lib.Research
             result.Visuals = new List<Visual>();
             try
             {
-                var response = ResearchMapMatcherManager.QueryVisual(scope, request);
+                var response = _manager.QueryVisual(scope, request);
 
                 result.Success = response.Success;
                 result.Message = response.Message;

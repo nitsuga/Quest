@@ -124,42 +124,41 @@ namespace Quest.Lib.OS.Routing.ITN
                 });
         }
 
-        private static Dictionary<int, RoutingLocation> LoadNodes()
+        private Dictionary<int, RoutingLocation> LoadNodes()
         {
             Logger.Write("Routing Data is loading the road nodes","LoadItn");
             var locs = new Dictionary<int, RoutingLocation>();
             StaticRoadNode[] nodes;
 
-            using (var context = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
-                nodes = context.StaticRoadNode.ToArray();
-            }
+                nodes = db.StaticRoadNode.ToArray();
 
-            foreach (var current in nodes)
-            {
-                var loc = new RoutingLocation(current.X , current.Y )
+                foreach (var current in nodes)
                 {
-                    Id = current.RoadNodeId,
-                };
-                locs.Add(loc.Id, loc);
-            }
+                    var loc = new RoutingLocation(current.X , current.Y )
+                    {
+                        Id = current.RoadNodeId,
+                    };
+                    locs.Add(loc.Id, loc);
+                }
+            });
             Logger.Write("Routing Data has loaded the road nodes", "LoadItn");
 
             return locs;
         }
 
-        private static StaticRoadLinks[] LoadLinks()
+        private StaticRoadLinks[] LoadLinks()
         {
             try
             {
                 Logger.Write("Routing Data is loading the road links", "LoadItn");
-                using (var context = new QuestOSContext())
+                return _dbFactory.Execute<QuestOSContext, StaticRoadLinks[]>((db) =>
                 {
-                    var links = context.StaticRoadLinks.ToArray();
+                    var links = db.StaticRoadLinks.ToArray();
                     Logger.Write("Routing Data has loaded the road links", "LoadItn");
                     return links;
-                }
-
+                });
             }
             catch (Exception ex)
             {

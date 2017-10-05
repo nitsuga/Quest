@@ -7,11 +7,19 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.OS.DataModelOS;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.OS.Indexer
 {
     public class ItnIndexer : ElasticIndexer
     {
+        private IDatabaseFactory _dbFactory;
+
+        public ItnIndexer(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
+
         public override void StartIndexing(BuildIndexSettings config)
         {
             Build(config);
@@ -21,7 +29,7 @@ namespace Quest.Lib.OS.Indexer
         {
             DeleteDataSet<LocationDocument>(config.DefaultIndex, config.Client, IndexBuilder.AddressDocumentType.RoadLink);
 
-            using (var db = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 var total = db.Road.Count();
 
@@ -40,7 +48,7 @@ namespace Quest.Lib.OS.Indexer
                 {
                     config.RecordsCurrent++;
 
-                    var point = GeomUtils.ConvertToLatLonLoc(r.X,r.Y);
+                    var point = GeomUtils.ConvertToLatLonLoc(r.X, r.Y);
 
                     // check whether point is in master area if required
                     if (!IsPointInRange(config, point.Longitude, point.Latitude))
@@ -73,8 +81,8 @@ namespace Quest.Lib.OS.Indexer
                         Point = PointfromGeoLocation(point),
                         //Organisation = "",
                         //Postcode = "",
-                  //      SubBuilding = "",
-                        Thoroughfare = new List<string> {r.RoadName.ToUpper()},
+                        //      SubBuilding = "",
+                        Thoroughfare = new List<string> { r.RoadName.ToUpper() },
                         Locality = new List<string>(),
                         Areas = terms,
                         Status = "Approved",
@@ -92,7 +100,7 @@ namespace Quest.Lib.OS.Indexer
 
                 CommitBultRequest(config, descriptor);
 
-            }
+            });
         }
     }
 }

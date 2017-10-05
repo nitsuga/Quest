@@ -5,11 +5,18 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.OS.DataModelOS;
+using Quest.Lib.Data;
 
 namespace Quest.Lib.OS.Indexer
 {
     internal class JunctionIndexer : ElasticIndexer
     {
+        private IDatabaseFactory _dbFactory;
+
+        public JunctionIndexer(IDatabaseFactory dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         public override void StartIndexing(BuildIndexSettings config)
         {
@@ -20,7 +27,7 @@ namespace Quest.Lib.OS.Indexer
         {
             DeleteDataSet<LocationDocument>(config.DefaultIndex, config.Client, IndexBuilder.AddressDocumentType.Junction);
 
-            using (var db = new QuestOSContext())
+            _dbFactory.Execute<QuestOSContext>((db) =>
             {
                 var descriptor = GetBulkRequest(config);
                 var total = db.Junctions.Count();
@@ -75,8 +82,7 @@ namespace Quest.Lib.OS.Indexer
 
                 // commit anything else
                 CommitBultRequest(config, descriptor);
-            }
+            });
         }
-
     }
 }

@@ -26,7 +26,6 @@
     <Compile Remove="Interfaces\ISimPart.cs" />
     <Compile Remove="Interfaces\IUserOut.cs" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
-    <Compile Remove="Resources\ResSimulator.cs" />
     <Compile Remove="Resources\RosterStoreDb.cs" />
   </ItemGroup>
 

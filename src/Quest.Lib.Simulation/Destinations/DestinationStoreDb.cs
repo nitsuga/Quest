@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Simulation;
+using Quest.Lib.Data;
 using Quest.Lib.Routing;
 using Quest.Lib.Simulation.DataModelSim;
 using System;
@@ -14,11 +15,12 @@ namespace Quest.Lib.Simulation.Destinations
 
         public string Filename { get; set; }
         private RoutingData _data;
-
+        private IDatabaseFactory _dbFactory;
         List<SimDestination> _allDestinations;
 
-        public DestinationStoreDb(RoutingData data)
+        public DestinationStoreDb(IDatabaseFactory dbFactory, RoutingData data)
         {
+            _dbFactory = dbFactory;
             _data = data;
             _allDestinations = GetAllDestinations();
         }
@@ -29,21 +31,21 @@ namespace Quest.Lib.Simulation.Destinations
             while (!_data.IsInitialised)
                 Thread.Sleep(1);
 
-            using (var db = new QuestSimContext())
+            return _dbFactory.Execute<QuestSimContext, List<SimDestination>>((db) =>
             {
                 var d = db.Destinations
                     .ToList()
                     .Select(x =>
                     {
-                        var pos = new GeoAPI.Geometries.Coordinate(0,0);
+                        var pos = new GeoAPI.Geometries.Coordinate(0, 0);
                         var edge = _data.GetEdgeFromPoint(pos);
                         return new SimDestination
                         {
                             ID = x.DestinationId.ToString(),
                             IsHospital = x.IsHospital,
-                            IsRoad = x.IsRoad ,
-                            IsStandby = x.IsStandby ,
-                            IsStation = x.IsStation ,
+                            IsRoad = x.IsRoad,
+                            IsStandby = x.IsStandby,
+                            IsStation = x.IsStation,
                             Name = x.Destination,
                             X = 0,
                             Y = 0,
@@ -58,7 +60,7 @@ namespace Quest.Lib.Simulation.Destinations
                 //    res.Position = new GeoAPI.Geometries.Coordinate(latlng.Longitude, latlng.Latitude);
                 //}
                 return d;
-            }
+            });
         }
 
         public List<SimDestination> GetDestinations(bool hospitals, bool stations, bool standby)

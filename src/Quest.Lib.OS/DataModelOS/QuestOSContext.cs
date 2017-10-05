@@ -23,11 +23,6 @@ namespace Quest.Lib.OS.DataModelOS
         {
         }
 
-        public QuestOSContext()
-        {
-        }
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Junctions>(entity =>

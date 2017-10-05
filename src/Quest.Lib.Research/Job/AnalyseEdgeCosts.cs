@@ -32,12 +32,16 @@ namespace Quest.Lib.Research.Job
         #region Private Fields
         private ILifetimeScope _scope;
         private RoutingData _data;
+        private IDatabaseFactory _dbFactory;
         private DijkstraRoutingEngine _selectedRouteEngine;
+        private TrackLoader _trackLoader;
         #endregion
 
         public AnalyseEdgeCosts(
             ILifetimeScope scope,
             RoutingData data,
+            TrackLoader trackLoader,
+            IDatabaseFactory dbFactory,
             DijkstraRoutingEngine selectedRouteEngine,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
@@ -46,6 +50,8 @@ namespace Quest.Lib.Research.Job
             _selectedRouteEngine = selectedRouteEngine;
             _scope = scope;
             _data = data;
+            _dbFactory = dbFactory;
+            _trackLoader = trackLoader;
         }
 
         protected override void OnPrepare()
@@ -58,6 +64,24 @@ namespace Quest.Lib.Research.Job
 
         public void Analyse()
         {
+            List<IncidentRoutes> routes = new List<IncidentRoutes>();
+
+            _dbFactory.Execute<QuestDataContext>((db) =>
+            {
+                Logger.Write("Getting routes", GetType().Name);
+
+                db.Database.AutoTransactionsEnabled = false;
+                db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
+
+                // get 10000 "good" routes from November 2016. These routes have been excluded from the summary speed tables
+                // and so are effectvely unseen
+                routes = db.IncidentRoutes
+                    //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
+                    .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGps == false)
+                    .Take(100000)
+                    .ToList();
+            });
+
             var edgeCalculators = _scope.Resolve<IEnumerable<IRoadSpeedCalculator>>().ToList();
 
             // start the engine
@@ -69,19 +93,6 @@ namespace Quest.Lib.Research.Job
 
             if (File.Exists(filename))
                 File.Delete(filename);
-
-            List<IncidentRoutes> routes = new List<IncidentRoutes>();
-            using (var db = new QuestDataContext())
-            {
-                Logger.Write("Getting routes", GetType().Name);
-                // get 10000 "good" routes from November 2016. These routes have been excluded from the summary speed tables
-                // and so are effectvely unseen
-                routes = db.IncidentRoutes                    
-                    //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
-                    .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGps == false)
-                    .Take(100000)
-                    .ToList();
-            }
 
             using (var file = new StreamWriter(filename))
             {
@@ -118,22 +129,22 @@ namespace Quest.Lib.Research.Job
         void CalculateEstimates(StreamWriter file, List<IRoadSpeedCalculator> edgeCalculators, IncidentRoutes route, int index)
         {
             //            Logger.Write($"Loading track", GetType().Name);
-            var track = Tracks.GetTrack($"db.inc:{route.IncidentRouteId}");
+            var track = _trackLoader.GetTrack($"db.inc:{route.IncidentRouteId}");
 
             if (track.Fixes.Count == 0)
                 return;
 
-            List<RoadSpeedItem> mapmatchdata;
+            List<RoadSpeedItem> mapmatchdata=null;
 
-            using (var db = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 // get map match route as well
                 mapmatchdata = db.RoadSpeedItem
-                
+
                 .Where(x => x.IncidentRouteId == route.IncidentRouteId)
                 .OrderBy(x => x.DateTime)
                 .ToList();
-            }
+            });
 
             if (!mapmatchdata.Any())
                 return;
@@ -175,7 +186,7 @@ namespace Quest.Lib.Research.Job
 
         void CalculateStartEnd(Track track, IncidentRoutes r)
         {
-            using (var db = new QuestDataContext())
+            _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 var starttime = track.Fixes.First().Timestamp;
                 var endtime = track.Fixes.Last().Timestamp;
@@ -184,7 +195,7 @@ namespace Quest.Lib.Research.Job
                 //TODO: fix SP execution
                 db.Execute($"exec UpdateIncidentDuration {r.IncidentRouteId}, {starttime}, {endtime}, {(int)duration}");
                 //db.UpdateIncidentDuration(r.IncidentRouteID, starttime, endtime, (int)duration);
-            }
+            });
         }
 
         void CalculateEstimateUsingOriginalTrack(StreamWriter file, Track track, IncidentRoutes r, IRoadSpeedCalculator edgeCalculator, List<RoadSpeedItem> mapmatchdata, int index, Fix first, Fix last, EdgeWithOffset startPoint, List<EdgeWithOffset> endPoints, int how, double actualDuration, Double sx, Double sy, Double ex, Double ey)

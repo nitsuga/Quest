@@ -30,7 +30,7 @@ namespace Quest.Core
 
         // Set the Modules environment variable to specify which components to run
         //
-        // to run the full web stack set Modules to:
+        // to run the full web stack set Modules environment variable to:
         // SecurityManager;DeviceManager;NotificationManager;SearchManager;RoutingManager;MapMatcherManager;VisualsManager;IndexerManager
 
         // for research, use these

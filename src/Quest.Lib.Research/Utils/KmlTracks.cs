@@ -7,12 +7,14 @@ using System.IO;
 using SharpKml.Dom;
 using SharpKml.Engine;
 using SharpKml.Dom.GX;
+using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.Research.Utils
 {
     /// <summary>
     /// Read track from a file
     /// </summary>
+    [Injection]
     public class KmlTracks : ITrackProvider
     {
         /// <summary>

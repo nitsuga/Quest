@@ -26,10 +26,6 @@ namespace Quest.Lib.Simulation.DataModelSim
         {
         }
 
-        public QuestSimContext()
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Coverage>(entity =>

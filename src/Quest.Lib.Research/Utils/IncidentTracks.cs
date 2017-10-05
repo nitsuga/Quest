@@ -5,11 +5,23 @@ using Quest.Lib.MapMatching;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Quest.Lib.Research.DataModelResearch;
+using Quest.Lib.Data;
+using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.Research.Utils
 {
+    [Injection]
     public class IncidentTracks : ITrackProvider
     {
+        private IDatabaseFactory _dbFactory;
+
+        public IncidentTracks(
+            IDatabaseFactory dbFactory
+            )
+        {
+            _dbFactory = dbFactory;
+        }
+
         /// <summary>
         /// Get a track from the database for a specific RouteId. 
         /// <param name="id"></param>
@@ -20,13 +32,12 @@ namespace Quest.Lib.Research.Utils
         /// </summary>
         public Track GetTrack(string urn, int skip = 0)
         {
-            int id = int.Parse(urn);
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, Track>((db) =>
             {
+                int id = int.Parse(urn);
+                var routeinfo = db.IncidentRoutes.FirstOrDefault(x => x.IncidentRouteId == id);
 
-                var routeinfo = context.IncidentRoutes.FirstOrDefault(x => x.IncidentRouteId == id);
-
-                var fixes = context.Avls                    
+                var fixes = db.Avls
                     .Where(x => x.IncidentId == routeinfo.IncidentId)
                     .Where(x => x.Callsign.Trim() == routeinfo.Callsign.Trim())
                     //.Where(x => x.Process)                  // Process flag must be set
@@ -39,9 +50,8 @@ namespace Quest.Lib.Research.Utils
                     var track = MakeTrack(routeinfo.IncidentId ?? 0, routeinfo.Callsign.Trim(), fixes, routeinfo.VehicleId);
                     return track;
                 }
-            }
-
-            return null;
+                return null;
+            });            
         }
 
         /// <summary>
@@ -51,21 +61,19 @@ namespace Quest.Lib.Research.Utils
         /// <returns></returns>
         public List<String> GetTracks(string urn)
         {
-            long incident = long.Parse(urn);
-            var tracks = new List<String>();
-
-            using (var context = new QuestDataContext())
+            return _dbFactory.Execute<QuestDataContext, List<String>>((db) =>
             {
-                var routeinfo = context.IncidentRoutes.Where(x => x.IncidentId == incident);
+                long incident = long.Parse(urn);
+                var tracks = new List<String>();
+                var routeinfo = db.IncidentRoutes.Where(x => x.IncidentId == incident);
                 foreach (var c in routeinfo)
                 {
                     var track = $"db.inc:{c.IncidentRouteId}";
                     tracks.Add(track);
                 }
-            }
+                return tracks;
+            });
 
-
-            return tracks;
         }
 
         private static Track MakeTrack(long incidentId, string callsign, List<Avls> fixes, int? vehicleType)
