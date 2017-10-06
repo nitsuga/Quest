@@ -8,6 +8,7 @@ using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using System.Threading;
 using Quest.Lib.Data;
+using System.Threading.Tasks;
 
 namespace Quest.Lib.Routing.Speeds
 {
@@ -58,6 +59,8 @@ namespace Quest.Lib.Routing.Speeds
                 Logger.Write("Need 64bit arhitecture for this estimator", GetType().Name, System.Diagnostics.TraceEventType.Error);
             }
 
+            Thread.Sleep(1000);
+
             _dbFactory.Execute<QuestContext>((db) =>
             {
                 db.Database.AutoTransactionsEnabled = false;
@@ -65,24 +68,28 @@ namespace Quest.Lib.Routing.Speeds
 
                 Logger.Write("Loading road speeds", GetType().Name);
                 // count roadlinks
-                var speeds =
-                    db.RoadSpeed
-                        .ToArray()
-                        .GroupBy(x => x.RoadLinkEdgeId ?? 0);
+                var rawspeeds = db.RoadSpeed.ToArray();
 
-                Logger.Write("Waiting for road network to load", GetType().Name);
+                Logger.Write("Grouping road speeds", GetType().Name);
+                var speeds = rawspeeds.GroupBy(x => x.RoadLinkEdgeId ?? 0);
 
-                while (!_routingdata.IsInitialised)
-                    Thread.Sleep(1);
-
-                Logger.Write("Estimating missing speeds", GetType().Name);
-
-                foreach (var k in speeds)
+                if (!_routingdata.IsInitialised)
                 {
-                    var spds = k.ToArray();
-                    var data = MakeSpeedArray(k.Key, spds);
-                    _speeds.Add(k.Key, data);
+                    Logger.Write("Waiting for road network to load", GetType().Name);
+
+                    while (!_routingdata.IsInitialised)
+                        Thread.Sleep(1);
                 }
+
+                Logger.Write($"Estimating missing speeds ({speeds.Count()} groups)", GetType().Name);
+
+                Parallel.ForEach(speeds, x => {
+                    var spds = x.ToArray();
+                    var data = MakeSpeedArray(x.Key, spds);
+                    lock(_speeds) {
+                        _speeds.Add(x.Key, data);
+                    }                    
+                });                
 
                 Logger.Write("Estimation of missing speeds completed", GetType().Name);
 

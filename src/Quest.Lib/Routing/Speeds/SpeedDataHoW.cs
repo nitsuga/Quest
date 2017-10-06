@@ -54,19 +54,6 @@ namespace Quest.Lib.Routing.Speeds
                     db.Database.AutoTransactionsEnabled = false;
                     db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
 
-#if false
-                    var summaries = context.RoadSpeedMatrixHoWSummaries.FirstOrDefault();
-                    if (summaries != null)
-                    {
-                        RMax = summaries.MaxRoadType ?? 0;
-                        EastingMax = summaries.MaxX ?? 0;
-                        NorthingMax = summaries.MaxY ?? 0;
-                        EastingMin = summaries.MinX ?? 0;
-                        NorthingMin = summaries.MinY ?? 0;
-                        VMax = summaries.MaxVehicleType ?? 0;
-                        Hourmax = summaries.HourCount ?? 0;
-                    }
-#else
                     RMax = db.RoadSpeedMatrixHoW.Max(x => x.RoadTypeId);
                     EastingMax = db.RoadSpeedMatrixHoW.Max(x => x.GridX);
                     NorthingMax = db.RoadSpeedMatrixHoW.Max(x => x.GridY);
@@ -74,11 +61,11 @@ namespace Quest.Lib.Routing.Speeds
                     NorthingMin = db.RoadSpeedMatrixHoW.Min(x => x.GridY);
                     VMax = db.RoadSpeedMatrixHoW.Max(x => x.VehicleId);
                     Hourmax = db.RoadSpeedMatrixHoW.Max(x => x.HourOfWeek);
-#endif
+
                     var dimx = 1 + (EastingMax - EastingMin) / Cellsize;
                     var dimy = 1 + (NorthingMax - NorthingMin) / Cellsize;
                     // create and array
-                    Data = new float[dimx, dimy, VMax, RMax + 1, Hourmax];
+                    Data = new float[dimx, dimy, VMax, RMax + 1, Hourmax+1];
 
                     foreach (var reader in db.RoadSpeedMatrixHoW)
                     {

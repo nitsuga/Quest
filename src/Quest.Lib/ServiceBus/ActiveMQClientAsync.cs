@@ -100,6 +100,8 @@ namespace Quest.Lib.ServiceBus
                     using (IConnection connection = amqfactory.CreateConnection())
                     using (ISession qsess = connection.CreateSession( AcknowledgementMode.ClientAcknowledge ))
                     {
+                        Logger.Write($"Connected successfully to ActiveMq topic {topic} on {server}", GetType().Name);
+
                         // Start the connection so that messages will be processed.
                         connection.Start();
 
@@ -120,7 +122,7 @@ namespace Quest.Lib.ServiceBus
                 }
                 catch (Exception ex)
                 {
-                    Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq");
+                    Logger.Write($"Message queue error: {ex.Message} ", TraceEventType.Error, "ActiveMq");
                 }
                 Thread.Sleep(5000);
             } while (true);

@@ -10,7 +10,7 @@ using Quest.Lib.DependencyInjection;
 
 namespace Quest.Lib.Research.Utils
 {
-    [Injection]
+    [Injection("db.inc", typeof(ITrackProvider), Lifetime.Singleton)]
     public class IncidentTracks : ITrackProvider
     {
         private IDatabaseFactory _dbFactory;

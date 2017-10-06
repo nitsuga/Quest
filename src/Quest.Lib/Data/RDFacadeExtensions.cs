@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +16,9 @@ namespace Quest.Lib.Data
     /// </summary>
     public static class RDFacadeExtensions
     {
-        public static RelationalDataReader ExecuteSqlQuery(this DatabaseFacade databaseFacade, string sql, params object[] parameters)
+
+#if false
+        private static RelationalDataReader ExecuteSqlQuery(this DatabaseFacade databaseFacade, string sql, params object[] parameters)
         {
             var concurrencyDetector = databaseFacade.GetService<IConcurrencyDetector>();
 
@@ -32,12 +36,8 @@ namespace Quest.Lib.Data
             }
         }
 
-        public static async Task<RelationalDataReader> ExecuteSqlQueryAsync(this DatabaseFacade databaseFacade,
-                                                             string sql,
-                                                             CancellationToken cancellationToken = default(CancellationToken),
-                                                             params object[] parameters)
+        private static async Task<RelationalDataReader> ExecuteSqlQueryAsync(this DatabaseFacade databaseFacade, string sql, CancellationToken cancellationToken = default(CancellationToken), params object[] parameters)
         {
-
             var concurrencyDetector = databaseFacade.GetService<IConcurrencyDetector>();
 
             using (concurrencyDetector.EnterCriticalSection())
@@ -46,31 +46,41 @@ namespace Quest.Lib.Data
                     .GetService<IRawSqlCommandBuilder>()
                     .Build(sql, parameters);
 
-                return await rawSqlCommand
-                    .RelationalCommand
-                    .ExecuteReaderAsync(
-                        databaseFacade.GetService<IRelationalConnection>(),
-                        parameterValues: rawSqlCommand.ParameterValues,
-                        cancellationToken: cancellationToken);
+                using (var conn = databaseFacade.GetService<IRelationalConnection>())
+                    return await rawSqlCommand
+                        .RelationalCommand
+                        .ExecuteReaderAsync(
+                            conn,
+                            parameterValues: rawSqlCommand.ParameterValues,
+                            cancellationToken: cancellationToken);
             }
         }
 
-        public static async void Execute(this DbContext context, string sql, Action<DbDataReader> func=null)
+        public static async Task<int> ExecuteAsync(this DbContext context, string sql, Action<DbDataReader> func = null, params object[] parameters)
         {
-            // Execute a query.
-            using (var dr = await context.Database.ExecuteSqlQueryAsync(sql))
+            if (func != null)
             {
-                // Output rows.
-                if (func!=null)
-                {
-                    var reader = dr.DbDataReader;
+                // Execute a query.
+                using (var dr = await context.Database.ExecuteSqlQueryAsync(sql, parameters))
+                using (var reader = dr.DbDataReader)// Output rows.
                     while (reader.Read())
-                    {
                         func(reader);
-                    }
-                }
+                return 0;
             }
+            else
+            {
+                var dr = await context.Database.ExecuteSqlAsync(sql, parameters);
+                return dr;
+            }
+        }
+#endif
+
+        // public methods
+
+        public static int Execute(this DbContext context, string sql, params object[] parameters)
+        {
+            var dr = context.Database.ExecuteSqlCommand(sql, parameters);
+            return dr;
         }
     }
-
 }

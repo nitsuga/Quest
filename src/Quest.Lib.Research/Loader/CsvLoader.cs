@@ -67,7 +67,7 @@ namespace Quest.Lib.Research.Loader
                                 int rows = 0;
 
                                 //TODO: make sure this returns the number of rows affected
-                                db.Execute(batch.ToString(), (x) => { rows = x.GetInt32(0); });
+                                rows = db.Execute(batch.ToString());
 
                                 writeRowcount += rows;
                                 batch.Clear();

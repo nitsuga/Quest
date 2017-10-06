@@ -14,7 +14,7 @@ namespace Quest.Lib.Research.Utils
     /// <summary>
     /// Read track from a file
     /// </summary>
-    [Injection]
+    [Injection("kml:inc", typeof(ITrackProvider), Lifetime.Singleton)]
     public class KmlTracks : ITrackProvider
     {
         /// <summary>

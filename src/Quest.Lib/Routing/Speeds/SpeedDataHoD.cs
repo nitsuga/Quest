@@ -80,7 +80,7 @@ namespace Quest.Lib.Routing.Speeds
                     var dimx = 1 + (EastingMax - EastingMin) / Cellsize;
                     var dimy = 1 + (NorthingMax - NorthingMin) / Cellsize;
                     // create and array
-                    Data = new float[dimx, dimy, VMax, RMax + 1, Hourmax];
+                    Data = new float[dimx, dimy, VMax, RMax + 1, Hourmax+1];
 
                     Logger.Write("calling RoadSpeedMatrixHoDs", GetType().Name);
 

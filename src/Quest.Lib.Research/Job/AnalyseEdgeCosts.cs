@@ -19,6 +19,7 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
+using System.Data.SqlClient;
 
 namespace Quest.Lib.Research.Job
 {
@@ -66,6 +67,8 @@ namespace Quest.Lib.Research.Job
         {
             List<IncidentRoutes> routes = new List<IncidentRoutes>();
 
+            var edgeCalculators = _scope.Resolve<IEnumerable<IRoadSpeedCalculator>>().ToList();
+
             _dbFactory.Execute<QuestDataContext>((db) =>
             {
                 Logger.Write("Getting routes", GetType().Name);
@@ -81,8 +84,6 @@ namespace Quest.Lib.Research.Job
                     .Take(100000)
                     .ToList();
             });
-
-            var edgeCalculators = _scope.Resolve<IEnumerable<IRoadSpeedCalculator>>().ToList();
 
             // start the engine
             Logger.Write("Loading road network", GetType().Name);
@@ -192,9 +193,8 @@ namespace Quest.Lib.Research.Job
                 var endtime = track.Fixes.Last().Timestamp;
                 var duration = (endtime - starttime).TotalSeconds;
 
-                //TODO: fix SP execution
-                db.Execute($"exec UpdateIncidentDuration {r.IncidentRouteId}, {starttime}, {endtime}, {(int)duration}");
-                //db.UpdateIncidentDuration(r.IncidentRouteID, starttime, endtime, (int)duration);
+                db.Execute("UpdateIncidentDuration @id={0}, @StartTime={1}, @EndTime={2}, @Duration={3}", r.IncidentRouteId, starttime, endtime, (int)duration);
+
             });
         }
 

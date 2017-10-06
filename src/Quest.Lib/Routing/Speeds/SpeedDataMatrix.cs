@@ -52,7 +52,7 @@ namespace Quest.Lib.Routing.Speeds
             // make a new array containing just the patched values.. this gets merged later
             var fixedRoadSpeeds =
                 new float[1 + (EastingMax - EastingMin) / Cellsize, 1 + (NorthingMax - NorthingMin) / Cellsize, VMax,
-                    RMax + 1, Hourmax];
+                    RMax + 1, Hourmax+1];
 
             // calcate a series of parameters
             var xValues = Enumerable.Range(Lowerx, Upperx);

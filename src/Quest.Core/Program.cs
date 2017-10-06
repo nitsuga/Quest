@@ -167,9 +167,7 @@ namespace Quest.Core
         {
             services.AddMemoryCache();
 
-            var x = config.GetConnectionString("Quest");
-
-            services.AddDbContext<QuestContext>(options => options.UseSqlServer(x));
+            services.AddDbContext<QuestContext>(options => options.UseSqlServer(config.GetConnectionString("Quest")));
             services.AddDbContext<QuestOSContext>(options => options.UseSqlServer(config.GetConnectionString("QuestOS")));
             services.AddDbContext<QuestDataContext>(options => options.UseSqlServer(config.GetConnectionString("QuestData")));
             services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
