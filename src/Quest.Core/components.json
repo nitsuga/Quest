@@ -580,8 +580,8 @@
       "instanceScope": "single-instance",
       "properties": {
         "defaultengine": "DijkstraRoutingEngine",
-        "doCoverage": "false",
-        "doEta": "false",
+        "doCoverage": "true",
+        "doEta": "true",
         "tilesize": 500,
         "roadSpeedCalculator": "VariableSpeedHoD",
         "enrFrequencySeconds": 10,

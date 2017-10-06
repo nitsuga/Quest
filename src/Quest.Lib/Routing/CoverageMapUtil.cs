@@ -53,9 +53,7 @@ namespace Quest.Lib.Routing
                     return _dbFactory.Execute<QuestContext, IGeometry>((db) =>
                     {
                         // add in programmable ones.
-                        var results = db.GetOperationalArea(2000);
-                        var area = results.First();
-
+                        var area = db.GetOperationalArea(2000);
                         // convert
                         var reader = new WKTReader();
                         var geoms = reader.Read(area.ToString());

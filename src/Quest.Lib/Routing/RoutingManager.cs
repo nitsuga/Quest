@@ -120,6 +120,8 @@ namespace Quest.Lib.Routing
 
             Logger.Write("Routing Manager Initialising", TraceEventType.Information, "Routing Manager");
 
+            _operationalArea = _coverageMap.GetOperationalArea(tilesize);
+
             Logger.Write($"Loading default routing engine {defaultengine}", TraceEventType.Information, "Routing Manager");
             var engine = _scope.ResolveNamed<IRouteEngine>(defaultengine);
 
@@ -129,20 +131,22 @@ namespace Quest.Lib.Routing
             // build list and start tracker engines
             MakeTrackerList();
 
-            _operationalArea = _coverageMap.GetOperationalArea(tilesize);
-
             if (doCoverage && _operationalArea!=null)
             {
                 // start standard coverage calculator
                 var t1 = new Task(CalculateStandardCoverages );
                 t1.Start();
             }
+            else
+                Logger.Write($"Coverage Tracking turned off", TraceEventType.Information, "Routing Manager");
 
             if (doEta)
             {
                 var t2 = new Task(CalculateEta);
                 t2.Start();
             }
+            else
+                Logger.Write($"ETA Tracking turned off", TraceEventType.Information, "Routing Manager");
 
             Logger.Write("Routing Manager Started", TraceEventType.Information, "Routing Manager");
 
