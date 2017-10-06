@@ -61,25 +61,54 @@ namespace Quest.Lib.DataModel
 
         public virtual int CleanCoverage()
         {
-            //return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("CleanCoverage");
+            using (var dbc = this.Database.GetDbConnection())
+            {
+                dbc.Open();
+                using (var sqlcmd = dbc.CreateCommand())
+                {
+                    sqlcmd.LoadStoredProc("CleanCoverage");
+                    sqlcmd.ExecuteNonQuery();
+                }
+            }
             return 0;
         }
 
-        public virtual List<GetVehicleCoverage_Result> GetVehicleCoverage(Nullable<int> vehtype)
+        public virtual IList<GetVehicleCoverage_Result> GetVehicleCoverage(int vehtype)
         {
-            //var vehtypeParameter = vehtype.HasValue ?
-            //    new ObjectParameter("vehtype", vehtype) :
-            //    new ObjectParameter("vehtype", typeof(int));
+            using (var dbc = this.Database.GetDbConnection())
+            {
+                dbc.Open();
+                using (var sqlcmd = dbc.CreateCommand())
+                {
+                    sqlcmd.LoadStoredProc("GetVehicleCoverage")
+                        .WithSqlParam("@vehtype", vehtype);
 
-            //return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetVehicleCoverage_Result>("GetVehicleCoverage", vehtypeParameter);
-            return null;
+                    using (var reader = sqlcmd.ExecuteReader())
+                    {
+                        var result = reader.MapToList<GetVehicleCoverage_Result>();
+                        return result;
+                    }
+                }
+            }
         }
 
 
-        public virtual List<GetIncidentDensity_Result> GetIncidentDensity()
+        public virtual IList<GetIncidentDensity_Result> GetIncidentDensity()
         {
-            //return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetIncidentDensity_Result>("GetIncidentDensity");
-            return null;
+            using (var dbc = this.Database.GetDbConnection())
+            {
+                dbc.Open();
+                using (var sqlcmd = dbc.CreateCommand())
+                {
+                    sqlcmd.LoadStoredProc("GetIncidentDensity");
+
+                    using (var reader = sqlcmd.ExecuteReader())
+                    {
+                        var result = reader.MapToList<GetIncidentDensity_Result>();
+                        return result;
+                    }
+                }
+            }
         }
     }
     public partial class GetClaims_Result
