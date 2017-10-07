@@ -89,73 +89,64 @@ namespace Quest.Lib.Resource
                 int? originalTypeId = null;
                 long? originalRevision = null;
 
-                // find corresponding resource;
-                var res = db.Resource.FirstOrDefault(x => x.CallsignId == callsign.CallsignId);
-                if (res == null)
+                // find the most up-to-date resource record;
+                var oldres = db.Resource.FirstOrDefault(x => x.CallsignId == callsign.CallsignId && x.EndDate == null);
+
+                if (oldres == null)
                 {
+                    // resource doesn't exist so use current status as the last status
                     originalTypeId = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == resourceUpdate.ResourceType).ResourceTypeId;
-                    res = new DataModel.Resource();
-                    db.Resource.Add(res);
                 }
                 else
                 {
-                    originalTypeId = res.ResourceTypeId;
-                    originalStatusId = res.ResourceStatusId;
-                    originalRevision = res.Revision;
+                    originalTypeId = oldres.ResourceTypeId;
+                    originalStatusId = oldres.ResourceStatusId;
+                    originalRevision = oldres.Revision;
+
+                    // mark record as old
+                    oldres.EndDate = resourceUpdate.UpdateTime;
                 }
 
-                // save the new resource record
-                res.Agency = resourceUpdate.Agency;
-                res.CallsignId = callsign.CallsignId;
-                res.Destination = resourceUpdate.Destination;
-                res.Direction = 0; //resourceUpdate.Direction;
-                res.Eta = null; // resourceUpdate.ETA;
-                res.EventType = resourceUpdate.EventType;
-                res.FleetNo = resourceUpdate.FleetNo;
-                res.Latitude = (float?)resourceUpdate.Latitude;
-                res.Longitude = (float?)resourceUpdate.Longitude;
-                res.LastUpdated = resourceUpdate.UpdateTime;
-                res.Agency = resourceUpdate.Agency;
-                res.Serial = resourceUpdate.Incident;
-                res.Speed = resourceUpdate.Speed;
-                res.ResourceTypeId = originalTypeId;
-                res.Skill = resourceUpdate.Skill;
-                res.Sector = "";
-                res.ResourceStatusPrevId = res.ResourceStatusId;
-                res.ResourceStatusId = status.ResourceStatusId;
-
-                var requireEventNotification = false;
-                var requireStatusNotification = false;
-
-                // detect change in status
-                if (originalStatusId != status.ResourceStatusId)
+                //create a new record for this moving dimension
+                var newres = new DataModel.Resource
                 {
-                    requireStatusNotification = true;
-                    if (status.Status == triggerStatus)
-                        requireEventNotification = true;
+                    // save the new resource record
+                    Agency = resourceUpdate.Agency,
+                    CallsignId = callsign.CallsignId,
+                    Destination = resourceUpdate.Destination,
+                    Direction = 0, //resourceUpdate.Direction;
+                    Eta = null, // resourceUpdate.ETA;
+                    EventType = resourceUpdate.EventType,
+                    FleetNo = resourceUpdate.FleetNo,
+                    Latitude = (float?)resourceUpdate.Latitude,
+                    Longitude = (float?)resourceUpdate.Longitude,
+                    Serial = resourceUpdate.Incident,
+                    Speed = resourceUpdate.Speed,
+                    ResourceTypeId = originalTypeId,
+                    Skill = resourceUpdate.Skill,
+                    Sector = "",
+                    EndDate = null,
+                    StartDate = resourceUpdate.UpdateTime,
+                    ResourceStatusId = status.ResourceStatusId,
+                    // copy across previous values not contained in the resource update
+                    Comment = oldres?.Comment,
+                    DestLatitude = oldres?.DestLatitude,
+                    DestLongitude =oldres?.DestLongitude,
+                };
 
-                    // save a status history if the status has changed
-                    var history = new ResourceStatusHistory
-                    {
-                        ResourceId = res.ResourceId,
-                        ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
-                        // use current status if status not known
-                        Revision = originalRevision ?? 0
-                    };
+                db.Resource.Add(newres);
 
-                    db.ResourceStatusHistory.Add(history);
-                }
+                // save the old and new records
                 db.SaveChanges();
 
-                //var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
-                ResourceItem ri = GetResourceItemFromView(res);
+                ResourceItem ri = GetResourceItemFromView(newres);
 
-                var point = new PointGeoShape(new GeoCoordinate(res.Latitude ?? 0, res.Longitude ?? 0));
+                var point = new PointGeoShape(new GeoCoordinate(newres.Latitude ?? 0, newres.Longitude ?? 0));
 
                 if (config != null)
                 {
                     // save in elastic
-                    var indextext = resourceUpdate.Callsign + " " + res.FleetNo + " " + resourceUpdate.ResourceType + " " +
+                    var indextext = resourceUpdate.Callsign + " " + newres.FleetNo + " " + resourceUpdate.ResourceType + " " +
                                     resourceUpdate.Status;
                     var add = new LocationDocument
                     {
@@ -164,7 +155,7 @@ namespace Quest.Lib.Resource
                         Source = "Quest",
                         indextext = indextext,
                         Description = indextext,
-                        Location = new GeoLocation(res.Latitude ?? 0, res.Longitude ?? 0),
+                        Location = new GeoLocation(newres.Latitude ?? 0, newres.Longitude ?? 0),
                         Point = point,
                         Created = DateTime.UtcNow
                     };
@@ -177,9 +168,9 @@ namespace Quest.Lib.Resource
 
                 SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, "C&C Assigned", incStore, msgSource);
 
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = resourceUpdate.Callsign, Item = ri });
 
-                return res.ResourceId;
+                return newres.ResourceId;
 
             });
         }
@@ -193,7 +184,6 @@ namespace Quest.Lib.Resource
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,
                 Callsign = res.Callsign.Callsign1,
-                lastUpdate = res.LastUpdated,
                 StatusCategory = GetStatusDescription(res.ResourceStatus),
                 Status = res.ResourceStatus.Status,
                 PrevStatus = res.ResourceStatusPrev.Status,
@@ -201,7 +191,6 @@ namespace Quest.Lib.Resource
                 Destination = res.Destination,
                 Eta = res.Eta,
                 FleetNo = res.FleetNo,
-                Road = res.Road,
                 Comment = res.Comment,
                 Skill = res.Skill,
                 Speed = res.Speed,
@@ -236,15 +225,42 @@ namespace Quest.Lib.Resource
         {
             _dbFactory.Execute<QuestContext>((db) =>
             {
-                var i = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign).ToList();
-                if (!i.Any()) return;
-                foreach (var x in i)
+                var oldres = db.Resource.Where(x => x.Callsign.Callsign1 == item.Callsign && x.EndDate==null).FirstOrDefault();
+                if (oldres==null) return;
+
+                oldres.EndDate = DateTime.UtcNow;
+
+                var newres = new DataModel.Resource
                 {
-                    x.ResourceStatusId = DeleteStatusId;
-                    x.LastUpdated = DateTime.UtcNow;
-                    db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = x.ResourceId });
-                }
+                    ResourceStatusId = DeleteStatusId,
+
+                    // save the new resource record
+                    Agency = oldres?.Agency,
+                    CallsignId = oldres?.CallsignId,
+                    Destination = oldres?.Destination,
+                    Direction = oldres?.Direction,
+                    Eta = oldres?.Eta,
+                    EventType = oldres?.EventType,
+                    FleetNo = oldres?.FleetNo,
+                    Latitude = oldres?.Latitude,
+                    Longitude = oldres?.Longitude,
+                    Serial = oldres?.Serial,
+                    Speed = oldres?.Speed,
+                    ResourceTypeId = oldres?.ResourceTypeId,
+                    Skill = oldres?.Skill,
+                    Sector = "",
+                    EndDate = null,
+                    StartDate = oldres.EndDate,
+                    Comment = oldres?.Comment,
+                    DestLatitude = oldres?.DestLatitude,
+                    DestLongitude = oldres?.DestLongitude,
+                };
+
+                db.Resource.Add(newres);
+
+                db.SaveChanges();
+
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = item.Callsign });
             });
         }
 

@@ -61,11 +61,8 @@ namespace Quest.Lib.Routing.Speeds
 
             Thread.Sleep(1000);
 
-            _dbFactory.Execute<QuestContext>((db) =>
+            _dbFactory.ExecuteNoTracking<QuestContext>((db) =>
             {
-                db.Database.AutoTransactionsEnabled = false;
-                db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
-
                 Logger.Write("Loading road speeds", GetType().Name);
                 // count roadlinks
                 var rawspeeds = db.RoadSpeed.ToArray();

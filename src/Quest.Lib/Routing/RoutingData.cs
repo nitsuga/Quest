@@ -101,12 +101,9 @@ namespace Quest.Lib.Routing
             try
             {
                 Logger.Write($"Loading road network from database...", TraceEventType.Information, "Routing Data");
-                return _dbFactory.Execute<QuestContext, int>((db) =>
+                return _dbFactory.ExecuteNoTracking<QuestContext, int>((db) =>
                 {
                     Logger.Write($"Loading road network...", TraceEventType.Information, "Routing Data");
-
-                    db.Database.AutoTransactionsEnabled = false;
-                    db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
 
                     var edges = db.RoadLinkEdge.ToArray();
                     Logger.Write($"Road network data loaded ...", TraceEventType.Information, "Routing Data");

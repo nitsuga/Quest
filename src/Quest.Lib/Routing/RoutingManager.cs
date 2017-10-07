@@ -91,6 +91,7 @@ namespace Quest.Lib.Routing
             _routingdata = routingdata;
             _dbFactory = dbFactory;
             _coverageMap = coverageMap;
+            _etaCalculator = etaCalculator;
         }
 
         protected override void OnPrepare()
@@ -612,32 +613,11 @@ namespace Quest.Lib.Routing
         /// <param name="name"></param>
         private CoverageMap CalculateStandardIncidentCoverage(string name, int tilesize)
         {
-            return _dbFactory.Execute<QuestContext, CoverageMap>((db) =>
-            {
-                var map = _coverageMap.GetStandardMap(tilesize).Clone().Name(name);
-                map.ClearData();
-
-                var results = db.GetIncidentDensity().ToList();
-
-                foreach (var v in results)
-                {
-                    if (v.CellX == null)
-                        v.CellX = 0;
-
-                    if (v.CellY == null)
-                        v.CellY = 0;
-
-                    var i = (int)v.CellX + (int)(v.CellY * map.Columns);
-                    if (i >= 0 && i < map.Data.Length)
-                    {
-                        var i1 = v.Quantity & 0xff;
-                        if (i1 != null) map.Data[i] = (byte)i1;
-                    }
-                }
-
-                map.Percent = Math.Round(map.Coverage(_operationalArea) * 100, 1);
-                return map;
-            });
+            //TODO: Calculate density
+            var map = _coverageMap.GetStandardMap(tilesize).Clone().Name(name);
+            map.ClearData();
+            map.Percent = Math.Round(map.Coverage(_operationalArea) * 100, 1);
+            return map;
         }
 
         /// <summary>

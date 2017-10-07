@@ -92,36 +92,11 @@ namespace Quest.Lib.DataModel
             }
         }
 
-
-        public virtual IList<GetIncidentDensity_Result> GetIncidentDensity()
-        {
-            using (var dbc = this.Database.GetDbConnection())
-            {
-                dbc.Open();
-                using (var sqlcmd = dbc.CreateCommand())
-                {
-                    sqlcmd.LoadStoredProc("GetIncidentDensity");
-
-                    using (var reader = sqlcmd.ExecuteReader())
-                    {
-                        var result = reader.MapToList<GetIncidentDensity_Result>();
-                        return result;
-                    }
-                }
-            }
-        }
     }
     public partial class GetClaims_Result
     {
         public string SecuredItemName { get; set; }
         public string SecuredValue { get; set; }
-    }
-
-    public partial class GetIncidentDensity_Result
-    {
-        public Nullable<int> Quantity { get; set; }
-        public Nullable<int> CellX { get; set; }
-        public Nullable<int> CellY { get; set; }
     }
 
     public partial class GetVehicleCoverage_Result

@@ -23,8 +23,6 @@ namespace Quest.Lib.Routing
             _dbFactory = dbFactory;
         }
 
-        private static DateTime _fromTimeStampEnroute = DateTime.MinValue;
-
         /// <summary>
         ///     calculate the time enroute for enroute vehicles
         /// </summary>
@@ -87,23 +85,10 @@ namespace Quest.Lib.Routing
         /// <returns></returns>
         private DataModel.Resource[] GetEnrouteResources()
         {
-            return _dbFactory.Execute<QuestContext, DataModel.Resource[]>((db) =>
+            return _dbFactory.ExecuteNoTracking<QuestContext, DataModel.Resource[]>((db) =>
             {
-                DataModel.Resource[] result = null;
-
-                using (new TransactionScope(TransactionScopeOption.Required,
-                    new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
-                {
-                    var vehEnroute = from r in db.Resource
-                                     where r.LastUpdated > _fromTimeStampEnroute && r.ResourceStatus.BusyEnroute == true
-                                     select r;
-
-                    result = vehEnroute.ToArray();
-                    var dateTime = (from x in db.Resource select x.LastUpdated).Max();
-                    if (dateTime != null)
-                        _fromTimeStampEnroute = (DateTime)dateTime;
-                }
-                return result;
+                var vehEnroute = db.Resource.Where(r => r.EndDate == null && r.ResourceStatus.BusyEnroute==true).ToArray();
+                return vehEnroute;
             });
         }
 
@@ -121,25 +106,24 @@ namespace Quest.Lib.Routing
         {
             var eta = DateTime.MinValue;
 
-                var startPoint = routingdata.GetEdgeFromPoint(new Coordinate(positionX , positionY ));
-                var endPoints = new List<EdgeWithOffset> { routingdata.GetEdgeFromPoint(new Coordinate(destinationX, destinationY)) };
+            var startPoint = routingdata.GetEdgeFromPoint(new Coordinate(positionX , positionY ));
+            var endPoints = new List<EdgeWithOffset> { routingdata.GetEdgeFromPoint(new Coordinate(destinationX, destinationY)) };
 
+            var request = new RouteRequestMultiple
+            {
+                StartLocation = startPoint,
+                EndLocations = endPoints,
+                InstanceMax = 1,
+                VehicleType = vehicleType,
+                HourOfWeek = DateTime.Now.HourOfWeek(),
+                DistanceMax = 18000,
+                DurationMax = 18000,
+                SearchType = RouteSearchType.Quickest,
+                RoadSpeedCalculator = speedCalc
+            };
 
-                var request = new RouteRequestMultiple
-                {
-                    StartLocation = startPoint,
-                    EndLocations = endPoints,
-                    InstanceMax = 1,
-                    VehicleType = vehicleType,
-                    HourOfWeek = DateTime.Now.HourOfWeek(),
-                    DistanceMax = 18000,
-                    DurationMax = 18000,
-                    SearchType = RouteSearchType.Quickest,
-                    RoadSpeedCalculator = speedCalc
-                };
-
-                // calculate the route to the incident
-                var result = routingEngine.CalculateRouteMultiple(request);
+            // calculate the route to the incident
+            var result = routingEngine.CalculateRouteMultiple(request);
 
             if (result.Items.Count >= 1)
             {
@@ -168,7 +152,6 @@ namespace Quest.Lib.Routing
                         {
                             var res = db.Resource.First(x => x.ResourceId == resourceId);
                             res.Eta = eta;
-                            res.Road = roadName;
                             db.SaveChanges();
                         }
                         catch (Exception ex)

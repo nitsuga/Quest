@@ -77,14 +77,14 @@ namespace Quest.WebCore.Services
             if (item.Item != null)
                 return GetResourceUpdateFeature(item.Item);
             else
-                return GetResourceDeleteFeature(item.ResourceId);
+                return GetResourceDeleteFeature(item.Callsign);
         }
 
-        public ResourceFeature GetResourceDeleteFeature(int resourceId)
+        public ResourceFeature GetResourceDeleteFeature(string callsign)
         {
             var feature = new ResourceFeature(new Point(new Position(0, 0)), null)
             {
-                ID = resourceId.ToString(),
+                ID = callsign,
                 FeatureType = "res",
                 Action = "d",
             };

@@ -49,11 +49,8 @@ namespace Quest.Lib.Routing.Speeds
 
             try
             {
-                _dbFactory.Execute<QuestContext>((db) =>
+                _dbFactory.ExecuteNoTracking<QuestContext>((db) =>
                 {
-                    db.Database.AutoTransactionsEnabled = false;
-                    db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
-
                     RMax = db.RoadSpeedMatrixHoW.Max(x => x.RoadTypeId);
                     EastingMax = db.RoadSpeedMatrixHoW.Max(x => x.GridX);
                     NorthingMax = db.RoadSpeedMatrixHoW.Max(x => x.GridY);

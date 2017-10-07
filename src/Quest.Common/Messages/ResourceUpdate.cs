@@ -9,19 +9,18 @@ namespace Quest.Common.Messages
     [Serializable]
     public class ResourceDatabaseUpdate : Request
     {
-        public int ResourceId;
+        public string Callsign;
 
         // optional item details (missing if the item ha been deleted)
         public ResourceItem Item;
     }
 
     /// <summary>
-    /// A resource update has been received from CAD
+    /// A resource update has been received from CAD - this is a full update
     /// </summary>
     [Serializable]
     public class ResourceUpdate : MessageBase
     {
-        public string Session;
         public string Callsign;
         public string ResourceType ;
         public string Status ;
@@ -30,7 +29,6 @@ namespace Quest.Common.Messages
         public int Speed ;
         public int Direction ;
         public string Skill ;
-        public DateTime UpdateTime;
         public string FleetNo;
         public string Incident;
         public bool Emergency;
@@ -38,6 +36,7 @@ namespace Quest.Common.Messages
         public string Agency;
         public string Class;
         public string EventType;
+        public DateTime UpdateTime;
 
         public override string ToString()
         {

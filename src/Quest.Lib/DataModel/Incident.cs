@@ -29,5 +29,7 @@ namespace Quest.Lib.DataModel
         public string CallerTelephone { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
+        public int? CellX { get; set; }
+        public int? CellY { get; set; }
     }
 }

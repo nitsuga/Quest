@@ -30,7 +30,7 @@ namespace Quest.Lib.Incident
                 LocationComment = inc.LocationComment,
                 PatientAge = inc.PatientAge,
                 PatientSex = inc.PatientSex,
-                ProblemDescription = inc.ProblemDescription
+                ProblemDescription = inc.ProblemDescription,
             };
 
             // updates go to assigned devices and to nearby ones of the right grade

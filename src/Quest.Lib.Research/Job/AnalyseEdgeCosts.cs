@@ -69,12 +69,9 @@ namespace Quest.Lib.Research.Job
 
             var edgeCalculators = _scope.Resolve<IEnumerable<IRoadSpeedCalculator>>().ToList();
 
-            _dbFactory.Execute<QuestDataContext>((db) =>
+            _dbFactory.ExecuteNoTracking<QuestDataContext>((db) =>
             {
                 Logger.Write("Getting routes", GetType().Name);
-
-                db.Database.AutoTransactionsEnabled = false;
-                db.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
 
                 // get 10000 "good" routes from November 2016. These routes have been excluded from the summary speed tables
                 // and so are effectvely unseen
