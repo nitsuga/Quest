@@ -8,8 +8,6 @@ namespace Quest.Lib.DataModel
         {
             Devices = new HashSet<Devices>();
             ResourceResourceStatus = new HashSet<Resource>();
-            ResourceResourceStatusPrev = new HashSet<Resource>();
-            ResourceStatusHistory = new HashSet<ResourceStatusHistory>();
         }
 
         public int ResourceStatusId { get; set; }
@@ -23,7 +21,5 @@ namespace Quest.Lib.DataModel
 
         public ICollection<Devices> Devices { get; set; }
         public ICollection<Resource> ResourceResourceStatus { get; set; }
-        public ICollection<Resource> ResourceResourceStatusPrev { get; set; }
-        public ICollection<ResourceStatusHistory> ResourceStatusHistory { get; set; }
     }
 }

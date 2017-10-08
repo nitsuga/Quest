@@ -114,7 +114,8 @@ namespace Quest.Lib.Routing
                 // calculate changed entries
                 UpdateMapsforChangedLocations(routingEngine);
 
-                Logger.Write(
+                if (CombinedMap != null)
+                    Logger.Write(
                     $"Calculating Coverage for {Definition.VehicleCodes} Coverage = {CombinedMap.Percent*100,2} ", TraceEventType.Error,
                     "Vehicle Coverage Tracker");
 
@@ -186,7 +187,8 @@ namespace Quest.Lib.Routing
                 }
             }
 
-            CombinedMap.Percent = Math.Round(CombinedMap.Coverage()*100, 1)/100;
+            if (CombinedMap != null)
+                CombinedMap.Percent = Math.Round(CombinedMap.Coverage()*100, 1)/100;
         }
 
         private void RemoveInvalidEntries()
@@ -257,18 +259,13 @@ namespace Quest.Lib.Routing
             // calculate available 
             return dbFactory.Execute<QuestContext, List<DataModel.Resource>>((db) =>
             {
-                using (
-                    var scope = new TransactionScope(TransactionScopeOption.Required,
-                        new TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted }))
-                {
-                    var results = from result in db.Resource
-                                  where
-                                      result.ResourceStatus.Available == true
-                                      //                            && vehicleCodes.Contains(result.ResourceType)
-                                      && result.Latitude != null
-                                  select result;
-                    resources = results.ToList();
-                }
+                var results = from result in db.Resource
+                                where
+                                    result.ResourceStatus.Available == true
+                                    //                            && vehicleCodes.Contains(result.ResourceType)
+                                    && result.Latitude != null
+                                select result;
+                resources = results.ToList();
                 return resources;
             });
         }

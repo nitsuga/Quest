@@ -19,7 +19,6 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<Resource> Resource { get; set; }
         public virtual DbSet<ResourceArea> ResourceArea { get; set; }
         public virtual DbSet<ResourceStatus> ResourceStatus { get; set; }
-        public virtual DbSet<ResourceStatusHistory> ResourceStatusHistory { get; set; }
         public virtual DbSet<ResourceType> ResourceType { get; set; }
         public virtual DbSet<RoadLinkEdge> RoadLinkEdge { get; set; }
         public virtual DbSet<RoadLinkEdgeLink> RoadLinkEdgeLink { get; set; }
@@ -408,15 +407,7 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
-
                 entity.Property(e => e.ResourceStatusId).HasColumnName("ResourceStatusID");
-
-                entity.Property(e => e.ResourceStatusPrevId).HasColumnName("ResourceStatusPrevID");
-
-                entity.Property(e => e.Road)
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
 
                 entity.Property(e => e.Sector)
                     .HasMaxLength(50)
@@ -439,11 +430,6 @@ namespace Quest.Lib.DataModel
                     .WithMany(p => p.ResourceResourceStatus)
                     .HasForeignKey(d => d.ResourceStatusId)
                     .HasConstraintName("FK_Resource_ResourceStatus");
-
-                entity.HasOne(d => d.ResourceStatusPrev)
-                    .WithMany(p => p.ResourceResourceStatusPrev)
-                    .HasForeignKey(d => d.ResourceStatusPrevId)
-                    .HasConstraintName("FK_Resource_ResourceStatus1");
 
                 entity.HasOne(d => d.ResourceType)
                     .WithMany(p => p.Resource)
@@ -475,27 +461,6 @@ namespace Quest.Lib.DataModel
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasMaxLength(50);
-            });
-
-            modelBuilder.Entity<ResourceStatusHistory>(entity =>
-            {
-                entity.Property(e => e.ResourceStatusHistoryId).HasColumnName("ResourceStatusHistoryID");
-
-                entity.Property(e => e.ResourceId).HasColumnName("ResourceID");
-
-                entity.Property(e => e.ResourceStatusId).HasColumnName("ResourceStatusID");
-
-                entity.HasOne(d => d.Resource)
-                    .WithMany(p => p.ResourceStatusHistory)
-                    .HasForeignKey(d => d.ResourceId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_ResourceStatusHistory_Resource");
-
-                entity.HasOne(d => d.ResourceStatus)
-                    .WithMany(p => p.ResourceStatusHistory)
-                    .HasForeignKey(d => d.ResourceStatusId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_ResourceStatusHistory_ResourceStatus");
             });
 
             modelBuilder.Entity<ResourceType>(entity =>

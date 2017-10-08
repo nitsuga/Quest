@@ -464,11 +464,14 @@ namespace Quest.Lib.Routing
                 {
                     var map = vt.GetCoverage(routingEngine);
 
-                    // map.Percent = CalcPercent(CoverageFactor, CoverageMapUtil.Coverage(map));
-                    map.Percent = Math.Round(map.Coverage(_operationalArea)*100, 1);
+                    if (map != null)
+                    {
+                        // map.Percent = CalcPercent(CoverageFactor, CoverageMapUtil.Coverage(map));
+                        map.Percent = Math.Round(map.Coverage(_operationalArea) * 100, 1);
 
-                    AddCoverage(target, map);
-                    vehicleCoverage.Add(vt.CombinedMap);
+                        AddCoverage(target, map);
+                        vehicleCoverage.Add(vt.CombinedMap);
+                    }
                 }
             }
 
@@ -477,28 +480,34 @@ namespace Quest.Lib.Routing
                 //calculate a combined coverage
                 combinedmap = CalculateCombinedResourceCoverage(vehicleCoverage, CombinedCoverage);
 
-                //combinedmap.Percent = CalcPercent(CoverageFactor, CoverageMapUtil.Coverage(combinedmap));
-                combinedmap.Percent = Math.Round(combinedmap.Coverage(_operationalArea)*100, 1);
+                if (combinedmap != null)
+                {
+                    //combinedmap.Percent = CalcPercent(CoverageFactor, CoverageMapUtil.Coverage(combinedmap));
+                    combinedmap.Percent = Math.Round(combinedmap.Coverage(_operationalArea) * 100, 1);
 
 
-                Logger.Write($"Calculated combined coverage={combinedmap.Percent}",
-                    TraceEventType.Information, "Routing Manager");
+                    Logger.Write($"Calculated combined coverage={combinedmap.Percent}",
+                        TraceEventType.Information, "Routing Manager");
 
-                AddCoverage(target, combinedmap);
+                    AddCoverage(target, combinedmap);
+                }
             }
 
             if (!_stopping && incCoverage != null && combinedmap != null)
             {
-                    Logger.Write("Calculating resource holes", 
-                        TraceEventType.Information, "Routing Manager");
-                    // subtract all resource coverages from incident coverage to see where the holes are
-                    var holes = CalculateResourceHoles(incCoverage, combinedmap, ResourceHoles);
+                Logger.Write("Calculating resource holes",
+                    TraceEventType.Information, "Routing Manager");
+                // subtract all resource coverages from incident coverage to see where the holes are
+                var holes = CalculateResourceHoles(incCoverage, combinedmap, ResourceHoles);
 
-                    holes.Percent = Math.Round(holes.Coverage(_operationalArea)*100, 1);
+                if (holes != null)
+                {
+                    holes.Percent = Math.Round(holes.Coverage(_operationalArea) * 100, 1);
 
                     //holes.Percent = CalcPercent(CoverageFactor, CoverageMapUtil.Coverage(holes));
 
                     AddCoverage(target, holes);
+                }
             }
         }
 

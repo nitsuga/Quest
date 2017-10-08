@@ -186,7 +186,6 @@ namespace Quest.Lib.Resource
                 Callsign = res.Callsign.Callsign1,
                 StatusCategory = GetStatusDescription(res.ResourceStatus),
                 Status = res.ResourceStatus.Status,
-                PrevStatus = res.ResourceStatusPrev.Status,
                 VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
                 Destination = res.Destination,
                 Eta = res.Eta,
@@ -298,8 +297,6 @@ namespace Quest.Lib.Resource
 
                 // set all resource
                 db.Resource.RemoveRange(db.Resource.Where(x => !x.Devices.Any()));
-
-                db.ResourceStatusHistory.RemoveRange(db.ResourceStatusHistory);
 
                 db.SaveChanges();
             });

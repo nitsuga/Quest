@@ -10,6 +10,7 @@ using Quest.Lib.Trace;
 using Quest.Lib.Utils;
 using Quest.Lib.DependencyInjection;
 using Quest.Lib.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Quest.Lib.Routing
 {
@@ -87,7 +88,7 @@ namespace Quest.Lib.Routing
         {
             return _dbFactory.ExecuteNoTracking<QuestContext, DataModel.Resource[]>((db) =>
             {
-                var vehEnroute = db.Resource.Where(r => r.EndDate == null && r.ResourceStatus.BusyEnroute==true).ToArray();
+                var vehEnroute = db.Resource.FromSql("SELECT Resource.*  FROM Resource INNER JOIN ResourceStatus ON Resource.ResourceStatusId = ResourceStatus.ResourceStatusID WHERE (Resource.EndDate IS NULL) AND (ResourceStatus.BusyEnroute = 1)").ToArray();
                 return vehEnroute;
             });
         }

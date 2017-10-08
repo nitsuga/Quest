@@ -10,7 +10,6 @@ namespace Quest.Common.Messages
         public long? Revision;
         public string Callsign;
         public ResourceStatus ResourceStatus;
-        public ResourceStatus ResourceStatusPrev;
         public double Speed;
         public double Direction;
         public string Skill;

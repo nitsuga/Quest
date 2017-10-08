@@ -35,7 +35,6 @@ namespace Quest.Lib.DataModel
 
         public Callsign Callsign { get; set; }
         public ResourceStatus ResourceStatus { get; set; }
-        public ResourceStatus ResourceStatusPrev { get; set; }
         public ResourceType ResourceType { get; set; }
         public ICollection<Devices> Devices { get; set; }
     }

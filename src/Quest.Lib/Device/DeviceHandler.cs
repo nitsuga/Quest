@@ -902,7 +902,6 @@ namespace Quest.Lib.Device
                 Callsign = res.Callsign.Callsign1,
                 StatusCategory = GetStatusDescription(res),
                 Status = res.ResourceStatus.Status,
-                PrevStatus = res.ResourceStatusPrev.Status,
                 VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
                 Destination = res.Destination,
                 Eta = res.Eta,
