@@ -3,28 +3,107 @@ using System;
 
 namespace Quest.Common.Messages
 {
+    /// <summary>
+    /// represents a resource within the system. 
+    /// The resource has a unique key of Agency and Callsign
+    /// </summary>
     public class QuestResource
     {
-        public bool Available;
-        public int ResourceId;
+        /// <summary>
+        /// global revision number
+        /// </summary>
         public long? Revision;
+
+        /// <summary>
+        /// PK: callsign
+        /// </summary>
         public string Callsign;
-        public ResourceStatus ResourceStatus;
-        public double Speed;
-        public double Direction;
-        public string Skill;
-        public DateTime? LastUpdated;
-        public int? FleetNo;
-        public string Sector;
-        public string Serial;
-        public string Emergency;
+
+        /// <summary>
+        /// specific type of resource
+        /// </summary>
+        public string ResourceType;
+
+        /// <summary>
+        /// resource type group
+        /// </summary>
+        public string ResourceTypeGroup;
+
+        /// <summary>
+        /// PK: which organisation owns this resource
+        /// </summary>
         public string Agency;
-        public string Class;
+
+        /// <summary>
+        /// workflow status
+        /// </summary>
+        public string Status;
+
+        /// <summary>
+        /// status category e.g. available, busy etc
+        /// </summary>
+        public string StatusCategory;
+
+        /// <summary>
+        /// Speed in m/s
+        /// </summary>
+        public double? SpeedMS;
+
+        /// <summary>
+        /// direction of travel degrees
+        /// </summary>
+        public int? Direction;
+
+        /// <summary>
+        /// skill code of the crew
+        /// </summary>
+        public string Skill;
+
+        /// <summary>
+        /// valid as of
+        /// </summary>
+        public DateTime? LastUpdated;
+
+        /// <summary>
+        /// vehicle number if appropriate
+        /// </summary>
+        public string FleetNo;
+
+        /// <summary>
+        /// owning sector
+        /// </summary>
+        public string Sector;
+
+        /// <summary>
+        /// Event current Assigned to
+        /// </summary>
+        public string Incident;
+
+        /// <summary>
+        /// Type of event being worked on
+        /// </summary>
         public string EventType;
-        public DateTime? ETA;
+
+        /// <summary>
+        /// Eta of the vehicle to next destination
+        /// </summary>
+        public DateTime? Eta;
+
+        /// <summary>
+        /// user comments
+        /// </summary>
         public string Comment;
-        public string Road;
+
+        /// <summary>
+        /// coordinates in lat/lon
+        /// </summary>
         public Coordinate Position;
-        public QuestDestination Destination;
+
+        /// <summary>
+        /// destination e.g. standby, hospital, station etc
+        /// </summary>
+        public String Destination;
+
+        public Coordinate DestPosition;
     }
 }

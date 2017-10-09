@@ -12,8 +12,6 @@ namespace Quest.Lib.DataModel
         public string DeviceIdentity { get; set; }
         public string NotificationTypeId { get; set; }
         public string NotificationId { get; set; }
-        public DateTime? LastUpdate { get; set; }
-        public DateTime? LastStatusUpdate { get; set; }
         public float? PositionAccuracy { get; set; }
         public bool? IsEnabled { get; set; }
         public bool? SendNearby { get; set; }
@@ -25,17 +23,16 @@ namespace Quest.Lib.DataModel
         public string DeviceMake { get; set; }
         public string DeviceModel { get; set; }
         public bool? UseExternalStatus { get; set; }
-        public int? ResourceStatusId { get; set; }
         public string DeviceCallsign { get; set; }
-        public string PrevStatus { get; set; }
-        public string Destination { get; set; }
         public string Road { get; set; }
         public string Skill { get; set; }
         public int? Speed { get; set; }
         public int? Direction { get; set; }
-        public string Event { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
+        public string FleetNo { get; set; }
+        public DateTime? StartDate;
+        public DateTime? EndDate;
 
         public DeviceRole DeviceRole { get; set; }
         public Resource Resource { get; set; }

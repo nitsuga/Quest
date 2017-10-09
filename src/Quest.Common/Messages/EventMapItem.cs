@@ -24,8 +24,6 @@ namespace Quest.Common.Messages
         public string Notes;
         public string Priority;
         public string Status;
-        public string Created;
-        public DateTime? LastUpdated;
         public int AssignedResources;
         public string PatientAge;
         public string Location;
@@ -33,10 +31,6 @@ namespace Quest.Common.Messages
         public string ProblemDescription;
         public string DeterminantDescription;
         public string Determinant;
-        public string AZ;
         public string PatientSex;
-
     }
-
-
 }

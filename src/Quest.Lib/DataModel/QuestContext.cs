@@ -169,10 +169,6 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.AuthToken).IsUnicode(false);
 
-                entity.Property(e => e.Destination)
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.DeviceCallsign)
                     .HasMaxLength(50)
                     .IsUnicode(false);
@@ -189,19 +185,15 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.DeviceRoleId).HasColumnName("DeviceRoleID");
 
-                entity.Property(e => e.Event)
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.IsEnabled).HasColumnName("isEnabled");
-
-                entity.Property(e => e.LastStatusUpdate).HasColumnType("datetime");
-
-                entity.Property(e => e.LastUpdate).HasColumnType("datetime");
 
                 entity.Property(e => e.LoggedOffTime).HasColumnType("datetime");
 
                 entity.Property(e => e.LoggedOnTime).HasColumnType("datetime");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.NotificationId)
                     .HasColumnName("NotificationID")
@@ -217,10 +209,6 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.OwnerId)
                     .HasColumnName("OwnerID")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.PrevStatus)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
@@ -245,10 +233,6 @@ namespace Quest.Lib.DataModel
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_Devices_Resource");
 
-                entity.HasOne(d => d.ResourceStatus)
-                    .WithMany(p => p.Devices)
-                    .HasForeignKey(d => d.ResourceStatusId)
-                    .HasConstraintName("FK_Devices_ResourceStatus");
             });
 
             modelBuilder.Entity<Incident>(entity =>
@@ -257,11 +241,6 @@ namespace Quest.Lib.DataModel
                     .HasName("NonClusteredIndex-20160719-103259");
 
                 entity.Property(e => e.IncidentId).HasColumnName("IncidentID");
-
-                entity.Property(e => e.Az)
-                    .HasColumnName("AZ")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
 
                 entity.Property(e => e.CallerTelephone)
                     .HasMaxLength(50)
@@ -318,6 +297,11 @@ namespace Quest.Lib.DataModel
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
             });
 
             modelBuilder.Entity<JobTemplate>(entity =>
@@ -413,13 +397,18 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Serial)
+                entity.Property(e => e.Incident)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Skill)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
 
                 entity.HasOne(d => d.Callsign)
                     .WithMany(p => p.Resource)

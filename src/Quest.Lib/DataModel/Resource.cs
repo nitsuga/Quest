@@ -14,12 +14,12 @@ namespace Quest.Lib.DataModel
         public long? Revision { get; set; }
         public int? CallsignId { get; set; }
         public int? ResourceStatusId { get; set; }
-        public int? Speed { get; set; }
+        public double? SpeedMS { get; set; }
         public int? Direction { get; set; }
         public string Skill { get; set; }
         public string FleetNo { get; set; }
         public string Sector { get; set; }
-        public string Serial { get; set; }
+        public string Incident { get; set; }
         public string Destination { get; set; }
         public string Agency { get; set; }
         public string EventType { get; set; }

@@ -2,6 +2,7 @@
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
+using System;
 using System.Linq;
 
 namespace Quest.Lib.Device
@@ -37,47 +38,54 @@ namespace Quest.Lib.Device
             });
         }
 
-        public void Update(QuestDevice device)
+        public QuestDevice Update(QuestDevice device, DateTime timestamp)
         {
-            _dbFactory.Execute<QuestContext>((db) =>
+            return _dbFactory.Execute<QuestContext, QuestDevice>((db) =>
             {
-                // locate record and create or update
-                var resrecord = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
-                if (resrecord == null)
-                {
-                    resrecord = new DataModel.Devices();
-                    db.Devices.Add(resrecord);
+                if (device.DeviceIdentity == null)
+                    return null;
 
-                    // use the tiestamp of the message for the creation time
-                    //resrecord.Created = new DateTime((item.Timestamp + 62135596800) * 10000000);
+                // locate record and create or update
+                var oldrec = db.Devices.FirstOrDefault(x => x.DeviceIdentity == device.DeviceIdentity);
+
+                if (oldrec == null)
+                {
+                    oldrec = new DataModel.Devices();
+                    db.Devices.Add(oldrec);
+                }
+                else
+                {
+                    oldrec.EndDate = timestamp;
+                    db.SaveChanges();
                 }
 
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
 
-                resrecord.OwnerId = device.OwnerId;
-                resrecord.DeviceIdentity = device.DeviceIdentity;
-                resrecord.LoggedOnTime = device.LoggedOnTime;
-                resrecord.LastUpdate = device.LastUpdate;
-                resrecord.DeviceRoleId = device.DeviceRoleId;
-                resrecord.NotificationTypeId = device.NotificationTypeId;
-                resrecord.NotificationId = device.NotificationId;
-                resrecord.AuthToken = device.Token;
-                resrecord.IsEnabled = device.IsEnabled;
-                resrecord.LastStatusUpdate = device.LastStatusUpdate;
-                resrecord.LoggedOffTime = device.LoggedOffTime;
-                resrecord.Osversion = device.OSVersion;
-                resrecord.DeviceMake = device.DeviceMake;
-                resrecord.DeviceModel = device.DeviceModel;
-                resrecord.ResourceId = device.ResourceId;
-                resrecord.PositionAccuracy = device.PositionAccuracy;
-                resrecord.NearbyDistance = device.NearbyDistance;
+                var newres = new DataModel.Devices
+                {
+                    DeviceIdentity = device.DeviceIdentity,
+                    OwnerId = device.OwnerId??oldrec.OwnerId,
+                    LoggedOnTime = device.LoggedOnTime??oldrec.LoggedOnTime,
+                    DeviceRoleId = device.DeviceRoleId??oldrec.DeviceRoleId,
+                    NotificationTypeId = device.NotificationTypeId??oldrec.NotificationTypeId,
+                    NotificationId = device.NotificationId??oldrec.NotificationId,
+                    AuthToken = device.Token,
+                    IsEnabled = device.IsEnabled,
+                    LoggedOffTime = device.LoggedOffTime,
+                    Osversion = device.OSVersion??oldrec.Osversion,
+                    DeviceMake = device.DeviceMake??oldrec.Osversion,
+                    DeviceModel = device.DeviceModel??oldrec.DeviceModel,
+                    PositionAccuracy = device.PositionAccuracy??oldrec.PositionAccuracy,
+                    NearbyDistance = device.NearbyDistance??oldrec.NearbyDistance,
+                    EndDate =null,
+                    StartDate =timestamp
+                };
 
                 db.SaveChanges();
 
+                return  Cloner.CloneJson<QuestDevice>(newres);
+
             });
         }
-
-
-        
     }
 }

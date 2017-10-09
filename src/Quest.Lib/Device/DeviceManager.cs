@@ -48,7 +48,6 @@ namespace Quest.Lib.Device
             MsgHandler.AddHandler<LoginRequest>(LoginRequestHandler);
             MsgHandler.AddHandler<LogoutRequest>(LogoutRequestHandler);
             MsgHandler.AddHandler<AckAssignedEventRequest>(AckAssignedEventRequestHandler);
-            MsgHandler.AddHandler<CallsignChangeRequest>(CallsignChangeRequestHandler);
             MsgHandler.AddHandler<RefreshStateRequest>(RefreshStateHandler);
             MsgHandler.AddHandler<GetEntityTypesRequest>(GetEntityTypesRequestHandler);
             MsgHandler.AddHandler<GetHistoryRequest>(GetHistoryRequestHandler);
@@ -107,16 +106,6 @@ namespace Quest.Lib.Device
             return null;
         }
 
-        private Response CallsignChangeRequestHandler(NewMessageArgs t)
-        {
-            var request = t.Payload as CallsignChangeRequest;
-            if (request != null)
-            {
-                return _deviceHandler.CallsignChange(request, _devStore, _resStore);
-            }
-            return null;
-        }
-
         private Response RefreshStateHandler(NewMessageArgs t)
         {
             var request = t.Payload as RefreshStateRequest;
@@ -162,7 +151,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as MakePatientObservationRequest;
             if (request != null)
             {
-                return _deviceHandler.MakePatientObservation(request);
+                return _deviceHandler.MakePatientObservation(request, _devStore);
             }
             return null;
         }
@@ -192,7 +181,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as PositionUpdateRequest;
             if (request != null)
             {
-                return _deviceHandler.PositionUpdate(request);
+                return _deviceHandler.PositionUpdate(request, _devStore);
             }
             return null;
         }
@@ -202,7 +191,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as SetStatusRequest;
             if (request != null)
             {
-                return _deviceHandler.SetStatusRequest(request, ServiceBusClient);
+                return _deviceHandler.SetStatusRequest(request, ServiceBusClient, _devStore);
             }
             return null;
         }

@@ -3,13 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
-using Quest.Lib.Trace;
-using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using Quest.Lib.Data;
@@ -54,11 +51,12 @@ namespace Quest.Lib.Device
         public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore, ResourceHandler resHandler, ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
         {
             var callsign = "";
-            var sc = new StatusCode() { Code="???", Description = "Pending" };
+            var sc = new StatusCode() { Code = "???", Description = "Pending" };
 
             var devrecord = devStore.Get(request.DeviceIdentity);
 
-            if (devrecord != null) {
+            if (devrecord != null)
+            {
                 devrecord.OwnerId = request.Username;
                 devrecord.LoggedOnTime = DateTime.UtcNow;
                 devrecord.LastUpdate = DateTime.UtcNow;
@@ -84,54 +82,37 @@ namespace Quest.Lib.Device
                     NotificationTypeId = request.NotificationTypeId,
                     NotificationId = request.NotificationId,
                     IsEnabled = true,
-                    LastStatusUpdate = DateTime.UtcNow,
-                    LoggedOffTime = null,
                     OSVersion = request.OSVersion,
                     DeviceMake = request.DeviceMake,
                     DeviceModel = request.DeviceModel,
-                    ResourceId = null,
-                    PositionAccuracy = 0,
-                    NearbyDistance = 0,
                 };
             }
 
             // make a new token. this becomes a claim (jti unique identitier
             devrecord.AuthToken = Guid.NewGuid().ToString();
 
-            devStore.Update(devrecord);
+            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
-            QuestResource resource=null;
+            devStore.Update(devrecord, timestamp);
+
+            QuestResource resource = null;
 
             // try and use the provided fleetnumber to associate with a resource
             if (!string.IsNullOrEmpty(request.FleetNo))
                 resource = resStore.GetByFleetNo(request.FleetNo);
-            else
-                resource = resStore.GetByResourceId(devrecord.ResourceId??0);
 
             // the device is not associated with a resource
             if (resource == null)
             {
                 ResourceUpdate newresource = new ResourceUpdate
                 {
-                    Agency = "",
-                    Destination = "",
-                    Callsign = $"#{devrecord.DeviceID.ToString("0000")}",
-                    Class = "",
-                    Direction = 0,
-                    FleetNo = $"DEV-{devrecord.DeviceID}",
-                    EventType = "",
-                    Skill = "",
-                    Speed = 0
+                    Resource = new QuestResource
+                    {
+                        Callsign = $"#{devrecord.DeviceID.ToString("0000")}",
+                        FleetNo = $"DEV-{devrecord.DeviceID}",
+                    }
                 };
-                var resourceid = resHandler.ResourceUpdate(newresource, msgSource, config, incStore);
-                resource = resStore.GetByResourceId(devrecord.ResourceId ?? 0);
-            }
-
-            // look up the resource if the id is set
-            if (devrecord.ResourceId != resource.ResourceId)
-            {
-                devrecord.ResourceId = resource.ResourceId;
-                devStore.Update(devrecord);
+                resource = resHandler.ResourceUpdate(newresource, msgSource, config, resStore, incStore);
             }
 
             return new LoginResponse
@@ -141,7 +122,7 @@ namespace Quest.Lib.Device
                 RequiresCallsign = false,
                 Callsign = callsign,
                 Status = sc,
-                Success = true, 
+                Success = true,
                 SessionId = devrecord.AuthToken,
                 Message = "successfully logged on"
             };
@@ -165,7 +146,9 @@ namespace Quest.Lib.Device
                 resrecord.NotificationId = "";
                 resrecord.NotificationTypeId = "";
 
-                devStore.Update(resrecord);
+                var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
+
+                devStore.Update(resrecord, timestamp);
 
                 return new LogoutResponse
                 {
@@ -179,49 +162,6 @@ namespace Quest.Lib.Device
                 Success = false,
                 Message = "invalid authentication token",
                 RequestId = request.RequestId
-            };
-        }
-    
-        /// <summary>
-        /// Request a callsign change
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public CallsignChangeResponse CallsignChange(CallsignChangeRequest request, IDeviceStore devStore, IResourceStore resStore)
-        {
-            var oldCallsign = "";
-
-            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
-
-            if (deviceRecord == null)
-            {
-                return new CallsignChangeResponse
-                {
-                    Success = false,
-                    Message = "invalid authentication token",
-                    RequestId = request.RequestId
-                };
-            }
-
-            if (deviceRecord?.ResourceId==null)
-            {
-                return new CallsignChangeResponse
-                {
-                    Success = false,
-                    Message = "device is not associated with a resource",
-                    RequestId = request.RequestId
-                };
-            }
-
-            var resource = resStore.GetByResourceId((int)deviceRecord.ResourceId);
-                            
-            return new CallsignChangeResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                OldCallsign = oldCallsign,
-                NewCallsign = request.Callsign,
-                Message = "requested"
             };
         }
 
@@ -292,7 +232,7 @@ namespace Quest.Lib.Device
                         Message = "device not linked to a resource"
                     };
 
-                if (deviceRecord.Resource.Serial == null)
+                if (deviceRecord.Resource.Incident == null)
                     return new AckAssignedEventResponse
                     {
                         RequestId = request.RequestId,
@@ -313,59 +253,60 @@ namespace Quest.Lib.Device
             });
         }
 
-        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
+        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request, IDeviceStore devStore)
         {
-            return _dbFactory.Execute<QuestContext, PositionUpdateResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new PositionUpdateResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "unknown device"
-                    };
+            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
 
-                deviceRecord.Latitude = (float?)request.Vector.Latitude ?? 0;
-                deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
-                deviceRecord.LastUpdate = DateTime.UtcNow;
-                deviceRecord.PositionAccuracy = (float)request.Vector.HDoP;
-
-                //TODO: Save to Elastic
-                db.SaveChanges();
+            if (deviceRecord == null)
                 return new PositionUpdateResponse
                 {
                     RequestId = request.RequestId,
-                    Success = true,
-                    Message = "successful"
+                    Success = false,
+                    Message = "unknown device"
                 };
 
-            });
+            deviceRecord.Latitude = (float?)request.Vector.Latitude ?? 0;
+            deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
+            deviceRecord.PositionAccuracy = (float)request.Vector.HDoP;
+
+            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
+
+            var updated = devStore.Update(deviceRecord, timestamp);
+
+            //TODO: Save to Elastic
+            return new PositionUpdateResponse
+            {
+                RequestId = request.RequestId,
+                Success = true,
+                Message = "successful"
+            };
         }
 
-        public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request)
+        public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request, IDeviceStore devStore)
         {
-            return _dbFactory.Execute<QuestContext, MakePatientObservationResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new MakePatientObservationResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "unknown device"
-                    };
+            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
 
-                // save audit record
-                //TODO: Save to Elastic
-                db.SaveChanges();
+            if (deviceRecord == null)
                 return new MakePatientObservationResponse
                 {
                     RequestId = request.RequestId,
-                    Success = true,
-                    Message = "successful"
+                    Success = false,
+                    Message = "unknown device"
                 };
-            });
+
+            //TODO: make changes here..
+
+            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
+
+            var updated = devStore.Update(deviceRecord, timestamp);
+
+            //TODO: Save to Elastic
+            return new MakePatientObservationResponse
+            {
+                RequestId = request.RequestId,
+                Success = true,
+                Message = "successful"
+            };
         }
 
         public PatientDetailsResponse PatientDetails(PatientDetailsRequest request)
@@ -449,8 +390,7 @@ namespace Quest.Lib.Device
                 Resources = new List<ResourceItem>(),
                 Destinations = new List<QuestDestination>(),
                 Events = new List<EventMapItem>(),
-                Devices = new List<ResourceItem>(),
-                DeleteResources = new List<int>(),
+                //Devices = new List<ResourceItem>(),
                 Success = true,
                 Message = "successful"
             };
@@ -459,8 +399,8 @@ namespace Quest.Lib.Device
             {
                 // make a note of the current revision
                 var resmax = db.Resource.Max(x => x.Revision);
-                
-                response.CurrRevision = (long)(resmax??0) + 1;
+
+                response.CurrRevision = (long)(resmax ?? 0) + 1;
             });
 
             response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
@@ -479,30 +419,24 @@ namespace Quest.Lib.Device
                     request.ResourcesBusy));
 
                 // get devices
-                response.Devices.AddRange(GetDeviceResources(request.Revision, request.ResourcesAvailable,
-                    request.ResourcesBusy));
+                //response.Devices.AddRange(GetDeviceResources(request.Revision, request.ResourcesAvailable,
+                //    request.ResourcesBusy));
 
                 // work out which have been deleted - these are in not in new_resource but are in original_resources                
-                foreach (var i1 in originalResource)
-                {
-                        var i = i1;
-                        if (!newResource.Contains(i))
-                            response.DeleteResources.Add(i);
-                }
 
                 // truncate for efficiency                
-                response.Resources.Sort((x, y) => (int) (x.revision - y.revision));
+                response.Resources.Sort((x, y) => (int)(x.revision - y.revision));
                 response.Resources = response.Resources.Take(maxres).ToList();
 
-                response.Devices.Sort((x, y) => (int) (x.revision - y.revision));
-                response.Devices = response.Devices.Take(maxdev).ToList();
+                //response.Devices.Sort((x, y) => (int) (x.revision - y.revision));
+                //response.Devices = response.Devices.Take(maxdev).ToList();
             }
 
             if (request.IncidentsImmediate || request.IncidentsOther)
             {
                 response.Events.AddRange(GetIncidents(request.Revision, request.IncidentsImmediate,
                     request.IncidentsOther));
-                response.Events.Sort((x, y) => (int) (x.revision - y.revision));
+                response.Events.Sort((x, y) => (int)(x.revision - y.revision));
                 response.Events = response.Events.Take(maxinc).ToList();
             }
 
@@ -515,16 +449,16 @@ namespace Quest.Lib.Device
             if (response.Events.Count > 0)
                 c2 = response.Events.Max(x => x.revision);
 
-            if (response.Devices.Count > 0)
-                c3 = response.Devices.Max(x => x.revision);
+            //if (response.Devices.Count > 0)
+            //    c3 = response.Devices.Max(x => x.revision);
 
             response.Revision = Math.Max(Math.Max(c1, c2), c3);
 
             if (response.Revision == 0)
                 response.Revision = response.CurrRevision;
 
-            Debug.Print(
-                $"Map rev in={request.Revision} rev out={response.Revision} rev cur = {response.CurrRevision} count inc={response.Events.Count} res={response.Resources.Count} dev={response.Devices.Count} deleted={response.DeleteResources.Count}");
+            //Debug.Print($"Map rev in={request.Revision} rev out={response.Revision} rev cur = {response.CurrRevision} count inc={response.Events.Count} res={response.Resources.Count} dev={response.Devices.Count} deleted={response.DeleteResources.Count}");
+            Debug.Print($"Map rev in={request.Revision} rev out={response.Revision} rev cur = {response.CurrRevision} count inc={response.Events.Count} res={response.Resources.Count}");
 
             return response;
         }
@@ -644,10 +578,6 @@ namespace Quest.Lib.Device
                                 Notes = inc.Determinant,
                                 Priority = inc.Priority,
                                 Status = inc.Status,
-                                Created = inc.Created?.ToString("hh:MM") ?? "?",
-                                LastUpdated = inc.LastUpdated,
-                                //AssignedResources = inc.AssignedResources,
-                                AZ = inc.Az,
                                 Determinant = inc.Determinant,
                                 DeterminantDescription = inc.DeterminantDescription,
                                 Location = inc.Location,
@@ -666,113 +596,113 @@ namespace Quest.Lib.Device
             });
         }
 
-        private List<ResourceItem> GetDeviceResources(long revision, bool avail = false, bool busy = false)
-        {
-            return _dbFactory.Execute<QuestContext, List<ResourceItem>>((db) =>
-            {
-                var features = new List<ResourceItem>();
+        //private List<ResourceItem> GetDeviceResources(long revision, bool avail = false, bool busy = false)
+        //{
+        //    return _dbFactory.Execute<QuestContext, List<ResourceItem>>((db) =>
+        //    {
+        //        var features = new List<ResourceItem>();
 
-                if (avail)
-                    features.AddRange(
+        //        if (avail)
+        //            features.AddRange(
 
-                            db.Devices
-                            .Where(
-                                x =>
-                                    x.ResourceStatus.Available == true &&
-                                    x.Latitude != null && x.Longitude != null)
-                            .Where(x => x.Revision > revision)
-                            .ToList()
-                            .Select(
-                                res => new ResourceItem
-                                {
-                                    ID = res.DeviceId.ToString(),
-                                    revision = res.Revision ?? 0,
-                                    X = res.Longitude ?? 0,
-                                    Y = res.Latitude ?? 0,
-                                    Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
-                                    lastUpdate = res.LastUpdate,
-                                    StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
-                                    Status = res.ResourceStatus.Status,
-                                    PrevStatus = res.PrevStatus,
-                                    VehicleType = "Device",
-                                    Destination = res.Destination,
-                                    Eta = null,
-                                    FleetNo = "",
-                                    Road = res.Road,
-                                    Comment = "",
-                                    Skill = res.Skill,
-                                    Speed = res.Speed,
-                                    Direction = res.Direction,
-                                    Incident = res.Event,
-                                    Available = res.ResourceStatus.Available ?? false,
-                                    Busy = res.ResourceStatus.Busy ?? false,
-                                    BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
-                                    ResourceTypeGroup = "HAND"
-                                }
-                            )
+        //                    db.Devices
+        //                    .Where(
+        //                        x =>
+        //                            x.ResourceStatus.Available == true &&
+        //                            x.Latitude != null && x.Longitude != null)
+        //                    .Where(x => x.Revision > revision)
+        //                    .ToList()
+        //                    .Select(
+        //                        res => new ResourceItem
+        //                        {
+        //                            ID = res.DeviceId.ToString(),
+        //                            revision = res.Revision ?? 0,
+        //                            X = res.Longitude ?? 0,
+        //                            Y = res.Latitude ?? 0,
+        //                            Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
+        //                            lastUpdate = res.LastUpdate,
+        //                            StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
+        //                            Status = res.ResourceStatus.Status,
+        //                            PrevStatus = res.PrevStatus,
+        //                            VehicleType = "Device",
+        //                            Destination = res.Destination,
+        //                            Eta = null,
+        //                            FleetNo = "",
+        //                            Road = res.Road,
+        //                            Comment = "",
+        //                            Skill = res.Skill,
+        //                            Speed = res.Speed,
+        //                            Direction = res.Direction,
+        //                            Incident = res.Event,
+        //                            Available = res.ResourceStatus.Available ?? false,
+        //                            Busy = res.ResourceStatus.Busy ?? false,
+        //                            BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
+        //                            ResourceTypeGroup = "HAND"
+        //                        }
+        //                    )
 
-                        );
+        //                );
 
-                if (busy)
-                    features.AddRange(
-                        db.Devices
-                            .Where(
-                                x =>
-                                    x.ResourceStatus.Busy == true &&
-                                    x.Latitude != null && x.Longitude != null)
-                            .Where(x => x.Revision > revision)
-                            .ToList()
-                            .Select(
-                                       res => new ResourceItem
-                                       {
-                                           ID = res.DeviceId.ToString(),
-                                           revision = res.Revision ?? 0,
-                                           X = res.Longitude ?? 0,
-                                           Y = res.Latitude ?? 0,
-                                           Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
-                                           lastUpdate = res.LastUpdate,
-                                           StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
-                                           Status = res.ResourceStatus.Status,
-                                           PrevStatus = res.PrevStatus,
-                                           VehicleType = "Device",
-                                           Destination = res.Destination,
-                                           Eta = null,
-                                           FleetNo = "",
-                                           Road = res.Road,
-                                           Comment = "",
-                                           Skill = res.Skill,
-                                           Speed = res.Speed,
-                                           Direction = res.Direction,
-                                           Incident = res.Event,
-                                           Available = res.ResourceStatus.Available ?? false,
-                                           Busy = res.ResourceStatus.Busy ?? false,
-                                           BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
-                                           ResourceTypeGroup = "HAND"
-                                       }
+        //        if (busy)
+        //            features.AddRange(
+        //                db.Devices
+        //                    .Where(
+        //                        x =>
+        //                            x.ResourceStatus.Busy == true &&
+        //                            x.Latitude != null && x.Longitude != null)
+        //                    .Where(x => x.Revision > revision)
+        //                    .ToList()
+        //                    .Select(
+        //                               res => new ResourceItem
+        //                               {
+        //                                   ID = res.DeviceId.ToString(),
+        //                                   revision = res.Revision ?? 0,
+        //                                   X = res.Longitude ?? 0,
+        //                                   Y = res.Latitude ?? 0,
+        //                                   Callsign = res.DeviceCallsign ?? $"DV{res.DeviceId}",
+        //                                   lastUpdate = res.LastUpdate,
+        //                                   StatusCategory = GetStatusDescription(res.ResourceStatus.Available ?? false, res.ResourceStatus.Busy ?? false, res.ResourceStatus.BusyEnroute ?? false, res.ResourceStatus.Rest ?? false),
+        //                                   Status = res.ResourceStatus.Status,
+        //                                   PrevStatus = res.PrevStatus,
+        //                                   VehicleType = "Device",
+        //                                   Destination = res.Destination,
+        //                                   Eta = null,
+        //                                   FleetNo = "",
+        //                                   Road = res.Road,
+        //                                   Comment = "",
+        //                                   Skill = res.Skill,
+        //                                   Speed = res.Speed,
+        //                                   Direction = res.Direction,
+        //                                   Incident = res.Event,
+        //                                   Available = res.ResourceStatus.Available ?? false,
+        //                                   Busy = res.ResourceStatus.Busy ?? false,
+        //                                   BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
+        //                                   ResourceTypeGroup = "HAND"
+        //                               }
 
-                            )
-                        );
+        //                    )
+        //                );
 
-                var lastCallsign = "";
-                var callsignCount = 0;
-                foreach (var res in features.OrderBy(x => x.Callsign))
-                {
-                    var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
-                    res.X = latlng.Longitude;
-                    res.Y = latlng.Latitude;
+        //        var lastCallsign = "";
+        //        var callsignCount = 0;
+        //        foreach (var res in features.OrderBy(x => x.Callsign))
+        //        {
+        //            var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
+        //            res.X = latlng.Longitude;
+        //            res.Y = latlng.Latitude;
 
-                    if (lastCallsign == res.Callsign)
-                    {
-                        callsignCount++;
-                        res.Callsign += "/" + callsignCount;
-                    }
-                    else
-                        callsignCount = 0;
-                }
+        //            if (lastCallsign == res.Callsign)
+        //            {
+        //                callsignCount++;
+        //                res.Callsign += "/" + callsignCount;
+        //            }
+        //            else
+        //                callsignCount = 0;
+        //        }
 
-                return features;
-            });
-        }
+        //        return features;
+        //    });
+        //}
 
         private List<ResourceItem> GetStandardResources(long revision, bool avail = false, bool busy = false)
         {
@@ -855,7 +785,7 @@ namespace Quest.Lib.Device
                 return false;
 
             // its linked to a resource - good, as it should always be anyway, and it has the right callsign?
-            if (device.Resource?.Serial != null && string.Equals(device.Resource.Serial, serial, StringComparison.CurrentCultureIgnoreCase) && device.DeviceIdentity != null)
+            if (device.Resource?.Incident != null && string.Equals(device.Resource.Incident, serial, StringComparison.CurrentCultureIgnoreCase) && device.DeviceIdentity != null)
                 return true;
 
             // check the nearby settings
@@ -899,22 +829,22 @@ namespace Quest.Lib.Device
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,
-                Callsign = res.Callsign.Callsign1,
-                StatusCategory = GetStatusDescription(res),
-                Status = res.ResourceStatus.Status,
-                VehicleType = res.ResourceType.ResourceType1 ?? "VEH",
-                Destination = res.Destination,
-                Eta = res.Eta,
-                FleetNo = res.FleetNo,
-                Comment = res.Comment,
-                Skill = res.Skill,
-                Speed = res.Speed,
-                Direction = res.Direction,
-                Incident = res.Serial,
-                Available = res.ResourceStatus.Available ?? false,
-                Busy = res.ResourceStatus.Busy ?? false,
-                BusyEnroute = res.ResourceStatus.BusyEnroute ?? false,
-                ResourceTypeGroup = res.ResourceType.ResourceTypeGroup,
+                Resource = new QuestResource
+                {
+                    Callsign = res.Callsign.Callsign1,
+                    StatusCategory = GetStatusDescription(res),
+                    Status = res.ResourceStatus.Status,
+                    ResourceType = res.ResourceType.ResourceType1 ?? "VEH",
+                    Destination = res.Destination,
+                    Eta = res.Eta,
+                    FleetNo = res.FleetNo,
+                    Comment = res.Comment,
+                    Skill = res.Skill,
+                    SpeedMS = res.SpeedMS,
+                    Direction = res.Direction,
+                    Incident = res.Incident,
+                    ResourceTypeGroup = res.ResourceType.ResourceTypeGroup,
+                }
             };
         }
 
@@ -996,107 +926,32 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient)
+        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient, IDeviceStore devStore)
         {
-            return _dbFactory.Execute<QuestContext, SetStatusResponse>((db) =>
+            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
+
+            if (deviceRecord == null)
+                return new SetStatusResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = "unknown device"
+                };
+
+            //TODO: make changes here..
+
+            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
+
+            var updated = devStore.Update(deviceRecord, timestamp);
+
+            //TODO: Save to Elastic
+            return new SetStatusResponse
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new SetStatusResponse
-                    {
-                        RequestId = request.RequestId,
-                        NewStatusCode = null,
-                        OldStatusCode = null,
-                        Success = false,
-                        Message = "unknown device"
-                    };
+                RequestId = request.RequestId,
+                Success = true,
+                Message = "successful"
+            };
 
-                // device is linked, set status on resource instead
-                // the resource update will update all linked devices
-                if (deviceRecord.ResourceId != null)
-                {
-                    //TODO:
-                    return new SetStatusResponse
-                    {
-                        RequestId = request.RequestId,
-                        NewStatusCode = null,
-                        OldStatusCode = null,
-                        Success = false,
-                        Message = "not implemented - change status via MDT"
-                    };
-                }
-                else
-                {
-                    return new SetStatusResponse
-                    {
-                        RequestId = request.RequestId,
-                        NewStatusCode = null,
-                        OldStatusCode = null,
-                        Callsign = deviceRecord.DeviceCallsign,
-                        Success = true,
-                        Message = "successful"
-                    };
-
-                    //TODO: Migrate this code into the resource manager
-#if false
-                    StatusCode oldStatusCode = null;
-
-                    if (deviceRecord.ResourceStatusId != null)
-                    {
-                        oldStatusCode = new StatusCode
-                        {
-                            Code = deviceRecord.ResourceStatus.Status,
-                            Description = GetStatusDescription(deviceRecord.ResourceStatus.Available ?? false, deviceRecord.ResourceStatus.Busy ?? false, deviceRecord.ResourceStatus.BusyEnroute ?? false, deviceRecord.ResourceStatus.Rest ?? false),
-                        };
-                    }
-
-                    var newStatusRecord = db.ResourceStatus.FirstOrDefault(x => x.Status == request.StatusCode);
-
-                    if (newStatusRecord == null)
-                        return new SetStatusResponse
-                        {
-                            RequestId = request.RequestId,
-                            NewStatusCode = oldStatusCode,
-                            OldStatusCode = oldStatusCode,
-                            Success = false,
-                            Message = "invalid status code"
-                        };
-
-                    var newStatusCode = new StatusCode
-                    {
-                        Code = newStatusRecord.Status,
-                        Description = GetStatusDescription(deviceRecord.ResourceStatus.Available ?? false, deviceRecord.ResourceStatus.Busy ?? false, deviceRecord.ResourceStatus.BusyEnroute ?? false, deviceRecord.ResourceStatus.Rest ?? false)
-
-                    };
-
-                    // are we using the CAD to make status changes?
-                    if (deviceRecord.UseExternalStatus.HasValue && deviceRecord.UseExternalStatus.Value)
-                    {
-                        // use the cad..
-                    }
-                    else
-                    {
-                        // set the device status
-                        deviceRecord.ResourceStatusId = newStatusRecord.ResourceStatusId;
-                        db.SaveChanges();
-                    }
-
-                    SendStatusNotification(deviceRecord.DeviceCallsign, "Update", serviceBusClient);
-
-                    return new SetStatusResponse
-                    {
-                        RequestId = request.RequestId,
-                        NewStatusCode = newStatusCode,
-                        OldStatusCode = oldStatusCode,
-                        Callsign = deviceRecord.DeviceCallsign,
-                        Success = true,
-                        Message = "successful"
-                    };
-#endif
-
-                }
-
-            });
         }
 
         private string GetStatusDescription(DataModel.ResourceStatus status)

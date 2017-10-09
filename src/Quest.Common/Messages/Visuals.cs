@@ -111,9 +111,6 @@ namespace Quest.Common.Messages
         public string GeoJson;
     }
 
-
-
-    
     public class VisualId
     {
         
@@ -286,14 +283,4 @@ namespace Quest.Common.Messages
     }
 #endif
 
-    public enum ResourceStatus
-    {
-        Off,
-        Available,
-        Enroute,
-        OnScene,
-        Convey,
-        Hospital,
-        Dispatched
-    }
 }

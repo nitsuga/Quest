@@ -20,10 +20,6 @@ namespace Quest.Lib.Incident
                 Notes = inc.Determinant,
                 Priority = inc.Priority,
                 Status = inc.Status,
-                Created = inc.Created?.ToString("hh:MM") ?? "?",
-                LastUpdated = inc.LastUpdated,
-                //AssignedResources = inc.AssignedResources,
-                AZ = inc.AZ,
                 Determinant = inc.Determinant,
                 DeterminantDescription = inc.DeterminantDescription,
                 Location = inc.Location,
@@ -31,6 +27,7 @@ namespace Quest.Lib.Incident
                 PatientAge = inc.PatientAge,
                 PatientSex = inc.PatientSex,
                 ProblemDescription = inc.ProblemDescription,
+                AssignedResources = inc.AssignedResources,
             };
 
             // updates go to assigned devices and to nearby ones of the right grade

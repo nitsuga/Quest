@@ -58,13 +58,13 @@ namespace Quest.WebCore.Services
                         features.Add(feature);
 
                 }
-                foreach (var res in results.Devices)
-                {
-                    ResourceFeature feature = GetResourceUpdateFeature(res);
-                    if (feature != null)
-                        features.Add(feature);
+                //foreach (var res in results.Devices)
+                //{
+                //    ResourceFeature feature = GetResourceUpdateFeature(res);
+                //    if (feature != null)
+                //        features.Add(feature);
 
-                }
+                //}
             }
             var result = new ResourceFeatureCollection();
             result.Features.AddRange(features.ToArray());
@@ -105,26 +105,21 @@ namespace Quest.WebCore.Services
                     var geometry = new Point(new Position(res.Y, res.X));
                     var properties = new GTResourceFeatureProperties
                     {
-                        Speed = res.Speed,
-                        Direction = res.Direction,
-                        IncSerial = res.Incident,
-                        Callsign = res.Callsign,
-                        ResourceType = res.VehicleType,
-                        TimeStamp = res.lastUpdate?.ToString("dd/MM/yyyy HH:mm:ss"),
-                        Destination = res.Destination,
-                        ETA = res.Eta?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
-                        Fleet = res.FleetNo?.ToString() ?? string.Empty,
-                        Road = res.Road ?? string.Empty,
-                        Comment = res.Comment,
-                        Skill = res.Skill,
-                        currStatus = res.Status,
-                        prevStatus = res.PrevStatus
-                        ,
-                        StatusCategory = res.StatusCategory
-                        ,
-                        Area = ""
-                        ,
-                        ResourceTypeGroup = res.ResourceTypeGroup
+                        Speed = res.Resource.SpeedMS,
+                        Direction = res.Resource.Direction,
+                        IncSerial = res.Resource.Incident,
+                        Callsign = res.Resource.Callsign,
+                        ResourceType = res.Resource.ResourceType,
+                        TimeStamp = res.Resource.LastUpdated?.ToString("dd/MM/yyyy HH:mm:ss"),
+                        Destination = res.Resource.Destination,
+                        ETA = res.Resource.Eta?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        Fleet = res.Resource.FleetNo?.ToString() ?? string.Empty,
+                        Comment = res.Resource.Comment,
+                        Skill = res.Resource.Skill,
+                        currStatus = res.Resource.Status,
+                        StatusCategory = res.Resource.StatusCategory,
+                        Area = "",
+                        ResourceTypeGroup = res.Resource.ResourceTypeGroup
                     };
                     feature = new ResourceFeature(geometry, properties)
                     {

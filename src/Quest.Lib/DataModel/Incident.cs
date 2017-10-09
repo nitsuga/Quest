@@ -9,7 +9,6 @@ namespace Quest.Lib.DataModel
         public DateTime? LastUpdated { get; set; }
         public string Status { get; set; }
         public string Serial { get; set; }
-        public long? SerialNumber { get; set; }
         public string IncidentType { get; set; }
         public string Complaint { get; set; }
         public string Determinant { get; set; }
@@ -17,7 +16,6 @@ namespace Quest.Lib.DataModel
         public string Location { get; set; }
         public string Priority { get; set; }
         public string Sector { get; set; }
-        public string Az { get; set; }
         public DateTime? Created { get; set; }
         public string LocationComment { get; set; }
         public string PatientSex { get; set; }
@@ -31,5 +29,7 @@ namespace Quest.Lib.DataModel
         public float? Longitude { get; set; }
         public int? CellX { get; set; }
         public int? CellY { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

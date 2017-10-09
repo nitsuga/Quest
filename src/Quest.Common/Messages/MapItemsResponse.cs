@@ -12,10 +12,8 @@ namespace Quest.Common.Messages
     {
 
         public List<ResourceItem> Resources;
-        public List<int> DeleteResources;
-
         // these are children of the resources
-        public List<ResourceItem> Devices;
+        //public List<DeviceItem> Devices;
         public List<EventMapItem> Events;
         public List<QuestDestination> Destinations;
 

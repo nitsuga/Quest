@@ -219,8 +219,6 @@ namespace Quest.Mobile.Models
 
         public string Destination { get; set; }
 
-        public string prevStatus { get; set; }
-
         public string currStatus { get; set; }
 
         public string StatusCategory { get; set; }
@@ -238,6 +236,6 @@ namespace Quest.Mobile.Models
 
         public int? Direction { get; set; }
 
-        public int? Speed { get; set; }
+        public double? Speed { get; set; }
     }
 }
