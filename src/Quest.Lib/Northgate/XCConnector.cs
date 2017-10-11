@@ -644,24 +644,24 @@ namespace Quest.Lib.Northgate
 
             ResourceUpdate update = new ResourceUpdate()
             {
-                Callsign = GetValueString("Callsign", _resformat, parts),
-                ResourceType = GetValueString("ResourceType", _resformat, parts),
-                Status = GetValueString("Status", _resformat, parts),
-                Latitude = pos.Latitude,
-                Longitude = pos.Longitude,
-                Speed = GetValueInt("Speed", _resformat, parts),
-                Direction = GetValueInt("Direction", _resformat, parts),
-                Skill = GetValueString("Skill", _resformat, parts),
-                //LastUpdate = GetValueDate("LastUpdate", _resformat, parts),
-                FleetNo = GetValueString("FleetNo", _resformat, parts),
-                //Sector = GetValueString("Sector", _resformat, parts),
-                Incident = GetValueString("Incident", _resformat, parts),
-                Emergency = GetValueBool("Emergency", _resformat, parts),
-                Destination = GetValueString("Destination", _resformat, parts),
-                Agency = GetValueString("Agency", _resformat, parts),
-                Class = GetValueString("Class", _resformat, parts),
-                EventType = GetValueString("EventType", _resformat, parts),
-                UpdateTime = DateTime.UtcNow, 
+                Resource = new QuestResource()
+                {
+                    Callsign = GetValueString("Callsign", _resformat, parts),
+                    ResourceType = GetValueString("ResourceType", _resformat, parts),
+                    Status = GetValueString("Status", _resformat, parts),
+                    Position = new GeoAPI.Geometries.Coordinate(pos.Longitude, pos.Latitude),
+                    SpeedMS = GetValueInt("Speed", _resformat, parts),
+                    Direction = GetValueInt("Direction", _resformat, parts),
+                    Skill = GetValueString("Skill", _resformat, parts),
+                    //LastUpdate = GetValueDate("LastUpdate", _resformat, parts),
+                    FleetNo = GetValueString("FleetNo", _resformat, parts),
+                    //Sector = GetValueString("Sector", _resformat, parts),
+                    Incident = GetValueString("Incident", _resformat, parts),
+                    Destination = GetValueString("Destination", _resformat, parts),
+                    Agency = GetValueString("Agency", _resformat, parts),
+                    EventType = GetValueString("EventType", _resformat, parts),
+                },
+                UpdateTime = DateTime.UtcNow
             };
 
             base.ServiceBusClient.Broadcast(update);

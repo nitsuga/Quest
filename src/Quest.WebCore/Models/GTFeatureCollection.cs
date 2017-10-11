@@ -138,9 +138,6 @@ namespace Quest.Mobile.Models
         [JsonProperty("location")]
         public string Location { get; set; }
 
-        [JsonProperty("lastupdate")]
-        public string LastUpdate { get; set; }
-
         [JsonProperty("description")]
         public string Description { get; set; }
 
@@ -152,9 +149,6 @@ namespace Quest.Mobile.Models
 
         [JsonProperty("resources")]
         public int? AssignedResources { get; set; }
-
-        [JsonProperty("az")]
-        public string AZ { get; set; }
 
         [JsonProperty("sex")]
         public string Sex { get; set; }

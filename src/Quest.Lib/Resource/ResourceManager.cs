@@ -70,7 +70,8 @@ namespace Quest.Lib.Resource
             var resourceUpdate = t.Payload as ResourceUpdate;
 
             if (resourceUpdate != null)
-                _resourceHandler.ResourceUpdate(resourceUpdate, ServiceBusClient, _config, _incStore);
+                _resourceHandler.ResourceUpdate(resourceUpdate, ServiceBusClient, _config);
+
             return null;
         }
 

@@ -28,11 +28,15 @@ namespace Quest.Lib.Resource
 
         private IDatabaseFactory _dbFactory;
         private const string Version = "1.0.0";
-        private int _deleteStatusId;        
+        private int _deleteStatusId;
+        private IResourceStore _resStore;
+        private IIncidentStore _incStore;
 
-        public ResourceHandler(IDatabaseFactory dbFactory)
+        public ResourceHandler(IDatabaseFactory dbFactory, IResourceStore resStore, IIncidentStore incStore)
         {
             _dbFactory = dbFactory;
+            _resStore = resStore;
+            _incStore = incStore;
         }
 
         private int DeleteStatusId
@@ -54,9 +58,9 @@ namespace Quest.Lib.Resource
         /// <param name="settings"></param>
         /// <param name="client"></param>
         /// <param name="msgSource"></param>
-        public QuestResource ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config, IResourceStore resStore, IIncidentStore incStore)
+        public QuestResource ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config)
         {
-            QuestResource res = resStore.Update(resourceUpdate);
+            QuestResource res = _resStore.Update(resourceUpdate);
 
             ResourceItem ri = GetResourceItemFromView(res);
 
@@ -89,7 +93,7 @@ namespace Quest.Lib.Resource
 
             SendStatusNotification(resourceUpdate.Resource.Callsign, "Update", msgSource);
 
-            SendEventNotification(resourceUpdate.Resource.Callsign, resourceUpdate.Resource.Incident, "C&C Assigned", incStore, msgSource);
+            SendEventNotification(resourceUpdate.Resource.Callsign, resourceUpdate.Resource.Incident, "C&C Assigned", msgSource);
 
             msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
 
@@ -210,7 +214,7 @@ namespace Quest.Lib.Resource
         /// <param name="serial"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        public void SendEventNotification(string callsign, string serial, string reason, IIncidentStore incStore, IServiceBusClient serviceBusClient)
+        public void SendEventNotification(string callsign, string serial, string reason, IServiceBusClient serviceBusClient)
         {
             _dbFactory.Execute<QuestContext>((db) =>
             {
@@ -230,7 +234,7 @@ namespace Quest.Lib.Resource
                         $"Unable to send notification, no resource exists with callsign {callsignRec}");
 
                 // create a event message to send to devices if necessary
-                var inc = incStore.Get(serial);
+                var inc = _incStore.Get(serial);
 
                 // find associated devices with this resource callsign
                 var devices = db

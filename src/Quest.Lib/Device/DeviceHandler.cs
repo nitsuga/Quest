@@ -112,7 +112,7 @@ namespace Quest.Lib.Device
                         FleetNo = $"DEV-{devrecord.DeviceID}",
                     }
                 };
-                resource = resHandler.ResourceUpdate(newresource, msgSource, config, resStore, incStore);
+                resource = resHandler.ResourceUpdate(newresource, msgSource, config);
             }
 
             return new LoginResponse

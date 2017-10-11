@@ -67,7 +67,6 @@ namespace Quest.WebCore.Services
         /// <returns></returns>
         public static IncidentFeature GetIncidentUpdateFeature(EventMapItem inc)
         {
-            if (inc.LastUpdated == null) return null;
             var geometry = new Point(new Position(inc.Y, inc.X));
             var properties = new GTIncidentFeatureProperties
             {
@@ -76,11 +75,9 @@ namespace Quest.WebCore.Services
                 Location = inc.Location,
                 Priority = inc.Priority,
                 Status = inc.Status,
-                LastUpdate = inc.LastUpdated.Value.ToString("dd/MM/yyyy HH:mm:ss"),
                 IncidentId = inc.EventId,
                 AssignedResources = inc.AssignedResources,
                 Age = inc.PatientAge ?? "?",
-                AZ = inc.AZ ?? "?",
                 LocationComment = inc.LocationComment ?? "",
                 ProblemDescription = inc.ProblemDescription ?? "",
                 Sex = inc.PatientSex ?? "?"

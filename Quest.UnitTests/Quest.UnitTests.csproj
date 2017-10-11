@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Quest.Common\Quest.Common.csproj" />
+    <ProjectReference Include="..\src\Quest.Lib.OS\Quest.Lib.OS.csproj" />
+    <ProjectReference Include="..\src\Quest.Lib.Research\Quest.Lib.Research.csproj" />
+    <ProjectReference Include="..\src\Quest.Lib\Quest.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Quest.Lib.Simulation">
+      <HintPath>..\src\Quest.Lib.Simulation\bin\Debug\netcoreapp2.0\Quest.Lib.Simulation.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
