@@ -169,10 +169,6 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.AuthToken).IsUnicode(false);
 
-                entity.Property(e => e.DeviceCallsign)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.DeviceIdentity).IsUnicode(false);
 
                 entity.Property(e => e.DeviceMake)
@@ -195,6 +191,8 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
+                entity.Property(e => e.IsPrimary).HasColumnName("IsPrimary");
+
                 entity.Property(e => e.NotificationId)
                     .HasColumnName("NotificationID")
                     .HasMaxLength(1024)
@@ -212,12 +210,6 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ResourceId).HasColumnName("ResourceID");
-
-                entity.Property(e => e.Road)
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.Skill)
                     .HasMaxLength(150)
                     .IsUnicode(false);
@@ -226,12 +218,6 @@ namespace Quest.Lib.DataModel
                     .WithMany(p => p.Devices)
                     .HasForeignKey(d => d.DeviceRoleId)
                     .HasConstraintName("FK_Devices_DeviceRole");
-
-                entity.HasOne(d => d.Resource)
-                    .WithMany(p => p.Devices)
-                    .HasForeignKey(d => d.ResourceId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK_Devices_Resource");
 
             });
 
@@ -370,8 +356,6 @@ namespace Quest.Lib.DataModel
             {
                 entity.HasIndex(e => e.CallsignId)
                     .HasName("NonClusteredIndex-20160719-125115");
-
-                entity.Property(e => e.ResourceId).HasColumnName("ResourceID");
 
                 entity.Property(e => e.Agency)
                     .HasMaxLength(50)

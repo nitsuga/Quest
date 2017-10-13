@@ -1,10 +1,10 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Text;
 using System.IO;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
+using Quest.Lib.Csv;
 
 namespace Quest.Lib.Research.Loader
 {
@@ -15,23 +15,15 @@ namespace Quest.Lib.Research.Loader
             // throw away header line
             using (StreamReader reader = File.OpenText(filename))
             {
-                using (var data = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "\t" }))
-                {
                     _dbFactory.Execute<QuestDataContext>((db) =>
                     {
-                        // skip header
-                        while (headers > 0)
-                        {
-                            headers--;
-                            data.Read();
-                        }
-
                         var batch = new StringBuilder();
                         var readRowcount = 0;
                         var writeRowcount = 0;
                         var skipped = 0;
-                        while (data.Read())
-                        {
+                    foreach (var data in CsvReader.Read(reader, new CsvOptions { RowsToSkip = headers, Separator = ',' }))
+                    {
+                        
                             if (data == null)
                             {
                                 skipped++;
@@ -41,7 +33,7 @@ namespace Quest.Lib.Research.Loader
                             string sqlToExec;
                             try
                             {
-                                sqlToExec = processRow(data.CurrentRecord);
+                                sqlToExec = processRow(data.Line);
 
                             }
                             catch (Exception)
@@ -86,7 +78,6 @@ namespace Quest.Lib.Research.Loader
                     });
                 }
             }
-        }
 
         public static string GetValue(string value)
         {

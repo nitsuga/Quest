@@ -8,7 +8,6 @@ using System;
 using System.Linq;
 using Nest;
 using Quest.Common.Messages;
-using Quest.Lib.DataModel;
 using Quest.Lib.Search.Elastic;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
@@ -18,6 +17,7 @@ using Quest.Lib.Trace;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Globalization;
+using Quest.Lib.Device;
 
 namespace Quest.Lib.Resource
 {
@@ -28,26 +28,16 @@ namespace Quest.Lib.Resource
 
         private IDatabaseFactory _dbFactory;
         private const string Version = "1.0.0";
-        private int _deleteStatusId;
         private IResourceStore _resStore;
         private IIncidentStore _incStore;
+        private IDeviceStore _devStore;
 
-        public ResourceHandler(IDatabaseFactory dbFactory, IResourceStore resStore, IIncidentStore incStore)
+        public ResourceHandler(IDatabaseFactory dbFactory, IResourceStore resStore, IIncidentStore incStore, IDeviceStore devStore)
         {
             _dbFactory = dbFactory;
             _resStore = resStore;
             _incStore = incStore;
-        }
-
-        private int DeleteStatusId
-        {
-            get
-            {
-                if (_deleteStatusId == 0)
-                    GetDeleteStatusId();
-                return _deleteStatusId;
-
-            }
+            _devStore = devStore;
         }
 
         /// <summary>
@@ -58,12 +48,17 @@ namespace Quest.Lib.Resource
         /// <param name="settings"></param>
         /// <param name="client"></param>
         /// <param name="msgSource"></param>
-        public QuestResource ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config)
+        public ResourceUpdateResult ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config)
         {
-            QuestResource res = _resStore.Update(resourceUpdate);
+            // update the resource record
+            var resupdate = _resStore.Update(resourceUpdate);
 
-            ResourceItem ri = GetResourceItemFromView(res);
+            var res = resupdate.NewResource;
 
+            // create a notification to say that resource details are persisted
+            ResourceItem ri = GetResourceItemFromView(resupdate.NewResource);
+
+            // save details to elastic if we have location info
             if (res.Position != null)
             {
                 var point = new PointGeoShape(new GeoCoordinate(res.Position.Y, res.Position.X));
@@ -91,13 +86,17 @@ namespace Quest.Lib.Resource
                 }
             }
 
-            SendStatusNotification(resourceUpdate.Resource.Callsign, "Update", msgSource);
+            // detect change in status
+            if (resupdate.OldResource.Status != resupdate.NewResource.Status)
+                SendStatusNotification(resourceUpdate.Resource.FleetNo, "Update", msgSource);
 
-            SendEventNotification(resourceUpdate.Resource.Callsign, resourceUpdate.Resource.Incident, "C&C Assigned", msgSource);
+            // detect change in event
+            if (resupdate.OldResource.Incident != resupdate.NewResource.Incident)
+                SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.Incident, "C&C Assigned", msgSource);
 
             msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
 
-            return res;
+            return resupdate;
         }
 
         private ResourceItem GetResourceItemFromView( QuestResource res)
@@ -110,18 +109,6 @@ namespace Quest.Lib.Resource
                 Y = res.Position.Y,
                 Resource = res
             };
-        }
-
-        private void GetDeleteStatusId()
-        {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                var ds = db.ResourceStatus.FirstOrDefault(x => x.Status == deletedStatus);
-                if (ds != null)
-                {
-                    _deleteStatusId = ds.ResourceStatusId;
-                }
-            });
         }
 
         /// <summary>
@@ -159,43 +146,17 @@ namespace Quest.Lib.Resource
         public void BeginDump(BeginDump item)
         {
             Logger.Write(string.Format("System reset commanded from " + item.From), TraceEventType.Information, "XReplayPlayer");
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // remove all incidents
-                db.Incident.RemoveRange(db.Incident);
-
-                db.SaveChanges();
-
-                // set all resource
-                db.Resource.RemoveRange(db.Resource.Where(x => !x.Devices.Any()));
-
-                db.SaveChanges();
-            });
+            _resStore.Clear();
         }
 
-        public void SendCallsignNotification(string callsign, string reason, IServiceBusClient serviceBusClient)
+        public void SendCallsignNotification(string fleetNo, string callsign, string reason, IServiceBusClient serviceBusClient)
         {
-            _dbFactory.Execute<QuestContext>((db) =>
-            {
-                // find associated devices with this resource callsign
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.Resource != null && x.Resource.Callsign.Callsign1 == callsign)
-                    .ToList();
+            var devices = _devStore.GetByFleet(fleetNo);
 
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                    db.SaveChanges();
-                }
-
-                SendCallsignNotification(devices, callsign, reason, serviceBusClient);
-            });
+            SendCallsignNotification(devices, callsign, reason, serviceBusClient);
         }
 
-        private void SendCallsignNotification(List<Devices> devices, string callsign, string reason, IServiceBusClient serviceBusClient)
+        private void SendCallsignNotification(List<QuestDevice> devices, string callsign, string reason, IServiceBusClient serviceBusClient)
         {
             if (devices == null || !devices.Any())
                 return;
@@ -208,53 +169,23 @@ namespace Quest.Lib.Resource
         }
 
         /// <summary>
-        ///     send an assignment to this callsign. Also sends to corresponding unmanaged callsigns if within range
+        ///     send an assignment to this FleetNo. Also sends to corresponding unmanaged callsigns if within range
         /// </summary>
-        /// <param name="callsign"></param>
+        /// <param name="FleetNo"></param>
         /// <param name="serial"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        public void SendEventNotification(string callsign, string serial, string reason, IServiceBusClient serviceBusClient)
+        public void SendEventNotification(string fleetNo, string serial, string reason, IServiceBusClient serviceBusClient)
         {
-            _dbFactory.Execute<QuestContext>((db) =>
+            var incident = _incStore.Get(serial);
+            if (incident != null)
             {
-                // make sure callsign exists
-                var callsignRec = db.Callsign.FirstOrDefault(x => x.Callsign1 == callsign);
-                if (callsignRec == null)
-                {
-                    callsignRec = new Callsign { Callsign1 = callsign };
-                    db.Callsign.Add(callsignRec);
-                    db.SaveChanges();
-                }
-
-                // find corresponding resource;
-                var res = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-                if (res == null)
-                    throw new ApplicationException(
-                        $"Unable to send notification, no resource exists with callsign {callsignRec}");
-
-                // create a event message to send to devices if necessary
-                var inc = _incStore.Get(serial);
-
-                // find associated devices with this resource callsign
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.ResourceId == res.ResourceId)
-                    .ToList();
-
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                    db.SaveChanges();
-                }
-
-                SendEventNotification(devices, inc, reason, serviceBusClient);
-            });
+                var devices = _devStore.GetByFleet(fleetNo);
+                SendEventNotifications(devices, incident, reason, serviceBusClient);
+            }
         }
 
-        private void SendEventNotification(List<Devices> devices, QuestIncident inc, string reason, IServiceBusClient serviceBusClient)
+        private void SendEventNotifications(List<QuestDevice> devices, QuestIncident inc, string reason, IServiceBusClient serviceBusClient)
         {
             if (devices == null || !devices.Any())
                 return;
@@ -282,7 +213,7 @@ namespace Quest.Lib.Resource
                         Updated = DateTime.Now.ToString(CultureInfo.InvariantCulture)
                     };
 
-                    Logger.Write($"Sending incident {inc.Serial} ", TraceEventType.Information, "DeviceTracker");
+                    Logger.Write($"Sending incident {inc.Serial} ", TraceEventType.Information, "ResourceHandler");
 
                     NotifyDevices(devices, request, reason, serviceBusClient);
                 }
@@ -295,43 +226,14 @@ namespace Quest.Lib.Resource
         /// <param name="callsign"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        public void SendStatusNotification(string callsign, string reason, IServiceBusClient serviceBusClient)
+        public void SendStatusNotification(string fleetno, string reason, IServiceBusClient serviceBusClient)
         {
-            _dbFactory.Execute<QuestContext>((db) =>
+            var devices = _devStore.GetByFleet(fleetno);
+            if (devices.Count > 0)
             {
-                // find corresponding resource;
-                var resource = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-                if (resource == null)
-                    throw new ApplicationException(
-                        $"Unable to send notification, no resource exists with callsign {callsign}");
-
-                var request = new StatusNotification
-                {
-                    Status = new StatusCode
-                    {
-                        Code = resource.ResourceStatus.Status,
-                        Description = GetStatusDescription(resource.ResourceStatus),
-                    }
-                };
-
-                Logger.Write($"Sending status to devices for callsign {callsign} ",
-                    TraceEventType.Information, "DeviceTracker");
-
-                var devices = db
-                    .Devices
-                    .ToList()
-                    .Where(x => x.ResourceId == resource.ResourceId)
-                    .ToList();
-
-                foreach (var deviceRecord in devices)
-                {
-                    // save audit record
-                    //TODO: Save to Elastic
-                }
-
-                if (devices.Count > 0)
-                    NotifyDevices(devices, request, reason, serviceBusClient);
-            });
+                StatusNotification msg = new StatusNotification { };
+                NotifyDevices(devices, msg, reason, serviceBusClient);
+            }
         }
 
         /// <summary>
@@ -341,7 +243,7 @@ namespace Quest.Lib.Resource
         /// <param name="evt"></param>
         /// <param name="settings"></param>
         /// <param name="reason"></param>
-        private void NotifyDevices(IEnumerable<Devices> devices, INotificationMessage evt, string reason, IServiceBusClient serviceBusClient)
+        private void NotifyDevices(IEnumerable<QuestDevice> devices, INotificationMessage evt, string reason, IServiceBusClient serviceBusClient)
         {
             try
             {

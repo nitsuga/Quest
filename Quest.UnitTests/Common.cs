@@ -11,7 +11,6 @@ using Quest.Lib.DependencyInjection;
 using Quest.Lib.OS.DataModelNLPG;
 using Quest.Lib.OS.DataModelOS;
 using Quest.Lib.Research.DataModelResearch;
-using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.Trace;
 using System;
 using System.Collections.Generic;
@@ -80,7 +79,7 @@ namespace Quest.UnitTests
             services.AddDbContext<QuestContext>(options => options.UseSqlServer(config.GetConnectionString("Quest")));
             services.AddDbContext<QuestOSContext>(options => options.UseSqlServer(config.GetConnectionString("QuestOS")));
             services.AddDbContext<QuestDataContext>(options => options.UseSqlServer(config.GetConnectionString("QuestData")));
-            services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
+            //services.AddDbContext<QuestSimContext>(options => options.UseSqlServer(config.GetConnectionString("QuestSim")));
             services.AddDbContext<QuestNLPGContext>(options => options.UseSqlServer(config.GetConnectionString("QuestNLPG")));
 
             LoggerFactory factory = new LoggerFactory();

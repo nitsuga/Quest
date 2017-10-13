@@ -22,26 +22,17 @@ namespace Quest.Common.Messages
     public class ResourceUpdate : MessageBase
     {
         public QuestResource Resource;
-        //public string Callsign;
-        //public string ResourceType ;
-        //public string Status ;
-        //public double Latitude = 0;
-        //public double Longitude = 0;
-        //public int Speed ;
-        //public int Direction ;
-        //public string Skill ;
-        //public string FleetNo;
-        //public string Incident;
-        //public bool Emergency;
-        //public string Destination;
-        //public string Agency;
-        //public string Class;
-        //public string EventType;
         public DateTime UpdateTime;
 
         public override string ToString()
         {
             return $"ResourceUpdate {Resource.Callsign} Status={Resource.Status} type={Resource.ResourceType} event={Resource.Incident}";
         }
+    }
+
+    public class ResourceUpdateResult : MessageBase
+    {
+        public QuestResource OldResource;
+        public QuestResource NewResource;
     }
 }

@@ -5,7 +5,7 @@ namespace Quest.Common.Simulation
 {
     public class StatusChange:MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public ResourceStatus Status;
         public int NonConveyCode;
         public string DestHospital;

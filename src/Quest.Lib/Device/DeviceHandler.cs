@@ -17,7 +17,13 @@ namespace Quest.Lib.Device
 {
     public class DeviceHandler
     {
-        IDatabaseFactory _dbFactory;
+        private ElasticSettings _elastic;
+        private BuildIndexSettings _config;
+        private IDeviceStore _devStore;
+        private IResourceStore _resStore;
+        private IIncidentStore _incStore;
+        private ResourceHandler _resHandler;
+        private IDatabaseFactory _dbFactory;
 
         public string deletedStatus { get; set; } = "";
 
@@ -37,9 +43,22 @@ namespace Quest.Lib.Device
             }
         }
 
-        public DeviceHandler(IDatabaseFactory dbFactory)
+        public DeviceHandler(IDatabaseFactory dbFactory, ElasticSettings elastic,
+            IDeviceStore devStore,
+            IResourceStore resStore,
+            ResourceHandler resHandler,
+            IIncidentStore incStore)
         {
+            _resHandler = resHandler;
+            _devStore = devStore;
+            _resStore = resStore;
+            _incStore = incStore;
+            _elastic = elastic;
             _dbFactory = dbFactory;
+
+            var syns = IndexBuilder.LoadSynsFromFile(_elastic.SynonymsFile);
+            _config = new BuildIndexSettings(_elastic, _elastic.DefaultIndex, null);
+            _config.RestrictToMaster = false;
         }
 
         /// <summary>
@@ -48,41 +67,39 @@ namespace Quest.Lib.Device
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public LoginResponse Login(LoginRequest request, IResourceStore resStore, IDeviceStore devStore, ResourceHandler resHandler, ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config, IIncidentStore incStore)
+        public LoginResponse Login(LoginRequest request, IServiceBusClient msgSource)
         {
-            var callsign = "";
-            var sc = new StatusCode() { Code = "???", Description = "Pending" };
 
-            var devrecord = devStore.Get(request.DeviceIdentity);
+            // get the device record
+            var devrecord = _devStore.Get(request.DeviceIdentity);
 
             if (devrecord != null)
             {
+                // update core details
                 devrecord.OwnerId = request.Username;
                 devrecord.LoggedOnTime = DateTime.UtcNow;
-                devrecord.LastUpdate = DateTime.UtcNow;
                 devrecord.NotificationTypeId = request.NotificationTypeId;
                 devrecord.NotificationId = request.NotificationId;
                 devrecord.DeviceIdentity = request.DeviceIdentity;
-                devrecord.OSVersion = request.OSVersion;
+                devrecord.Osversion = request.OSVersion;
                 devrecord.DeviceMake = request.DeviceMake;
-                devrecord.DeviceModel = request.DeviceModel;
+                devrecord.DeviceModel = request.DeviceModel; 
             }
             else
             {
-                var offRoadStatus = resStore.GetOffroadStatusId();
-
+                var offRoadStatus = _resStore.GetOffroadStatusId();
+                    
                 // new record
                 devrecord = new QuestDevice
                 {
                     OwnerId = request.Username,
                     DeviceIdentity = request.DeviceIdentity,
                     LoggedOnTime = DateTime.UtcNow,
-                    LastUpdate = DateTime.UtcNow,
                     DeviceRoleId = 3, //TODO: This is the default role that the new login will play. This should come from a setting 
                     NotificationTypeId = request.NotificationTypeId,
                     NotificationId = request.NotificationId,
                     IsEnabled = true,
-                    OSVersion = request.OSVersion,
+                    Osversion = request.OSVersion,
                     DeviceMake = request.DeviceMake,
                     DeviceModel = request.DeviceModel,
                 };
@@ -91,28 +108,35 @@ namespace Quest.Lib.Device
             // make a new token. this becomes a claim (jti unique identitier
             devrecord.AuthToken = Guid.NewGuid().ToString();
 
-            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
+            var timestamp = DateTime.UtcNow;
 
-            devStore.Update(devrecord, timestamp);
+            _devStore.Update(devrecord, timestamp);
 
             QuestResource resource = null;
 
             // try and use the provided fleetnumber to associate with a resource
             if (!string.IsNullOrEmpty(request.FleetNo))
-                resource = resStore.GetByFleetNo(request.FleetNo);
+                resource = _resStore.GetByFleetNo(request.FleetNo);
 
-            // the device is not associated with a resource
+            // the device is not associated with a resource then make a resource
             if (resource == null)
             {
                 ResourceUpdate newresource = new ResourceUpdate
                 {
                     Resource = new QuestResource
                     {
-                        Callsign = $"#{devrecord.DeviceID.ToString("0000")}",
-                        FleetNo = $"DEV-{devrecord.DeviceID}",
-                    }
+                        Callsign = $"#0000",
+                        FleetNo = request.FleetNo,
+                        Position =new GeoAPI.Geometries.Coordinate(0,0),
+                        ResourceType ="UNK",
+                        Status ="OFF"
+                    },
+                    UpdateTime =DateTime.UtcNow
                 };
-                resource = resHandler.ResourceUpdate(newresource, msgSource, config);
+
+                var updateResult = _resHandler.ResourceUpdate(newresource, msgSource, _config);
+
+                resource = updateResult.NewResource;
             }
 
             return new LoginResponse
@@ -120,11 +144,10 @@ namespace Quest.Lib.Device
                 QuestApi = Version,
                 RequestId = request.RequestId,
                 RequiresCallsign = false,
-                Callsign = callsign,
-                Status = sc,
                 Success = true,
                 SessionId = devrecord.AuthToken,
-                Message = "successfully logged on"
+                Resource = resource,
+                Message = "Successfully logged on"
             };
         }
 
@@ -134,21 +157,20 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="devStore"></param>
         /// <returns></returns>
-        public LogoutResponse Logout(LogoutRequest request, IDeviceStore devStore)
+        public LogoutResponse Logout(LogoutRequest request)
         {
-            var resrecord = devStore.GetByToken(request.SessionId);
+            var resrecord = _devStore.GetByToken(request.SessionId);
 
             if (resrecord != null)
             {
                 resrecord.LoggedOffTime = DateTime.UtcNow;
-                resrecord.LastUpdate = DateTime.UtcNow;
                 resrecord.AuthToken = null;
                 resrecord.NotificationId = "";
                 resrecord.NotificationTypeId = "";
 
                 var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
-                devStore.Update(resrecord, timestamp);
+                _devStore.Update(resrecord, timestamp);
 
                 return new LogoutResponse
                 {
@@ -171,91 +193,47 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public RefreshStateResponse RefreshState(RefreshStateRequest request, IIncidentStore incStore, IServiceBusClient serviceBusClient)
+        public RefreshStateResponse RefreshState(RefreshStateRequest request, IServiceBusClient serviceBusClient)
         {
-            return _dbFactory.Execute<QuestContext, RefreshStateResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new RefreshStateResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-                if (deviceRecord.Resource == null)
-                    return new RefreshStateResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "device not linked to a resource"
-                    };
-
-                //TODO: trigger message sending
-#if false
-                var inc = incStore.Get(deviceRecord.Resource.Serial);
-
-                // send incident details if currently assigned
-                if (inc != null)
-                {
-                    var devices = new List<DataModel.Devices> { deviceRecord };
-                    SendEventNotification(devices, inc, "Refresh", serviceBusClient);
-                }
-
-                // also send the status
-                SendStatusNotification(deviceRecord.Resource.Callsign.Callsign1, "Refresh", serviceBusClient);
-                SendCallsignNotification(deviceRecord.Resource.Callsign.Callsign1, "Refresh", serviceBusClient);
-#endif
-                return new RefreshStateResponse();
-            });
+            return new RefreshStateResponse() {  Message="Not Implemented"};
         }
 
         public AckAssignedEventResponse AckAssignedEvent(AckAssignedEventRequest request)
         {
-            return _dbFactory.Execute<QuestContext, AckAssignedEventResponse>((db) =>
+            var devrecord = _devStore.GetByToken(request.SessionId);
+
+            if (devrecord == null)
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new AckAssignedEventResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-                if (deviceRecord.Resource == null)
-                    return new AckAssignedEventResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "device not linked to a resource"
-                    };
-
-                if (deviceRecord.Resource.Incident == null)
-                    return new AckAssignedEventResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "Not assigned to an event"
-                    };
-
-                // save audit record
-                //TODO: Save to Elastic
-                db.SaveChanges();
-
                 return new AckAssignedEventResponse
                 {
                     RequestId = request.RequestId,
-                    Success = true,
-                    Message = "successful"
+                    Success = false,
+                    Message = "unknown device"
                 };
-            });
+            }
+            var resource = _resStore.GetByFleetNo(devrecord.FleetNo);
+            if (resource==null)
+            {
+                return new AckAssignedEventResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = "device not linked to a resource"
+                };
+            }
+
+            // action here to say the device has confirmed the assignment,
+            return new AckAssignedEventResponse
+            {
+                RequestId = request.RequestId,
+                Success = true,
+                Message = "successful"
+            };
         }
 
-        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request, IDeviceStore devStore)
+        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
         {
-            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
+            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
                 return new PositionUpdateResponse
@@ -271,7 +249,7 @@ namespace Quest.Lib.Device
 
             var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
-            var updated = devStore.Update(deviceRecord, timestamp);
+            var updated = _devStore.Update(deviceRecord, timestamp);
 
             //TODO: Save to Elastic
             return new PositionUpdateResponse
@@ -282,9 +260,9 @@ namespace Quest.Lib.Device
             };
         }
 
-        public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request, IDeviceStore devStore)
+        public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request)
         {
-            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
+            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
                 return new MakePatientObservationResponse
@@ -298,7 +276,7 @@ namespace Quest.Lib.Device
 
             var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
-            var updated = devStore.Update(deviceRecord, timestamp);
+            var updated = _devStore.Update(deviceRecord, timestamp);
 
             //TODO: Save to Elastic
             return new MakePatientObservationResponse
@@ -311,71 +289,38 @@ namespace Quest.Lib.Device
 
         public PatientDetailsResponse PatientDetails(PatientDetailsRequest request)
         {
-            return _dbFactory.Execute<QuestContext, PatientDetailsResponse>((db) =>
+            return new PatientDetailsResponse
             {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new PatientDetailsResponse
-                    {
-                        RequestId = request.RequestId,
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-                // save audit record
-                //TODO: Save to Elastic
-                db.SaveChanges();
-
-                var response = new PatientDetailsResponse
-                {
-                    RequestId = request.RequestId,
-                    DoB = "03/03/1989",
-                    FirstName = "siobhan",
-                    LastName = "metcalfe-poulton",
-                    NHSNumber = "NI72761982",
-                    Notes =
-                        new List<string>
-                        {
-                            "Some notes line 1",
-                            "Some notes line 2",
-                            "Some notes line 3",
-                            "Some notes line 4"
-                        },
-                    Message = "success",
-                    Success = true
-                };
-
-                return response;
-            });
+                RequestId = request.RequestId,
+                Success = false,
+                Message = "Not Implemented"
+            };
         }
 
         public GetEntityTypesResponse GetEntityTypes(GetEntityTypesRequest request)
         {
-            return _dbFactory.Execute<QuestContext, GetEntityTypesResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new GetEntityTypesResponse
-                    {
-                        RequestId = request.RequestId,
-                        Items = new List<string>(),
-                        Success = false,
-                        Message = "unknown device"
-                    };
+            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
-                var layers = new[]
-                {
-                    "Stations", "Hospitals (non-A&E)", "Hospital (A&E)", "Hospitals (Maternity)", "Fuel", "A-Z Grid", "CCG",
-                    "Atoms"
-                };
+            if (deviceRecord == null)
                 return new GetEntityTypesResponse
                 {
                     RequestId = request.RequestId,
-                    Items = layers.ToList(),
-                    Success = true,
-                    Message = "successful"
+                    Success = false,
+                    Message = "unknown device"
                 };
-            });
+
+            var layers = new[]
+            {
+                    "Stations", "Hospitals (non-A&E)", "Hospital (A&E)", "Hospitals (Maternity)", "Fuel", "A-Z Grid", "CCG",
+                    "Atoms"
+                };
+            return new GetEntityTypesResponse
+            {
+                RequestId = request.RequestId,
+                Items = layers.ToList(),
+                Success = true,
+                Message = "successful"
+            };
         }
 
         public MapItemsResponse GetMapItems(MapItemsRequest request)
@@ -771,47 +716,6 @@ namespace Quest.Lib.Device
             });
         }
 
-        /// <summary>
-        ///     check if a device is the target (by callsign) or is nearby
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="target"></param>
-        /// <param name="serial"></param>
-        /// <returns></returns>
-        private bool IsNearbyDeviceOrAssigned(DataModel.Devices device, float? Latitude, float? Longitude, string serial)
-        {
-            // enabled?
-            if (device.IsEnabled == false)
-                return false;
-
-            // its linked to a resource - good, as it should always be anyway, and it has the right callsign?
-            if (device.Resource?.Incident != null && string.Equals(device.Resource.Incident, serial, StringComparison.CurrentCultureIgnoreCase) && device.DeviceIdentity != null)
-                return true;
-
-            // check the nearby settings
-            if (device.SendNearby == false)
-                return false;
-
-            if (device.NearbyDistance == 0)
-                return false;
-
-            // no position
-            if (device.Latitude == null)
-                return false;
-
-            // no target
-            if (Latitude == null)
-                return false;
-
-            // calculate the distance
-            var distance = GeomUtils.Distance(device.Latitude ?? 0, device.Longitude ?? 0, Latitude ?? 0, Longitude ?? 0);
-
-            if (distance <= device.NearbyDistance)
-                return true;
-
-            return false;
-        }
-
         public void SendAlertMessage(string callsign, string message)
         {
             //using (QuestEntities db = new QuestEntities())
@@ -926,9 +830,9 @@ namespace Quest.Lib.Device
         /// <param name="request"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient, IDeviceStore devStore)
+        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient)
         {
-            QuestDevice deviceRecord = devStore.GetByToken(request.SessionId);
+            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
                 return new SetStatusResponse
@@ -942,7 +846,7 @@ namespace Quest.Lib.Device
 
             var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
-            var updated = devStore.Update(deviceRecord, timestamp);
+            var updated = _devStore.Update(deviceRecord, timestamp);
 
             //TODO: Save to Elastic
             return new SetStatusResponse

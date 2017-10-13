@@ -4,7 +4,7 @@ namespace Quest.Common.Simulation
 {
     public class AssignedResource : ICloneable
     {
-        public int ResourceId;
+        public string Callsign;
         public DateTime? Dispatched;
         public DateTime? Enroute;
         public DateTime? OnSceneTime;
@@ -22,7 +22,7 @@ namespace Quest.Common.Simulation
                 Hospital = Hospital,
                 OnSceneTime = OnSceneTime,
                 Released = Released,
-                ResourceId = ResourceId
+                Callsign = Callsign
             };
             return i;
         }

@@ -5,7 +5,7 @@ namespace Quest.Common.Simulation
 {
     public class Login:MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public DateTime TimeStamp;
     }
 

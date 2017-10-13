@@ -39,6 +39,49 @@ namespace Quest.Lib.Incident
 
         }
 
+#if false
+        /// <summary>
+        ///     check if a device is the target (by callsign) or is nearby
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="target"></param>
+        /// <param name="serial"></param>
+        /// <returns></returns>
+        private bool IsNearbyDeviceOrAssigned(DataModel.Devices device, float? Latitude, float? Longitude, string serial)
+        {
+            // enabled?
+            if (device.IsEnabled == false)
+                return false;
+
+            // its linked to a resource - good, as it should always be anyway, and it has the right callsign?
+            if (device.Resource?.Incident != null && string.Equals(device.Resource.Incident, serial, StringComparison.CurrentCultureIgnoreCase) && device.DeviceIdentity != null)
+                return true;
+
+            // check the nearby settings
+            if (device.SendNearby == false)
+                return false;
+
+            if (device.NearbyDistance == 0)
+                return false;
+
+            // no position
+            if (device.Latitude == null)
+                return false;
+
+            // no target
+            if (Latitude == null)
+                return false;
+
+            // calculate the distance
+            var distance = GeomUtils.Distance(device.Latitude ?? 0, device.Longitude ?? 0, Latitude ?? 0, Longitude ?? 0);
+
+            if (distance <= device.NearbyDistance)
+                return true;
+
+            return false;
+        }
+#endif
+
         public void CloseIncident(CloseIncident item, NotificationSettings settings, IServiceBusClient msgSource, IIncidentStore persist)
         {
             persist.Close(item.Serial);

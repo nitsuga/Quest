@@ -5,7 +5,7 @@ namespace Quest.Common.Simulation
 {
     public class AtDestination:MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public int ConveyCode;
         public DestType DestType;
         public double Easting;

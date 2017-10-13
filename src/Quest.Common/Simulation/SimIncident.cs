@@ -19,10 +19,10 @@ namespace Quest.Common.Simulation
         public List<AssignedResource> AssignedResources;
         public int AmbAssigned;
         public int FruAssigned;
-        public int FirstResponderArrivalId;
+        public string FirstResponderArrival;
         public int FirstResponderArrivalDelay;
         public int AmbulanceArrivalDelay;
-        public int AmbulanceArrivalId;
+        public string AmbulanceArrival;
         public DateTime CallStart;
         public DateTime OnSceneTime;
         public int OnSceneDelay;

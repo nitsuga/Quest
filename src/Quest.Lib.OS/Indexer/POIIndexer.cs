@@ -9,7 +9,7 @@ using NetTopologySuite.IO;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using System.IO;
-using CsvHelper;
+using Quest.Lib.Csv;
 
 namespace Quest.Lib.OS.Indexer
 {
@@ -63,30 +63,26 @@ namespace Quest.Lib.OS.Indexer
             // throw away header line
             using (StreamReader reader = File.OpenText(Filename))
             {
-                using (var parser = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration { Delimiter = "|" }))
-                {
-                    // skip header
-                    parser.Read();
 
-                    while (parser.Read())
-                    {
-                        config.RecordsCurrent++;
+                foreach (var data in CsvReader.Read(reader, new CsvOptions { RowsToSkip = 0, Separator = ',' }))
+                {
+                    config.RecordsCurrent++;
                         config.RecordsTotal++;
 
                         // commit any messages and report progress
                         CommitCheck(this, config, descriptor);
 
-                        var featureEasting = parser[3];
-                        var featureNorthing = parser[4];
+                        var featureEasting = data[3];
+                        var featureNorthing = data[4];
                         var point = GeomUtils.ConvertToLatLonLoc(double.Parse(featureEasting), double.Parse(featureNorthing));
 
-                        ProcessRecord(parser.CurrentRecord, config, descriptor, point);
+                        ProcessRecord(data.Line, config, descriptor, point);
                     }
                     // commit anything else
                     CommitBultRequest(config, descriptor);
                 }
             }
-        }
+        
 
         void ProcessRecord(string[] data, BuildIndexSettings config, BulkRequest descriptor, GeoLocation point)
         {

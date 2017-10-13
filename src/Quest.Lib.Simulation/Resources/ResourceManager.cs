@@ -22,11 +22,6 @@ namespace Quest.Lib.Simulation.Resources
             _resourceStore = resourceStore;
         }
 
-        public SimResource FindResource(int resourceId)
-        {
-            return Resources.Where(x => x.ResourceId == resourceId).FirstOrDefault();
-        }
-
         public SimResource FindResource(String callsign)
         {
             return Resources.Where(x => x.Callsign == callsign).FirstOrDefault();

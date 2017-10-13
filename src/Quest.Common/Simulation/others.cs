@@ -37,11 +37,11 @@ namespace Quest.Common.Simulation
     public class AssignVehicle
     {
         public long IncidentId;
-        public int ResourceId;
+        public string Callsign;
     }
     public class CancelVehicle
     {
         public long IncidentId;
-        public int ResourceId;
+        public string Callsign;
     }
 }

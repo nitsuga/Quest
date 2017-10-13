@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Quest.Lib.Routing
 {
-    public class RouteSet : Dictionary<int, RoutingResult>
+    public class RouteSet : Dictionary<string, RoutingResult>
     {
     }
 }

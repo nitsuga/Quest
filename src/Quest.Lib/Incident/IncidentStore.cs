@@ -16,11 +16,11 @@ namespace Quest.Lib.Incident
             _dbFactory = dbFactory;
         }
 
-        public QuestIncident Get(string id)
+        public QuestIncident Get(string serial)
         {
             return _dbFactory.Execute<QuestContext, QuestIncident>((db) =>
             {
-                var dbinc = db.Incident.FirstOrDefault(x => x.Serial == id);
+                var dbinc = db.Incident.FirstOrDefault(x => x.Serial == serial);
                 var inc = Cloner.CloneJson<QuestIncident>(dbinc);
                 return inc;
             });

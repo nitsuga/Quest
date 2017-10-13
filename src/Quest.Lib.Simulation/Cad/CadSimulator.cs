@@ -120,7 +120,7 @@ namespace Quest.Lib.Simulation.Cad
         public Response StatusChange(NewMessageArgs t)
         {
             StatusChange newStatus = (StatusChange)t.Payload;
-            SimResource res = _ResManager.FindResource(newStatus.ResourceId);
+            SimResource res = _ResManager.FindResource(newStatus.Callsign);
 
             if (res != null)
                 ProcessVehicleStatus(res.Incident, res, EventQueue.Now, newStatus.Status);
@@ -137,7 +137,7 @@ namespace Quest.Lib.Simulation.Cad
         {
             Login loginDetails = (Login)t.Payload;
             // As the Vehicle is Logging Off remove it from the list
-            SimResource res = _ResManager.FindResource(loginDetails.ResourceId);
+            SimResource res = _ResManager.FindResource(loginDetails.Callsign);
 
             if (res != null)
             {
@@ -148,7 +148,7 @@ namespace Quest.Lib.Simulation.Cad
             // actually, make one up.
             CallsignUpdate cu = new CallsignUpdate();
             cu.Callsign = res.Callsign;
-            cu.ResourceId = loginDetails.ResourceId;
+            cu.Callsign = loginDetails.Callsign;
 
             ServiceBusClient.Broadcast(cu);
             return null;
@@ -162,7 +162,7 @@ namespace Quest.Lib.Simulation.Cad
         {
             Logout logoutDetails = (Logout)t.Payload;
             // As the Vehicle is Logging Off remove it from the list
-            SimResource res = _ResManager.FindResource(logoutDetails.ResourceId);
+            SimResource res = _ResManager.FindResource(logoutDetails.Callsign);
 
             if (res != null)
             {
@@ -171,7 +171,7 @@ namespace Quest.Lib.Simulation.Cad
                 res.OnDuty = false;
             }
             else
-                Logger.Write(string.Format("C&C Got logout request for unknown resourceid {0}", res.ResourceId));
+                Logger.Write(string.Format("C&C Got logout request for unknown Callsign {0}", res.Callsign));
 
             ServiceBusClient.Broadcast(logoutDetails);
             return null;
@@ -185,11 +185,11 @@ namespace Quest.Lib.Simulation.Cad
         {
             SkillLevel skillLevelDetails = (SkillLevel)t.Payload;
             // If the Vehicle is logged in then Send the Message
-            SimResource res = _ResManager.FindResource(skillLevelDetails.ResourceId);
+            SimResource res = _ResManager.FindResource(skillLevelDetails.Callsign);
             // If this Vehicle has logged in then send in this message
             if (res == null)
             {
-                // Logger.Write(string.Format("ExpressQ:  <-- ICadIn::SkillLevel - {0}/{1}", skillLevelDetails.ResourceId, skillLevelDetails.SkillLevel1));
+                // Logger.Write(string.Format("ExpressQ:  <-- ICadIn::SkillLevel - {0}/{1}", skillLevelDetails.Callsign, skillLevelDetails.SkillLevel1));
             }
             return null;
         }
@@ -216,11 +216,11 @@ namespace Quest.Lib.Simulation.Cad
         /// to the mdt.
         /// </summary>
         /// <param name="IncidentId"></param>
-        /// <param name="ResourceId"></param>
+        /// <param name="Callsign"></param>
         public Response AssignVehicle(NewMessageArgs t)
         {
             AssignVehicle assignVehicle = (AssignVehicle)t.Payload;
-            SimResource res = _ResManager.FindResource(assignVehicle.ResourceId);
+            SimResource res = _ResManager.FindResource(assignVehicle.Callsign);
             SimIncident inc = _incidentManager.FindIncident(assignVehicle.IncidentId);
 
             // find the resource
@@ -233,7 +233,7 @@ namespace Quest.Lib.Simulation.Cad
 
                 // send message to MDT
                 MDTIncident mdtinc = new MDTIncident();
-                mdtinc.ResourceId = assignVehicle.ResourceId;
+                mdtinc.Callsign = assignVehicle.Callsign;
                 mdtinc.IncidentDetails = new SimIncident();
                 mdtinc.IncidentDetails.Category = inc.Category;
                 mdtinc.IncidentDetails.Date = (DateTime)inc.CallStart;
@@ -256,11 +256,11 @@ namespace Quest.Lib.Simulation.Cad
         /// cancels a vehicle from the incident
         /// </summary>
         /// <param name="IncidentId"></param>
-        /// <param name="ResourceId"></param>
+        /// <param name="Callsign"></param>
         public Response CancelVehicle(NewMessageArgs t)
         {
             CancelVehicle cancelVehicle = (CancelVehicle)t.Payload;
-            SimResource res = _ResManager.FindResource(cancelVehicle.ResourceId);
+            SimResource res = _ResManager.FindResource(cancelVehicle.Callsign);
             SimIncident inc = _incidentManager.FindIncident(cancelVehicle.IncidentId);
 
             if (res != null && inc != null)
@@ -268,7 +268,7 @@ namespace Quest.Lib.Simulation.Cad
                 RemoveResource(inc, res);
 
                 Logger.Write(res.Callsign + " Cancelling vehicle from " + inc.IncidentId.ToString());
-                CancelIncident details = new CancelIncident() { ResourceId = res.ResourceId };
+                CancelIncident details = new CancelIncident() { Callsign = res.Callsign };
                 ServiceBusClient.Broadcast(details);
             }
             else
@@ -317,7 +317,7 @@ namespace Quest.Lib.Simulation.Cad
         /// add a new vehicle to the list of vehicles activated on this incident. It also updates the 
         /// current incident status
         /// </summary>
-        /// <param name="resourceId"></param>
+        /// <param name="Callsign"></param>
         private static AssignedResource AddResourceRecord(SimIncident incident, SimResource resource, DateTime now)
         {
             Debug.Assert(incident != null && resource != null);
@@ -325,18 +325,18 @@ namespace Quest.Lib.Simulation.Cad
             AssignedResource resRecord = null;
 
             if (incident.AssignedResources != null)
-                resRecord = (from r in incident.AssignedResources where r.ResourceId == resource.ResourceId select r).FirstOrDefault();
+                resRecord = (from r in incident.AssignedResources where r.Callsign == resource.Callsign select r).FirstOrDefault();
 
             // no record? add one
             if (resRecord == null)
             {
-                resRecord = new AssignedResource() { ResourceId = resource.ResourceId, Dispatched = null, OnSceneTime = null, Convey = null, Enroute = null, Hospital = null, Released = null };
+                resRecord = new AssignedResource() { Callsign = resource.Callsign, Dispatched = null, OnSceneTime = null, Convey = null, Enroute = null, Hospital = null, Released = null };
 
                 // convert to a list and add the new entry onto the end
                 List<AssignedResource> list = incident.AssignedResources != null ? new List<AssignedResource>(incident.AssignedResources) : new List<AssignedResource>();
 
                 // create a new resource record
-                list.Add(new AssignedResource() { ResourceId = resource.ResourceId, Dispatched = null, OnSceneTime = null, Convey = null, Enroute = null, Hospital = null, Released = null });
+                list.Add(new AssignedResource() { Callsign = resource.Callsign, Dispatched = null, OnSceneTime = null, Convey = null, Enroute = null, Hospital = null, Released = null });
 
                 incident.AssignedResources = list;
 
@@ -397,17 +397,17 @@ namespace Quest.Lib.Simulation.Cad
                     if (incident.FirstResponderArrivalDelay == 0)
                     {
                         incident.FirstResponderArrivalDelay = (int)(now.Subtract(incident.CallStart).TotalSeconds);
-                        incident.FirstResponderArrivalId = resource.ResourceId;
+                        incident.FirstResponderArrival = resource.Callsign;
                     }
 
                     // record the ambulance on scene time
                     if (incident.AmbulanceArrivalDelay == 0 && resource.VehicleType == "AEU")  // 1=ambulance 2=FRU
                     {
                         incident.AmbulanceArrivalDelay = (int)(now.Subtract(incident.CallStart).TotalSeconds);
-                        incident.AmbulanceArrivalId = resource.ResourceId;
+                        incident.AmbulanceArrival = resource.Callsign;
                     }
 
-                    incident.AmbulanceArrivalId = resource.ResourceId;
+                    incident.AmbulanceArrival = resource.Callsign;
 
                     if (incident.OnSceneTime == DateTime.MinValue)
                         incident.OnSceneTime = now;
@@ -416,7 +416,7 @@ namespace Quest.Lib.Simulation.Cad
                         record.OnSceneTime = now;
                     break;
 
-                case ResourceStatus.Convey:
+                case ResourceStatus.Conveying:
 
                     Debug.Assert(incident != null);
 
@@ -429,24 +429,24 @@ namespace Quest.Lib.Simulation.Cad
                     // cancel any other vehicle that is dispatched or enroute
                     if (incident != null)
                     {
-                        List<int> resourcesToCancel = new List<int>();
+                        List<string> resourcesToCancel = new List<string>();
 
                         // remove the assigned resource from the list
                         foreach (AssignedResource ar in incident.AssignedResources)
-                            if (ar.ResourceId != resource.ResourceId)
-                                resourcesToCancel.Add(ar.ResourceId);
+                            if (ar.Callsign != resource.Callsign)
+                                resourcesToCancel.Add(ar.Callsign);
 
                         resourcesToCancel.ForEach(
                             x =>
                             {
-                                CancelVehicle( new NewMessageArgs { Payload = (IServiceBusMessage)new CancelVehicle { IncidentId = incident.IncidentId, ResourceId = x } });
+                                CancelVehicle( new NewMessageArgs { Payload = (IServiceBusMessage)new CancelVehicle { IncidentId = incident.IncidentId, Callsign = x } });
                             }
                         );
                     }
 
                     break;
 
-                case ResourceStatus.Hospital:
+                case ResourceStatus.Arrived:
                     Debug.Assert(incident != null);
 
                     if (incident == null)
@@ -487,11 +487,11 @@ namespace Quest.Lib.Simulation.Cad
 
                 // if there are no active resources on this incident then it is closed
                 int active_count = (from x in incident.AssignedResources
-                                    join r in _ResManager.Resources on x.ResourceId equals r.ResourceId
+                                    join r in _ResManager.Resources on x.Callsign equals r.Callsign
                                     where r.Status == ResourceStatus.Enroute ||
                                      r.Status == ResourceStatus.OnScene ||
-                                     r.Status == ResourceStatus.Convey ||
-                                     r.Status == ResourceStatus.Hospital
+                                     r.Status == ResourceStatus.Conveying ||
+                                     r.Status == ResourceStatus.Arrived
                                     select r).Count();
 
                 if (active_count == 0)
@@ -520,7 +520,7 @@ namespace Quest.Lib.Simulation.Cad
         void RemoveResource(SimIncident incident, SimResource resource)
         {
             // remove the assigned resource from the list
-            AssignedResource ar = (from a in incident.AssignedResources where a.ResourceId == resource.ResourceId select a).FirstOrDefault();
+            AssignedResource ar = (from a in incident.AssignedResources where a.Callsign == resource.Callsign select a).FirstOrDefault();
             List<AssignedResource> list = new List<AssignedResource>(incident.AssignedResources);
             list.Remove(ar);
             incident.AssignedResources = list;

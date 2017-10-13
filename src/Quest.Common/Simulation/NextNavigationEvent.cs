@@ -7,7 +7,7 @@ namespace Quest.Common.Simulation
     /// </summary>
     public class NextNavigationEvent: MessageBase
     {
-        public int ResourceId;
+        public int Callsign;
         public Waypoint waypoint;
     }
 

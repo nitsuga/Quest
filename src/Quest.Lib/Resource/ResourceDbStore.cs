@@ -19,7 +19,7 @@ namespace Quest.Lib.Resource
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
-                var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == fleetno);
+                var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == fleetno && x.EndDate == null);
                 if (dbinc == null)
                     return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
@@ -31,19 +31,7 @@ namespace Quest.Lib.Resource
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
-                var dbinc = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign);
-                if (dbinc == null)
-                    return null;
-                var res = Cloner.CloneJson<QuestResource>(dbinc);
-                return res;
-            });
-        }
-
-        public QuestResource GetByResourceId(int resourceId)
-        {
-            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
-            {
-                var dbinc = db.Resource.FirstOrDefault(x => x.ResourceId == resourceId);
+                var dbinc = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign && x.EndDate == null);
                 if (dbinc == null)
                     return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
@@ -65,9 +53,9 @@ namespace Quest.Lib.Resource
         /// </summary>
         /// <param name="update"></param>
         /// <returns></returns>
-        public QuestResource Update(ResourceUpdate update)
+        public ResourceUpdateResult Update(ResourceUpdate update)
         {
-            return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
+            return _dbFactory.Execute<QuestContext, ResourceUpdateResult>((db) =>
             {
                 // callsign is the primary key
                 if (update.Resource.Callsign == null)
@@ -100,8 +88,8 @@ namespace Quest.Lib.Resource
                         Eta = res.Eta,
                         EventType = res.EventType,
                         FleetNo = res.FleetNo,
-                        Latitude = (float?)res.Position.Y,
-                        Longitude = (float?)res.Position.X,
+                        Latitude = (float?)res?.Position?.Y,
+                        Longitude = (float?)res?.Position?.X,
                         Incident = res.Incident,
                         SpeedMS = res.SpeedMS,
                         Skill = res.Skill,
@@ -120,7 +108,15 @@ namespace Quest.Lib.Resource
                 var restype = update.Resource.ResourceType??oldres.ResourceType.ResourceType1;
 
                 // look up resource type
-                var resourceTypeId = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == restype)?.ResourceTypeId;
+                var resourceType = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == restype);
+
+                if (resourceType == null)
+                {
+                    resourceType = new ResourceType {  ResourceType1 = restype };
+                    db.ResourceType.Add(resourceType);
+                    db.SaveChanges();
+                }
+
 
                 // use last destination if update is null
                 var destination = update.Resource.Destination ?? oldres.Destination;
@@ -128,7 +124,7 @@ namespace Quest.Lib.Resource
                 // look up resource type
                 var dest = db.Destinations.FirstOrDefault(x => x.Destination == destination);
 
-                var qdestination = new QuestDestination { Name = dest.Destination };
+                var qdestination = new QuestDestination { Name = dest?.Destination };
 
                 // find corresponding status;
                 var status = db.ResourceStatus.FirstOrDefault(x => x.Status == update.Resource.Status);
@@ -167,7 +163,7 @@ namespace Quest.Lib.Resource
                     // save the new resource record
                     Agency = update.Resource.Agency??oldres.Agency,
                     CallsignId = callsign.CallsignId,
-                    Destination = update.Resource.Destination,
+                    Destination = destination,
                     Direction = update.Resource.Direction??oldres.Direction,
                     Eta = update.Resource.Eta??oldres.Eta,
                     EventType = update.Resource.EventType??oldres.EventType,
@@ -176,7 +172,7 @@ namespace Quest.Lib.Resource
                     Longitude = (float?)Longitude,
                     Incident = update.Resource.Incident??oldres.Incident,
                     SpeedMS = update.Resource.SpeedMS??oldres.SpeedMS,
-                    ResourceTypeId = resourceTypeId,
+                    ResourceTypeId = resourceType.ResourceTypeId,
                     Skill = update.Resource.Skill ?? oldres.Skill,
                     Sector = update.Resource.Sector ?? oldres.Sector,
                     EndDate = null,
@@ -190,25 +186,12 @@ namespace Quest.Lib.Resource
                 // save the old and new records
                 db.SaveChanges();
 
-                return new QuestResource
+                return new ResourceUpdateResult
                 {
-                    Agency = newres.Agency,
-                    Callsign = newres.Callsign.Callsign1,
-                    Destination = destination,
-                    Direction = newres.Direction,
-                    Eta = newres.Eta,
-                    EventType = newres.EventType,
-                    FleetNo = newres.FleetNo,
-                    Position = new GeoAPI.Geometries.Coordinate(Longitude ?? 0, Latitude ?? 0),
-                    Incident = newres.Incident,
-                    SpeedMS = newres.SpeedMS,
-                    ResourceType = restype,
-                    Skill = newres.Skill,
-                    Sector = newres.Sector,
-                    Status = status.Status,
-                    Comment = update.Resource.Comment ?? oldres.Comment ,
-                    LastUpdated = update.UpdateTime
+                    NewResource = FromDatabase(newres),
+                    OldResource = FromDatabase(oldres)
                 };
+                
             });
         }
 
@@ -232,8 +215,23 @@ namespace Quest.Lib.Resource
                 Status = newres.ResourceStatus.Status,
                 Comment = newres.Comment,
                 LastUpdated = newres.StartDate,
-                //ResourceTypeGroup =
                 };
+        }
+
+        public void Clear()
+        {
+            _dbFactory.Execute<QuestContext>((db) =>
+            {
+                // remove all incidents
+                db.Incident.RemoveRange(db.Incident);
+
+                db.SaveChanges();
+
+                // set all resource
+                db.Resource.RemoveRange(db.Resource);
+
+                db.SaveChanges();
+            });
         }
     }
 }

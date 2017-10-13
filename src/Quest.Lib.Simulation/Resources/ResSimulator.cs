@@ -8,6 +8,7 @@ using Quest.Lib.Utils;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.Data;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Simulation.Resources
 {
@@ -16,7 +17,7 @@ namespace Quest.Lib.Simulation.Resources
     /// </summary>
     public class ResSimulator : ServiceBusProcessor
     {
-        private DateTime _lastResourceId;
+        private DateTime _lastCallsign;
 
         public int quantity { get; set; } = 0;
         public int lowWatermark { get; set; } = 0;
@@ -40,7 +41,7 @@ namespace Quest.Lib.Simulation.Resources
     
         protected override void OnPrepare()
         {
-            _lastResourceId = DateTime.MinValue;
+            _lastCallsign = DateTime.MinValue;
 
             LogMessage($"Parameters Quantity={quantity} LowWatermark:{lowWatermark} StartTime={startTime} EndTime={endTime}", TraceEventType.Warning);
         }
@@ -63,43 +64,42 @@ namespace Quest.Lib.Simulation.Resources
                 int quantity = this.quantity;
 
                 // get 'quantity' Resources from a specific Resource number
-                var data = _resourceStore.GetHistoricResources(_lastResourceId, quantity, startTime, endTime);
+                var data = _resourceStore.GetHistoricResources(_lastCallsign, quantity, startTime, endTime);
 
                 int count = data.Count();
                 foreach (var i in data)
                 {
                     count--;
+                    LatLng c;
+                    if (i.X != 0)
+                        c = LatLongConverter.OSRefToWGS84(i.X ?? 0, i.Y ?? 0);
+                    else
+                        c = new LatLng(0,0);
 
                     ResourceUpdate msg = new ResourceUpdate()
                     {
-                        Callsign = i.Callsign,
-                        ResourceType = i.VehicleTypeId == 1 ? "AEU" : "FRU",
-                        Status = i.Status,
-                        Latitude = 0,
-                        Longitude = 0,
-                        Speed = i.Speed ?? 0,
-                        Direction = i.Direction ?? 0,
-                        Skill = "",
                         UpdateTime = i.AvlsDateTime ?? DateTime.MinValue,
-                        FleetNo = i.FleetNumber.ToString(),
-                        Incident = i.IncidentId.ToString(),
-                        Emergency = false,
-                        Destination = "",
-                        Agency = "",
-                        Class = "",
-                        EventType = ""
+                        Resource = new QuestResource
+                        {
+                            Callsign = i.Callsign,
+                            ResourceType = i.VehicleTypeId == 1 ? "AEU" : "FRU",
+                            Status = i.Status,
+                            Position=new GeoAPI.Geometries.Coordinate(c.Longitude, c.Latitude),
+                            SpeedMS = i.Speed ?? 0,
+                            Direction = i.Direction ?? 0,
+                            Skill = "",
+                            FleetNo = i.FleetNumber.ToString(),
+                            Incident = i.IncidentId.ToString(),
+                            Destination = "",
+                            Agency = "",
+                            EventType = ""
+                        }
                     };
 
-                    if (i.X != 0)
-                    {
-                        var c = LatLongConverter.OSRefToWGS84(i.X ?? 0, i.Y ?? 0);
-                        msg.Latitude = c.Latitude;
-                        msg.Longitude = c.Longitude;
-                    }
 
-                    SetTimedMessage($"RESNEW-{msg.Callsign}", msg.UpdateTime, msg);
+                    SetTimedMessage($"RESNEW-{msg.Resource.Callsign}", msg.UpdateTime, msg);
 
-                    _lastResourceId = msg.UpdateTime;
+                    _lastCallsign = msg.UpdateTime;
 
                     // add a trigger for when the number of incs goes below a certain amount
                     if (count == lowWatermark)

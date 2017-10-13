@@ -36,7 +36,7 @@ namespace Quest.Lib.Simulation.Resources
         private SimResourceManager _resManager;
         private SimContext _context;
         private string _roadSpeedCalculator;
-        private int _resourceid=1;
+        private int _callsign = 0;
 
         public RosterSimulator(
             IDestinationStore destinationStore,
@@ -106,7 +106,7 @@ namespace Quest.Lib.Simulation.Resources
         /// <returns></returns>
         private bool PowerOn(SimResource mdt, VehicleRoster r, bool showMessage)
         {
-            mdt.ResourceId = _resourceid++;
+            mdt.Callsign = $"A{_callsign++}";
             mdt.PoweredOn = true;
             mdt.OnDuty = true;
             mdt.VehicleType = r.VehicleType;
@@ -124,7 +124,7 @@ namespace Quest.Lib.Simulation.Resources
                 ServiceBusClient.Broadcast(msg);
 
              //   if (showMessage)
-                    Logger.Write("Powered on vehicle " + mdt.ResourceId);
+                    Logger.Write("Powered on vehicle " + mdt.Callsign);
 
                 return true;
             }

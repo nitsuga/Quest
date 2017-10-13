@@ -81,7 +81,6 @@
     <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="Autofac.Configuration" Version="4.0.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
-    <PackageReference Include="CsvHelper" Version="2.16.3" />
     <PackageReference Include="GeoAPI" Version="1.7.4" />
     <PackageReference Include="GeoJSON.Net" Version="1.1.64" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />

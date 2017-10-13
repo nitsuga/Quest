@@ -7,7 +7,6 @@ namespace Quest.Lib.DataModel
     {
         public Resource()
         {
-            Devices = new HashSet<Devices>();
         }
 
         public int ResourceId { get; set; }
@@ -36,6 +35,5 @@ namespace Quest.Lib.DataModel
         public Callsign Callsign { get; set; }
         public ResourceStatus ResourceStatus { get; set; }
         public ResourceType ResourceType { get; set; }
-        public ICollection<Devices> Devices { get; set; }
     }
 }

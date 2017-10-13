@@ -6,7 +6,6 @@ namespace Quest.Lib.DataModel
     {
         public ResourceStatus()
         {
-            Devices = new HashSet<Devices>();
             ResourceResourceStatus = new HashSet<Resource>();
         }
 
@@ -19,7 +18,6 @@ namespace Quest.Lib.DataModel
         public bool? NoSignal { get; set; }
         public bool? BusyEnroute { get; set; }
 
-        public ICollection<Devices> Devices { get; set; }
         public ICollection<Resource> ResourceResourceStatus { get; set; }
     }
 }

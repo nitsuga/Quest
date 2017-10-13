@@ -82,12 +82,9 @@ namespace Quest.Api.Controllers
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
             return new AuthResult { Token = encodedJwt, Message="OK", Success=true };
-            //var json = JsonConvert.SerializeObject(new AuthResult { Token= encodedJwt }, _serializerSettings);
-            //return new OkObjectResult(json);
         }
 
     }
-
 
     public class AuthResult
     {

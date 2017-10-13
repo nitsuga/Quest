@@ -16,11 +16,11 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// retrieve a list of historic resource updates
         /// </summary>
-        /// <param name="lastResourceId"></param>
+        /// <param name="lastCallsign"></param>
         /// <param name="take"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        List<Avls> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to);
+        List<Avls> GetHistoricResources(DateTime lastCallsign, int take, DateTime from, DateTime to);
     }
 }

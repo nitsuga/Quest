@@ -52,7 +52,7 @@ namespace Quest.Lib.Routing
                                 Eta = UpdateResourceEta(
                                     routingEngine,
                                     routingdata,
-                                    r.ResourceId,
+                                    r.Callsign.Callsign1,
                                     r.ResourceType.ResourceType1,
                                     r.Eta,
                                     fc.Easting, fc.Northing,
@@ -98,10 +98,10 @@ namespace Quest.Lib.Routing
         /// </summary>
         /// <param name="routingEngine"></param>
         /// <param name="resEta"></param>
-        /// <param name="resourceId"></param>
+        /// <param name="Callsign"></param>
         /// <param name="vehicleType"></param>
         private DateTime UpdateResourceEta(IRouteEngine routingEngine, 
-            RoutingData routingdata, int resourceId, string vehicleType,
+            RoutingData routingdata, string Callsign, string vehicleType,
             DateTime? resEta, double positionX, double positionY, 
             double destinationX, double destinationY, string speedCalc)
         {
@@ -151,7 +151,7 @@ namespace Quest.Lib.Routing
                     {
                         try
                         {
-                            var res = db.Resource.First(x => x.ResourceId == resourceId);
+                            var res = db.Resource.First(x => x.Callsign.Callsign1 == Callsign);
                             res.Eta = eta;
                             db.SaveChanges();
                         }

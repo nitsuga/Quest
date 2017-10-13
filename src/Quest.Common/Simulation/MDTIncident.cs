@@ -4,7 +4,7 @@ namespace Quest.Common.Simulation
 {
     public class MDTIncident : MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public SimIncident IncidentDetails;
     }
 

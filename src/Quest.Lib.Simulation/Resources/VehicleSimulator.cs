@@ -100,7 +100,7 @@ namespace Quest.Lib.Simulation.Resources
 
         protected override void OnStop()
         {
-            ShutdownMDT(0, "Stop Simulation");
+            ShutdownMDT("", "Stop Simulation");
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Quest.Lib.Simulation.Resources
             resource.DTG = 0;
             resource.LastChanged = DateTime.Now;
 
-            SetSysMessage(resource, string.Format("Calculating route to   :  {0} {1}", resource.ResourceId, resource.Destination.Name));
+            SetSysMessage(resource, string.Format("Calculating route to   :  {0} {1}", resource.Callsign, resource.Destination.Name));
 
             Coordinate startPoint = resource.Position;
             Coordinate endPoint = new Coordinate(resource.Destination.X, resource.Destination.Y);
@@ -184,7 +184,7 @@ namespace Quest.Lib.Simulation.Resources
             MoveVehicleTowardsTarget(Resource);
 
             // this will cause a new route to be calculated
-            _routes.Remove(Resource.ResourceId);
+            _routes.Remove(Resource.Callsign);
 
             Resource.LastChanged = DateTime.Now;
         }
@@ -213,7 +213,7 @@ namespace Quest.Lib.Simulation.Resources
                 case ResourceStatus.Enroute:
                     VehicleArrivedAtIncident(resource);
                     break;
-                case ResourceStatus.Convey:
+                case ResourceStatus.Conveying:
                     VehicleArrivedAtHospital(resource);
                     break;
                 case ResourceStatus.OnScene:
@@ -223,7 +223,7 @@ namespace Quest.Lib.Simulation.Resources
                     VehicleArrivedAtStandby(resource);
                     break;
                 default:
-                    Logger.Write(string.Format("NextNavigationEvent: Unrecognised status and at destination {0} Status='{1}' Destination={2}", resource.ResourceId, resource.Status, resource.Destination.Name));
+                    Logger.Write(string.Format("NextNavigationEvent: Unrecognised status and at destination {0} Status='{1}' Destination={2}", resource.Callsign, resource.Status, resource.Destination.Name));
 
                     break;
             }
@@ -267,7 +267,7 @@ namespace Quest.Lib.Simulation.Resources
             double seconds = 0;
 
             // do we have a route - if not we may need to calculate one
-            if (!_routes.ContainsKey(Resource.ResourceId))
+            if (!_routes.ContainsKey(Resource.Callsign))
             {
                 // no route.. is there a destination?
                 if (Resource.Destination != null)
@@ -277,7 +277,7 @@ namespace Quest.Lib.Simulation.Resources
             }
 
             // move through the existing route for GPSFrequency seconds
-            RoutingResult route = _routes[Resource.ResourceId];
+            RoutingResult route = _routes[Resource.Callsign];
             var conn = route.Connections[0];
 
             while (seconds < Resource.GPSFrequency)
@@ -344,7 +344,7 @@ namespace Quest.Lib.Simulation.Resources
             // calc ETA's
             Resource.DTG = route.Connections.Sum(x => x.Vector.DistanceMeters);
             Resource.TTG = route.Connections.Sum(x => x.Vector.DurationSecs);
-            Resource.Speed = Constants.Constant.ms2mph * conn.Vector.DistanceMeters / conn.Vector.DurationSecs;
+            Resource.SpeedMS = Constants.Constant.ms2mph * conn.Vector.DistanceMeters / conn.Vector.DurationSecs;
 
             return seconds;
         }
@@ -358,12 +358,12 @@ namespace Quest.Lib.Simulation.Resources
         void SetRoute(SimResource Resource, RoutingResponse routes)
         {
             var result = routes.Items[0];
-            if (_routes.ContainsKey(Resource.ResourceId))
-                _routes.Remove(Resource.ResourceId);
+            if (_routes.ContainsKey(Resource.Callsign))
+                _routes.Remove(Resource.Callsign);
 
             if (result != null)
             {
-                _routes.Add(Resource.ResourceId, result);
+                _routes.Add(Resource.Callsign, result);
                 if (result.Connections.Count() == 0)
                 {
                     SetSysMessage(Resource, string.Format("Route complete         :  {0} no nodes  ", Resource.Callsign));
@@ -420,9 +420,9 @@ namespace Quest.Lib.Simulation.Resources
 
             //NextNavigationEvent data = new NextNavigationEvent();
             //TimeSpan ts = new TimeSpan(0, 0, (int)nextreportseconds);
-            //new TaskEntry(EventQueue, new TaskKey("Res-" + Resource.ResourceId.ToString()), NextNavigationEventHandler, data, ts);
+            //new TaskEntry(EventQueue, new TaskKey("Res-" + Resource.Callsign.ToString()), NextNavigationEventHandler, data, ts);
 
-            SetTimedEvent($"Res-{resource.ResourceId}", EventQueue.Now.AddSeconds(nextreportseconds), () => NextNavigationEventHandler(resource));
+            SetTimedEvent($"Res-{resource.Callsign}", EventQueue.Now.AddSeconds(nextreportseconds), () => NextNavigationEventHandler(resource));
 
             SendCurrentPosition(resource);
 
@@ -441,12 +441,12 @@ namespace Quest.Lib.Simulation.Resources
             // send current position
             SATNAVLocation details = new SATNAVLocation()
             {
-                ResourceId = resource.ResourceId,
+                Callsign = resource.Callsign,
                 Position = resource.Position,
                 EtaDistance = resource.DTG,
                 EtaSeconds = resource.TTG,
                 Direction = resource.Heading / 45,
-                Speed = resource.Speed
+                Speed = (double)resource.SpeedMS
             };
 
             try
@@ -473,20 +473,20 @@ namespace Quest.Lib.Simulation.Resources
             Logger.Write(msg);
 
             // record action in database
-            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Message = "At Incident", Status= ResourceStatus.OnScene });
+            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Message = "At Incident", Status= ResourceStatus.OnScene });
 
             SetSysMessage(resource, "Arrived on Scene");
 
             resource.LastChanged = DateTime.Now;
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.Speed = 0;
+            resource.SpeedMS = 0;
 
             SendCurrentPosition(resource);
             SendAtDestinationToCad(resource, DestType.Incident);
             SendStatusToCad(resource, ResourceStatus.OnScene, resource.NonConveyCode, null);
 
-            TaskKey tk = new TaskKey("Res-" + resource.ResourceId.ToString());
+            TaskKey tk = new TaskKey("Res-" + resource.Callsign.ToString());
 
             {
                 // if this is the first vehicle then determine
@@ -498,7 +498,7 @@ namespace Quest.Lib.Simulation.Resources
                     SetSysMessage(resource, "AMPDS Code probably unknown so random onscene time of " + secondsOnScene.ToString() + " seconds will be used");
                 }
 
-                SetTimedEvent($"Res-{resource.ResourceId}", EventQueue.Now.AddSeconds(secondsOnScene), () => OnsceneComplete(resource));
+                SetTimedEvent($"Res-{resource.Callsign}", EventQueue.Now.AddSeconds(secondsOnScene), () => OnsceneComplete(resource));
 
                 SetSysMessage(resource, $"first on scene, will leave in {secondsOnScene} seconds ");
             }
@@ -555,17 +555,17 @@ namespace Quest.Lib.Simulation.Resources
             Logger.Write(resource.Callsign + " Vehicle Arrived At Hosp: " + resource.Incident.IncidentId.ToString() + " " + resource.Incident.Position + " Current location " + resource.Position.X.ToString() + "/" + resource.Position.Y.ToString());
 
             // record action in database
-            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Hospital });
+            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Arrived });
 
             resource.LastChanged = DateTime.Now;
             SetSysMessage(resource, "At hospital");
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.Speed = 0;
+            resource.SpeedMS = 0;
 
             SendCurrentPosition(resource);
             SendAtDestinationToCad(resource, DestType.Hospital);
-            SendStatusToCad(resource, ResourceStatus.Hospital, resource.NonConveyCode, null);
+            SendStatusToCad(resource, ResourceStatus.Arrived, resource.NonConveyCode, null);
 
             // how long to remain at scene? queue up a task to fire when done.
             int secondsOnScene = _OSprobability.GetHospitalTime(resource.Incident.AMPDS, EventQueue.Now, resource.VehicleType);
@@ -580,7 +580,7 @@ namespace Quest.Lib.Simulation.Resources
             SetSysMessage(resource, "will leave hospital at " + finishedAt.ToString());
 
             
-            SetTimedEvent($"Res-{resource.ResourceId}", EventQueue.Now.AddSeconds(secondsOnScene), () => HospitalFinished(resource));
+            SetTimedEvent($"Res-{resource.Callsign}", EventQueue.Now.AddSeconds(secondsOnScene), () => HospitalFinished(resource));
 
 
         }
@@ -594,13 +594,13 @@ namespace Quest.Lib.Simulation.Resources
             Logger.Write(resource.Callsign + " VehicleArrivedAtStandby");
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.Speed = 0;
+            resource.SpeedMS = 0;
 
             resource.LastChanged = DateTime.Now;
             SetSysMessage(resource, "Arrived @ standby");
 
             // record action in database
-            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Available, Message="Standby" });
+            ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Available, Message="Standby" });
 
             SendCurrentPosition(resource);
             SendAtDestinationToCad(resource, DestType.Other);
@@ -704,7 +704,7 @@ namespace Quest.Lib.Simulation.Resources
             if (resource.OnDuty == false && _noShutdown == false)
             {
                 Logger.Write(resource.Callsign + String.Format(" GotoStandbyPoint:         {0} marked as off duty..shutting down", resource.Callsign));
-                ShutdownMDT(resource.ResourceId, "Resource is marked as off duty");
+                ShutdownMDT(resource.Callsign, "Resource is marked as off duty");
                 return;
             }
         }
@@ -724,7 +724,7 @@ namespace Quest.Lib.Simulation.Resources
             resource.DestHospital = hospital.Name;
             NewDestination(resource, hospital);
             MoveVehicleTowardsTarget(resource);
-            SendStatusToCad(resource, ResourceStatus.Hospital, resource.NonConveyCode, hospital);
+            SendStatusToCad(resource, ResourceStatus.Arrived, resource.NonConveyCode, hospital);
         }
 
         /// <summary>
@@ -785,17 +785,17 @@ namespace Quest.Lib.Simulation.Resources
         /// <returns></returns>
         private bool IsAtDestination(SimResource Resource)
         {
-            if (_routes.ContainsKey(Resource.ResourceId) == false)
+            if (_routes.ContainsKey(Resource.Callsign) == false)
                 return false;
 
             if (Resource.Destination == null)
                 return false;
 
             // vehicle has tracked to its destination (or had no destination
-            if (_routes[Resource.ResourceId] == null)
+            if (_routes[Resource.Callsign] == null)
                 return true;
 
-            if (_routes[Resource.ResourceId].Connections.Count == 0)
+            if (_routes[Resource.Callsign].Connections.Count == 0)
                 return true;
 
             int distance = (int)Math.Sqrt(
@@ -833,7 +833,7 @@ namespace Quest.Lib.Simulation.Resources
                 Logger.Write(resource.Callsign + " RespondToNewIncident:     Accepted " + resource.Incident.IncidentId);
 
                 // record action in database
-                ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Dispatched });
+                ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Dispatched });
 
                 SendStatusToCad(resource, ResourceStatus.Enroute, resource.NonConveyCode, null);
                 NewDestination(resource, resource.Destination);
@@ -841,7 +841,7 @@ namespace Quest.Lib.Simulation.Resources
             }
             else
             {
-                Logger.Write("RespondToNewIncident: " + resource.ResourceId.ToString() + " Rejected");
+                Logger.Write("RespondToNewIncident: " + resource.Callsign.ToString() + " Rejected");
                 resource.LastChanged = DateTime.Now;
 
                 // start driving to standby point
@@ -860,8 +860,8 @@ namespace Quest.Lib.Simulation.Resources
         private void NewDestination(SimResource resource, SimDestination d)
         {
             // this causes the engine to calculate a new route
-            if (_routes.ContainsKey(resource.ResourceId))
-                _routes.Remove(resource.ResourceId);
+            if (_routes.ContainsKey(resource.Callsign))
+                _routes.Remove(resource.Callsign);
 
             if (d != null)
                 resource.Destination = d;
@@ -906,7 +906,7 @@ namespace Quest.Lib.Simulation.Resources
             if (destHospital != null)
                 change.DestHospital = destHospital.Name;
 
-            change.ResourceId = resource.ResourceId;
+            change.Callsign = resource.Callsign;
             change.Position = resource.Position;
 
             resource.NonConveyCode = 0;
@@ -923,7 +923,7 @@ namespace Quest.Lib.Simulation.Resources
             SetSysMessage(resource, "At Destination");
 
             AtDestination atDestinationDetails = new AtDestination();
-            atDestinationDetails.ResourceId = resource.ResourceId;
+            atDestinationDetails.Callsign = resource.Callsign;
             atDestinationDetails.ConveyCode = resource.NonConveyCode;
             atDestinationDetails.DestType = destType;    //TODO: wrong type, should be int (Now fixed RJP)
             atDestinationDetails.Position = resource.Position;
@@ -938,7 +938,7 @@ namespace Quest.Lib.Simulation.Resources
         private void SendLogonToCad(SimResource resource)
         {
             Login loginDetails = new Login();
-            loginDetails.ResourceId = resource.ResourceId;
+            loginDetails.Callsign = resource.Callsign;
             loginDetails.TimeStamp = DateTime.Now;
 
             SetMdtMessage(resource, "<< Login");
@@ -949,7 +949,7 @@ namespace Quest.Lib.Simulation.Resources
         {
 
             Logout details = new Logout();
-            details.ResourceId = resource.ResourceId;
+            details.Callsign = resource.Callsign;
             details.TimeStamp = DateTime.Now;
 
             try
@@ -970,7 +970,7 @@ namespace Quest.Lib.Simulation.Resources
             resource.LastChanged = DateTime.Now;
             SkillLevel SkillLevel = new SkillLevel();
 
-            SkillLevel.ResourceId = resource.ResourceId;
+            SkillLevel.Callsign = resource.Callsign;
             SkillLevel.Skill  = resource.Skill;
 
             try
@@ -1003,7 +1003,7 @@ namespace Quest.Lib.Simulation.Resources
         public void Incident(MDTIncident incidentDetails)
         {
 
-            SimResource resource = _resManager.Resources.Where(x => x.ResourceId == incidentDetails.ResourceId).First();
+            SimResource resource = _resManager.Resources.Where(x => x.Callsign == incidentDetails.Callsign).First();
 
             String msg = String.Format(resource.Callsign + "{0} Assigning resource:       {1} {2}/{3}->{4}/{5}",
                 resource.Incident.IncidentId,
@@ -1018,7 +1018,7 @@ namespace Quest.Lib.Simulation.Resources
                 SetMdtMessage(resource, ">> Incident");
                 SetSysMessage(resource, "Got incident");
 
-                EventQueue.Remove(new TaskKey("Res-" + resource.ResourceId.ToString()));
+                EventQueue.Remove(new TaskKey("Res-" + resource.Callsign.ToString()));
 
                 // clear out movements tasks.
 
@@ -1045,19 +1045,19 @@ namespace Quest.Lib.Simulation.Resources
         public void CancelIncident(CancelIncident CancelIncidentdetails)
         {
 
-            SimResource resource = _resManager.Resources.Where(x => x.ResourceId == CancelIncidentdetails.ResourceId).First();
+            SimResource resource = _resManager.Resources.Where(x => x.Callsign == CancelIncidentdetails.Callsign).First();
             if (resource != null)
             {
                 String msg = " CancelIncident - current status is " + resource.Status.ToString();
                 SetMdtMessage(resource, msg);
 
                 // record action in database
-                ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Available, Message="Cancelled" });
+                ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Status = ResourceStatus.Available, Message="Cancelled" });
 
                 Logger.Write(resource.Callsign + msg);
                 resource.Incident = null;
 
-                EventQueue.Remove(new TaskKey("Res-" + resource.ResourceId.ToString()));
+                EventQueue.Remove(new TaskKey("Res-" + resource.Callsign.ToString()));
                 GotoStandbyPoint(resource, null, "CancelIncident - current status is " + resource.Status.ToString());       // go to default standby point
 
             }
@@ -1073,7 +1073,7 @@ namespace Quest.Lib.Simulation.Resources
         public void ResMessage(ResMessage Messagedetails)
         {
 
-            SimResource resource = _resManager.Resources.Where(x => x.ResourceId == Messagedetails.ResourceId).FirstOrDefault();
+            SimResource resource = _resManager.Resources.Where(x => x.Callsign == Messagedetails.Callsign).FirstOrDefault();
             if (resource != null)
             {
                 SetMdtMessage(resource, ">> SendMessage");
@@ -1093,7 +1093,7 @@ namespace Quest.Lib.Simulation.Resources
         public void CallsignUpdate(CallsignUpdate callsignDetails)
         {
 
-            SimResource resource = _resManager.Resources.Where(x => x.ResourceId == callsignDetails.ResourceId).FirstOrDefault();
+            SimResource resource = _resManager.Resources.Where(x => x.Callsign == callsignDetails.Callsign).FirstOrDefault();
             if (resource != null)
             {
                 SetMdtMessage(resource, ">> CallsignUpdate");
@@ -1117,7 +1117,7 @@ namespace Quest.Lib.Simulation.Resources
 
         public void SetStatus(SetStatus setStatusdetails)
         {
-            SimResource resource = _resManager.Resources.Where(x => x.ResourceId == setStatusdetails.ResourceId).FirstOrDefault();
+            SimResource resource = _resManager.Resources.Where(x => x.Callsign == setStatusdetails.Callsign).FirstOrDefault();
             if (resource != null)
             {
                 SetMdtMessage(resource, ">> SetStatus");
@@ -1135,7 +1135,7 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// Make an Vehicle start navigating toward a predefined destination (listed in Destinations array)
         /// </summary>
-        /// <param name="ResourceId">The name of the Vehicle to start navigation on. If this is null or empty then 
+        /// <param name="Callsign">The name of the Vehicle to start navigation on. If this is null or empty then 
         /// all MDT's will be navigated to the same destination
         /// </param>
         /// <param name="name"></param>
@@ -1143,15 +1143,15 @@ namespace Quest.Lib.Simulation.Resources
         {
             SimDestination dest = _destinationStore.GetDestinations(false, false, true).Where(d => d.ID == details.DestinationId.ToString()).FirstOrDefault();
 
-            Logger.Write(String.Format("IUserOut::NavigateTo: {0}-->{1} {2}", details.ResourceId, dest.Name, details.Reason));
+            Logger.Write(String.Format("IUserOut::NavigateTo: {0}-->{1} {2}", details.Callsign, dest.Name, details.Reason));
 
-            var vehicles = _resManager.Resources.Where(x => x.ResourceId == 0 || x.ResourceId == details.ResourceId);
+            var vehicles = _resManager.Resources.Where(x => x.Callsign == details.Callsign);
             foreach (SimResource resource in vehicles)
             {
                 if (resource.Status == ResourceStatus.Available)
                 {
                     // record action in database
-                    ServiceBusClient.Broadcast(new UpdateAssignmentRecord { ResourceId = resource.ResourceId, IncidentId = resource.Incident.IncidentId, Status = resource.Status, Message = "Navigate to " + dest.Name + " " + details.Reason });
+                    ServiceBusClient.Broadcast(new UpdateAssignmentRecord { Callsign = resource.Callsign, IncidentId = resource.Incident.IncidentId, Status = resource.Status, Message = "Navigate to " + dest.Name + " " + details.Reason });
 
                     NewDestination(resource, dest);
                     SetSysMessage(resource, string.Format("Navigate to {0}", dest.Name));
@@ -1180,18 +1180,18 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// starts the Vehicle given or starts all Resources if no name is provided.
         /// </summary>
-        /// <param name="ResourceId"></param>
-        public void StartMDT(int ResourceId)
+        /// <param name="Callsign"></param>
+        public void StartMDT(string Callsign)
         {
             int milliseconds = 0;
-            var Resource = _resManager.Resources.Where(x => ResourceId == 0 || x.ResourceId == ResourceId);
+            var Resource = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource vehicle in Resource)
             {
                 if (vehicle.Enabled == true)
                 {
                     // keep moving towards the target
                     TimeSpan ts = new TimeSpan(0, 0, 0, 0, milliseconds);
-                    TaskEntry newte = new TaskEntry(EventQueue, new TaskKey(vehicle.ResourceId, "Logon"), StartMDT, vehicle, ts);
+                    TaskEntry newte = new TaskEntry(EventQueue, new TaskKey(vehicle.Callsign, "Logon"), StartMDT, vehicle, ts);
                     milliseconds += 50;
                 }
             }
@@ -1215,15 +1215,15 @@ namespace Quest.Lib.Simulation.Resources
             resource.PoweredOn = true;
             resource.Enabled = true;
             resource.LastChanged = DateTime.Now;
-            Logger.Write(String.Format("IUserOut::StartMDT: {0} ", resource.ResourceId));
+            Logger.Write(String.Format("IUserOut::StartMDT: {0} ", resource.Callsign));
 
             SendLogonToCad(resource);
 
             SendStatusToCad(resource, ResourceStatus.Available, resource.NonConveyCode, null);
             NewDestination(resource, resource.StandbyPoint);
 
-            if (_routes.ContainsKey(resource.ResourceId))
-                _routes.Remove(resource.ResourceId);
+            if (_routes.ContainsKey(resource.Callsign))
+                _routes.Remove(resource.Callsign);
 
             SendCurrentPosition(resource);
             MoveVehicleTowardsTarget(resource);
@@ -1234,12 +1234,12 @@ namespace Quest.Lib.Simulation.Resources
 
         }
 
-        public void SetAcceptCancellation(int ResourceId, bool value)
+        public void SetAcceptCancellation(string Callsign, bool value)
         {
 
-            Logger.Write(String.Format("IUserOut::SetAcceptCancellation: {0} ", ResourceId));
+            Logger.Write(String.Format("IUserOut::SetAcceptCancellation: {0} ", Callsign));
 
-            var vehicles = _resManager.Resources.Where(x => ResourceId == 0 || x.ResourceId == ResourceId);
+            var vehicles = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource Resource in vehicles)
             {
                 Resource.AcceptCancellation = value;
@@ -1248,14 +1248,14 @@ namespace Quest.Lib.Simulation.Resources
 
         }
 
-        public void SetStandbyPoint(int ResourceId, string name)
+        public void SetStandbyPoint(string Callsign, string name)
         {
             /// find the destination
             SimDestination dest = _destinationStore.GetDestinations(false, false, true).FirstOrDefault(d => d.Name == name && d.IsStandby == true);
 
-            Logger.Write(String.Format("IUserOut::SetStandbyPoint: {0} ", ResourceId));
+            Logger.Write(String.Format("IUserOut::SetStandbyPoint: {0} ", Callsign));
 
-            var vehicles = _resManager.Resources.Where(x => ResourceId == 0 || x.ResourceId == ResourceId);
+            var vehicles = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource vehicle in vehicles)
             {
                 vehicle.StandbyPoint = dest;
@@ -1269,21 +1269,21 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// Shutdown on or more MDT's
         /// </summary>
-        /// <param name="resourceId">The name of the Vehicle . If this is null or empty then 
+        /// <param name="Callsign">The name of the Vehicle . If this is null or empty then 
         /// all MDT's will be affected
         /// </param>
-        public void ShutdownMDT(int resourceId, string reason)
+        public void ShutdownMDT(string Callsign, string reason)
         {
 
             if (_resManager.Resources == null)
                 return;
 
-            var vehicles = _resManager.Resources.Where(x => resourceId == 0 || x.ResourceId == resourceId);
+            var vehicles = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource resource in vehicles)
             {
                 if (resource.PoweredOn == true)
                 {
-                    Logger.Write(String.Format("IUserOut::ShutdownMDT: id={0} {1} {2}", resourceId, resource.Callsign, reason));
+                    Logger.Write(String.Format("IUserOut::ShutdownMDT: id={0} {1} {2}", Callsign, resource.Callsign, reason));
 
                     resource.PoweredOn = false;
                     resource.OnDuty = false;
@@ -1299,15 +1299,15 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// User has pressed the At Destination button (if there is one)
         /// </summary>
-        /// <param name="ResourceId">The name of the Vehicle . If this is null or empty then 
+        /// <param name="Callsign">The name of the Vehicle . If this is null or empty then 
         /// all MDT's will be affected
         /// </param>
         /// <param name="destType">The type of destination reached</param>
-        public void AtDestination(int ResourceId, DestType destType)
+        public void AtDestination(string Callsign, DestType destType)
         {
-            Logger.Write(String.Format("IUserOut::AtDestination: {0}-->{1}", ResourceId, destType.ToString()));
+            Logger.Write(String.Format("IUserOut::AtDestination: {0}-->{1}", Callsign, destType.ToString()));
 
-            var Resources = _resManager.Resources.Where(x => ResourceId == 0 || x.ResourceId == ResourceId);
+            var Resources = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource Resource in Resources)
                 SendAtDestinationToCad(Resource, destType);
 
@@ -1316,19 +1316,19 @@ namespace Quest.Lib.Simulation.Resources
         /// <summary>
         /// Make an Vehicle start navigating toward a predefined destination (listed in Destinations array)
         /// </summary>
-        /// <param name="ResourceId">The name of the Vehicle to start navigation on. If this is null or empty then 
+        /// <param name="Callsign">The name of the Vehicle to start navigation on. If this is null or empty then 
         /// all MDT's will be navigated to the same destination
         /// </param>
-        public void UserStatusChange(int ResourceId, ResourceStatus status, int nonConveyCode, String name)
+        public void UserStatusChange(string Callsign, ResourceStatus status, int nonConveyCode, String name)
         {
             SimDestination destHospital = _destinationStore.GetDestinations(false, false, true).FirstOrDefault(x => x.Name == name);
 
             //if (destHospital == null)
             //    throw new Exception("Destination not found: " + name);
 
-            Logger.Write(String.Format("IUserOut::UserStatusChange: {0}-->status={1} convey={2} dest={3}", ResourceId, status, nonConveyCode, destHospital));
+            Logger.Write(String.Format("IUserOut::UserStatusChange: {0}-->status={1} convey={2} dest={3}", Callsign, status, nonConveyCode, destHospital));
 
-            var vehicles = _resManager.Resources.Where(x => ResourceId == 0 || x.ResourceId == ResourceId);
+            var vehicles = _resManager.Resources.Where(x => Callsign == "" || x.Callsign == Callsign);
             foreach (SimResource Resource in vehicles)
                 SendStatusToCad(Resource, status, nonConveyCode, destHospital);
         }

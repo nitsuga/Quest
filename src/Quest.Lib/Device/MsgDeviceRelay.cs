@@ -146,7 +146,7 @@ namespace Quest.Lib.Device
                     // save a status history if the status has changed
                     var history = new ResourceStatusHistory
                     {
-                        ResourceId = res.ResourceId,
+                        Callsign = res.Callsign,
                         ResourceStatusId = originalStatusId ?? status.ResourceStatusId,
                         // use current status if status not known
                         Revision = originalRevision ?? 0
@@ -156,7 +156,7 @@ namespace Quest.Lib.Device
                 }
                 db.SaveChanges();
 
-                var rv = db.Resource.FirstOrDefault(x => x.ResourceId == res.ResourceId);
+                var rv = db.Resource.FirstOrDefault(x => x.Callsign == res.Callsign);
                 ResourceItem ri = GetResourceItemFromView(rv);
 
                 var point = new PointGeoShape(new GeoCoordinate(rv.Latitude ?? 0, rv.Longitude ?? 0));
@@ -188,7 +188,7 @@ namespace Quest.Lib.Device
                 if (requireEventNotification)
                     SendEventNotification(resourceUpdate.Callsign, resourceUpdate.Incident, settings, "C&C Assigned", incStore);
 
-                msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = res.ResourceId, Item = ri });
+                msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = res.Callsign, Item = ri });
 
             });
         }
@@ -197,7 +197,7 @@ namespace Quest.Lib.Device
         {
             return new ResourceItem
             {
-                ID = res.ResourceId.ToString(),
+                ID = res.Callsign.ToString(),
                 revision = res.Revision ?? 0,
                 X = res.Longitude ?? 0,
                 Y = res.Latitude ?? 0,
@@ -252,7 +252,7 @@ namespace Quest.Lib.Device
                     x.ResourceStatusId = DeleteStatusId;
                     x.LastUpdated = DateTime.UtcNow;
                     db.SaveChanges();
-                    msgSource.Broadcast(new ResourceDatabaseUpdate() { ResourceId = x.ResourceId });
+                    msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = x.Callsign });
                 }
             });
         }

@@ -15,30 +15,16 @@ namespace Quest.Lib.Device
     public class DeviceManager : ServiceBusProcessor
     {
 #if USE_ELASTIC
-        private ElasticSettings _elastic;
-        private BuildIndexSettings _config;
         private DeviceHandler _deviceHandler;
-        private IDeviceStore _devStore;
-        private IResourceStore _resStore;
-        private IIncidentStore _incStore;
-        private ResourceHandler _resHandler;
-        private ResourceUpdate _resourceUpdate;
         
 #endif
         public DeviceManager(
-            ElasticSettings elastic,
-            IDeviceStore devStore,
-            IResourceStore resStore,
-            IIncidentStore incStore,
+
             DeviceHandler deviceHandler,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
-            _devStore = devStore;
-            _resStore = resStore;
-            _incStore = incStore;
-            _elastic = elastic;
             _deviceHandler = deviceHandler;
         }
 
@@ -71,9 +57,6 @@ namespace Quest.Lib.Device
         /// </summary>
         private void Initialise()
         {
-            var syns = IndexBuilder.LoadSynsFromFile(_elastic.SynonymsFile);
-            _config = new BuildIndexSettings(_elastic, _elastic.DefaultIndex, null);
-            _config.RestrictToMaster = false;
         }
 
         private Response LoginRequestHandler(NewMessageArgs t)
@@ -81,7 +64,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as LoginRequest;
             if (request != null)
             {
-                return _deviceHandler.Login(request,_resStore,_devStore, _resHandler, _resourceUpdate, ServiceBusClient, _config, _incStore);
+                return _deviceHandler.Login(request,ServiceBusClient);
             }
             return null;
         }
@@ -91,7 +74,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as LogoutRequest;
             if (request != null)
             {
-                return _deviceHandler.Logout(request,_devStore);
+                return _deviceHandler.Logout(request);
             }
             return null;
         }
@@ -111,7 +94,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as RefreshStateRequest;
             if (request != null)
             {
-                return _deviceHandler.RefreshState(request, _incStore, ServiceBusClient);
+                return _deviceHandler.RefreshState(request, ServiceBusClient);
             }
             return null;
         }
@@ -151,7 +134,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as MakePatientObservationRequest;
             if (request != null)
             {
-                return _deviceHandler.MakePatientObservation(request, _devStore);
+                return _deviceHandler.MakePatientObservation(request);
             }
             return null;
         }
@@ -181,7 +164,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as PositionUpdateRequest;
             if (request != null)
             {
-                return _deviceHandler.PositionUpdate(request, _devStore);
+                return _deviceHandler.PositionUpdate(request);
             }
             return null;
         }
@@ -191,7 +174,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as SetStatusRequest;
             if (request != null)
             {
-                return _deviceHandler.SetStatusRequest(request, ServiceBusClient, _devStore);
+                return _deviceHandler.SetStatusRequest(request, ServiceBusClient);
             }
             return null;
         }

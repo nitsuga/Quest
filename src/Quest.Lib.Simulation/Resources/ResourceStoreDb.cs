@@ -17,19 +17,19 @@ namespace Quest.Lib.Simulation.Resources
             _dbFactory = dbFactory;
         }
 
-        public List<Avls> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to)
+        public List<Avls> GetHistoricResources(DateTime lastCallsign, int take, DateTime from, DateTime to)
         {
             throw new NotImplementedException();
         }
 
-        //public List<Avl> GetHistoricResources(DateTime lastResourceId, int take, DateTime from, DateTime to)
+        //public List<Avl> GetHistoricResources(DateTime lastCallsign, int take, DateTime from, DateTime to)
         //{
         //    using (var SimData = new QuestDataEntities())
         //    {
         //        // get 'quantity' Resources from a specific Resource number
         //        List<Avl> data;
-        //        if (lastResourceId != DateTime.MinValue)
-        //            data = SimData.Avls.OrderBy(x => x.AvlsDateTime).Where(x => x.AvlsDateTime > lastResourceId).Take(take).ToList();
+        //        if (lastCallsign != DateTime.MinValue)
+        //            data = SimData.Avls.OrderBy(x => x.AvlsDateTime).Where(x => x.AvlsDateTime > lastCallsign).Take(take).ToList();
         //        else
         //            data = SimData.Avls.OrderBy(x => x.AvlsDateTime).Where(x => x.AvlsDateTime >= from && x.AvlsDateTime <= to).Take(take).ToList();
 

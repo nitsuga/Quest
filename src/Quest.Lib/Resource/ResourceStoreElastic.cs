@@ -14,7 +14,7 @@ namespace Quest.Lib.Resource
             throw new System.NotImplementedException();
         }
 
-        public QuestResource GetByResourceId(int resourceId)
+        public QuestResource GetByCallsign(int Callsign)
         {
             throw new System.NotImplementedException();
         }
@@ -27,6 +27,16 @@ namespace Quest.Lib.Resource
         public QuestResource Update(ResourceUpdate item)
         {
             return null;
+        }
+
+        public void Clear()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        ResourceUpdateResult IResourceStore.Update(ResourceUpdate item)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

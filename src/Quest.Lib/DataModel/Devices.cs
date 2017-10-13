@@ -7,7 +7,6 @@ namespace Quest.Lib.DataModel
         public int DeviceId { get; set; }
         public long? Revision { get; set; }
         public string OwnerId { get; set; }
-        public int? ResourceId { get; set; }
         public string AuthToken { get; set; }
         public string DeviceIdentity { get; set; }
         public string NotificationTypeId { get; set; }
@@ -23,19 +22,16 @@ namespace Quest.Lib.DataModel
         public string DeviceMake { get; set; }
         public string DeviceModel { get; set; }
         public bool? UseExternalStatus { get; set; }
-        public string DeviceCallsign { get; set; }
-        public string Road { get; set; }
         public string Skill { get; set; }
         public int? Speed { get; set; }
         public int? Direction { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
         public string FleetNo { get; set; }
-        public DateTime? StartDate;
-        public DateTime? EndDate;
+        public bool? IsPrimary { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         public DeviceRole DeviceRole { get; set; }
-        public Resource Resource { get; set; }
-        public ResourceStatus ResourceStatus { get; set; }
     }
 }

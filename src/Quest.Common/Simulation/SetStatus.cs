@@ -5,7 +5,7 @@ namespace Quest.Common.Simulation
     public class SetStatus
     {
         public ResourceStatus Status;
-        public int ResourceId;
+        public string Callsign;
     }
 
 }

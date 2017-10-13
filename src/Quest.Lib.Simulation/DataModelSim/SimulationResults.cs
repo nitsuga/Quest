@@ -7,10 +7,10 @@ namespace Quest.Lib.Simulation.DataModelSim
         public int SimulationResultId { get; set; }
         public long? Incidentid { get; set; }
         public int? Frdelay { get; set; }
-        public int? FrresourceId { get; set; }
+        public int? FrCallsign { get; set; }
         public int? AmbDelay { get; set; }
         public int? TurnAround { get; set; }
-        public int? AmbResourceId { get; set; }
+        public int? AmbCallsign { get; set; }
         public int? OnScene { get; set; }
         public int SimulationRunId { get; set; }
         public DateTime? Closed { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Quest.Lib.ServiceBus;
 using Quest.Common.Messages;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Quest.Api.Controllers
 {
@@ -25,6 +26,7 @@ namespace Quest.Api.Controllers
         /// <param name="subject">Subject line, might not used in all methods</param>
         /// <returns></returns>
         [HttpPost("Send")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> Send([FromBody] string message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject, [FromQuery]bool silent)
         {
             try
@@ -52,6 +54,7 @@ namespace Quest.Api.Controllers
         /// <param name="subject">Subject line, might not used in all methods</param>
         /// <returns></returns>
         [HttpPost("MessageNotification")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> SendMessage([FromBody] MessageNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
             try
@@ -69,6 +72,7 @@ namespace Quest.Api.Controllers
         }
 
         [HttpPost("CallsignNotification")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> SendCall([FromBody] CallsignNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
             try
@@ -86,6 +90,7 @@ namespace Quest.Api.Controllers
         }
 
         [HttpPost("StatusNotification")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> SendStatusNotification([FromBody] StatusNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
             try
@@ -103,6 +108,7 @@ namespace Quest.Api.Controllers
         }
 
         [HttpPost("CancellationNotification")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> SendCancellationNotification([FromBody] CancellationNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
             try
@@ -120,6 +126,7 @@ namespace Quest.Api.Controllers
         }
 
         [HttpPost("EventNotification")]
+        [AllowAnonymous]
         public async Task<NotificationResponse> SendEventNotification([FromBody] EventNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
             NotificationResponse result;

@@ -3,7 +3,7 @@
     public class NavigateTo
     {
         public int DestinationId;
-        public int ResourceId;
+        public string Callsign;
         public string Reason;
     }
 

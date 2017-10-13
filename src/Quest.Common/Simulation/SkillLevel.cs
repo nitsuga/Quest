@@ -4,7 +4,7 @@ namespace Quest.Common.Simulation
 {
     public class SkillLevel : MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public string Skill;
     }
 

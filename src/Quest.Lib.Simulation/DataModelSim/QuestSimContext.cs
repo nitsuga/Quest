@@ -246,16 +246,16 @@ namespace Quest.Lib.Simulation.DataModelSim
 
                 entity.Property(e => e.Frdelay).HasColumnName("FRDelay");
 
-                entity.Property(e => e.FrresourceId).HasColumnName("FRResourceId");
+                entity.Property(e => e.FrCallsign).HasColumnName("FRCallsign");
 
                 entity.HasOne(d => d.AmbResource)
                     .WithMany(p => p.SimulationResultsAmbResource)
-                    .HasForeignKey(d => d.AmbResourceId)
+                    .HasForeignKey(d => d.AmbCallsign)
                     .HasConstraintName("FK_SimulationResults_Vehicles1");
 
                 entity.HasOne(d => d.Frresource)
                     .WithMany(p => p.SimulationResultsFrresource)
-                    .HasForeignKey(d => d.FrresourceId)
+                    .HasForeignKey(d => d.FrCallsign)
                     .HasConstraintName("FK_SimulationResults_Vehicles");
 
                 entity.HasOne(d => d.Incident)

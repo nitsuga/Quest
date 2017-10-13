@@ -1,5 +1,6 @@
 ﻿using Quest.Common.Messages;
 using System;
+using System.Collections.Generic;
 
 namespace Quest.Lib.Device
 {
@@ -7,6 +8,7 @@ namespace Quest.Lib.Device
     {
         QuestDevice Get(string deviceIdentity);
         QuestDevice GetByToken(string token);
+        List<QuestDevice> GetByFleet(string fleetNo);
         QuestDevice Update(QuestDevice device, DateTime timestamp);
     }
 }

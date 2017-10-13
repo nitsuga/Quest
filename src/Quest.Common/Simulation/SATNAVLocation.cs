@@ -8,7 +8,7 @@ namespace Quest.Common.Simulation
     /// </summary>
     public class SATNAVLocation: MessageBase
     {
-        public int ResourceId;
+        public string Callsign;
         public Coordinate Position;
         public double EtaDistance;
         public double EtaSeconds;
