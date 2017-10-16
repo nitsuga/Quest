@@ -1,4 +1,5 @@
-﻿using Quest.Common.Messages;
+﻿using Microsoft.EntityFrameworkCore;
+using Quest.Common.Messages;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
@@ -15,11 +16,24 @@ namespace Quest.Lib.Resource
             _dbFactory = dbFactory;
         }
 
+        public bool FleetNoExists(string fleetno)
+        {
+            return _dbFactory.Execute<QuestContext, bool>((db) =>
+            {
+                return db.Resource.Any(x => x.FleetNo == fleetno && x.EndDate == null);
+            });
+        }
+
         public QuestResource GetByFleetNo(string fleetno)
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
-                var dbinc = db.Resource.FirstOrDefault(x => x.FleetNo == fleetno && x.EndDate == null);
+                var dbinc = db.Resource
+                    .Include(x => x.Callsign)
+                    .Include(x => x.ResourceStatus)
+                    .Include(x => x.ResourceType)
+                    .FirstOrDefault(x => x.FleetNo == fleetno && x.EndDate == null);
+
                 if (dbinc == null)
                     return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
@@ -31,7 +45,10 @@ namespace Quest.Lib.Resource
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
             {
-                var dbinc = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == callsign && x.EndDate == null);
+                var dbinc = db.Resource
+                    .Include(x => x.Callsign)
+                    .Include(x => x.ResourceStatus)
+                    .Include(x => x.ResourceType).FirstOrDefault(x => x.Callsign.Callsign1 == callsign && x.EndDate == null);
                 if (dbinc == null)
                     return null;
                 var res = Cloner.CloneJson<QuestResource>(dbinc);
@@ -57,22 +74,16 @@ namespace Quest.Lib.Resource
         {
             return _dbFactory.Execute<QuestContext, ResourceUpdateResult>((db) =>
             {
-                // callsign is the primary key
-                if (update.Resource.Callsign == null)
+                // fleetno is the primary key
+                if (update.Resource.FleetNo == null)
                     return null;
 
-                // look up callsign
-                // make sure callsign exists
-                var callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == update.Resource.Callsign);
-                if (callsign == null)
-                {
-                    callsign = new Callsign { Callsign1 = update.Resource.Callsign };
-                    db.Callsign.Add(callsign);
-                    db.SaveChanges();
-                }
-
                 // find the most up-to-date resource record;
-                var oldres = db.Resource.FirstOrDefault(x => x.Callsign.Callsign1 == update.Resource.Callsign && x.EndDate == null);
+                var oldres = db.Resource
+                    .Include(x => x.Callsign)
+                    .Include(x => x.ResourceStatus)
+                    .Include(x => x.ResourceType)
+                    .FirstOrDefault(x => x.FleetNo == update.Resource.FleetNo && x.EndDate == null);
 
                 if (oldres == null)
                 {
@@ -84,14 +95,14 @@ namespace Quest.Lib.Resource
                         Agency = res.Agency,
                         CallsignId = null,
                         Destination = res.Destination,
-                        Direction = res.Direction,
+                        Course = res.Course,
                         Eta = res.Eta,
                         EventType = res.EventType,
                         FleetNo = res.FleetNo,
                         Latitude = (float?)res?.Position?.Y,
                         Longitude = (float?)res?.Position?.X,
-                        Incident = res.Incident,
-                        SpeedMS = res.SpeedMS,
+                        EventId = res.EventId,
+                        Speed = res.Speed,
                         Skill = res.Skill,
                         Sector = res.Skill,
                         Comment = res.Comment
@@ -104,8 +115,34 @@ namespace Quest.Lib.Resource
                     db.SaveChanges();
                 }
 
+
+                // look up callsign
+                // make sure callsign exists
+                Callsign callsign = null;
+                if (!string.IsNullOrEmpty(update.Resource.Callsign))
+                {
+                    callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == update.Resource.Callsign);
+                    if (callsign == null)
+                    {
+                        callsign = new Callsign { Callsign1 = update.Resource.Callsign };
+                        db.Callsign.Add(callsign);
+                        db.SaveChanges();
+                    }
+                }
+                else
+                {
+                    // use the old record for the callsign
+                    if (oldres.Callsign != null)
+                        callsign = db.Callsign.FirstOrDefault(x => x.Callsign1 == oldres.Callsign.Callsign1);
+                    else
+                    {
+                        // new record and old record are both null for the callsign
+                    }
+                }
+
+                ////////////////////////////////////////////////////////////
                 // use last resource type if update is null
-                var restype = update.Resource.ResourceType??oldres.ResourceType.ResourceType1;
+                var restype = update.Resource.ResourceType??oldres.ResourceType?.ResourceType1;
 
                 // look up resource type
                 var resourceType = db.ResourceType.FirstOrDefault(x => x.ResourceType1 == restype);
@@ -117,22 +154,25 @@ namespace Quest.Lib.Resource
                     db.SaveChanges();
                 }
 
-
+                ////////////////////////////////////////////////////////////
                 // use last destination if update is null
                 var destination = update.Resource.Destination ?? oldres.Destination;
 
-                // look up resource type
                 var dest = db.Destinations.FirstOrDefault(x => x.Destination == destination);
 
                 var qdestination = new QuestDestination { Name = dest?.Destination };
 
+                ////////////////////////////////////////////////////////////
                 // find corresponding status;
-                var status = db.ResourceStatus.FirstOrDefault(x => x.Status == update.Resource.Status);
-                if (status == null)
+
+                var status = update.Resource.Status ?? oldres.ResourceStatus?.Status;
+
+                var statusrec = db.ResourceStatus.FirstOrDefault(x => x.Status == status);
+                if (statusrec == null)
                 {
-                    status = new DataModel.ResourceStatus
+                    statusrec = new DataModel.ResourceStatus
                     {
-                        Status = update.Resource.Status,
+                        Status = update.Resource.Status??"???",
                         Rest = false,
                         Offroad = false,
                         NoSignal = false,
@@ -140,7 +180,7 @@ namespace Quest.Lib.Resource
                         Busy = false,
                         Available = false
                     };
-                    db.ResourceStatus.Add(status);
+                    db.ResourceStatus.Add(statusrec);
                     db.SaveChanges();
                 }
 
@@ -162,23 +202,24 @@ namespace Quest.Lib.Resource
                 {
                     // save the new resource record
                     Agency = update.Resource.Agency??oldres.Agency,
-                    CallsignId = callsign.CallsignId,
+                    Callsign = callsign,
                     Destination = destination,
-                    Direction = update.Resource.Direction??oldres.Direction,
+                    Course = update.Resource.Course ?? oldres.Course,
                     Eta = update.Resource.Eta??oldres.Eta,
                     EventType = update.Resource.EventType??oldres.EventType,
                     FleetNo = update.Resource.FleetNo??oldres.FleetNo,
                     Latitude = (float?)Latitude,
                     Longitude = (float?)Longitude,
-                    Incident = update.Resource.Incident??oldres.Incident,
-                    SpeedMS = update.Resource.SpeedMS??oldres.SpeedMS,
-                    ResourceTypeId = resourceType.ResourceTypeId,
+                    EventId = update.Resource.EventId ?? oldres.EventId,
+                    Speed = update.Resource.Speed??oldres.Speed,
+                    ResourceType = resourceType,
                     Skill = update.Resource.Skill ?? oldres.Skill,
                     Sector = update.Resource.Sector ?? oldres.Sector,
                     EndDate = null,
                     StartDate = update.UpdateTime,
-                    ResourceStatusId = status.ResourceStatusId,
-                    Comment = update.Resource.Comment ?? oldres.Comment
+                    ResourceStatus = statusrec,
+                    Comment = update.Resource.Comment ?? oldres.Comment,
+                    HDoP = update.Resource.HDoP ?? oldres.HDoP,
                 };
 
                 db.Resource.Add(newres);
@@ -202,13 +243,13 @@ namespace Quest.Lib.Resource
                 Agency = newres.Agency,
                 Callsign = newres.Callsign.Callsign1,
                 Destination = newres.Destination,
-                Direction = newres.Direction,
+                Course = newres.Course,
                 Eta = newres.Eta,
                 EventType = newres.EventType,
                 FleetNo = newres.FleetNo,
                 Position = new GeoAPI.Geometries.Coordinate(newres.Longitude ?? 0, newres.Latitude ?? 0),
-                Incident = newres.Incident,
-                SpeedMS = newres.SpeedMS,
+                EventId = newres.EventId,
+                Speed = newres.Speed,
                 ResourceType = newres.ResourceType.ResourceType1,
                 Skill = newres.Skill,
                 Sector = newres.Sector,

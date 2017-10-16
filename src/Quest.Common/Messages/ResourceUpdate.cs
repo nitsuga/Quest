@@ -26,7 +26,7 @@ namespace Quest.Common.Messages
 
         public override string ToString()
         {
-            return $"ResourceUpdate {Resource.Callsign} Status={Resource.Status} type={Resource.ResourceType} event={Resource.Incident}";
+            return $"ResourceUpdate {Resource.Callsign} Status={Resource.Status} type={Resource.ResourceType} event={Resource.EventId}";
         }
     }
 

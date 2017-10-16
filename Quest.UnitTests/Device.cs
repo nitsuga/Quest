@@ -338,10 +338,20 @@ namespace Quest.UnitTests
             PositionUpdateRequest request = new PositionUpdateRequest()
             {
                 RequestId = "",
-                SessionId = sessionid,
+                SessionId = sessionid, Vector = new LocationVector
+                {
+                     Altitude=200,
+                     Course=45,
+                     CaptureMethod="GPS",
+                     HDoP=20,
+                     Latitude=51.15254,
+                     Longitude=-0.187382,
+                     Speed=6.76,
+                     VDoP=22
+                }
             };
 
-            var result = deviceHandler.PositionUpdate(request);
+            var result = deviceHandler.PositionUpdate(request, serviceBusClient);
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Success);
         }

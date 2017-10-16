@@ -62,6 +62,7 @@ namespace Quest.Lib.Resource
             if (res.Position != null)
             {
                 var point = new PointGeoShape(new GeoCoordinate(res.Position.Y, res.Position.X));
+                var geo = new GeoLocation(res.Position.Y, res.Position.X);
 
                 if (config != null)
                 {
@@ -76,7 +77,7 @@ namespace Quest.Lib.Resource
                         Source = "Quest",
                         indextext = indextext,
                         Description = indextext,
-                        Location = new GeoLocation(resourceUpdate.Resource.Position.X, resourceUpdate.Resource.Position.Y),
+                        Location = geo,
                         Point = point,
                         Created = DateTime.UtcNow
                     };
@@ -91,8 +92,8 @@ namespace Quest.Lib.Resource
                 SendStatusNotification(resourceUpdate.Resource.FleetNo, "Update", msgSource);
 
             // detect change in event
-            if (resupdate.OldResource.Incident != resupdate.NewResource.Incident)
-                SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.Incident, "C&C Assigned", msgSource);
+            if (resupdate.OldResource.EventId != resupdate.NewResource.EventId)
+                SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.EventId, "C&C Assigned", msgSource);
 
             msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
 

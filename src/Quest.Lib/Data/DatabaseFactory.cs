@@ -56,7 +56,6 @@ namespace Quest.Lib.Data
         {
             using (var localscope = _scope.BeginLifetimeScope())
             {
-                DB t;
                 using (var db = localscope.Resolve<DB>())
                 {
                     return action(db);
@@ -68,7 +67,6 @@ namespace Quest.Lib.Data
         {
             using (var localscope = _scope.BeginLifetimeScope())
             {
-                DB t;
                 using (var db = localscope.Resolve<DB>())
                 {
                     db.Database.AutoTransactionsEnabled = false;

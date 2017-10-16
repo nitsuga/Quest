@@ -345,7 +345,7 @@ namespace Quest.Lib.Simulation.Resources
             // calc ETA's
             Resource.DTG = route.Connections.Sum(x => x.Vector.DistanceMeters);
             Resource.TTG = route.Connections.Sum(x => x.Vector.DurationSecs);
-            Resource.SpeedMS = Constants.Constant.ms2mph * conn.Vector.DistanceMeters / conn.Vector.DurationSecs;
+            Resource.Speed = (float)( Constants.Constant.ms2mph * conn.Vector.DistanceMeters / conn.Vector.DurationSecs);
 
             return seconds;
         }
@@ -447,7 +447,7 @@ namespace Quest.Lib.Simulation.Resources
                 EtaDistance = resource.DTG,
                 EtaSeconds = resource.TTG,
                 Direction = resource.Heading / 45,
-                Speed = (double)resource.SpeedMS
+                Speed = (double)resource.Speed
             };
 
             try
@@ -481,7 +481,7 @@ namespace Quest.Lib.Simulation.Resources
             resource.LastChanged = DateTime.Now;
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.SpeedMS = 0;
+            resource.Speed = 0;
 
             SendCurrentPosition(resource);
             SendAtDestinationToCad(resource, DestType.Incident);
@@ -562,7 +562,7 @@ namespace Quest.Lib.Simulation.Resources
             SetSysMessage(resource, "At hospital");
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.SpeedMS = 0;
+            resource.Speed = 0;
 
             SendCurrentPosition(resource);
             SendAtDestinationToCad(resource, DestType.Hospital);
@@ -595,7 +595,7 @@ namespace Quest.Lib.Simulation.Resources
             Logger.Write(resource.Callsign + " VehicleArrivedAtStandby");
             resource.TTG = 0;
             resource.DTG = 0;
-            resource.SpeedMS = 0;
+            resource.Speed = 0;
 
             resource.LastChanged = DateTime.Now;
             SetSysMessage(resource, "Arrived @ standby");

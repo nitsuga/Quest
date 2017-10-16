@@ -45,16 +45,6 @@ namespace Quest.Common.Messages
         public string StatusCategory;
 
         /// <summary>
-        /// Speed in m/s
-        /// </summary>
-        public double? SpeedMS;
-
-        /// <summary>
-        /// direction of travel degrees
-        /// </summary>
-        public int? Direction;
-
-        /// <summary>
         /// skill code of the crew
         /// </summary>
         public string Skill;
@@ -77,7 +67,7 @@ namespace Quest.Common.Messages
         /// <summary>
         /// Event current Assigned to
         /// </summary>
-        public string Incident;
+        public string EventId;
 
         /// <summary>
         /// Type of event being worked on
@@ -105,5 +95,22 @@ namespace Quest.Common.Messages
         public String Destination;
 
         public Coordinate DestPosition;
+
+        /// <summary>
+        /// Speed in m/s
+        /// </summary>
+        public float? Speed;
+
+        /// <summary>
+        /// direction of travel degrees
+        /// </summary>
+        public float? Course;
+
+        /// <summary>
+        /// Horizontal Dilution of precision
+        /// </summary>
+        public float? HDoP;
+
+
     }
 }

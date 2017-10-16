@@ -4,6 +4,11 @@ namespace Quest.Lib.Resource
 {
     public class ResourceStoreElastic : IResourceStore
     {
+        public bool FleetNoExists(string fleetno)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public QuestResource GetByCallsign(string callsign)
         {
             throw new System.NotImplementedException();

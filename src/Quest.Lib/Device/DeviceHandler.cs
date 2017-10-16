@@ -127,22 +127,15 @@ namespace Quest.Lib.Device
 
             // try and use the provided fleetnumber to associate with a resource
             if (!string.IsNullOrEmpty(request.FleetNo))
-                resource = _resStore.GetByFleetNo(request.FleetNo);
-
-            // the device is not associated with a resource then make a resource
-            if (resource == null)
             {
+                // update associated resource record
                 ResourceUpdate newresource = new ResourceUpdate
                 {
                     Resource = new QuestResource
                     {
-                        Callsign = $"#0000",
                         FleetNo = request.FleetNo,
-                        Position =new GeoAPI.Geometries.Coordinate(0,0),
-                        ResourceType ="UNK",
-                        Status ="OFF"
                     },
-                    UpdateTime =DateTime.UtcNow
+                    UpdateTime = DateTime.UtcNow
                 };
 
                 var updateResult = _resHandler.ResourceUpdate(newresource, msgSource, _config);
@@ -364,13 +357,13 @@ namespace Quest.Lib.Device
                 };
             }
 
-            if (resource.Incident != request.EventId)
+            if (resource.EventId != request.EventId)
             {
                 return new AckAssignedEventResponse
                 {
                     RequestId = request.RequestId,
                     Success = false,
-                    Message = $"Current event for your device is {resource.Incident}, not {request.EventId}"
+                    Message = $"Current event for your device is {resource.EventId}, not {request.EventId}"
                 };
             }
 
@@ -383,7 +376,7 @@ namespace Quest.Lib.Device
             };
         }
 
-        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
+        public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request, IServiceBusClient msgSource)
         {
             // check the timestamp
             var failedTimecheck = ValidateTime<PositionUpdateResponse>(request);
@@ -403,9 +396,36 @@ namespace Quest.Lib.Device
 
             deviceRecord.Latitude = (float?)request.Vector.Latitude ?? 0;
             deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
-            deviceRecord.PositionAccuracy = (float)request.Vector.HDoP;
+            deviceRecord.HDoP = (float)request.Vector.HDoP;
+            deviceRecord.Speed = (float)request.Vector.Speed;
+            deviceRecord.Course = (float)request.Vector.Course;
 
             var updated = _devStore.Update(deviceRecord, timestamp);
+
+            // Primary device is used to update the position  of the Resource record
+            if (deviceRecord.IsPrimary==true)
+            {
+                // try and use the provided fleetnumber to associate with a resource
+                if (!string.IsNullOrEmpty(deviceRecord.FleetNo))
+                {
+                    QuestResource resource = new QuestResource
+                    {
+                        FleetNo = deviceRecord.FleetNo,
+                        Position = new GeoAPI.Geometries.Coordinate(request.Vector.Longitude, request.Vector.Latitude),
+                        HDoP = (float)request.Vector.HDoP,
+                        Speed = (float)request.Vector.Speed,
+                        Course = (float)request.Vector.Course
+                    };
+
+                    ResourceUpdate resupdate = new ResourceUpdate
+                    {
+                        Resource = resource,
+                        UpdateTime = DateTime.UtcNow
+                    };
+
+                    var updateResult = _resHandler.ResourceUpdate(resupdate, msgSource, _config);
+                }
+            }
 
             //TODO: Save to Elastic
             return new PositionUpdateResponse
@@ -929,9 +949,9 @@ namespace Quest.Lib.Device
                     FleetNo = res.FleetNo,
                     Comment = res.Comment,
                     Skill = res.Skill,
-                    SpeedMS = res.SpeedMS,
-                    Direction = res.Direction,
-                    Incident = res.Incident,
+                    Speed = res.Speed,
+                    Course = res.Course,
+                    EventId = res.EventId,
                     ResourceTypeGroup = res.ResourceType.ResourceTypeGroup,
                 }
             };

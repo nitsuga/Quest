@@ -217,7 +217,7 @@ namespace Quest.Mobile.Models
 
         public string StatusCategory { get; set; }
 
-        public string IncSerial { get; set; }
+        public string EventId { get; set; }
 
         public string Road { get; set; }
 
@@ -228,7 +228,7 @@ namespace Quest.Mobile.Models
         [JsonProperty("skill")]
         public string Skill { get; set; }
 
-        public int? Direction { get; set; }
+        public double? Course { get; set; }
 
         public double? Speed { get; set; }
     }

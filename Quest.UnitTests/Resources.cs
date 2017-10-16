@@ -32,8 +32,8 @@ namespace Quest.UnitTests
             {
                 Resource = new QuestResource
                 {
-                    Callsign = $"#0000",
-                    FleetNo = $"DEV-0000",
+                    Callsign = $"C1000",
+                    FleetNo = $"1000",
                     Position = new GeoAPI.Geometries.Coordinate(0, 0),
                     ResourceType = "UNK",
                     Status = "OFF"

@@ -381,7 +381,7 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Incident)
+                entity.Property(e => e.EventId)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 

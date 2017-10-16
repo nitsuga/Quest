@@ -172,7 +172,7 @@ namespace Quest.Lib.EISEC
 
                 SendPacketToEisec(reqPkt.Serialize());
             }
-            catch (Exception ex)
+            catch 
             {
             }
 

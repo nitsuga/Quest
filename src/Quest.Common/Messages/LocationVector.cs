@@ -13,9 +13,9 @@ namespace Quest.Common.Messages
         public double Longitude { get; set; }
         public double VDoP { get; set; }
         public double HDoP { get; set; }
-        public double AltitudeM { get; set; }
-        public double BearingDeg { get; set; }
-        public double SpeedMS { get; set; }
+        public double Altitude { get; set; }
+        public double Course { get; set; }
+        public double Speed { get; set; }
         public string CaptureMethod { get; set; } // e.g. GPS/Wireless etc
 
         public override string ToString()

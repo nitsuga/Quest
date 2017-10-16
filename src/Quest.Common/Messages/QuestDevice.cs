@@ -11,7 +11,7 @@ namespace Quest.Common.Messages
         public string DeviceIdentity { get; set; }
         public string NotificationTypeId { get; set; }
         public string NotificationId { get; set; }
-        public float? PositionAccuracy { get; set; }
+        public float? HDoP { get; set; }
         public bool? IsEnabled { get; set; }
         public bool? SendNearby { get; set; }
         public float? NearbyDistance { get; set; }
@@ -23,8 +23,8 @@ namespace Quest.Common.Messages
         public string DeviceModel { get; set; }
         public bool? UseExternalStatus { get; set; }
         public string Skill { get; set; }
-        public int? Speed { get; set; }
-        public int? Direction { get; set; }
+        public float? Speed { get; set; }
+        public float? Course { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
         public string FleetNo { get; set; }

@@ -164,7 +164,7 @@ namespace Quest.Lib.Device
             var request = t.Payload as PositionUpdateRequest;
             if (request != null)
             {
-                return _deviceHandler.PositionUpdate(request);
+                return _deviceHandler.PositionUpdate(request, ServiceBusClient);
             }
             return null;
         }

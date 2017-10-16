@@ -105,9 +105,9 @@ namespace Quest.WebCore.Services
                     var geometry = new Point(new Position(res.Y, res.X));
                     var properties = new GTResourceFeatureProperties
                     {
-                        Speed = res.Resource.SpeedMS,
-                        Direction = res.Resource.Direction,
-                        IncSerial = res.Resource.Incident,
+                        Speed = res.Resource.Speed,
+                        Course = res.Resource.Course,
+                        EventId = res.Resource.EventId,
                         Callsign = res.Resource.Callsign,
                         ResourceType = res.Resource.ResourceType,
                         TimeStamp = res.Resource.LastUpdated?.ToString("dd/MM/yyyy HH:mm:ss"),
