@@ -645,6 +645,15 @@
       }
     },
     {
+      "type": "Quest.Lib.Resource.ResourceHandler",
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "deletedStatus": "OOS",
+        "triggerStatus": "DSP"
+      }
+    },
+    {
       "type": "Quest.Lib.Resource.ResourceStoreMssql",
       "injectProperties": true,
       "instanceScope": "single-instance"

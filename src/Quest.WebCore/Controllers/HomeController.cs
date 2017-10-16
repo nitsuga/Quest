@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Quest.WebCore.Services;
 using Quest.WebCore.Models;
-using Nest;
 using Quest.Common.Messages;
 using System.Text;
 using System.IO;
@@ -302,7 +301,6 @@ namespace Quest.WebCore.Controllers
             return data;
         }
 
-        
         [HttpGet]
         public async Task<ActionResult> InformationSearch(double lng, double lat)
         {
@@ -319,7 +317,6 @@ namespace Quest.WebCore.Controllers
             return result;
         }
 
- 
         [HttpGet]
         public ActionResult CancelDevice(string callsign, string eventId)
         {
@@ -858,44 +855,9 @@ namespace Quest.WebCore.Controllers
 
     }
 
-
-    public class DisplaySearchResult
-    {
-        public List<DisplayDocument> Documents;
-        public List<Aggregate> Aggregates;
-        public long Count;
-        public long Removed;
-        public long ms;
-        public List<List<int>> Grouping { get; set; }
-        public PolygonGeoShape Bounds { get; set; }
-    }
-
-    public class DisplayDocument
-    {
-        /// <summary>
-        /// Score
-        /// </summary>
-        public string c { get; set; }
-        public float s { get; set; }
-        public string t { get; set; }
-        public string src { get; set; }
-        public string ID { get; set; }
-        public string d { get; set; }
-        public string url { get; set; }
-        public string st { get; set; }
-        public string i { get; set; }
-        public string v { get; set; }
-        public GeoLocation l { get; set; }
-        public PolygonGeoShape pg { get; set; }
-        public MultiLineStringGeoShape ml { get; set; }
-        public string grp { get; set; }
-    }
-
     public class p
     {
         public double x;
         public double y;
     }
-
-
 }

@@ -12,6 +12,7 @@ using Quest.Lib.Resource;
 using Quest.Lib.Data;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Search.Elastic;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.Device
 {
@@ -29,6 +30,11 @@ namespace Quest.Lib.Device
 
         public string triggerStatus { get; set; } = "";
 
+        /// <summary>
+        /// maximum delta between current time and message time
+        /// </summary>
+        public long MaxMessageTimeDelta { get; set; } = 60*60;
+
         private const int Version = 1;
 
         private int _deleteStatusId;
@@ -43,7 +49,7 @@ namespace Quest.Lib.Device
             }
         }
 
-        public DeviceHandler(IDatabaseFactory dbFactory, ElasticSettings elastic,
+    public DeviceHandler(IDatabaseFactory dbFactory, ElasticSettings elastic,
             IDeviceStore devStore,
             IResourceStore resStore,
             ResourceHandler resHandler,
@@ -69,6 +75,11 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public LoginResponse Login(LoginRequest request, IServiceBusClient msgSource)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<LoginResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
 
             // get the device record
             var devrecord = _devStore.Get(request.DeviceIdentity);
@@ -83,7 +94,8 @@ namespace Quest.Lib.Device
                 devrecord.DeviceIdentity = request.DeviceIdentity;
                 devrecord.Osversion = request.OSVersion;
                 devrecord.DeviceMake = request.DeviceMake;
-                devrecord.DeviceModel = request.DeviceModel; 
+                devrecord.DeviceModel = request.DeviceModel;
+                devrecord.FleetNo = request.FleetNo;
             }
             else
             {
@@ -102,13 +114,12 @@ namespace Quest.Lib.Device
                     Osversion = request.OSVersion,
                     DeviceMake = request.DeviceMake,
                     DeviceModel = request.DeviceModel,
-                };
+                    FleetNo = request.FleetNo
+            };
             }
 
             // make a new token. this becomes a claim (jti unique identitier
             devrecord.AuthToken = Guid.NewGuid().ToString();
-
-            var timestamp = DateTime.UtcNow;
 
             _devStore.Update(devrecord, timestamp);
 
@@ -159,6 +170,12 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public LogoutResponse Logout(LogoutRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<LogoutResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             var resrecord = _devStore.GetByToken(request.SessionId);
 
             if (resrecord != null)
@@ -167,8 +184,6 @@ namespace Quest.Lib.Device
                 resrecord.AuthToken = null;
                 resrecord.NotificationId = "";
                 resrecord.NotificationTypeId = "";
-
-                var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
                 _devStore.Update(resrecord, timestamp);
 
@@ -187,6 +202,110 @@ namespace Quest.Lib.Device
             };
         }
 
+        public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
+        {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<GetStatusCodesResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
+            return _dbFactory.Execute<QuestContext, GetStatusCodesResponse>((db) =>
+            {
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
+                if (deviceRecord == null)
+                    return new GetStatusCodesResponse
+                    {
+                        RequestId = request.RequestId,
+                        Items = new List<StatusCode>(),
+                        Success = false,
+                        Message = "unknown device"
+                    };
+
+                List<StatusCode> results = null;
+
+                switch (request.SearchMode)
+                {
+                    case GetStatusCodesRequest.Mode.AllCodes:
+                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
+                            .Select(x => new StatusCode
+                            {
+                                Code = x.Status,
+                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
+                            }
+                            )
+                            .ToList();
+                        break;
+                    case GetStatusCodesRequest.Mode.Context:
+                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
+                            .Select(x => new StatusCode
+                            {
+                                Code = x.Status,
+                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
+                            }
+                            )
+                            .ToList();
+                        break;
+                    case GetStatusCodesRequest.Mode.Specified:
+                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
+                            .Select(x => new StatusCode
+                            {
+                                Code = x.Status,
+                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
+                            }
+                            )
+                            .ToList();
+                        break;
+                }
+
+                return new GetStatusCodesResponse
+                {
+                    RequestId = request.RequestId,
+                    Items = results,
+                    Success = true,
+                    Message = "successful"
+                };
+            });
+        }
+
+        /// <summary>
+        ///     Status request by device
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient)
+        {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<SetStatusResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
+            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
+
+            if (deviceRecord == null)
+                return new SetStatusResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = "unknown device"
+                };
+
+            //TODO: make changes here..
+
+            var updated = _devStore.Update(deviceRecord, timestamp);
+
+            //TODO: Save to Elastic
+            return new SetStatusResponse
+            {
+                RequestId = request.RequestId,
+                Success = true,
+                Message = "successful"
+            };
+
+        }
+
         /// <summary>
         /// Get the status of the device. can be used at startup of the device so it has the right details.
         /// </summary>
@@ -195,11 +314,23 @@ namespace Quest.Lib.Device
         /// <returns></returns>
         public RefreshStateResponse RefreshState(RefreshStateRequest request, IServiceBusClient serviceBusClient)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<RefreshStateResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             return new RefreshStateResponse() {  Message="Not Implemented"};
         }
 
         public AckAssignedEventResponse AckAssignedEvent(AckAssignedEventRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<AckAssignedEventResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             var devrecord = _devStore.GetByToken(request.SessionId);
 
             if (devrecord == null)
@@ -211,6 +342,17 @@ namespace Quest.Lib.Device
                     Message = "unknown device"
                 };
             }
+
+            if ( string.IsNullOrEmpty(request.EventId))
+            {
+                return new AckAssignedEventResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = "Empty event id sent"
+                };
+            }
+
             var resource = _resStore.GetByFleetNo(devrecord.FleetNo);
             if (resource==null)
             {
@@ -219,6 +361,16 @@ namespace Quest.Lib.Device
                     RequestId = request.RequestId,
                     Success = false,
                     Message = "device not linked to a resource"
+                };
+            }
+
+            if (resource.Incident != request.EventId)
+            {
+                return new AckAssignedEventResponse
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = $"Current event for your device is {resource.Incident}, not {request.EventId}"
                 };
             }
 
@@ -233,6 +385,12 @@ namespace Quest.Lib.Device
 
         public PositionUpdateResponse PositionUpdate(PositionUpdateRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<PositionUpdateResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
@@ -247,8 +405,6 @@ namespace Quest.Lib.Device
             deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
             deviceRecord.PositionAccuracy = (float)request.Vector.HDoP;
 
-            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
-
             var updated = _devStore.Update(deviceRecord, timestamp);
 
             //TODO: Save to Elastic
@@ -262,6 +418,12 @@ namespace Quest.Lib.Device
 
         public MakePatientObservationResponse MakePatientObservation(MakePatientObservationRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<MakePatientObservationResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
@@ -273,8 +435,6 @@ namespace Quest.Lib.Device
                 };
 
             //TODO: make changes here..
-
-            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
 
             var updated = _devStore.Update(deviceRecord, timestamp);
 
@@ -289,6 +449,12 @@ namespace Quest.Lib.Device
 
         public PatientDetailsResponse PatientDetails(PatientDetailsRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<PatientDetailsResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             return new PatientDetailsResponse
             {
                 RequestId = request.RequestId,
@@ -299,6 +465,12 @@ namespace Quest.Lib.Device
 
         public GetEntityTypesResponse GetEntityTypes(GetEntityTypesRequest request)
         {
+            // check the timestamp
+            var failedTimecheck = ValidateTime<GetEntityTypesResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
             QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
 
             if (deviceRecord == null)
@@ -328,6 +500,13 @@ namespace Quest.Lib.Device
             const int maxres = 20;
             const int maxdev = 20;
             const int maxinc = 20;
+
+            // check the timestamp
+            var failedTimecheck = ValidateTime<MapItemsResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
 
             var response = new MapItemsResponse
             {
@@ -408,92 +587,38 @@ namespace Quest.Lib.Device
             return response;
         }
 
-        private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
+        public GetHistoryResponse GetHistory(GetHistoryRequest request)
         {
-            return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
+            // check the timestamp
+            var failedTimecheck = ValidateTime<GetHistoryResponse>(request);
+            if (failedTimecheck != null)
+                return failedTimecheck;
+            var timestamp = Time.UnixTime(request.Timestamp);
+
+            return _dbFactory.Execute<QuestContext, GetHistoryResponse>((db) =>
             {
-                var d = db.Destinations
-                    .Where(x => ((hospitals == true && x.IsHospital == true))
-                             || ((stations == true && x.IsStation == true))
-                             || ((standby == true && x.IsStandby == true))
-                              )
-                    .ToList()
-                    .Select(x =>
+                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
+                if (deviceRecord == null)
+                    return new GetHistoryResponse
                     {
-                        var point = Lib.Utils.GeomUtils.GetPointFromWkt(x.Wkt);
-                        return new QuestDestination
-                        {
-                            ID = x.DestinationId.ToString(),
-                            IsHospital = x.IsHospital ?? false,
-                            IsAandE = x.IsAandE ?? false,
-                            IsRoad = x.IsRoad ?? false,
-                            IsStandby = x.IsStandby ?? false,
-                            IsStation = x.IsStation ?? false,
-                            Name = x.Destination,
-                            X = point.X,
-                            Y = point.Y
-                        };
+                        RequestId = request.RequestId,
+                        Items = new List<DeviceHistoryItem>(),
+                        Success = false,
+                        Message = "unknown device"
+                    };
 
-                    }
-                    )
-                    .ToList();
-
-                foreach (var res in d)
+                var response = new GetHistoryResponse
                 {
-                    var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
-                    res.X = latlng.Longitude;
-                    res.Y = latlng.Latitude;
-                }
-                return d;
+                    Items = new List<DeviceHistoryItem>(),
+                    Success = true,
+                    Message = "successful"
+                };
+
+                return response;
             });
         }
 
-        IEnumerable<DataModel.Resource> ResourceAtRevision(QuestContext db, long revision)
-        {
-            //TODO: Net Core
-            return new List<DataModel.Resource>();
-        }
-
-        private List<int> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
-        {
-            return _dbFactory.Execute<QuestContext, List<int>>((db) =>
-            {
-                var results = new List<int>();
-
-                // work out which ones were on display at the original revision
-                if (avail && busy)
-                {
-                    var resources = ResourceAtRevision(db, revision)
-                        .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
-                        .Select(x => x.ResourceId);
-                    if (resources != null)
-                        results.AddRange(resources);
-                }
-                else
-                {
-                    if (avail)
-                    {
-                        var resources = ResourceAtRevision(db, revision)
-                                .Where(x => x.ResourceStatus.Available == true)
-                                .Select(x => x.ResourceId);
-                        if (resources != null)
-                            results.AddRange(resources);
-                    }
-
-                    if (busy)
-                    {
-                        var resources = ResourceAtRevision(db, revision)
-                            .Where(x => x.ResourceStatus.Busy == true)
-                            .Select(x => x.ResourceId);
-                        results.AddRange(resources);
-                    }
-                }
-
-                return results;
-            });
-        }
-
-        public List<EventMapItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
+        private List<EventMapItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
         {
             return _dbFactory.Execute<QuestContext, List<EventMapItem>>((db) =>
             {
@@ -538,6 +663,91 @@ namespace Quest.Lib.Device
                 }
 
                 return features;
+            });
+        }
+
+        private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
+        {
+            return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
+            {
+                var d = db.Destinations
+                    .Where(x => ((hospitals == true && x.IsHospital == true))
+                             || ((stations == true && x.IsStation == true))
+                             || ((standby == true && x.IsStandby == true))
+                              )
+                    .ToList()
+                    .Select(x =>
+                    {
+                        var point = Lib.Utils.GeomUtils.GetPointFromWkt(x.Wkt);
+                        return new QuestDestination
+                        {
+                            ID = x.DestinationId.ToString(),
+                            IsHospital = x.IsHospital ?? false,
+                            IsAandE = x.IsAandE ?? false,
+                            IsRoad = x.IsRoad ?? false,
+                            IsStandby = x.IsStandby ?? false,
+                            IsStation = x.IsStation ?? false,
+                            Name = x.Destination,
+                            X = point.X,
+                            Y = point.Y
+                        };
+
+                    }
+                    )
+                    .ToList();
+
+                foreach (var res in d)
+                {
+                    var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
+                    res.X = latlng.Longitude;
+                    res.Y = latlng.Latitude;
+                }
+                return d;
+            });
+        }
+
+        private IEnumerable<DataModel.Resource> ResourceAtRevision(QuestContext db, long revision)
+        {
+            //TODO: Net Core
+            return new List<DataModel.Resource>();
+        }
+
+        private List<int> GetResourcesAtRevision(long revision, bool avail = false, bool busy = false)
+        {
+            return _dbFactory.Execute<QuestContext, List<int>>((db) =>
+            {
+                var results = new List<int>();
+
+                // work out which ones were on display at the original revision
+                if (avail && busy)
+                {
+                    var resources = ResourceAtRevision(db, revision)
+                        .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
+                        .Select(x => x.ResourceId);
+                    if (resources != null)
+                        results.AddRange(resources);
+                }
+                else
+                {
+                    if (avail)
+                    {
+                        var resources = ResourceAtRevision(db, revision)
+                                .Where(x => x.ResourceStatus.Available == true)
+                                .Select(x => x.ResourceId);
+                        if (resources != null)
+                            results.AddRange(resources);
+                    }
+
+                    if (busy)
+                    {
+                        var resources = ResourceAtRevision(db, revision)
+                            .Where(x => x.ResourceStatus.Busy == true)
+                            .Select(x => x.ResourceId);
+                        results.AddRange(resources);
+                    }
+                }
+
+                return results;
             });
         }
 
@@ -691,32 +901,7 @@ namespace Quest.Lib.Device
             });
         }
 
-        public GetHistoryResponse GetHistory(GetHistoryRequest request)
-        {
-            return _dbFactory.Execute<QuestContext, GetHistoryResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new GetHistoryResponse
-                    {
-                        RequestId = request.RequestId,
-                        Items = new List<DeviceHistoryItem>(),
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-                var response = new GetHistoryResponse
-                {
-                    Items = new List<DeviceHistoryItem>(),
-                    Success = true,
-                    Message = "successful"
-                };
-
-                return response;
-            });
-        }
-
-        public void SendAlertMessage(string callsign, string message)
+        private void SendAlertMessage(string callsign, string message)
         {
             //using (QuestEntities db = new QuestEntities())
             //{
@@ -764,100 +949,6 @@ namespace Quest.Lib.Device
             });
         }
 
-        public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
-        {
-            return _dbFactory.Execute<QuestContext, GetStatusCodesResponse>((db) =>
-            {
-                var deviceRecord = db.Devices.FirstOrDefault(x => x.AuthToken == request.SessionId);
-                if (deviceRecord == null)
-                    return new GetStatusCodesResponse
-                    {
-                        RequestId = request.RequestId,
-                        Items = new List<StatusCode>(),
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-                List<StatusCode> results = null;
-
-                switch (request.SearchMode)
-                {
-                    case GetStatusCodesRequest.Mode.AllCodes:
-                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
-                            .Select(x => new StatusCode
-                            {
-                                Code = x.Status,
-                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
-                            }
-                            )
-                            .ToList();
-                        break;
-                    case GetStatusCodesRequest.Mode.Context:
-                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
-                            .Select(x => new StatusCode
-                            {
-                                Code = x.Status,
-                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
-                            }
-                            )
-                            .ToList();
-                        break;
-                    case GetStatusCodesRequest.Mode.Specified:
-                        results = db.ResourceStatus.Where(x => x.NoSignal != true)
-                            .Select(x => new StatusCode
-                            {
-                                Code = x.Status,
-                                Description = GetStatusDescription(x.Available ?? false, x.Busy ?? false, x.BusyEnroute ?? false, x.Rest ?? false)
-                            }
-                            )
-                            .ToList();
-                        break;
-                }
-
-                return new GetStatusCodesResponse
-                {
-                    RequestId = request.RequestId,
-                    Items = results,
-                    Success = true,
-                    Message = "successful"
-                };
-            });
-        }
-
-        /// <summary>
-        ///     Status request by device
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public SetStatusResponse SetStatusRequest(SetStatusRequest request, IServiceBusClient serviceBusClient)
-        {
-            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
-
-            if (deviceRecord == null)
-                return new SetStatusResponse
-                {
-                    RequestId = request.RequestId,
-                    Success = false,
-                    Message = "unknown device"
-                };
-
-            //TODO: make changes here..
-
-            var timestamp = new DateTime((request.Timestamp + 62135596800) * 10000000);
-
-            var updated = _devStore.Update(deviceRecord, timestamp);
-
-            //TODO: Save to Elastic
-            return new SetStatusResponse
-            {
-                RequestId = request.RequestId,
-                Success = true,
-                Message = "successful"
-            };
-
-        }
-
         private string GetStatusDescription(DataModel.ResourceStatus status)
         {
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
@@ -879,6 +970,28 @@ namespace Quest.Lib.Device
             if (rest == true)
                 return "Rest";
             return "Offroad";
+        }
+
+        private T ValidateTime<T>(Request request) where T : Response, new()
+        {
+            var current = Time.CurrentUnixTime();
+            if (request.Timestamp == 0)
+                return new T
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = $"You need to set the Timestamp in the request to the current Unix Epoch Time. The current Unix Epoch Time is {current}"
+                };
+
+            if (Math.Abs(request.Timestamp - current) > MaxMessageTimeDelta)
+                return new T
+                {
+                    RequestId = request.RequestId,
+                    Success = false,
+                    Message = $"The message timestamp is outside limits. The current Unix Epoch Time is {current} and the message was {request.Timestamp}. The limit is {MaxMessageTimeDelta} difference between the two."
+                };
+
+            return null;
         }
 
     }

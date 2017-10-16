@@ -9,6 +9,7 @@ using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
 using Quest.Lib.Data;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.Routing
 {

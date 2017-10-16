@@ -11,6 +11,7 @@ using Quest.Lib.Utils;
 using Quest.Lib.DependencyInjection;
 using Quest.Lib.Data;
 using Microsoft.EntityFrameworkCore;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.Routing
 {

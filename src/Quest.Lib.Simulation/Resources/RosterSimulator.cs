@@ -13,6 +13,7 @@ using Quest.Lib.Trace;
 using Quest.Common.Messages;
 using Quest.Lib.Utils;
 using Quest.Lib.Simulation.Destinations;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.Simulation.Resources
 {

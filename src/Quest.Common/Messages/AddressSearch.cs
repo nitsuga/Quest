@@ -50,28 +50,6 @@ namespace Quest.Common.Messages
         public long? Value { get; set; }
     }
 
-    [Serializable, ElasticsearchType(Name = "AuditDocument")]
-    public class AuditDocument
-    {
-        [Date]
-        public DateTime timestamp { get; set; }
-
-        [Number(NumberType.Long)]
-        public long duration { get; set; }
-
-        [Text]
-        public string type { get; set; }
-
-        [Text(Index = false)]
-        public string user { get; set; }
-
-        [Text]
-        public string description { get; set; }
-
-        [GeoShape] //Index = FieldIndexOption.Analyzed
-        public PolygonGeoShape poly { get; set; }
-    }
-
     public enum SearchMode
     {
         EXACT,

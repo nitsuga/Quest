@@ -1,4 +1,5 @@
 ﻿using Quest.Common.ServiceBus;
+using Quest.Common.Utils;
 using System;
 
 namespace Quest.Common.Messages
@@ -10,8 +11,7 @@ namespace Quest.Common.Messages
     {
         public MessageBase()
         {
-            Timestamp = DateTime.UtcNow.Ticks/10000000 - 62135596800;
-                                                         
+            Timestamp = Time.CurrentUnixTime();
         }
 
         /// <summary>

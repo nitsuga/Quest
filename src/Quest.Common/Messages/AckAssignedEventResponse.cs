@@ -3,10 +3,9 @@
 namespace Quest.Common.Messages
 {
     /// <summary>
-    ///     a response to an AckAssignedRequest.
+    ///     Send by the server to a device in response to AckAssignedRequest
     /// </summary>
-    [Serializable]
-    
+    [Serializable]    
     public class AckAssignedEventResponse : Response
     {
     }

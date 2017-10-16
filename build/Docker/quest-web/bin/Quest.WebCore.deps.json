@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "b5a10f1f78f8ae5e473e49b830ae57724c603ce3"
+    "signature": "27e7aaaa9ba4d5ad4c20dd3984ec70e1815cac68"
   },
   "compilationOptions": {
     "defines": [
@@ -148,19 +148,6 @@
         },
         "compile": {
           "lib/netstandard1.1/Autofac.Extensions.DependencyInjection.dll": {}
-        }
-      },
-      "CsvHelper/2.16.3": {
-        "dependencies": {
-          "Microsoft.CSharp": "4.4.0",
-          "NETStandard.Library": "2.0.0",
-          "System.Reflection.TypeExtensions": "4.3.0"
-        },
-        "runtime": {
-          "lib/netstandard1.3/CsvHelper.dll": {}
-        },
-        "compile": {
-          "lib/netstandard1.3/CsvHelper.dll": {}
         }
       },
       "Elasticsearch.Net/5.5.0": {
@@ -4164,7 +4151,6 @@
           "Autofac": "4.6.1",
           "Autofac.Configuration": "4.0.1",
           "Autofac.Extensions.DependencyInjection": "4.2.0",
-          "CsvHelper": "2.16.3",
           "GeoAPI": "1.7.4",
           "GeoJSON.Net": "1.1.64",
           "Microsoft.EntityFrameworkCore": "2.0.0",
@@ -4441,13 +4427,6 @@
       "sha512": "sha512-cqBmgg9y7ahGbt7CPdvZFL6bA0PEwFyhIofUoUxEteZc+d0yNnE6ZvIWxHEM2F2HPJlC9SRnHWiZQq8r53moAw==",
       "path": "autofac.extensions.dependencyinjection/4.2.0",
       "hashPath": "autofac.extensions.dependencyinjection.4.2.0.nupkg.sha512"
-    },
-    "CsvHelper/2.16.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-RTxNM9Q6MDg3WpGorrK7E9eXsjGhtDLYx5dBuHol5kHDpu7kND2NveHDVCFQgGxowuDB57ettaOEn3EJqiJ1oQ==",
-      "path": "csvhelper/2.16.3",
-      "hashPath": "csvhelper.2.16.3.nupkg.sha512"
     },
     "Elasticsearch.Net/5.5.0": {
       "type": "package",

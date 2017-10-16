@@ -111,8 +111,6 @@ namespace Quest.Lib.Notifier
 
             Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, GetType().Name);
 
-            var ticks = DateTime.UtcNow.Ticks;
-            var unixtime = (ticks / 1000L - 62135596800000L).ToString();
             var data = Newtonsoft.Json.Linq.JObject.FromObject(message.Body);            
             _gcmBroker.QueueNotification(new GcmNotification { RegistrationIds = new List<string> { message.Address }, Data = data });
             return new NotificationResponse { Message = $"GCM Message queued", Success = true, RequestId = message.RequestId };

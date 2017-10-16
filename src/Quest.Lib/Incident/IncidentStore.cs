@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Utils;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
@@ -36,8 +37,8 @@ namespace Quest.Lib.Incident
                     dbinc = new DataModel.Incident();
                     db.Incident.Add(dbinc);
 
-                    // use the tiestamp of the message for the creation time
-                    dbinc.Created = new DateTime((item.Timestamp + 62135596800) * 10000000);
+                    // use the timestamp of the message for the creation time
+                    dbinc.Created = Time.UnixTime(item.Timestamp);
                 }
 
                 dbinc.Serial = item.Serial;

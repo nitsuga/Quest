@@ -11,6 +11,7 @@ using Quest.Lib.Maths;
 using Quest.Lib.Routing;
 using Quest.Common.Messages;
 using Quest.Lib.Utils;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.MapMatching.HMMViterbi
 {

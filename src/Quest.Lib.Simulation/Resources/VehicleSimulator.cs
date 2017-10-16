@@ -15,6 +15,7 @@ using Quest.Common.ServiceBus;
 using Quest.Common.Messages;
 using GeoAPI.Geometries;
 using Quest.Lib.Simulation.Destinations;
+using Quest.Common.Utils;
 
 namespace Quest.Lib.Simulation.Resources
 {
