@@ -20,6 +20,7 @@ using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.OS.DataModelNLPG;
 using Microsoft.Extensions.Logging;
+using Quest.Lib.Data;
 
 namespace Quest.Core
 {
@@ -107,6 +108,8 @@ namespace Quest.Core
 
                 runner.settings.modules.AddRange(modulesToRun);
 
+                WaitFordatabase();
+
                 // prepare processors ready for action
                 var Ok = runner.PrepareProcessors(ServiceProvider, ApplicationContainer, config);
                 if (Ok)
@@ -122,6 +125,33 @@ namespace Quest.Core
             {
                 Logger.Write(ex.ToString(), TraceEventType.Error, "Quest.Cmd");
                 Console.ReadLine();
+            }
+        }
+
+        static void WaitFordatabase()
+        {
+            var dbFactory = ApplicationContainer.Resolve<IDatabaseFactory>();
+
+            var success = false;
+            for (int i = 0; i < 60; i++)
+            {
+                try
+                {
+                    success = dbFactory.ExecuteNoTracking<QuestContext, bool>((db) =>
+                    {
+                        db.Database.OpenConnection();
+                        Logger.Write($"Successfully opened database...", TraceEventType.Information, "Quest Core");
+                        return true;
+                    });
+
+                    return;
+                }
+                catch
+                {
+                    Logger.Write($"Failed to access database...", TraceEventType.Error, "Quest Core");
+                }
+
+                Thread.Sleep(5000);
             }
         }
 

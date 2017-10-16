@@ -17,7 +17,8 @@ if db_id('QuestData') is null
 	( FILENAME = N'/tmp/data3/QuestData.mdf' ),
 	( FILENAME = N'/tmp/data3/QuestData_log.ldf' )
 	 FOR ATTACH
-GOif db_id('QuestNLPG') is null
+GO
+if db_id('QuestNLPG') is null
 	CREATE DATABASE [QuestNLPG] ON 
 	( FILENAME = N'/tmp/data2/QuestNLPG.mdf' ),
 	( FILENAME = N'/tmp/data2/QuestNLPG_log.ldf' )
