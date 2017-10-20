@@ -4,111 +4,78 @@ hud.plugins = hud.plugins || {};
 
 hud.plugins.map = (function() {
 
-    var _maps = [];
-
-    // TODO: Get this key from a config file
-    var _apiKey = 'AIzaSyD20hy8wOit2U3ES37heiH-D8yAPXVawjU';
-
-    //var _mapId;
-    var _centreLat;
-    var _centreLng;
-    var _zoomLevel;
-
-    var _markers = [];
 
     var _initMap = function (mapId) {
+        L_PREFER_CANVAS = true;
 
-        console.log("init map " + mapId);
-        _maps.push(new google.maps.Map(document.getElementById(mapId),
-                {
-                    center: { lat: _centreLat, lng: _centreLng },
-                    zoom: _zoomLevel
-                })
-        );
+        var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+        var osmAttrib = "Map data © OpenStreetMap contributors";
+        osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+        var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            mbUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw";
 
-    };
+        var grayscale = L.tileLayer(mbUrl, { id: "mapbox.light", attribution: mbAttr }),
+            streets = L.tileLayer(mbUrl, { id: "mapbox.streets", attribution: mbAttr });
 
+        var googleLayer1 = new L.Google('ROADMAP');
+        var googleLayer2 = new L.Google('SATELLITE');
+        var googleLayer3 = new L.Google('HYBRID');
+        var googleLayer4 = new L.Google('TERRAIN');
 
-    //var _initializeMaps = function (mapId, centreLat, centreLng, zoomLevel) {
-    //    _mapId = mapId;
-    //    _centreLat = centreLat;
-    //    _centreLng = centreLng;
-    //    _zoomLevel = zoomLevel;
+        barts = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+        stations = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
 
-    //    var script = document.createElement('script');
-    //    script.type = 'text/javascript';
-    //    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + _apiKey + '&callback=hud.samplemap.initMap';
-    //    document.body.appendChild(script);
-    //};
+        baseLayers = {
+            "OSM": osm,
+            "Grayscale": grayscale,
+            "Mapbox Streets": streets,
+            "Barts": barts ,
+            "Google Road": googleLayer1,
+            "Google Satellite": googleLayer2,
+            "Google Hybrid": googleLayer3,
+            "Google Terrain": googleLayer4
+        };
+        baseLayer = osm;
 
-    var _initializeMaps = function (centreLat, centreLng, zoomLevel) {
-        _centreLat = centreLat;
-        _centreLng = centreLng;
-        _zoomLevel = zoomLevel;
+        var overlayLayers = {
+            "Stations": stations
+        };
 
-        // Find all the map canvases on the page
-        $('div[data-role="map-canvas"]').each(function (index, item) {
-            var mapId = $(item).attr('id');
-            _initMap(mapId);
+        lat = 51.5;
+        lng = -0.2;
+        zoom = 12;
+
+        map = new L.Map("map", {
+            center: new L.LatLng(lat, lng),
+            zoom: zoom,
+            layers: baseLayer,
+            zoomControl: false,
+            continuousWorld: true,
+            worldCopyJump: false,
+            inertiaDeceleration: 10000
         });
 
-        //if (_googleApiScriptExists === false) {
-        //    var script = document.createElement('script');
-        //    script.type = 'text/javascript';
-        //    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + _apiKey + '&callback=hud.samplemap.initMap';
-        //    document.body.appendChild(script);
-
-        //    _googleApiScriptExists = true;
-        //} else {
-        //    hud.samplemap.initMap();
-        //}
     };
+
 
     /// <summary>
     /// Re-centre the maps to new co-ordinates
     /// </summary
     var _panTo = function (lat, lng) {
-        var latlng = new google.maps.LatLng(lat, lng);
-
-        for (var i = 0; i < _maps.length; i++) {
-            _maps[i].panTo(latlng);
-        }
-
-        return latlng;
     };
 
     var _panAndMarkLocation = function (locationName, lat, lng) {
-        var latlng = _panTo(lat, lng);
-
-        if (_.where(_markers, { title: locationName }).length === 0) {
-
-            var marker;
-            for (var i = 0; i < _maps.length; i++) {
-                marker = new google.maps.Marker({
-                    position: latlng,
-                    map: _maps[i],
-                    title: locationName
-                });
-            }
-            if (marker)
-                _markers.push(marker);
-        }
     }
 
     var _setZoomLevel = function(z) {
-        for (var i = 0; i < _maps.length; i++) {
-            _maps[i].setZoom(z);
-        }
     };
 
     var _redrawMaps = function () {
-        for (var i = 0; i < _maps.length; i++) {
-            google.maps.event.trigger(_maps[i], "resize");
-        }
     }
 
     return {
-        initializeMaps: _initializeMaps,
         initMap: _initMap,
         redrawMaps: _redrawMaps,
 

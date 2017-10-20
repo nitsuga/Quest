@@ -14,24 +14,58 @@
         return $(source).html();
     };
 
-    var _loadAllPanelContents = function () {
+    var _loadPanel = function (pluginName, panelRole) {
+        
+        var selector = '[data-panel-role=' + panelRole + ']';
+        var containerPanel = $(selector).first();
+        var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName;
 
-        $('div[data-role="panel"]').each(function (index, item) {
+        console.log("Plugin Loader: " + url);
 
-            var $this = $(this);
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            success: function (json) {
 
-            // Identify the target content panel
-            //var content = $this.find('div[data-role="panel-content"]')[0];
-            //var contentHtml = _getPanelContent($this.attr('data-src'), $this.attr('data-panel-role'));
-            //$(content).html(contentHtml);
+                if (json.html.length > 0) {
+                    $(containerPanel).find('div[data-role="panel-content"]').html(json.html);
+                }
 
-            // Call any javascript init code
-            var script = $this.attr('data-on-init');
-            if (script.length > 0) {
-                console.log("hud._loadAllPanelContents    Executing script: " + script);
-                eval(script);
+                console.log(json.onInit);
+                if (json.onInit.length > 0) {
+                    eval(json.onInit);
+                }
+
+                if (json.onPanelMoved.length > 0) {
+                    $(containerPanel).attr('data-on-moved', json.onPanelMoved);
+                }
+            },
+            error: function (result) {
+                alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
             }
         });
+    }
+
+    var _loadAllPanelContents = function () {
+
+        //$('div[data-role="panel"]').each(function (index, item) {
+
+        //    var $this = $(this);
+
+        //    // Identify the target content panel
+        //    //var content = $this.find('div[data-role="panel-content"]')[0];
+        //    //var contentHtml = _getPanelContent($this.attr('data-src'), $this.attr('data-panel-role'));
+        //    //$(content).html(contentHtml);
+
+        //    // Call any javascript init code
+        //    var script = $this.attr('data-on-init');
+        //    if (script.length > 0) {
+        //        console.log("hud._loadAllPanelContents    Executing script: " + script);
+        //        eval(script);
+        //    }
+        //});
     };
 
     var _moveToMainPanel = function(panelRole) {
@@ -118,7 +152,7 @@
                         }
 
                          console.log(json.onInit);
-                         if (json.onInitJs.length > 0) {
+                         if (json.onInit.length > 0) {
                              eval(json.onInit);
                          }
 
@@ -220,6 +254,7 @@
     }
 
     return {
-        initialize: _initialize
+        initialize: _initialize,
+        loadPanel: _loadPanel
     }
 })();

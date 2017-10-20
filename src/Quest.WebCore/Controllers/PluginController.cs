@@ -11,22 +11,30 @@ namespace Quest.WebCore.Controllers
 {
     public class PluginController : Controller
     {
-        private readonly IPluginService _pluginFactory;
+        private readonly IPluginService _pluginService;
         private readonly IViewRenderService _viewRenderService;
         private IHostingEnvironment _env;
 
-        public PluginController(IPluginService pluginFactory, IViewRenderService viewRenderService, IHostingEnvironment env)
+        public PluginController(IPluginService pluginService, IViewRenderService viewRenderService, IHostingEnvironment env)
         {
-            _pluginFactory = pluginFactory;
+            _pluginService = pluginService;
             _viewRenderService = viewRenderService;
             _env = env;
+        }
+
+        [HttpGet()]
+        public HudLayout GetLayout()
+        {
+            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
+            var model = _pluginService.GetLayoutModel(summary);
+            return model;
         }
 
         [HttpGet()]
         public HudPluginModel Create(string id)
         {
             // Create the plugin object
-            var plugin = _pluginFactory.Create(id);
+            var plugin = _pluginService.Create(id);
 
             if (plugin == null)
                 return null;
@@ -35,7 +43,7 @@ namespace Quest.WebCore.Controllers
             // TODO: do we need to carry through plugin state?
             plugin.InitializeWithDefaultProperties();
 
-            var v = _pluginFactory.GetPluginModel(plugin);
+            var v = _pluginService.GetPluginModel(plugin);
 
             return v;
         }

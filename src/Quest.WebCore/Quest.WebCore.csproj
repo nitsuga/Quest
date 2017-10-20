@@ -105,8 +105,6 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-    <Folder Include="wwwroot\plugins\Map\Content\" />
-    <Folder Include="wwwroot\plugins\Map\Lib\" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Views\Plugin\" />
   </ItemGroup>

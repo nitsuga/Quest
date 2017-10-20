@@ -102,8 +102,8 @@ namespace Quest.WebCore.Plugins.PluginSelector
             else
             {
                 var h3 = new TagBuilder("h3");
-                h3.InnerHtml.Append("Select plugin");
-                div.InnerHtml.AppendHtml(h3);
+                //h3.InnerHtml.Append("Select plugin");
+                //div.InnerHtml.AppendHtml(h3);
 
                 for (var r = 0; r < 3; r++)
                 {
@@ -122,6 +122,7 @@ namespace Quest.WebCore.Plugins.PluginSelector
                         var btn = new TagBuilder("button");
                         btn.AddCssClass("btn");
                         btn.AddCssClass("btn-default");
+                        btn.AddCssClass("btn-plugin-selector");
                         btn.MergeAttribute("data-role", "plugin-selector");
                         btn.MergeAttribute("data-plugin-name", p.Name);
                         btn.InnerHtml.Append(p.MenuText);

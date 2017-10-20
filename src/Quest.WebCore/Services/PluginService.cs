@@ -62,10 +62,23 @@ namespace Quest.WebCore.Services
                 var scriptsFolder = new DirectoryInfo(folder.FullName + "\\Scripts");
                 if (!scriptsFolder.Exists) continue;
 
-                foreach (var fileInfo in scriptsFolder.GetFiles())
+                var scriptOrderFile = $"{scriptsFolder}/scripts.txt";
+                if (File.Exists(scriptOrderFile))
                 {
-                    var pluginFilePath = fileInfo.DirectoryName.Replace(pluginPath, "");
-                    files.Add($"/plugins{pluginFilePath}/{fileInfo.Name}".Replace("\\","/"));
+                    var scripts = File.ReadAllLines(scriptOrderFile);
+                    foreach (var script in scripts)
+                    {
+                        var pluginFilePath = scriptsFolder.FullName.Replace(_env.WebRootPath,"");
+                        files.Add($"{pluginFilePath}/{script}".Replace("\\", "/"));
+                    }
+                }
+                else
+                {
+                    foreach (var fileInfo in scriptsFolder.GetFiles())
+                    {
+                        var pluginFilePath = fileInfo.DirectoryName.Replace(pluginPath, "");
+                        files.Add($"/plugins{pluginFilePath}/{fileInfo.Name}".Replace("\\", "/"));
+                    }
                 }
 
             }
@@ -101,11 +114,11 @@ namespace Quest.WebCore.Services
                 Scripts = GetScripts(),
                 Styles = GetStyles(),
                 Format = summary.Format,
-                Panels =new List<HudPluginModel>()
+                Panels = summary.Plugins
             };
 
-            foreach (var pluginName in summary.Plugins)
-                layout.Panels.Add(GetPluginModel(pluginName));
+            //foreach (var pluginName in summary.Plugins)
+            //    layout.Panels.Add(GetPluginModel(pluginName));
             return layout;
         }
 

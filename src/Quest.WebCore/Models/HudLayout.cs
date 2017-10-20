@@ -10,7 +10,7 @@ namespace Quest.WebCore.Models
         /// </summary>
         public int Format;
 
-        public List<HudPluginModel> Panels { get; set; }
+        public List<string> Panels { get; set; }
         
         public List<string> Scripts;
 

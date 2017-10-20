@@ -1,18 +1,13 @@
-﻿@model HudPluginModel
-@{
-    //var role = Model.InitialRole;
-}
-<!--
+﻿<!--
 data-role           "panel" - this is a container for the panel's content and any control buttons
 data-panel-role     either "main" or "mini", specifying the size and location of the panel
 data-src            this specifed the id of a div hidden in the page below that contains the rendered Html for the plugin
 data-on-init        javascript code that will be executed when the component is rendered in the container.
 //-->
-<div class="hud-panel" data-role="panel" data-panel-role="0" data-src="main" id="main-panel" data-on-init="@Model.OnInit" data-on-moved="@Model.OnPanelMoved">
+<div class="hud-panel" data-role="panel" data-panel-role="0" data-src="main" id="main-panel" >
     <a href="#" class="menu-btn"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
     <a href="#" class="panel-btn panel-btn-bottom" data-role="expand-full-screen"><span class="glyphicon glyphicon-new-window" aria-label="Expand panel to full screen"></span></a>
     <a href="#" class="panel-btn panel-btn-bottom hidden"><span class="glyphicon glyphicon-th-large" aria-label="Display mix panel layout"></span></a>
-    <div data-role="panel-content">
-        @Html.Raw(Model.Html)
+    <div data-role="panel-content" data-on-init="" data-on-moved="">
     </div>
 </div>
