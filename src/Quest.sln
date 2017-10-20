@@ -49,7 +49,11 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Api", "Quest.Api\Quest.Api.csproj", "{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.UnitTests", "..\Quest.UnitTests\Quest.UnitTests.csproj", "{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.UnitTests", "..\Quest.UnitTests\Quest.UnitTests.csproj", "{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{62251DB7-1242-4211-A94E-93DD58F94AD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.WebCore.Interfaces", "..\Quest.WebCore.Interfaces\Quest.WebCore.Interfaces.csproj", "{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -353,6 +357,30 @@ Global
 		{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}.Release|x64.Build.0 = Release|Any CPU
 		{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}.Release|x86.Build.0 = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|x64.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Debug|x86.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|Any CPU.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|ARM.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|ARM.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|x64.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|x64.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|x86.ActiveCfg = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Docker|x86.Build.0 = Debug|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|ARM.ActiveCfg = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|ARM.Build.0 = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|x64.ActiveCfg = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|x64.Build.0 = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|x86.ActiveCfg = Release|Any CPU
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -362,9 +390,11 @@ Global
 		{C17DCB01-3D32-4EAA-A5AE-FCA6AF60AAE0} = {31A0C808-7CE3-455A-AEE8-73F9B615135A}
 		{CCDC405D-93A5-45EB-90B1-07FCD1A989CE} = {31A0C808-7CE3-455A-AEE8-73F9B615135A}
 		{494058D6-7775-4533-8C64-E0D324FC60F1} = {0075C3E1-157B-4660-A444-A95607472626}
+		{CEF52C71-4844-491E-BAA1-7DCC49D4E0ED} = {62251DB7-1242-4211-A94E-93DD58F94AD9}
+		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909} = {62251DB7-1242-4211-A94E-93DD58F94AD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
+		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
 	EndGlobalSection
 EndGlobal

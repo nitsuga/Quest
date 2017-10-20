@@ -1,0 +1,25 @@
+﻿@model Hud.ViewModels.HudPluginCollection
+
+<div class="plugin-selection-grid">
+    @if (!Model.Plugins.Any())
+    {
+        <h3>No plugins detected</h3>
+    }
+    else
+    {
+        for (var r = 0; r < 3; r++)
+        {
+            <div class="row">
+
+                @for (var c = 0; c < 3; c++)
+                {
+                    var p = Model.Plugins[r * 3 + c];
+                    <div class="col-sm-4">
+                        <button class="btn btn-default" data-plugin-name="@p">@p</button>
+                    </div>
+                }
+
+            </div>
+        }
+    }
+</div>

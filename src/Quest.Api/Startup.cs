@@ -18,12 +18,11 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using Quest.Lib.Trace;
-using Quest.Common.ServiceBus;
-using Quest.Lib.ServiceBus;
 using Quest.Api.Options;
 using Quest.Api.Filters;
-using Quest.Api.Modules;
 using Quest.Api.Middleware;
+using System.Collections.Generic;
+using Quest.Lib.DependencyInjection;
 
 namespace Quest.Api
 {
@@ -172,7 +171,13 @@ namespace Quest.Api
             });
 
             // Add any Autofac modules or registrations.
-            builder.RegisterModule(new AutofacModule());
+            // register other libraries for autoinjection
+            List<string> libraries = new List<string>();
+            var p = Configuration.GetSection("libraries");
+            foreach (var item in p.GetChildren())
+                libraries.Add(item.Value);
+            builder.RegisterModule(new AutofacModule(libraries));
+
 
             // Populate the services.
             builder.Populate(services);

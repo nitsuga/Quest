@@ -25,8 +25,10 @@ namespace Quest.WebCore.Controllers
         private RouteService _routeService;
         private TelephonyService _telephonyService;
         private SecurityService _securityService;
+        private readonly IPluginService _pluginService;
 
         public HomeController(AsyncMessageCache messageCache,
+                IPluginService pluginFactory,
                 ResourceService resourceService,
                 IncidentService incidentService,
                 DestinationService destinationService,
@@ -45,6 +47,7 @@ namespace Quest.WebCore.Controllers
             _routeService = routeService;
             _telephonyService = telephonyService;
             _securityService = securityService;
+            _pluginService = pluginFactory;
         }
 
         async Task<HomeViewModel> DefaultHomeViewModel()
@@ -56,8 +59,6 @@ namespace Quest.WebCore.Controllers
 
             var claims = await _securityService.GetAppClaims(user);
             //var user = await _userManager.FindByNameAsync(User.Identity.Name);
-
-            
 
             var groupResult = await _searchService.GetIndexGroups();
 
@@ -71,7 +72,15 @@ namespace Quest.WebCore.Controllers
         }
 
 
-        public async Task<IActionResult> Index()
+        // GET: Home
+        public ActionResult Index()
+        {
+            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
+            var model = _pluginService.GetLayoutModel(summary);
+            return View(model);
+        }
+
+        public async Task<IActionResult> Map()
         {
             HomeViewModel model = await DefaultHomeViewModel();
             return View(model);

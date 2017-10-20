@@ -10,6 +10,9 @@ using Autofac.Configuration;
 using Quest.WebCore.Services;
 using Quest.Common.ServiceBus;
 using Quest.Lib.ServiceBus;
+using Quest.WebCore.Models;
+using Quest.Lib.DependencyInjection;
+using System.Collections.Generic;
 
 namespace Quest.WebCore
 {
@@ -47,8 +50,24 @@ namespace Quest.WebCore
 
             services.AddMvc();
 
+            services.AddSignalR();
+
+            // Add Application Services
+            services.AddScoped<IViewRenderService, ViewRenderService>();
+
+            // Add Plugin Services
+            services.AddScoped<IPluginService, PluginService>();
+
             // Add any Autofac modules or registrations.
-            builder.RegisterModule(new AutofacModule());
+            // register other libraries for autoinjection
+            List<string> libraries = new List<string>();
+            var p = Configuration.GetSection("libraries");
+            foreach (var item in p.GetChildren())
+                libraries.Add(item.Value);
+            builder.RegisterModule(new AutofacModule(libraries));
+
+            // Add any Autofac modules or registrations.
+            builder.RegisterModule(new Modules.PluginModule());
 
             // Add application services.
             //services.AddSingleton<IServiceBusClient, ActiveMqClientAsync>();
@@ -100,6 +119,8 @@ namespace Quest.WebCore
             app.UseStaticFiles();
 
             app.UseAuthentication();
+
+            app.UseSignalR((routes)=> { });
 
             app.Use(async (http, next) =>
             {

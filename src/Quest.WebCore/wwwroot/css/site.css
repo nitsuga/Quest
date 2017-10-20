@@ -1,50 +1,155 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+﻿html, body, .container-fluid {
+    height: 100%;
+    background: #031c44;
 }
 
-/* Wrapping element */
-/* Set some basic padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+.full-height {
+    height: 100%;
 }
 
-/* Set widths on the form inputs since otherwise they're 100% wide */
-input,
-select,
-textarea {
-    max-width: 280px;
+.half-height {
+    height: 50%;
 }
 
-/* Carousel */
-.carousel-caption p {
-    font-size: 20px;
-    line-height: 1.4;
+.no-height {
+    height: 0;
 }
 
-/* buttons and links extension to use brackets: [ click me ] */
-.btn-bracketed::before {
-    display: inline-block;
-    content: "[";
-    padding-right: 0.5em;
+#main-panel-wrapper {
+    border-right: 1px solid #a9a9a9;
 }
 
-.btn-bracketed::after {
-    display: inline-block;
-    content: "]";
-    padding-left: 0.5em;
+#side-panel-wrapper > div:first-child {
+    border-bottom: 1px solid #a9a9a9
 }
 
-/* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
+.hud-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
     width: 100%;
+    padding: 32px;
 }
 
-/* Hide/rearrange for smaller screens */
-@media screen and (max-width: 767px) {
-    /* Hide captions */
-    .carousel-caption {
-        display: none;
+    .hud-panel .hud-panel-content {
+        height: 100%;
     }
+
+.plugin-selection-grid {
+    height: 50%;
+    width: 50%;
+    max-height: 340px;
+    max-width: 600px;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20%;
+    padding: 32px;
+    background-color: #c9c9c9
 }
+
+#side-panel-wrapper .plugin-selection-grid {
+    width: 100%;
+    height: calc(100% - 64px);
+    margin-top: 10%;
+}
+
+.plugin-selection-grid > .row {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+.panel-btn {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    z-index: 999;
+}
+
+    .panel-btn.panel-btn-top {
+        top: 0;
+        left: 50%;
+        transform: translateX(-16px);
+    }
+
+    .panel-btn.panel-btn-bottom {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-16px);
+    }
+
+    .panel-btn.panel-btn-left {
+        left: 0;
+        top: 50%;
+        transform: translateY(-16px);
+    }
+
+.menu-btn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 24px;
+    z-index: 999;
+}
+
+.buttonicon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    width: 32px;
+    height: 32px;
+}
+
+.panel-btn.panel-btn-bottom > .buttonicon {
+    margin-top: -3px;
+}
+
+.buttonicon-collapse-up {
+    background-image: url(images/bullet_arrow_up.png);
+}
+
+.buttonicon-collapse-down {
+    background-image: url(images/bullet_arrow_down.png);
+}
+
+.buttonicon-swap-left {
+    background-image: url(images/bullet_arrow_left.png);
+}
+
+.buttonicon-layout-full-screen {
+    background-image: url(images/layouts_header.png);
+}
+
+.buttonicon-layout-mix-panels {
+    background-image: url(images/layouts_3_mix.png);
+}
+
+
+div[data-role="panel"] > div {
+    padding: 0;
+}
+
+div[data-role="panel-content"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#myMap {
+    height: 100%;
+}
+
+

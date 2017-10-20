@@ -4,8 +4,8 @@
       "commandName": "Project",
       "workingDirectory": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.Core\\bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "AnalyseEdgeCosts;RoutingManager",
-        "Session": "Mjp"
+        "Modules": "SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager",
+        "Session": "Dev"
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- Leaflet.draw 0.4.9, a plugin that adds drawing and editing tools to Leaflet powered maps.
+ Leaflet.draw 0.4.12, a plugin that adds drawing and editing tools to Leaflet powered maps.
  (c) 2012-2017, Jacob Toye, Jon West, Smartrak, Leaflet
 
  https://github.com/Leaflet/Leaflet.draw
@@ -8,7 +8,7 @@
 (function (window, document, undefined) {/**
  * Leaflet.draw assumes that you have already included the Leaflet library.
  */
-L.drawVersion = "0.4.9";
+L.drawVersion = "0.4.12";
 /**
  * @class L.Draw
  * @aka Draw
@@ -79,6 +79,14 @@ L.Draw = {};
  *  **Please note the edit toolbar is not enabled by default.**
  */
 L.drawLocal = {
+	// format: {
+	// 	numeric: {
+	// 		delimiters: {
+	// 			thousands: ',',
+	// 			decimal: '.'
+	// 		}
+	// 	}
+	// },
 	draw: {
 		toolbar: {
 			// #TODO: this should be reorganized where actions are nested in actions
@@ -100,7 +108,8 @@ L.drawLocal = {
 				polygon: 'Draw a polygon',
 				rectangle: 'Draw a rectangle',
 				circle: 'Draw a circle',
-				marker: 'Draw a marker'
+				marker: 'Draw a marker',
+				circlemarker: 'Draw a circlemarker'
 			}
 		},
 		handlers: {
@@ -109,6 +118,11 @@ L.drawLocal = {
 					start: 'Click and drag to draw circle.'
 				},
 				radius: 'Radius'
+			},
+			circlemarker: {
+				tooltip: {
+					start: 'Click map to place circle marker.'
+				}
 			},
 			marker: {
 				tooltip: {
@@ -146,31 +160,35 @@ L.drawLocal = {
 		toolbar: {
 			actions: {
 				save: {
-					title: 'Save changes.',
+					title: 'Save changes',
 					text: 'Save'
 				},
 				cancel: {
-					title: 'Cancel editing, discards all changes.',
+					title: 'Cancel editing, discards all changes',
 					text: 'Cancel'
+				},
+				clearAll:{
+					title: 'Clear all layers',
+					text: 'Clear All'
 				}
 			},
 			buttons: {
-				edit: 'Edit layers.',
-				editDisabled: 'No layers to edit.',
-				remove: 'Delete layers.',
-				removeDisabled: 'No layers to delete.'
+				edit: 'Edit layers',
+				editDisabled: 'No layers to edit',
+				remove: 'Delete layers',
+				removeDisabled: 'No layers to delete'
 			}
 		},
 		handlers: {
 			edit: {
 				tooltip: {
-					text: 'Drag handles, or marker to edit feature.',
+					text: 'Drag handles or markers to edit features.',
 					subtext: 'Click cancel to undo changes.'
 				}
 			},
 			remove: {
 				tooltip: {
-					text: 'Click on a feature to remove'
+					text: 'Click on a feature to remove.'
 				}
 			}
 		}
@@ -192,7 +210,7 @@ L.drawLocal = {
  * @example
  * ```js
  * map.on(L.Draw.Event.CREATED; function (e) {
- *    var type = e.layerType;
+ *    var type = e.layerType,
  *        layer = e.layer;
  *
  *    if (type === 'marker') {
@@ -225,7 +243,7 @@ L.Draw.Event.CREATED = 'draw:created';
  *
  * @example
  * ```js
- *      map.on('draw:edited'; function (e) {
+ *      map.on('draw:edited', function (e) {
      *          var layers = e.layers;
      *          layers.eachLayer(function (layer) {
      *              //do whatever you want; most likely save back to db
@@ -337,6 +355,7 @@ L.Draw.Event.DELETESTART = 'draw:deletestart';
 L.Draw.Event.DELETESTOP = 'draw:deletestop';
 
 
+
 L.Draw = L.Draw || {};
 
 /**
@@ -374,7 +393,7 @@ L.Draw.Feature = L.Handler.extend({
 		this._map.fire(L.Draw.Event.DRAWSTART, { layerType: this.type });
 	},
 
-	// @method initialize(): void
+	// @method disable(): void
 	disable: function () {
 		if (!this._enabled) {
 			return;
@@ -428,8 +447,8 @@ L.Draw.Feature = L.Handler.extend({
 
 	// Cancel drawing when the escape key is pressed
 	_cancelDrawing: function (e) {
-		this._map.fire('draw:canceled', { layerType: this.type });
 		if (e.keyCode === 27) {
+			this._map.fire('draw:canceled', { layerType: this.type });
 			this.disable();
 		}
 	}
@@ -478,7 +497,8 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 		feet: true, // When not metric, to use feet instead of yards for display.
 		nautic: false, // When not metric, not feet use nautic mile for display
 		showLength: true, // Whether to display distance in the tooltip
-		zIndexOffset: 2000 // This should be > than the highest z-index any map layers
+    zIndexOffset: 2000, // This should be > than the highest z-index any map layers
+    factor: 1 // To change distance calculation
 	},
 
 	// @method initialize(): void
@@ -937,7 +957,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			this._measurementRunningTotal = 0;
 		} else {
 			previousMarkerIndex = markersLength - (added ? 2 : 1);
-			distance = latlng.distanceTo(this._markers[previousMarkerIndex].getLatLng());
+			distance = this._map.distance(latlng, this._markers[previousMarkerIndex].getLatLng()) * (this.options.factor || 1);
 
 			this._measurementRunningTotal += distance * (added ? 1 : -1);
 		}
@@ -949,9 +969,9 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			distance;
 
 		// calculate the distance from the last fixed point to the mouse position
-		distance = this._measurementRunningTotal + currentLatLng.distanceTo(previousLatLng);
+		distance = previousLatLng && currentLatLng ? this._measurementRunningTotal + this._map.distance(currentLatLng, previousLatLng) * (this.options.factor || 1) : this._measurementRunningTotal || 0 ;
 
-		return L.GeometryUtil.readableDistance(distance, this.options.metric, this.options.feet, this.options.nautic);
+		return L.GeometryUtil.readableDistance(distance, this.options.metric, this.options.feet, this.options.nautic, this.options.precision);
 	},
 
 	_showErrorTooltip: function () {
@@ -1034,6 +1054,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 
 	options: {
 		showArea: false,
+		showLength: false,
 		shapeOptions: {
 			stroke: true,
 			color: '#3388ff',
@@ -1044,7 +1065,14 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 			fillOpacity: 0.2,
 			clickable: true
 		},
-		metric: true // Whether to use the metric measurement system or imperial
+		// Whether to use the metric measurement system (truthy) or not (falsy).
+		// Also defines the units to use for the metric system as an array of
+		// strings (e.g. `['ha', 'm']`).
+		metric: true,
+		feet: true, // When not metric, to use feet instead of yards for display.
+		nautic: false, // When not metric, not feet use nautic mile for display
+		// Defines the precision for each type of unit (e.g. {km: 2, ft: 0}
+		precision: {}
 	},
 
 	// @method initialize(): void
@@ -1080,6 +1108,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 			text = L.drawLocal.draw.handlers.polygon.tooltip.start;
 		} else if (this._markers.length < 3) {
 			text = L.drawLocal.draw.handlers.polygon.tooltip.cont;
+			subtext = this._getMeasurementString();
 		} else {
 			text = L.drawLocal.draw.handlers.polygon.tooltip.end;
 			subtext = this._getMeasurementString();
@@ -1092,13 +1121,23 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 	},
 
 	_getMeasurementString: function () {
-		var area = this._area;
+		var area = this._area,
+			measurementString = '';
 
-		if (!area) {
+
+		if (!area && !this.options.showLength) {
 			return null;
 		}
 
-		return L.GeometryUtil.readableArea(area, this.options.metric);
+		if (this.options.showLength) {
+			measurementString = L.Draw.Polyline.prototype._getMeasurementString.call(this);
+		}
+
+		if (area) {
+			measurementString += '<br>' + L.GeometryUtil.readableArea(area, this.options.metric, this.options.precision);
+		}
+
+		return measurementString;
 	},
 
 	_shapeIsValid: function () {
@@ -1278,7 +1317,31 @@ L.Draw.Rectangle = L.Draw.SimpleShape.extend({
 
 		L.Draw.SimpleShape.prototype.initialize.call(this, map, options);
 	},
+    
+	// @method disable(): void
+	disable: function () {
+		if (!this._enabled) {
+			return;
+		}
 
+		this._isCurrentlyTwoClickDrawing = false;
+		L.Draw.SimpleShape.prototype.disable.call(this);
+	},
+    
+	_onMouseUp: function (e) {
+		if (!this._shape && !this._isCurrentlyTwoClickDrawing) {
+			this._isCurrentlyTwoClickDrawing = true;
+			return;
+		}
+		
+		// Make sure closing click is on map
+		if (this._isCurrentlyTwoClickDrawing && !_hasAncestor(e.target, 'leaflet-pane')) {
+			return;
+		}
+
+		L.Draw.SimpleShape.prototype._onMouseUp.call(this);
+	},
+    
 	_drawShape: function (latlng) {
 		if (!this._shape) {
 			this._shape = new L.Rectangle(new L.LatLngBounds(this._startLatLng, latlng), this.options.shapeOptions);
@@ -1312,84 +1375,10 @@ L.Draw.Rectangle = L.Draw.SimpleShape.extend({
 	}
 });
 
-
-
-/**
- * @class L.Draw.Circle
- * @aka Draw.Circle
- * @inherits L.Draw.SimpleShape
- */
-L.Draw.Circle = L.Draw.SimpleShape.extend({
-	statics: {
-		TYPE: 'circle'
-	},
-
-	options: {
-		shapeOptions: {
-			stroke: true,
-			color: '#3388ff',
-			weight: 4,
-			opacity: 0.5,
-			fill: true,
-			fillColor: null, //same as color by default
-			fillOpacity: 0.2,
-			clickable: true
-		},
-		showRadius: true,
-		metric: true, // Whether to use the metric measurement system or imperial
-		feet: true, // When not metric, use feet instead of yards for display
-		nautic: false // When not metric, not feet use nautic mile for display
-	},
-
-	// @method initialize(): void
-	initialize: function (map, options) {
-		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
-		this.type = L.Draw.Circle.TYPE;
-
-		this._initialLabelText = L.drawLocal.draw.handlers.circle.tooltip.start;
-
-		L.Draw.SimpleShape.prototype.initialize.call(this, map, options);
-	},
-
-	_drawShape: function (latlng) {
-		if (!this._shape) {
-			this._shape = new L.Circle(this._startLatLng, this._startLatLng.distanceTo(latlng), this.options.shapeOptions);
-			this._map.addLayer(this._shape);
-		} else {
-			this._shape.setRadius(this._startLatLng.distanceTo(latlng));
-		}
-	},
-
-	_fireCreatedEvent: function () {
-		var circle = new L.Circle(this._startLatLng, this._shape.getRadius(), this.options.shapeOptions);
-		L.Draw.SimpleShape.prototype._fireCreatedEvent.call(this, circle);
-	},
-
-	_onMouseMove: function (e) {
-		var latlng = e.latlng,
-			showRadius = this.options.showRadius,
-			useMetric = this.options.metric,
-			radius;
-
-		this._tooltip.updatePosition(latlng);
-		if (this._isDrawing) {
-			this._drawShape(latlng);
-
-			// Get the new radius (rounded to 1 dp)
-			radius = this._shape.getRadius().toFixed(1);
-
-			var subtext = '';
-			if (showRadius) {
-				subtext = L.drawLocal.draw.handlers.circle.radius + ': ' +
-						  L.GeometryUtil.readableDistance(radius, useMetric, this.options.feet, this.options.nautic);
-			}
-			this._tooltip.updateContent({
-				text: this._endLabelText,
-				subtext: subtext
-			});
-		}
-	}
-});
+function _hasAncestor (el, cls) {
+	while ((el = el.parentElement) && !el.classList.contains(cls));
+	return el;
+}
 
 
 
@@ -1414,6 +1403,8 @@ L.Draw.Marker = L.Draw.Feature.extend({
 		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
 		this.type = L.Draw.Marker.TYPE;
 
+		this._initialLabelText = L.drawLocal.draw.handlers.marker.tooltip.start;
+
 		L.Draw.Feature.prototype.initialize.call(this, map, options);
 	},
 
@@ -1423,7 +1414,7 @@ L.Draw.Marker = L.Draw.Feature.extend({
 		L.Draw.Feature.prototype.addHooks.call(this);
 
 		if (this._map) {
-			this._tooltip.updateContent({ text: L.drawLocal.draw.handlers.marker.tooltip.start });
+			this._tooltip.updateContent({ text: this._initialLabelText });
 
 			// Same mouseMarker as in Draw.Polyline
 			if (!this._mouseMarker) {
@@ -1477,10 +1468,7 @@ L.Draw.Marker = L.Draw.Feature.extend({
 		this._mouseMarker.setLatLng(latlng);
 
 		if (!this._marker) {
-			this._marker = new L.Marker(latlng, {
-				icon: this.options.icon,
-				zIndexOffset: this.options.zIndexOffset
-			});
+			this._marker = this._createMarker(latlng);
 			// Bind to both marker and map to make sure we get the click event.
 			this._marker.on('click', this._onClick, this);
 			this._map
@@ -1491,6 +1479,13 @@ L.Draw.Marker = L.Draw.Feature.extend({
 			latlng = this._mouseMarker.getLatLng();
 			this._marker.setLatLng(latlng);
 		}
+	},
+
+	_createMarker: function (latlng) {
+		return new L.Marker(latlng, {
+			icon: this.options.icon,
+			zIndexOffset: this.options.zIndexOffset
+		});
 	},
 
 	_onClick: function () {
@@ -1511,6 +1506,131 @@ L.Draw.Marker = L.Draw.Feature.extend({
 	_fireCreatedEvent: function () {
 		var marker = new L.Marker.Touch(this._marker.getLatLng(), { icon: this.options.icon });
 		L.Draw.Feature.prototype._fireCreatedEvent.call(this, marker);
+	}
+});
+
+
+
+/**
+ * @class L.Draw.CircleMarker
+ * @aka Draw.CircleMarker
+ * @inherits L.Draw.Marker
+ */
+L.Draw.CircleMarker = L.Draw.Marker.extend({
+	statics: {
+		TYPE: 'circlemarker'
+	},
+
+	options: {
+		stroke: true,
+		color: '#3388ff',
+		weight: 4,
+		opacity: 0.5,
+		fill: true,
+		fillColor: null, //same as color by default
+		fillOpacity: 0.2,
+		clickable: true,
+		zIndexOffset: 2000 // This should be > than the highest z-index any markers
+	},
+
+	// @method initialize(): void
+	initialize: function (map, options) {
+		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
+		this.type = L.Draw.CircleMarker.TYPE;
+
+		this._initialLabelText = L.drawLocal.draw.handlers.circlemarker.tooltip.start;
+
+		L.Draw.Feature.prototype.initialize.call(this, map, options);
+	},
+
+
+	_fireCreatedEvent: function () {
+		var circleMarker = new L.CircleMarker(this._marker.getLatLng(), this.options);
+		L.Draw.Feature.prototype._fireCreatedEvent.call(this, circleMarker);
+	},
+
+	_createMarker: function (latlng) {
+		return new L.CircleMarker(latlng, this.options);
+	}
+});
+
+
+
+/**
+ * @class L.Draw.Circle
+ * @aka Draw.Circle
+ * @inherits L.Draw.SimpleShape
+ */
+L.Draw.Circle = L.Draw.SimpleShape.extend({
+	statics: {
+		TYPE: 'circle'
+	},
+
+	options: {
+		shapeOptions: {
+			stroke: true,
+			color: '#3388ff',
+			weight: 4,
+			opacity: 0.5,
+			fill: true,
+			fillColor: null, //same as color by default
+			fillOpacity: 0.2,
+			clickable: true
+		},
+		showRadius: true,
+		metric: true, // Whether to use the metric measurement system or imperial
+		feet: true, // When not metric, use feet instead of yards for display
+		nautic: false // When not metric, not feet use nautic mile for display
+	},
+
+	// @method initialize(): void
+	initialize: function (map, options) {
+		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
+		this.type = L.Draw.Circle.TYPE;
+
+		this._initialLabelText = L.drawLocal.draw.handlers.circle.tooltip.start;
+
+		L.Draw.SimpleShape.prototype.initialize.call(this, map, options);
+	},
+
+	_drawShape: function (latlng) {
+    var distance = this._map.distance(this._startLatLng, latlng);
+		if (!this._shape) {
+			this._shape = new L.Circle(this._startLatLng, distance, this.options.shapeOptions);
+			this._map.addLayer(this._shape);
+		} else {
+			this._shape.setRadius(distance);
+		}
+	},
+
+	_fireCreatedEvent: function () {
+		var circle = new L.Circle(this._startLatLng, this._shape.getRadius(), this.options.shapeOptions);
+		L.Draw.SimpleShape.prototype._fireCreatedEvent.call(this, circle);
+	},
+
+	_onMouseMove: function (e) {
+		var latlng = e.latlng,
+			showRadius = this.options.showRadius,
+			useMetric = this.options.metric,
+			radius;
+
+		this._tooltip.updatePosition(latlng);
+		if (this._isDrawing) {
+			this._drawShape(latlng);
+
+			// Get the new radius (rounded to 1 dp)
+			radius = this._shape.getRadius().toFixed(1);
+
+			var subtext = '';
+			if (showRadius) {
+				subtext = L.drawLocal.draw.handlers.circle.radius + ': ' +
+						  L.GeometryUtil.readableDistance(radius, useMetric, this.options.feet, this.options.nautic);
+			}
+			this._tooltip.updateContent({
+				text: this._endLabelText,
+				subtext: subtext
+			});
+		}
 	}
 });
 
@@ -2458,16 +2578,67 @@ L.Rectangle.addInitHook(function () {
 
 L.Edit = L.Edit || {};
 /**
- * @class L.Edit.Circle
+ * @class L.Edit.CircleMarker
  * @aka Edit.Circle
  * @inherits L.Edit.SimpleShape
  */
-L.Edit.Circle = L.Edit.SimpleShape.extend({
+L.Edit.CircleMarker = L.Edit.SimpleShape.extend({
 	_createMoveMarker: function () {
 		var center = this._shape.getLatLng();
 
 		this._moveMarker = this._createMarker(center, this.options.moveIcon);
 	},
+
+	_createResizeMarker: function () {
+		// To avoid an undefined check in L.Edit.SimpleShape.removeHooks
+		this._resizeMarkers = [];
+	},
+
+	_move: function (latlng) {
+		if (this._resizeMarkers.length) {
+				var resizemarkerPoint = this._getResizeMarkerPoint(latlng);
+				// Move the resize marker
+				this._resizeMarkers[0].setLatLng(resizemarkerPoint);
+		}
+
+		// Move the circle
+		this._shape.setLatLng(latlng);
+
+		this._map.fire(L.Draw.Event.EDITMOVE, { layer: this._shape });
+	},
+});
+
+L.CircleMarker.addInitHook(function () {
+	if (L.Edit.CircleMarker) {
+		this.editing = new L.Edit.CircleMarker(this);
+
+		if (this.options.editable) {
+			this.editing.enable();
+		}
+	}
+
+	this.on('add', function () {
+		if (this.editing && this.editing.enabled()) {
+			this.editing.addHooks();
+		}
+	});
+
+	this.on('remove', function () {
+		if (this.editing && this.editing.enabled()) {
+			this.editing.removeHooks();
+		}
+	});
+});
+
+
+
+L.Edit = L.Edit || {};
+/**
+ * @class L.Edit.Circle
+ * @aka Edit.Circle
+ * @inherits L.Edit.CircleMarker
+ */
+L.Edit.Circle = L.Edit.CircleMarker.extend({
 
 	_createResizeMarker: function () {
 		var center = this._shape.getLatLng(),
@@ -2484,21 +2655,9 @@ L.Edit.Circle = L.Edit.SimpleShape.extend({
 		return this._map.unproject([point.x + delta, point.y - delta]);
 	},
 
-	_move: function (latlng) {
-		var resizemarkerPoint = this._getResizeMarkerPoint(latlng);
-
-		// Move the resize marker
-		this._resizeMarkers[0].setLatLng(resizemarkerPoint);
-
-		// Move the circle
-		this._shape.setLatLng(latlng);
-
-		this._map.fire(L.Draw.Event.EDITMOVE, { layer: this._shape });
-	},
-
 	_resize: function (latlng) {
 		var moveLatLng = this._moveMarker.getLatLng(),
-			radius = moveLatLng.distanceTo(latlng);
+			radius = this._map.distance(moveLatLng, latlng);
 
 		this._shape.setRadius(radius);
 
@@ -2527,6 +2686,7 @@ L.Circle.addInitHook(function () {
 		}
 	});
 });
+
 
 
 L.Map.mergeOptions({
@@ -2835,6 +2995,20 @@ L.LatLngUtil = {
 
 
 
+(function() {
+
+var defaultPrecision = {
+	km: 2,
+	ha: 2,
+	m: 0,
+	mi: 2,
+	ac: 2,
+	yd: 0,
+	ft: 0,
+	nm: 2
+};
+
+
 /**
  * @class L.GeometryUtil
  * @aka GeometryUtil
@@ -2862,26 +3036,60 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
 		return Math.abs(area);
 	},
 
-	// @method readableArea(area, isMetric): string
-	// Returns a readable area string in yards or metric
-	readableArea: function (area, isMetric) {
-		var areaStr;
+	// @method formattedNumber(n, precision): string
+	// Returns n in specified number format (if defined) and precision
+	formattedNumber: function (n, precision) {
+		var formatted = parseFloat(n).toFixed(precision),
+			format = L.drawLocal.format && L.drawLocal.format.numeric,
+			delimiters = format && format.delimiters,
+			thousands = delimiters && delimiters.thousands,
+			decimal = delimiters && delimiters.decimal;
+
+		if (thousands || decimal) {
+			var splitValue = formatted.split('.');
+			formatted = thousands ? splitValue[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + thousands) : splitValue[0];
+			decimal = decimal || '.';
+			if (splitValue.length > 1) {
+				formatted = formatted + decimal + splitValue[1];
+			}
+		}
+
+		return formatted;
+	},
+
+	// @method readableArea(area, isMetric, precision): string
+	// Returns a readable area string in yards or metric.
+	// The value will be rounded as defined by the precision option object.
+	readableArea: function (area, isMetric, precision) {
+		var areaStr,
+			units,
+			precision = L.Util.extend({}, defaultPrecision, precision);
 
 		if (isMetric) {
-			if (area >= 10000) {
-				areaStr = (area * 0.0001).toFixed(2) + ' ha';
+			units = ['ha', 'm'];
+			type = typeof isMetric;
+			if (type === 'string') {
+				units = [isMetric];
+			} else if (type !== 'boolean') {
+				units = isMetric;
+			}
+
+			if (area >= 1000000 && units.indexOf('km') !== -1) {
+				areaStr = L.GeometryUtil.formattedNumber(area * 0.000001, precision['km']) + ' km²';
+			} else if (area >= 10000 && units.indexOf('ha') !== -1) {
+				areaStr = L.GeometryUtil.formattedNumber(area * 0.0001, precision['ha']) + ' ha';
 			} else {
-				areaStr = area.toFixed(2) + ' m&sup2;';
+				areaStr = L.GeometryUtil.formattedNumber(area, precision['m']) + ' m²';
 			}
 		} else {
 			area /= 0.836127; // Square yards in 1 meter
 
 			if (area >= 3097600) { //3097600 square yards in 1 square mile
-				areaStr = (area / 3097600).toFixed(2) + ' mi&sup2;';
-			} else if (area >= 4840) {//48040 square yards in 1 acre
-				areaStr = (area / 4840).toFixed(2) + ' acres';
+				areaStr = L.GeometryUtil.formattedNumber(area / 3097600, precision['mi']) + ' mi²';
+			} else if (area >= 4840) { //4840 square yards in 1 acre
+				areaStr = L.GeometryUtil.formattedNumber(area / 4840, precision['ac']) + ' acres';
 			} else {
-				areaStr = Math.ceil(area) + ' yd&sup2;';
+				areaStr = L.GeometryUtil.formattedNumber(area, precision['yd']) + ' yd²';
 			}
 		}
 
@@ -2892,58 +3100,58 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
 	// Converts a metric distance to one of [ feet, nauticalMile, metric or yards ] string
 	//
 	// @alternative
-	// @method readableDistance(distance, isMetric, useFeet, isNauticalMile): string
+	// @method readableDistance(distance, isMetric, useFeet, isNauticalMile, precision): string
 	// Converts metric distance to distance string.
-	readableDistance: function (distance, isMetric, isFeet, isNauticalMile) {
+	// The value will be rounded as defined by the precision option object.
+	readableDistance: function (distance, isMetric, isFeet, isNauticalMile, precision) {
 		var distanceStr,
-			units;
+			units,
+			precision = L.Util.extend({}, defaultPrecision, precision);
 
-		if (typeof isMetric == "string") {
-			units = isMetric;
+		if (isMetric) {
+			units = typeof isMetric == 'string' ? isMetric : 'metric';
+		} else if (isFeet) {
+			units = 'feet';
+		} else if (isNauticalMile) {
+			units = 'nauticalMile';
 		} else {
-			if (isFeet) {
-				units = 'feet';
-			} else if (isNauticalMile) {
-				units = 'nauticalMile';
-			} else if (isMetric) {
-				units = 'metric';
-			} else {
-				units = 'yards';
-			}
+			units = 'yards';
 		}
 
 		switch (units) {
 		case 'metric':
 			// show metres when distance is < 1km, then show km
 			if (distance > 1000) {
-				distanceStr = (distance / 1000).toFixed(2) + ' km';
+				distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['km']) + ' km';
 			} else {
-				distanceStr = Math.ceil(distance) + ' m';
+				distanceStr = L.GeometryUtil.formattedNumber(distance, precision['m']) + ' m';
 			}
 			break;
 		case 'feet':
 			distance *= 1.09361 * 3;
-			distanceStr = Math.ceil(distance) + ' ft';
+			distanceStr = L.GeometryUtil.formattedNumber(distance, precision['ft']) + ' ft';
 
 			break;
 		case 'nauticalMile':
 			distance *= 0.53996;
-			distanceStr = (distance / 1000).toFixed(2) + ' nm';
+			distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['nm']) + ' nm';
 			break;
 		case 'yards':
 		default:
 			distance *= 1.09361;
 
 			if (distance > 1760) {
-				distanceStr = (distance / 1760).toFixed(2) + ' miles';
+				distanceStr = L.GeometryUtil.formattedNumber(distance / 1760, precision['mi']) + ' miles';
 			} else {
-				distanceStr = Math.ceil(distance) + ' yd';
+				distanceStr = L.GeometryUtil.formattedNumber(distance, precision['yd']) + ' yd';
 			}
 			break;
 		}
 		return distanceStr;
 	}
 });
+
+})();
 
 
 
@@ -3414,6 +3622,13 @@ L.Toolbar = L.Class.extend({
 			.on('disabled', this._handlerDeactivated, this);
 	},
 
+	/* Detect iOS based on browser User Agent, based on:
+	 * http://stackoverflow.com/a/9039885 */
+	_detectIOS: function () {
+		var iOS = (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream);
+		return iOS;
+	},
+
 	_createButton: function (options) {
 
 		var link = L.DomUtil.create('a', options.className || '', options.container);
@@ -3433,25 +3648,31 @@ L.Toolbar = L.Class.extend({
 			sr.innerHTML = options.text;
 		}
 
+		/* iOS does not use click events */
+		var buttonEvent = this._detectIOS() ? 'touchstart' : 'click';
+
 		L.DomEvent
 			.on(link, 'click', L.DomEvent.stopPropagation)
 			.on(link, 'mousedown', L.DomEvent.stopPropagation)
 			.on(link, 'dblclick', L.DomEvent.stopPropagation)
 			.on(link, 'touchstart', L.DomEvent.stopPropagation)
 			.on(link, 'click', L.DomEvent.preventDefault)
-			.on(link, 'click', options.callback, options.context);
+			.on(link, buttonEvent, options.callback, options.context);
 
 		return link;
 	},
 
 	_disposeButton: function (button, callback) {
+		/* iOS does not use click events */
+		var buttonEvent = this._detectIOS() ? 'touchstart' : 'click';
+
 		L.DomEvent
 			.off(button, 'click', L.DomEvent.stopPropagation)
 			.off(button, 'mousedown', L.DomEvent.stopPropagation)
 			.off(button, 'dblclick', L.DomEvent.stopPropagation)
 			.off(button, 'touchstart', L.DomEvent.stopPropagation)
 			.off(button, 'click', L.DomEvent.preventDefault)
-			.off(button, 'click', callback);
+			.off(button, buttonEvent, callback);
 	},
 
 	_handlerActivated: function (e) {
@@ -3577,6 +3798,7 @@ L.Draw.Tooltip = L.Class.extend({
 	initialize: function (map) {
 		this._map = map;
 		this._popupPane = map._panes.popupPane;
+		this._visible = false;
 
 		this._container = map.options.drawControlTooltips ?
 			L.DomUtil.create('div', 'leaflet-draw-tooltip', this._popupPane) : null;
@@ -3619,6 +3841,14 @@ L.Draw.Tooltip = L.Class.extend({
 			'<span class="leaflet-draw-tooltip-subtext">' + labelText.subtext + '</span>' + '<br />' : '') +
 			'<span>' + labelText.text + '</span>';
 
+		if (!labelText.text && !labelText.subtext) {
+			this._visible = false;
+			this._container.style.visibility = 'hidden';
+		} else {
+			this._visible = true;
+			this._container.style.visibility = 'inherit';
+		}
+
 		return this;
 	},
 
@@ -3629,7 +3859,9 @@ L.Draw.Tooltip = L.Class.extend({
 			tooltipContainer = this._container;
 
 		if (this._container) {
-			tooltipContainer.style.visibility = 'inherit';
+			if (this._visible) {
+				tooltipContainer.style.visibility = 'inherit';
+			}
 			L.DomUtil.setPosition(tooltipContainer, pos);
 		}
 
@@ -3678,7 +3910,8 @@ L.DrawToolbar = L.Toolbar.extend({
 		polygon: {},
 		rectangle: {},
 		circle: {},
-		marker: {}
+		marker: {},
+		circlemarker: {}
 	},
 
 	// @method initialize(): void
@@ -3724,6 +3957,11 @@ L.DrawToolbar = L.Toolbar.extend({
 				enabled: this.options.marker,
 				handler: new L.Draw.Marker(map, this.options.marker),
 				title: L.drawLocal.draw.toolbar.buttons.marker
+			},
+			{
+				enabled: this.options.circlemarker,
+				handler: new L.Draw.CircleMarker(map, this.options.circlemarker),
+				title: L.drawLocal.draw.toolbar.buttons.circlemarker
 			}
 		];
 	},
@@ -3850,8 +4088,8 @@ L.EditToolbar = L.Toolbar.extend({
 
 	// @method getActions(): object
 	// Get actions information
-	getActions: function () {
-		return [
+	getActions: function (handler) {
+		var actions = [
 			{
 				title: L.drawLocal.edit.toolbar.actions.save.title,
 				text: L.drawLocal.edit.toolbar.actions.save.text,
@@ -3865,6 +4103,17 @@ L.EditToolbar = L.Toolbar.extend({
 				context: this
 			}
 		];
+
+		if (handler.removeAllLayers) {
+			 actions.push({
+                 title: L.drawLocal.edit.toolbar.actions.clearAll.title,
+                 text: L.drawLocal.edit.toolbar.actions.clearAll.text,
+                 callback: this._clearAllLayers,
+                 context: this
+             });
+		}
+
+		return actions;
 	},
 
 	// @method addToolbar(map): L.DomUtil
@@ -3901,6 +4150,13 @@ L.EditToolbar = L.Toolbar.extend({
 
 	_save: function () {
 		this._activeMode.handler.save();
+		if (this._activeMode) {
+			this._activeMode.handler.disable();
+		}
+	},
+
+	_clearAllLayers:function(){
+		this._activeMode.handler.removeAllLayers();
 		if (this._activeMode) {
 			this._activeMode.handler.disable();
 		}
@@ -4096,7 +4352,7 @@ L.EditToolbar.Edit = L.Handler.extend({
 					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng()),
 					radius: layer.getRadius()
 				};
-			} else if (layer instanceof L.Marker) { // Marker
+			} else if (layer instanceof L.Marker || layer instanceof L.CircleMarker) { // Marker
 				this._uneditedLayerProps[id] = {
 					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng())
 				};
@@ -4125,7 +4381,7 @@ L.EditToolbar.Edit = L.Handler.extend({
 			} else if (layer instanceof L.Circle) {
 				layer.setLatLng(this._uneditedLayerProps[id].latlng);
 				layer.setRadius(this._uneditedLayerProps[id].radius);
-			} else if (layer instanceof L.Marker) { // Marker
+			} else if (layer instanceof L.Marker || layer instanceof L.CircleMarker) { // Marker or CircleMarker
 				layer.setLatLng(this._uneditedLayerProps[id].latlng);
 			}
 
@@ -4345,6 +4601,16 @@ L.EditToolbar.Delete = L.Handler.extend({
 	// Save deleted layers
 	save: function () {
 		this._map.fire(L.Draw.Event.DELETED, { layers: this._deletedLayers });
+	},
+
+	// @method removeAllLayers(): void
+	// Remove all delateable layers
+	removeAllLayers: function(){
+		// Iterate of the delateable layers and add remove them
+		this._deletableLayers.eachLayer(function (layer) {
+			this._removeLayer({layer:layer});
+		}, this);
+		this.save();
 	},
 
 	_enableLayerDelete: function (e) {

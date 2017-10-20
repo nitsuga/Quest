@@ -1,0 +1,9 @@
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.deps.json
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csprojResolveAssemblyReference.cache
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csproj.CoreCompileInputs.cache
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.AssemblyInfoInputs.cache
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.AssemblyInfo.cs
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
+E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb

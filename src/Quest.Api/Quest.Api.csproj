@@ -15,7 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Modules\AutofacModule.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Extensions\" />
+    <Folder Include="Modules\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

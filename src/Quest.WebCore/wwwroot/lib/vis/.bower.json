@@ -42,15 +42,15 @@
   ],
   "dependencies": {},
   "devDependencies": {},
-  "version": "4.20.1-SNAPSHOT",
-  "_release": "4.20.1-SNAPSHOT",
+  "version": "4.21.0",
+  "_release": "4.21.0",
   "_resolution": {
     "type": "version",
-    "tag": "v4.20.1-SNAPSHOT",
-    "commit": "0efc1ef7b9e514a83a096414809683706d919bb1"
+    "tag": "v4.21.0",
+    "commit": "001716727826e2ba6cc0df7070733013936dda9a"
   },
   "_source": "https://github.com/almende/vis.git",
-  "_target": "v4.20.1-SNAPSHOT",
+  "_target": "v4.21.0",
   "_originalSource": "vis",
   "_direct": true
 }

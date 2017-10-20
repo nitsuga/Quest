@@ -35,7 +35,7 @@ namespace Quest.Lib.DependencyInjection
             int count = 0;
             foreach (var t in asm.GetTypes())
                 count+=RegisterType(builder, t);
-            Logger.Write($".. registered {count} types");
+            Logger.Write($".. registered {count} types from {asm.FullName}");
         }
 
         static int RegisterType(ContainerBuilder builder, Type t)
@@ -76,10 +76,13 @@ namespace Quest.Lib.DependencyInjection
                         .PropertiesAutowired();
 
                     if (theinterface != null)
+                    {
                         if (name != null)
+                        {
                             b = b.Named(name, theinterface);
-                        else
-                            b = b.As(theinterface);
+                        }
+                        b = b.As(theinterface);
+                    }
                     else
                         if (name != null)
                         b = b.Named(name, attribute.AttributeType);
