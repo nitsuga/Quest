@@ -17,14 +17,15 @@ namespace Quest.WebCore.Services
         /// Creates an instance of a plugin
         /// </summary>
         /// <param name="pluginName"></param>
+        /// <param name="role">role</param>
         /// <returns></returns>
         IHudPlugin Create(string pluginName);
 
         HudLayout GetLayoutModel(HudLayoutSummary summary);
 
-        HudPluginModel GetPluginModel(string pluginName);
+        HudPluginModel GetPluginModel(string pluginName, string role);
 
-        HudPluginModel GetPluginModel(IHudPlugin plugin);
+        HudPluginModel GetPluginModel(IHudPlugin plugin, string role);
     }
 
     public class PluginService : Dictionary<string, Type>, IPluginService
@@ -116,20 +117,17 @@ namespace Quest.WebCore.Services
                 Format = summary.Format,
                 Panels = summary.Plugins
             };
-
-            //foreach (var pluginName in summary.Plugins)
-            //    layout.Panels.Add(GetPluginModel(pluginName));
             return layout;
         }
 
-        public HudPluginModel GetPluginModel(IHudPlugin plugin)
+        public HudPluginModel GetPluginModel(IHudPlugin plugin, string role)
         {
             HudPluginModel source = new HudPluginModel
             {
                 MenuText = plugin.MenuText,
                 IsMenuItem = plugin.IsMenuItem,
                 PluginSourceName = plugin.Name,
-                Html = HttpUtility.HtmlDecode(plugin.RenderHtml()),
+                Html = HttpUtility.HtmlDecode(plugin.RenderHtml(role)),
                 OnInit = HttpUtility.HtmlDecode(plugin.OnInit()),
                 OnPanelMoved = HttpUtility.HtmlDecode(plugin.OnPanelMoved()),
             };
@@ -140,7 +138,7 @@ namespace Quest.WebCore.Services
         /// Constructor
         /// </summary>
         /// <param name="plugin"></param>
-        public HudPluginModel GetPluginModel(string pluginName)
+        public HudPluginModel GetPluginModel(string pluginName, string role)
         {
             if (string.IsNullOrEmpty(pluginName))
                 return new HudPluginModel();
@@ -148,7 +146,7 @@ namespace Quest.WebCore.Services
             var plugin = Create(pluginName);
 
             if (plugin != null)
-                return GetPluginModel(plugin);
+                return GetPluginModel(plugin, role);
 
             // could return an Error plugin
             return null;

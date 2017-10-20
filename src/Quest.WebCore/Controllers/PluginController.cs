@@ -31,7 +31,7 @@ namespace Quest.WebCore.Controllers
         }
 
         [HttpGet()]
-        public HudPluginModel Create(string id)
+        public HudPluginModel Create(string id, [FromQuery]string role)
         {
             // Create the plugin object
             var plugin = _pluginService.Create(id);
@@ -43,7 +43,7 @@ namespace Quest.WebCore.Controllers
             // TODO: do we need to carry through plugin state?
             plugin.InitializeWithDefaultProperties();
 
-            var v = _pluginService.GetPluginModel(plugin);
+            var v = _pluginService.GetPluginModel(plugin, role);
 
             return v;
         }

@@ -5,7 +5,7 @@ hud.plugins = hud.plugins || {};
 hud.plugins.map = (function() {
 
 
-    var _initMap = function (mapId) {
+    var _initMap = function (role) {
         L_PREFER_CANVAS = true;
 
         var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -47,7 +47,9 @@ hud.plugins.map = (function() {
         lng = -0.2;
         zoom = 12;
 
-        map = new L.Map("map", {
+        var mapdiv = 'map' + role;
+
+        map = new L.Map(mapdiv, {
             center: new L.LatLng(lat, lng),
             zoom: zoom,
             layers: baseLayer,

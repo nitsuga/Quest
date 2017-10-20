@@ -38,9 +38,9 @@ namespace Quest.WebCore.Plugins.ChatPlugin
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml()
+        public string RenderHtml(string role)
         {
-            return DrawContainer();
+            return DrawContainer(role);
         }
 
         public string OnInit()
@@ -63,7 +63,7 @@ namespace Quest.WebCore.Plugins.ChatPlugin
             // Do nothing
         }
 
-        private string DrawContainer()
+        private string DrawContainer(string role)
         {
             const string templateFileName = "Chat.html";
             var templateFolder = _env.WebRootPath + "/plugins/Chat/Lib";

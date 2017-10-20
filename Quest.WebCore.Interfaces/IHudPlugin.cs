@@ -35,7 +35,7 @@ namespace Quest.WebCore.Interfaces
         /// A method call to render the Html for the Main Frame of a layout
         /// </summary>
         /// <returns></returns>
-        string RenderHtml();
+        string RenderHtml(string role);
 
         /// <summary>
         /// A single javascript command that will kick off any front-end initialization

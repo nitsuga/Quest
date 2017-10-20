@@ -18,7 +18,8 @@
         
         var selector = '[data-panel-role=' + panelRole + ']';
         var containerPanel = $(selector).first();
-        var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName;
+        var pluginRole = $(containerPanel).attr('data-panel-role');
+        var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName + '?role=' + pluginRole;
 
         console.log("Plugin Loader: " + url);
 
@@ -136,7 +137,7 @@
                 var contentPanel = $(panel).find('div[data-role="panel-content"]');
                 var pluginRole = $(panel).attr('data-panel-role');
 
-                var url = $('#pluginLoaderUrl').attr('data-url') + '/PluginSelector';
+                var url = $('#pluginLoaderUrl').attr('data-url') + '/PluginSelector?role=' + pluginRole;
 
                 console.log("Menu btn clicked: " + url);
 

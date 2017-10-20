@@ -38,14 +38,14 @@ namespace Quest.WebCore.Plugins.ChatPlugin
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml()
+        public string RenderHtml(string role)
         {
-            return DrawContainer();
+            return DrawContainer(role);
         }
 
         public string OnInit()
         {
-            return "hud.plugins.map.initMap()";
+            return "hud.plugins.map.initMap(panelRole)";
         }
 
         public string OnPanelMoved()
@@ -63,11 +63,12 @@ namespace Quest.WebCore.Plugins.ChatPlugin
             // Do nothing
         }
 
-        private string DrawContainer()
+        private string DrawContainer(string role)
         {
             const string templateFileName = "Map.html";
             var templateFolder = _env.WebRootPath + "/plugins/Map/Lib";
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            gazHtml = gazHtml.Replace("id=mapdivplaceholder", $"id='map{role}'");
             return gazHtml;
         }
     }
