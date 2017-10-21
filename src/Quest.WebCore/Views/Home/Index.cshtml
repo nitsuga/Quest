@@ -1,11 +1,8 @@
 ﻿@model Quest.WebCore.Models.HudLayout
-
 @{
     Layout = null;
 }
-
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -22,24 +19,50 @@
 <div class="container-fluid">
     <div class="row full-height">
 
-        <div class="col-md-9 full-height" id="main-panel-wrapper">
-            @Html.Partial("_HudMainPanel")
-        </div>
-        
-        <div class="col-md-3 full-height" id="side-panel-wrapper">
-            
-            <div class="row half-height">
+        <div class="col-md-6 twothird-height" id="main-panel-wrapper-left">
+            <div class="row full-height">
                 <div class="col-sm-12 full-height">
-                    @Html.Partial("_HudMiniPanelTop")
+                    @Html.Partial("_HudMainPanel", new HudPanel { role=0 })
                 </div>
             </div>
+        </div>
+        <div class="col-md-6 twothird-height" id="main-panel-wrapper-right">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudMainPanel", new HudPanel { role = 1 })
+                </div>
+            </div>
+        </div>
+        <div class="w-100"></div>
+        <div class="col-md-3 onethird-height" id="side-panel-wrapper-left">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudMiniPanelBottom", new HudPanel { role = 2 })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 onethird-height" id="side-panel-wrapper-mid">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudMiniPanelBottom", new HudPanel { role = 3 })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 onethird-height" id="side-panel-wrapper-mid">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudMiniPanelBottom", new HudPanel { role = 4 })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 onethird-height" id="side-panel-wrapper-right">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudMiniPanelBottom", new HudPanel { role = 5 })
+                </div>
+            </div>
+        </div>
 
-            <div class="row half-height">
-                <div class="col-sm-12 full-height">
-                    @Html.Partial("_HudMiniPanelBottom")
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 <span id="pluginLoaderUrl" data-url="@Url.Action("Create", "Plugin")"></span>
@@ -47,23 +70,13 @@
     <!-- Required external libraries -->
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="~/lib/signalr/jquery.signalR.js"></script>
-    <script src="~/lib/signalr/jquery.signalR.js"></script>
     <script src="~/lib/underscore/underscore.js"></script>
-
-    @*<script type="text/javascript" src="~/Scripts/underscore-min.js"></script>*@
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD20hy8wOit2U3ES37heiH-D8yAPXVawjU"></script>
-
-    <!--Reference the SignalR library. 
-    <script type="text/javascript" src="~/Scripts/jquery.signalR-2.2.2.js"></script>
-    <script type="text/javascript" src="~/signalr/hubs"></script>
-        -->
+    <script src="~/js/signalr-client-1.0.0-alpha2-final.js"></script>
 
     <!-- The core hud library -->
     <script type="text/javascript" src="~/js/hud.js"></script>
 
     <!-- Include the libraries for any plugin that might be called -->
-
     @foreach (var f in Model.Scripts)
     {
     <script src="@f"></script>

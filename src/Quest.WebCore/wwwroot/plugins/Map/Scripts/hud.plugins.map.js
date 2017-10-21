@@ -19,10 +19,10 @@ hud.plugins.map = (function() {
         var grayscale = L.tileLayer(mbUrl, { id: "mapbox.light", attribution: mbAttr }),
             streets = L.tileLayer(mbUrl, { id: "mapbox.streets", attribution: mbAttr });
 
-        var googleLayer1 = new L.Google('ROADMAP');
-        var googleLayer2 = new L.Google('SATELLITE');
-        var googleLayer3 = new L.Google('HYBRID');
-        var googleLayer4 = new L.Google('TERRAIN');
+        //var googleLayer1 = new L.Google('ROADMAP');
+        //var googleLayer2 = new L.Google('SATELLITE');
+        //var googleLayer3 = new L.Google('HYBRID');
+        //var googleLayer4 = new L.Google('TERRAIN');
 
         barts = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
         stations = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
@@ -31,11 +31,11 @@ hud.plugins.map = (function() {
             "OSM": osm,
             "Grayscale": grayscale,
             "Mapbox Streets": streets,
-            "Barts": barts ,
-            "Google Road": googleLayer1,
-            "Google Satellite": googleLayer2,
-            "Google Hybrid": googleLayer3,
-            "Google Terrain": googleLayer4
+            "Barts": barts //,
+            //"Google Road": googleLayer1,
+            //"Google Satellite": googleLayer2,
+            //"Google Hybrid": googleLayer3,
+            //"Google Terrain": googleLayer4
         };
         baseLayer = osm;
 

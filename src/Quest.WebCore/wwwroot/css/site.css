@@ -11,16 +11,45 @@
     height: 50%;
 }
 
+.twothird-height {
+    height: 65%;
+}
+
+.onethird-height {
+    height: 35%;
+}
+
 .no-height {
     height: 0;
 }
 
 #main-panel-wrapper {
-    border-right: 1px solid #a9a9a9;
+    border-right: 1px solid #444444;
 }
 
+#main-panel-wrapper-left {
+    border-right: 1px solid #444444;
+    border-bottom: 1px solid #444444;
+}
+
+#main-panel-wrapper-right {
+    border-bottom: 1px solid #444444;
+}
+
+
 #side-panel-wrapper > div:first-child {
-    border-bottom: 1px solid #a9a9a9
+    border-bottom: 1px solid #444444;
+}
+
+#side-panel-wrapper-left > div:first-child {
+    border-right: 1px solid #444444;
+}
+
+#side-panel-wrapper-mid > div:first-child {
+    border-right: 1px solid #444444;
+}
+
+#side-panel-wrapper-right > div:first-child {
 }
 
 .hud-panel {

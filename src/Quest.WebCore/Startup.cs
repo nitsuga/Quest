@@ -13,6 +13,7 @@ using Quest.Lib.ServiceBus;
 using Quest.WebCore.Models;
 using Quest.Lib.DependencyInjection;
 using System.Collections.Generic;
+using Quest.WebCore.SignalR;
 
 namespace Quest.WebCore
 {
@@ -120,19 +121,21 @@ namespace Quest.WebCore
 
             app.UseAuthentication();
 
-            app.UseSignalR((routes)=> { });
-
-            app.Use(async (http, next) =>
-            {
-                if (http.WebSockets.IsWebSocketRequest)
-                {
-                    //Handle WebSocket Requests here.         
-                }
-                else
-                {
-                    await next();
-                }
+            app.UseSignalR((routes)=> {
+                routes.MapHub<CentralHub>("hub");
             });
+
+            //app.Use(async (http, next) =>
+            //{
+            //    if (http.WebSockets.IsWebSocketRequest)
+            //    {
+            //        Handle WebSocket Requests here.         
+            //    }
+            //    else
+            //    {
+            //        await next();
+            //    }
+            //});
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 

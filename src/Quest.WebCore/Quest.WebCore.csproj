@@ -45,6 +45,8 @@
     <Compile Remove="Extensions\ControllerExtensions.cs" />
     <Compile Remove="Models\IdentityModels.cs" />
     <Compile Remove="Models\LocationSearchJob.cs" />
+    <Compile Remove="Plugins\Chat\Chat.cs" />
+    <Compile Remove="Plugins\Chat\ChatHub.cs" />
     <Compile Remove="Services\ClientConnectionService.cs" />
     <Compile Remove="Services\RouteInfo.cs" />
     <Compile Remove="Services\RouteJob.cs" />

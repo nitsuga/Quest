@@ -80,6 +80,14 @@ namespace Quest.WebCore.Controllers
             return View(model);
         }
 
+        // GET: Home
+        public ActionResult Index2R()
+        {
+            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
+            var model = _pluginService.GetLayoutModel(summary);
+            return View(model);
+        }
+
         public async Task<IActionResult> Map()
         {
             HomeViewModel model = await DefaultHomeViewModel();
