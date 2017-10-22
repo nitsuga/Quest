@@ -3,17 +3,24 @@ using System.Collections.Generic;
 
 namespace Quest.WebCore.Models
 {
+    /// <summary>
+    /// A layout definition containing panels
+    /// </summary>
     public class HudLayout
     {
         /// <summary>
-        /// todo: 1=fullscreen 2= L-R2
+        /// name of the layout
         /// </summary>
-        public int Format;
+        public string Name;
 
-        public List<string> Panels { get; set; }
-        
-        public List<string> Scripts;
+        /// <summary>
+        /// image representing the layout
+        /// </summary>
+        public string ImagePath;
 
-        public List<string> Styles;
+        /// <summary>
+        /// list of panel defintions
+        /// </summary>
+        public List<HudPanel> Panels { get; set; }
     }
 }

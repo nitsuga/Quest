@@ -75,16 +75,28 @@ namespace Quest.WebCore.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
-            var model = _pluginService.GetLayoutModel(summary);
+            //var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
+            //var model = _pluginService.GetLayoutModel(layout);
+
+            var model = new HudModel
+            {
+                Scripts = _pluginService.GetScripts(),
+                Styles = _pluginService.GetStyles(),
+                Layout = _pluginService.DefaultLayout()
+            };
+
             return View(model);
         }
-
-        // GET: Home
-        public ActionResult Index2R()
+        
+        // load a name layout
+        public ActionResult Layout(string id)
         {
-            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
-            var model = _pluginService.GetLayoutModel(summary);
+            var model = new HudModel
+            {
+                Scripts = _pluginService.GetScripts(),
+                Styles = _pluginService.GetStyles(),
+                Layout = _pluginService.GetLayout(id)
+            };
             return View(model);
         }
 
@@ -106,11 +118,9 @@ namespace Quest.WebCore.Controllers
         {
             HomeViewModel model = await DefaultHomeViewModel();
             return View(model);
-
         }
 
-
-        
+       
         [HttpGet]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public ActionResult SubmitCLI(string cli, string extension)

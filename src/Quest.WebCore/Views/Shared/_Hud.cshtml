@@ -1,0 +1,20 @@
+﻿@model Quest.WebCore.Models.HudLayout
+@foreach (var panel in Model.Panels)
+{
+    if (panel.Role != null)
+    {
+        <div class="@panel.Style" id="panel-@panel.Role">
+            <div class="row full-height">
+                <div class="col-sm-12 full-height">
+                    @Html.Partial("_HudPanel", panel)
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="w-100"></div>
+    };
+}
+
+

@@ -10,7 +10,5 @@ namespace Quest.WebCore.Models
 
         [JsonProperty(propertyName: "format")]
         public int Format { get; set; }
-
-
     }
 }

@@ -23,10 +23,16 @@ namespace Quest.WebCore.Controllers
         }
 
         [HttpGet()]
-        public HudLayout GetLayout()
+        public HudLayout GetLayout(string id)
         {
-            var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
-            var model = _pluginService.GetLayoutModel(summary);
+            var model = _pluginService.GetLayout(id);
+            return model;
+        }
+
+        [HttpGet()]
+        public List<HudLayout> GetLayouts()
+        {
+            var model = _pluginService.GetLayouts();
             return model;
         }
 

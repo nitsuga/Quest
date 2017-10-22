@@ -53,11 +53,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Shared\_HudMainPanel.cshtml" />
+    <Content Remove="Views\Shared\_HudMiniPanelBottom.cshtml" />
+    <Content Remove="Views\Shared\_HudMiniPanelEmpty.cshtml" />
+    <Content Remove="Views\Shared\_HudMiniPanelTop.cshtml" />
     <Content Remove="Views\Shared\_LoginPartial.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="wwwroot\plugins\PluginSelector\Scripts\hud.plugins.pluginSelector.js" />
     <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +100,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\plugins\PluginSelector\Scripts\hud.plugins.pluginSelector.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\plugins\LayoutSelector\Scripts\hud.plugins.layoutSelector.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

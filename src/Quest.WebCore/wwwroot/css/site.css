@@ -23,8 +23,17 @@
     height: 0;
 }
 
-#main-panel-wrapper {
+.right-border {
     border-right: 1px solid #444444;
+}
+.left-border {
+    border-left: 1px solid #444444;
+}
+.top-border {
+    border-top: 1px solid #444444;
+}
+.bottom-border {
+    border-bottom: 1px solid #444444;
 }
 
 #main-panel-wrapper-left {
@@ -91,21 +100,23 @@
 
     .panel-btn.panel-btn-left {
         left: 0;
-        top: 50%;
-        transform: translateY(-16px);
+        top: 90%;
+        /*transform: translateY(-16px);*/
     }
 
-.menu-btn {
+    .panel-btn.panel-btn-right {
+        left: 100%;
+        top: 90%;
+        transform: translateX(-20px);
+    }
+
+.panel-btn.panel-top-left {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 0;
+    left: 0;
     font-size: 24px;
     z-index: 999;
 }
-
-    a.menu-btn {
-        color: green;
-    }
 
 
 .buttonicon {

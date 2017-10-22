@@ -1,6 +1,6 @@
 ﻿.plugin-selection-grid {
     height: 50%;
-    width: 50%;
+    width: 70%;
     max-height: 340px;
     max-width: 600px;
     vertical-align: middle;
@@ -25,5 +25,6 @@
 .btn-plugin-selector {
     background-color: #010c00;
     color: #1ae008;
-    font-weight: 600
+    font-weight: 600;
+    width: 80px
 }

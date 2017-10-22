@@ -14,6 +14,27 @@
         return $(source).html();
     };
 
+    // load the specific layout
+    var _loadLayout = function (layoutName) {
+        var url = $('#layoutLoaderUrl').attr('data-url') + '/' + layoutName;
+
+        console.log("Layout Loader: " + url);
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            success: function (json) {
+
+            },
+            error: function (result) {
+                alert('error from hud.plugins.layoutSelector._initialize \r\n' + result.responseText);
+            }
+        });
+    }
+
+    // load the specific plugin into the target panel
     var _loadPanel = function (pluginName, panelRole) {
         
         var selector = '[data-panel-role=' + panelRole + ']';
@@ -49,27 +70,8 @@
         });
     }
 
-    var _loadAllPanelContents = function () {
-
-        //$('div[data-role="panel"]').each(function (index, item) {
-
-        //    var $this = $(this);
-
-        //    // Identify the target content panel
-        //    //var content = $this.find('div[data-role="panel-content"]')[0];
-        //    //var contentHtml = _getPanelContent($this.attr('data-src'), $this.attr('data-panel-role'));
-        //    //$(content).html(contentHtml);
-
-        //    // Call any javascript init code
-        //    var script = $this.attr('data-on-init');
-        //    if (script.length > 0) {
-        //        console.log("hud._loadAllPanelContents    Executing script: " + script);
-        //        eval(script);
-        //    }
-        //});
-    };
-
-    var _moveToMainPanel = function(panelRole) {
+    // swap two panels
+    var _swap = function(panelRole) {
 
         // Get the panel to be moved to the main panel
         var sidePanel = $('#side-panel-wrapper div.hud-panel[data-panel-role="' + panelRole + '"]');
@@ -112,61 +114,66 @@
 
     };
 
-    var _expandMainPanelToFullScreeen = function() {
+    // make this panel full screen
+    var _fullscreen = function(panelRole)  {
 
-        // Get the main panel
-        var mainPanel = $('#main-panel-wrapper');
-
-        // Get the side panel
-        var sidePanel = $('#side-panel-wrapper ');
+        var selector = '[data-panel-role=' + panelRole + ']';
+        var containerPanel = $(selector).first();
+        var pluginRole = $(containerPanel).attr('data-panel-role');
 
         // Expand the main panel to 12 columns
-        $(mainPanel).removeClass('col-md-9').addClass('col-md-12');
+        $(containerPanel).removeClass('col-md-9').addClass('col-md-12');
 
         // Hide the side panel
-        $(sidePanel).addClass('hidden');
+    };
+
+    // expand the panel
+    var _expand = function(panelRoleSource, panelRoleTarget)  {
+        var selectorFrom = '[data-panel-role=' + panelRoleSource + ']';
+        var containerPanelFrom = $(selectorFrom).first();
+    };
+
+    // show menu in the panel
+    var _showmenu = function(panelRole)  {
+        console.log("Menu btn clicked");
+        _loadPanel("PluginSelector", panelRole);
     };
 
     var _bindPanelButtonHandlers = function () {
 
         // The menu hamburger loads the plugin selector into the relevant panel
-        $('a.menu-btn').on('click',
+        $('a[data-role="menu"]').on('click',
             function (e) {
                 e.preventDefault();
                 var panel = $(this).parent();
-                var contentPanel = $(panel).find('div[data-role="panel-content"]');
                 var pluginRole = $(panel).attr('data-panel-role');
-
-                var url = $('#pluginLoaderUrl').attr('data-url') + '/PluginSelector?role=' + pluginRole;
-
-                console.log("Menu btn clicked: " + url);
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    dataType: 'json',
-                    contentType: "application/json; charset=utf-8",
-                    success: function (json) {
-
-                         if (json.html.length > 0) {
-                             $(contentPanel).html(json.html);
-                        }
-
-                         console.log(json.onInit);
-                         if (json.onInit.length > 0) {
-                             eval(json.onInit);
-                         }
-
-                         if (json.onPanelMoved.length > 0) {
-                             $(containerPanel).attr('data-on-moved', json.onPanelMoved);
-                         }
-                    },
-                    error: function (result) {
-                        alert('error from menu-btn click \r\n' + result.responseText);
-                    }
-                });
+                _showmenu(pluginRole);
             });
 
+        $('a[data-role="expand"]').on('click',
+            function (e) {
+                e.preventDefault();
+                var panel = $(this).parent();
+                var pluginRole = $(panel).attr('data-panel-role');
+                _expand(pluginRole);
+            });
+
+        $('a[data-role="fullscreen"]').on('click',
+            function (e) {
+                e.preventDefault();
+                var panel = $(this).parent();
+                var pluginRole = $(panel).attr('data-panel-role');
+                _fullscreen(pluginRole);
+            });
+
+        $('a[data-role="swap"]').on('click',
+            function (e) {
+                e.preventDefault();
+                var panel = $(this).parent();
+                var pluginRole = $(panel).attr('data-panel-role');
+                _swap(pluginRole);
+            });
+           
         $('a.panel-btn').on('click',
             function (e) {
                 e.preventDefault();
@@ -250,12 +257,17 @@
     };
 
     var _initialize = function () {
-        _loadAllPanelContents();
         _bindPanelButtonHandlers();
     }
 
     return {
         initialize: _initialize,
-        loadPanel: _loadPanel
+        loadPanel: _loadPanel,
+        loadLayout: _loadLayout,
+        fullscreen: _fullscreen,
+        expand: _expand,
+        swap: _swap,
+        showmenu: _showmenu
     }
+
 })();

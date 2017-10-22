@@ -1,0 +1,11 @@
+﻿@model HudPanel
+<div class="hud-panel" data-role="panel" data-panel-role="@Model.Role" data-src="mini-top">
+    @foreach (var action in Model.Actions)
+    {
+        <a href="#" class="panel-btn @action.Position" data-role="@action.Action" data-target="@action.Target">
+                <span class="glyphicon @action.Icon" aria-label="@action.Label"></span>
+        </a>
+    }
+    <div class="hud-panel-content" data-role="panel-content">
+    </div>
+</div>
