@@ -8,9 +8,20 @@ namespace Quest.WebCore.SignalR
 {
     public class CentralHub: Hub
     {
+        Task OnConnectedAsync()
+        {
+
+        }
+
+
         public Task Send(string message)
         {
             return Clients.All.InvokeAsync("Send", message);
+        }
+
+        public Task Register(string plugin, string messages)
+        {
+            return Clients.All.InvokeAsync("Register", messages);
         }
 
     }
