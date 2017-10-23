@@ -22,6 +22,11 @@ namespace Quest.WebCore.Controllers
             _env = env;
         }
 
+        /// <summary>
+        /// get a specific layout
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet()]
         public HudLayout GetLayout(string id)
         {
@@ -29,6 +34,10 @@ namespace Quest.WebCore.Controllers
             return model;
         }
 
+        /// <summary>
+        /// get available layouts
+        /// </summary>
+        /// <returns></returns>
         [HttpGet()]
         public List<HudLayout> GetLayouts()
         {
@@ -36,8 +45,14 @@ namespace Quest.WebCore.Controllers
             return model;
         }
 
+        /// <summary>
+        /// creates a plugin model for a spefic plug in a specific slot (role)
+        /// </summary>
+        /// <param name="id">name of the plugin</param>
+        /// <param name="role">target role</param>
+        /// <returns></returns>
         [HttpGet()]
-        public HudPluginModel Create(string id, [FromQuery]string role)
+        public HudPluginModel CreatePlugin(string id, [FromQuery]string role)
         {
             // Create the plugin object
             var plugin = _pluginService.Create(id);
@@ -52,6 +67,42 @@ namespace Quest.WebCore.Controllers
             var v = _pluginService.GetPluginModel(plugin, role);
 
             return v;
+        }
+
+        /// <summary>
+        /// Render a panel given the panel model
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult RenderPanel([FromBody] HudPanel model)
+        {
+            // render it
+            var view = PartialView("_HudPanel", model);
+            return view;
+        }
+
+        /// <summary>
+        /// render an entire layout
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult RenderLayout([FromBody] HudLayout model)
+        {
+            // render it
+            var view = PartialView("_Hud", model);
+            return view;
+        }
+
+        [HttpGet]
+        public ActionResult RenderLayoutByName(string id)
+        {
+            HudLayout layout = GetLayout(id);
+            // render it
+            var view = PartialView("_Hud", layout);
+            return view;
         }
     }
 }

@@ -14,24 +14,55 @@
         return $(source).html();
     };
 
-    // load the specific layout
-    var _loadLayout = function (layoutName) {
-        var url = $('#layoutLoaderUrl').attr('data-url') + '/' + layoutName;
+    // load the specific layout into the div id
+    var _loadLayout = function (id, layoutName) {
+        var url = $('#renderNamedLayoutUrl').attr('data-url') + '/' + layoutName;
 
-        console.log("Layout Loader: " + url);
+        console.log("Layout renderer: " + url);
+
+        // render the hud, note this only builds the panels but doesn't load
+        // the plugins.. we'll do that in the next step
+        $.get(url, function (json) {
+
+            if (json.length > 0) {
+                // 
+                $(id).empty();
+                $(id).append(json);
+
+                // wire up?
+                _bindPanelButtonHandlers();
+            }
+        });
+
+        // now get the model as well so we can populate the plugins
+        var loaderurl = $('#layoutLoaderUrl').attr('data-url') + '/' + layoutName;
+
+        console.log("Populate plugins: " + url);
 
         $.ajax({
-            url: url,
+            url: loaderurl,
             type: 'GET',
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
             success: function (json) {
 
+                if (json.panels.length > 0) {
+                    setTimeout(function () {
+                        json.panels.forEach(function (panel) {
+                            if (panel.role >= 0 && panel.plugin !== null) {
+                                _loadPanel(panel.plugin, panel.role);
+                            }
+                        });
+                    }
+                    , 50);
+                }
+
             },
             error: function (result) {
-                alert('error from hud.plugins.layoutSelector._initialize \r\n' + result.responseText);
+                alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
             }
         });
+
     }
 
     // load the specific plugin into the target panel
@@ -52,7 +83,8 @@
             success: function (json) {
 
                 if (json.html.length > 0) {
-                    $(containerPanel).find('div[data-role="panel-content"]').html(json.html);
+                    var panelContent = $(containerPanel).find('div[data-role="panel-content"]');
+                    panelContent.html(json.html);
                 }
 
                 console.log(json.onInit);

@@ -59,7 +59,7 @@ namespace Quest.WebCore.Services
         /// return a default layout
         /// </summary>
         /// <returns></returns>
-        HudLayout DefaultLayout();
+        String DefaultLayout();
     }
 
     public class PluginService : Dictionary<string, Type>, IPluginService
@@ -74,80 +74,22 @@ namespace Quest.WebCore.Services
             _env = env;
         }
 
-        public HudLayout DefaultLayout()
+        public String DefaultLayout()
         {
-            return new HudLayout {
-                Name="Double",
-                ImagePath=null,
-                Panels = new List<HudPanel>
-                {
-                    new HudPanel{ Role=0, Style="col-md-6 twothird-height right-border",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="fullscreen", Icon= "glyphicon-new-window", Position= "panel-btn-bottom", Label="Expand panel to full screen" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                    new HudPanel{ Role=1, Style="col-md-6 twothird-height",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="fullscreen", Icon= "glyphicon-new-window", Position= "panel-btn-bottom", Label="Expand panel to full screen" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                    new HudPanel{ Role=null },
-                    new HudPanel{
-                        Role =2, Style="col-md-3 onethird-height top-border right-border",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="swap", Target=0, Icon= "glyphicon-triangle-top", Position= "panel-btn-top" },
-                            new HudPanelAction{ Action="expand", Target=3, Icon= "glyphicon-triangle-right", Position= "panel-btn-right" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                    new HudPanel{
-                        Role =3, Style="col-md-3 onethird-height top-border right-border",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="expand", Target=2, Icon= "glyphicon-triangle-left", Position= "panel-btn-left" },
-                            new HudPanelAction{ Action="expand", Target=4, Icon= "glyphicon-triangle-right", Position= "panel-btn-right" },
-                            new HudPanelAction{ Action="swap",   Target=0, Icon= "glyphicon-triangle-top", Position= "panel-btn-top" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                    new HudPanel{
-                        Role =4, Style="col-md-3 onethird-height top-border right-border",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="expand", Target=3, Icon= "glyphicon-triangle-right", Position= "panel-btn-right" },
-                            new HudPanelAction{ Action="expand", Target=5, Icon= "glyphicon-triangle-left", Position= "panel-btn-left" },
-                            new HudPanelAction{ Action="swap",   Target=1, Icon= "glyphicon-triangle-top", Position= "panel-btn-top" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                    new HudPanel{
-                        Role =5, Style="col-md-3 onethird-height top-border right-border",
-                        Actions =new List<HudPanelAction>
-                        {
-                            new HudPanelAction{ Action="expand", Target=4, Icon= "glyphicon-triangle-left", Position= "panel-btn-left" },
-                            new HudPanelAction{ Action="swap", Target=1, Icon= "glyphicon-triangle-top", Position= "panel-btn-top" },
-                            new HudPanelAction{ Action="menu",       Icon= "glyphicon-menu-hamburger", Position= "panel-top-left" },
-                        }
-                    },
-                }
-            };
-    }
+            return "Layout";
+        }
 
-    /// <summary>
-    /// Creates an instance of a plugin
-    /// </summary>
-    /// <param name="pluginName"></param>
-    /// <returns></returns>
-    public IHudPlugin Create(string pluginName)
+
+        /// <summary>
+        /// Creates an instance of a plugin
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <returns></returns>
+        public IHudPlugin Create(string pluginName)
         {
             if (string.IsNullOrWhiteSpace(pluginName))
                 return null;
-            IHudPlugin plugin = _scope.ResolveNamed<IHudPlugin>( pluginName);
+            IHudPlugin plugin = _scope.ResolveNamed<IHudPlugin>(pluginName);
             return plugin;
         }
 
@@ -172,7 +114,7 @@ namespace Quest.WebCore.Services
                     var scripts = File.ReadAllLines(scriptOrderFile);
                     foreach (var script in scripts)
                     {
-                        var pluginFilePath = scriptsFolder.FullName.Replace(_env.WebRootPath,"");
+                        var pluginFilePath = scriptsFolder.FullName.Replace(_env.WebRootPath, "");
                         var scriptpath = $"{pluginFilePath}/{script}".Replace("\\", "/");
                         if (!files.Contains(scriptpath))
                             files.Add(scriptpath);

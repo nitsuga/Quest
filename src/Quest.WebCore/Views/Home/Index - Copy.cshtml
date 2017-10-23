@@ -17,17 +17,13 @@
 </head>
 <body>
     <div class="container-fluid">
-        <div class="row full-height" id="panel-container">
-            
+        <div class="row full-height">
+            @Html.Partial("_Hud", Model.Layout)
         </div>
     </div>
 
-    <span id="pluginLoaderUrl" data-url="@Url.Action("CreatePlugin", "Plugin")"></span>
+    <span id="pluginLoaderUrl" data-url="@Url.Action("Create", "Plugin")"></span>
     <span id="layoutLoaderUrl" data-url="@Url.Action("GetLayout", "Plugin")"></span>
-    <span id="renderPanelUrl" data-url="@Url.Action("RenderPanel", "Plugin")"></span>
-    <span id="renderLayoutUrl" data-url="@Url.Action("RenderLayout", "Plugin")"></span>
-    <span id="renderNamedLayoutUrl" data-url="@Url.Action("RenderLayoutByName", "Plugin")"></span>
-
 
     <!-- Required external libraries -->
     <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -48,12 +44,17 @@
         $(function () {
             hud.initialize();
 
-            hud.loadLayout("#panel-container", "@Model.Layout");
-
             // Reference the auto-generated proxy for the hub.
             //var centralHub = $.connection.centralHub;
             });
     </script>
 
+    @for (int i = 0; i < Model.Layout.Panels.Count; i++)
+    {
+        if (!string.IsNullOrEmpty(Model.Layout.Panels[i].Plugin))
+        {
+            <script>hud.loadPanel("@Model.Layout.Panels[i].Plugin","@i")</script>
+        }
+    }
 </body>
 </html>

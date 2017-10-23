@@ -5,7 +5,7 @@
     {
       "Role": 0,
       "Plugin": "LayoutSelector",
-      "Style": "col-md-6 full-height",
+      "Style": "col-md-12 full-height",
       "Actions": [
       ]
     }

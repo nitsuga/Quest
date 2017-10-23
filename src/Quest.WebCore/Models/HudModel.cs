@@ -8,6 +8,7 @@ namespace Quest.WebCore.Models
 
         public List<string> Styles;
 
-        public HudLayout Layout;
+        //public HudLayout Layout;
+        public string Layout;
     }
 }

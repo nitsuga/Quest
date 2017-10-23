@@ -88,17 +88,7 @@ namespace Quest.WebCore.Controllers
             return View(model);
         }
         
-        // load a name layout
-        public ActionResult Layout(string id)
-        {
-            var model = new HudModel
-            {
-                Scripts = _pluginService.GetScripts(),
-                Styles = _pluginService.GetStyles(),
-                Layout = _pluginService.GetLayout(id)
-            };
-            return View(model);
-        }
+        //  old stuff below here
 
         public async Task<IActionResult> Map()
         {

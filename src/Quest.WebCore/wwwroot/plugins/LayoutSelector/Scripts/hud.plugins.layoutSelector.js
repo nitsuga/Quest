@@ -14,11 +14,8 @@ hud.plugins.layoutSelector = (function() {
         $(document).on('click', 'button[data-role="layout-selector"]',
             function(e) {
                 e.preventDefault();
-
-                var pluginName = $(this).attr('data-layout-name');
-                var containerPanel = $(this).closest('div[data-role="panel"]');
-
-                hud.loadLayout(pluginName);
+                var layoutName = $(this).attr('data-layout-name');
+                hud.loadLayout("#panel-container", layoutName);
             });
 
         _initialized = true;
