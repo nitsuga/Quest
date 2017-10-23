@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 
-namespace Quest.WebCore.Plugins.ChatPlugin
+namespace Quest.WebCore.Plugins.RealtimeMap
 {
     /// <summary>
     /// This plugin is internal to the main Hud framework.

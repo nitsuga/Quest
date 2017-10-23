@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 
-namespace Quest.WebCore.Plugins.PluginSelector
+namespace Quest.WebCore.Plugins.LayoutSelector
 {
     /// <summary>
     /// This plugin is internal to the main Hud framework.

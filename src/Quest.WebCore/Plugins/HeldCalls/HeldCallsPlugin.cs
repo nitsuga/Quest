@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 
-namespace Quest.WebCore.Plugins.Gazetteer
+namespace Quest.WebCore.Plugins.HeldCalls
 {
     /// <summary>
     /// This plugin is internal to the main Hud framework.

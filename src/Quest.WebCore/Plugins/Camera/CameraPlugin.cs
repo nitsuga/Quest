@@ -8,19 +8,19 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 
-namespace Quest.WebCore.Plugins.Properties
+namespace Quest.WebCore.Plugins.Camera
 {
     /// <summary>
     /// This plugin is internal to the main Hud framework.
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
-    [Injection("PropertiesPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class PropertiesPlugin : IHudPlugin
+    [Injection("CameraPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
+    public class CameraPlugin : IHudPlugin
     {
         ILifetimeScope _scope;
         private IHostingEnvironment _env;
 
-        public PropertiesPlugin(ILifetimeScope scope, IHostingEnvironment env)
+        public CameraPlugin(ILifetimeScope scope, IHostingEnvironment env)
         {
             _scope = scope;
             _env = env;
@@ -30,11 +30,11 @@ namespace Quest.WebCore.Plugins.Properties
         /// <summary>
         /// The name of the plugin
         /// </summary>
-        public string Name => "PropertiesPlugin"; // <-- must be the same as the injected Name
+        public string Name => "CameraPlugin"; // <-- must be the same as the injected Name
 
         public Dictionary<string, object> Properties { get; set; }
 
-        public string MenuText => "PROP";
+        public string MenuText => "CAM";
 
         public bool IsMenuItem => true;
 
@@ -45,7 +45,7 @@ namespace Quest.WebCore.Plugins.Properties
 
         public string OnInit()
         {
-            return "hud.plugins.properties.initialize()";
+            return "hud.plugins.camera.initialize()";
         }
 
         public string OnPanelMoved()
@@ -65,8 +65,8 @@ namespace Quest.WebCore.Plugins.Properties
 
         private string DrawContainer(string role)
         {
-            const string templateFileName = "Properties.html";
-            var templateFolder = _env.WebRootPath + "/plugins/Properties/Lib";
+            const string templateFileName = "Gazetteer.html";
+            var templateFolder = _env.WebRootPath + "/plugins/Gazetteer/Lib";
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
             return gazHtml;
         }
