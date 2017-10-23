@@ -28,7 +28,6 @@
     <span id="renderLayoutUrl" data-url="@Url.Action("RenderLayout", "Plugin")"></span>
     <span id="renderNamedLayoutUrl" data-url="@Url.Action("RenderLayoutByName", "Plugin")"></span>
 
-
     <!-- Required external libraries -->
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
@@ -47,13 +46,8 @@
     <script type="text/javascript">
         $(function () {
             hud.initialize();
-
             hud.loadLayout("#panel-container", "@Model.Layout");
-
-            // Reference the auto-generated proxy for the hub.
-            //var centralHub = $.connection.centralHub;
-            });
+        });
     </script>
-
 </body>
 </html>

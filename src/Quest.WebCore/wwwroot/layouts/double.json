@@ -1,6 +1,7 @@
 ﻿{
   "Name": "Double",
   "Image": "Double",
+  "Selectable": true,
   "Panels": [
     {
       "Role": 0,

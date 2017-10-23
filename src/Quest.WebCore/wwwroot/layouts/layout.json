@@ -1,6 +1,7 @@
 ﻿{
   "Name": "Layout",
   "Image": "Layout",
+  "Selectable": false,
   "Panels": [
     {
       "Role": 0,

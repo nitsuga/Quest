@@ -1,26 +1,25 @@
 ﻿.plugin-selection-grid {
-    height: 50%;
+    /*min-height: 100%; 
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    height: 100%;
     width: 70%;
     max-height: 340px;
     max-width: 600px;
-    vertical-align: middle;
+    vertical-align: central;
     margin-left: auto;
     margin-right: auto;
     margin-top: 20%;
+    background-color: #010c00;*/
     padding: 32px;
-    background-color: #010c00
-}
-
-#side-panel-wrapper .plugin-selection-grid {
-    width: 100%;
-    height: calc(100% - 64px);
-    margin-top: 10%;
 }
 
 .plugin-selection-grid > .row {
     padding-top: 24px;
     padding-bottom: 24px;
 }
+
 
 .btn-plugin-selector {
     background-color: #010c00;

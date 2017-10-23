@@ -19,6 +19,11 @@ namespace Quest.WebCore.Models
         public string ImagePath;
 
         /// <summary>
+        /// is the layout available from the LayoutPlugin?
+        /// </summary>
+        public bool Selectable;
+
+        /// <summary>
         /// list of panel defintions
         /// </summary>
         public List<HudPanel> Panels { get; set; }

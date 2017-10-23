@@ -93,7 +93,10 @@ namespace Quest.WebCore.Plugins.LayoutSelector
             div.MergeAttribute("data-role", "layout-selector");
             div.AddCssClass("layout-selection-grid");
 
-            var allLayouts = _pluginService.GetLayouts();
+            var allLayouts = _pluginService
+                .GetLayouts()
+                .Where(x=>x.Selectable==true)
+                .ToList();
 
             if (allLayouts.Count == 0)
             {

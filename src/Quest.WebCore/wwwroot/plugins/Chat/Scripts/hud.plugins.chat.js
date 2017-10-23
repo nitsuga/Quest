@@ -54,13 +54,13 @@ hud.plugins.chat = (function() {
 
         // Reference the auto-generated proxy for the hub.
 
-        _hub = new signalR.HubConnection('/hub');
+        //_hub = new signalR.HubConnection('/hub');
 
-        _hub.on('send', data => {
-            console.log(data);
-        });
+        //_hub.on('send', data => {
+        //    console.log(data);
+        //});
 
-        _hub.connection.start();
+        //_hub.connection.start();
 
         // Find the message container
         var messageList = $(chatContainer).find('div.chat-msg-container > ul[data-role="discussion"]');
@@ -84,7 +84,7 @@ hud.plugins.chat = (function() {
         // Start the connection.
         startConnection('/hub', function (connection) {
             // Create a function that the hub can call to broadcast messages.
-            connection.on('broadcastMessage', function (name, message) {
+            connection.on('send', function (name, message) {
                 // Html encode display name and message.
                 var encodedName = name;
                 var encodedMsg = message;
@@ -96,13 +96,13 @@ hud.plugins.chat = (function() {
         })
             .then(function (connection) {
                 console.log('connection started');
-                document.getElementById('sendmessage').addEventListener('click', function (event) {
+                $(sendButton).click(function () {
+
                     // Call the Send method on the hub.
-                    connection.invoke('send', name, messageInput.value);
+                    connection.invoke('send', username, $(messageTextbox).val());
+
                     // Clear text box and reset focus for next comment.
-                    messageInput.value = '';
-                    messageInput.focus();
-                    event.preventDefault();
+                    $(messageTextbox).val('').focus();
                 });
             })
             .catch(error => {
@@ -114,14 +114,7 @@ hud.plugins.chat = (function() {
         // Start the connection.
         //_subscribeToConnectionStart(function () {
 
-            $(sendButton).click(function () {
-
-                // Call the Send method on the hub.
-                _hub.invoke('send', username, $(messageTextbox).val());
-
-                // Clear text box and reset focus for next comment.
-                $(messageTextbox).val('').focus();
-            });
+            
 
         //});
     };

@@ -1,6 +1,7 @@
 ﻿{
   "Name": "Gazetteer",
   "Image": "Gazetteer",
+  "Selectable": true,
   "Panels": [
     {
       "Role": 0,
