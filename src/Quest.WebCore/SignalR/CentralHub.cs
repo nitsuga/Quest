@@ -88,7 +88,7 @@ namespace Quest.WebCore.SignalR
 
     public class CentralHub : HubWithPresence
     {
-        public CentralHub(IUserTracker<Chat> userTracker)
+        public CentralHub(IUserTracker<CentralHub> userTracker)
             : base(userTracker)
         {
         }
