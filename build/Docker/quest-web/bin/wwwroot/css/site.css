@@ -1,50 +1,187 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+﻿html, body, .container-fluid {
+    height: 100%;
+    background: #010c00;
 }
 
-/* Wrapping element */
-/* Set some basic padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+
+.vertical-center {
+    min-height: 100%; /* Fallback for browsers do NOT support vh unit */
+    min-height: 100vh; /* These two lines are counted as one :-)       */
+    display: flex;
+    align-items: center;
 }
 
-/* Set widths on the form inputs since otherwise they're 100% wide */
-input,
-select,
-textarea {
-    max-width: 280px;
+.full-height {
+    height: 100%;
 }
 
-/* Carousel */
-.carousel-caption p {
-    font-size: 20px;
-    line-height: 1.4;
+.half-height {
+    height: 50%;
 }
 
-/* buttons and links extension to use brackets: [ click me ] */
-.btn-bracketed::before {
-    display: inline-block;
-    content: "[";
-    padding-right: 0.5em;
+.twothird-height {
+    height: 65%;
 }
 
-.btn-bracketed::after {
-    display: inline-block;
-    content: "]";
-    padding-left: 0.5em;
+.onethird-height {
+    height: 35%;
 }
 
-/* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
+.no-height {
+    height: 0;
+}
+
+.right-border {
+    border-right: 1px solid #444444;
+}
+.left-border {
+    border-left: 1px solid #444444;
+}
+.top-border {
+    border-top: 1px solid #444444;
+}
+.bottom-border {
+    border-bottom: 1px solid #444444;
+}
+
+#main-panel-wrapper-left {
+    border-right: 1px solid #444444;
+    border-bottom: 1px solid #444444;
+}
+
+#main-panel-wrapper-right {
+    border-bottom: 1px solid #444444;
+}
+
+
+.hud-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
     width: 100%;
+    padding: 32px;
 }
 
-/* Hide/rearrange for smaller screens */
-@media screen and (max-width: 767px) {
-    /* Hide captions */
-    .carousel-caption {
-        display: none;
+    .hud-panel .hud-panel-content {
+        height: 100%;
     }
+
+.panel-btn {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    z-index: 999;
+}
+
+    a.panel-btn {
+    color: green;
+    }
+
+    .panel-btn.panel-btn-top {
+        top: 0;
+        left: 50%;
+        transform: translateX(-16px);
+    }
+
+    .panel-btn.panel-btn-bottom {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-16px);
+    }
+
+    .panel-btn.panel-btn-left {
+        left: 0;
+        top: 90%;
+        /*transform: translateY(-16px);*/
+    }
+
+    .panel-btn.panel-btn-right {
+        left: 100%;
+        top: 90%;
+        transform: translateX(-20px);
+    }
+
+    .panel-btn.panel-top-left {
+        position: absolute;
+        top: 0;
+        left: 0;
+        font-size: 24px;
+        z-index: 999;
+    }
+
+.panel-btn.panel-btn-p1 {
+    left: 0%;
+    top: 80%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p2 {
+    left: 0%;
+    top: 70%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p3 {
+    left: 0%;
+    top: 60%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p4 {
+    left: 0%;
+    top: 50%;
+    transform: translateX(0px);
+}
+
+.buttonicon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    width: 32px;
+    height: 32px;
+}
+
+.panel-btn.panel-btn-bottom > .buttonicon {
+    margin-top: -3px;
+}
+
+.buttonicon-collapse-up {
+    background-image: url(images/bullet_arrow_up.png);
+}
+
+.buttonicon-collapse-down {
+    background-image: url(images/bullet_arrow_down.png);
+}
+
+.buttonicon-swap-left {
+    background-image: url(images/bullet_arrow_left.png);
+}
+
+.buttonicon-layout-full-screen {
+    background-image: url(images/layouts_header.png);
+}
+
+.buttonicon-layout-mix-panels {
+    background-image: url(images/layouts_3_mix.png);
+}
+
+
+div[data-role="panel"] > div {
+    padding: 0;
+}
+
+div[data-role="panel-content"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }

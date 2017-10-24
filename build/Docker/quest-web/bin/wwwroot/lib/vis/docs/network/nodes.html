@@ -809,7 +809,10 @@ network.setOptions(options);
             <td>Number</td>
             <td><code>1</code></td>
             <td>The barnesHut physics model (which is enabled by default) is based on an inverted gravity model. By
-                increasing the mass of a node, you increase it's repulsion. Values lower than 1 are not recommended.
+                increasing the mass of a node, you increase it's repulsion.
+                <br><br>
+                Values between 0 and 1 are not recommended.<br>
+                Negative or zero values are not allowed. These will generate a console error and will be set to 1.
             </td>
         </tr>
         <tr>
@@ -831,7 +834,7 @@ network.setOptions(options);
                 <code>ellipse</code>, <code>circle</code>, <code>database</code>, <code>box</code>, <code>text</code>.
                 Always scalable are:
                 <code>image</code>, <code>circularImage</code>, <code>diamond</code>, <code>dot</code>,
-                <code>star</code>, <code>triangle</code>, <code>triangleDown</code>, <code>square</code> and
+                <code>star</code>, <code>triangle</code>, <code>triangleDown</code>, <code>hexagon</code>, <code>square</code> and
                 <code>icon</code>. Keep in mind that when using scaling, the <code>size</code> option is neglected.
             </td>
         </tr>
@@ -972,7 +975,7 @@ mySize = minSize + diff * scale;
                 <code>ellipse</code>, <code>circle</code>, <code>database</code>, <code>box</code>, <code>text</code>.
                 The ones with the label outside of it are: <code>image</code>, <code>circularImage</code>,
                 <code>diamond</code>, <code>dot</code>, <code>star</code>, <code>triangle</code>,
-                <code>triangleDown</code>, <code>square</code> and <code>icon</code>.
+                <code>triangleDown</code>, <code>hexagon</code>, <code>square</code> and <code>icon</code>.
             </td>
         </tr>
         <tr class='toggle collapsible' onclick="toggleTable('optionTable','shapeProperties', this);">
@@ -1028,7 +1031,7 @@ mySize = minSize + diff * scale;
             <td><code>25</code></td>
             <td>The size is used to determine the size of node shapes that do not have the label inside of them. These
                 shapes are: <code>image</code>, <code>circularImage</code>, <code>diamond</code>, <code>dot</code>,
-                <code>star</code>, <code>triangle</code>, <code>triangleDown</code>, <code>square</code> and
+                <code>star</code>, <code>triangle</code>, <code>triangleDown</code>, <code>hexagon</code>, <code>square</code> and
                 <code>icon</code></td>
         </tr>
         <tr>

@@ -1,0 +1,23 @@
+﻿<div class="chat-container" data-username="">
+
+    <h4>Not logged in</h4>
+
+    <div class="chat-msg-container hidden">
+        <div class="input-group">
+            <input type="text" class="form-control" data-role="message" />
+            <div class="input-group-btn">
+                <input type="button" class="btn btn-default" data-role="sendmessage" value="Send" />    
+            </div>
+        </div>
+        <ul data-role="discussion"></ul>
+    </div>
+
+    <div data-role="chat-login">
+        <form class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" data-role="chat-username-input" placeholder="Enter username" />
+            </div>
+            <button type="button" class="btn btn-default" data-role="chat-login-button">Go</button>
+        </form>
+    </div>
+</div>

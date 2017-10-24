@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
+using Quest.Lib.Trace;
 using Quest.WebCore.Interfaces;
 using Quest.WebCore.Models;
 using System;
@@ -66,7 +67,6 @@ namespace Quest.WebCore.Services
     {
         private readonly ILifetimeScope _scope;
         private IHostingEnvironment _env;
-        private List<HudLayout> _layouts;
 
         public PluginService(ILifetimeScope scope, IHostingEnvironment env)
         {
@@ -102,30 +102,36 @@ namespace Quest.WebCore.Services
             var pluginPath = Path.Combine(_env.WebRootPath, "plugins");
             var files = new List<string>();
 
+            Logger.Write($"Looking for scripts in {pluginPath}");
+
             var pluginFolder = new DirectoryInfo(pluginPath);
             foreach (var folder in pluginFolder.GetDirectories())
             {
-                var scriptsFolder = new DirectoryInfo(folder.FullName + "\\Scripts");
-                if (!scriptsFolder.Exists) continue;
+                var scriptspath = Path.Combine(folder.FullName, "Scripts");
+                var relativeScriptsPath = scriptspath.Replace(_env.WebRootPath, "");
 
-                var scriptOrderFile = $"{scriptsFolder}/scripts.txt";
+                var scriptsInfo = new DirectoryInfo(scriptspath);
+                if (!scriptsInfo.Exists) continue;
+
+                var scriptOrderFile = Path.Combine(scriptspath, "scripts.txt");
                 if (File.Exists(scriptOrderFile))
                 {
                     var scripts = File.ReadAllLines(scriptOrderFile);
+                    Logger.Write($"  .. found script order file with {scripts.Count()} scripts in {relativeScriptsPath}");
                     foreach (var script in scripts)
                     {
-                        var pluginFilePath = scriptsFolder.FullName.Replace(_env.WebRootPath, "");
-                        var scriptpath = $"{pluginFilePath}/{script}".Replace("\\", "/");
+                        var scriptpath = $"{relativeScriptsPath}/{script}".Replace("\\", "/");
                         if (!files.Contains(scriptpath))
                             files.Add(scriptpath);
                     }
                 }
                 else
                 {
-                    foreach (var fileInfo in scriptsFolder.GetFiles())
+                    var scripts = scriptsInfo.GetFiles();
+                    Logger.Write($"  .. found {scripts.Count()} scripts in {scriptspath}");
+                    foreach (var fileInfo in scripts)
                     {
-                        var pluginFilePath = fileInfo.DirectoryName.Replace(pluginPath, "");
-                        var scriptpath = $"/plugins{pluginFilePath}/{fileInfo.Name}".Replace("\\", "/");
+                        var scriptpath = Path.Combine(relativeScriptsPath, fileInfo.Name).Replace("\\", "/");
                         if (!files.Contains(scriptpath))
                             files.Add(scriptpath);
                     }
@@ -141,16 +147,24 @@ namespace Quest.WebCore.Services
             var pluginPath = Path.Combine(_env.WebRootPath, "plugins");
             var files = new List<string>();
 
+            Logger.Write($"Looking for styles in {pluginPath}");
+
             var pluginFolder = new DirectoryInfo(pluginPath);
             foreach (var folder in pluginFolder.GetDirectories())
             {
-                var stylesFolder = new DirectoryInfo(folder.FullName + "\\Content");
-                if (!stylesFolder.Exists) continue;
+                var stylesFolder = Path.Combine(folder.FullName, "Content");
+                var stylesInfo = new DirectoryInfo(stylesFolder);
+                var stylesRelativeFolder = stylesFolder.Replace(_env.WebRootPath, "");
+                if (!stylesInfo.Exists) continue;
 
-                foreach (var fileInfo in stylesFolder.GetFiles("*.css"))
+                var styles = stylesInfo.GetFiles("*.css");
+
+                Logger.Write($"  .. found {styles.Count()} styles in {stylesRelativeFolder}");
+
+                foreach (var fileInfo in styles)
                 {
-                    var pluginFilePath = fileInfo.DirectoryName.Replace(pluginPath, "");
-                    files.Add($"/plugins{pluginFilePath}/{fileInfo.Name}".Replace("\\", "/"));
+                    var stylepath = Path.Combine(stylesRelativeFolder, fileInfo.Name).Replace("\\", "/");
+                    files.Add(stylepath);
                 }
 
             }

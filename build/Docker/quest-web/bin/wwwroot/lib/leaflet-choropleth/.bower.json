@@ -1,6 +1,6 @@
 {
   "name": "leaflet-choropleth",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "homepage": "https://github.com/timwis/leaflet-choropleth",
   "authors": [
     "timwis <tim@timwis.com>"
@@ -20,14 +20,14 @@
     "test",
     "tests"
   ],
-  "_release": "1.1.3",
+  "_release": "1.1.4",
   "_resolution": {
     "type": "version",
-    "tag": "v1.1.3",
-    "commit": "7c7c43fe52ae38cfe47eb78e22a836bc273ec96e"
+    "tag": "v1.1.4",
+    "commit": "6c36092f1f972e9567b78a55db9e41b5189b3388"
   },
   "_source": "https://github.com/timwis/leaflet-choropleth.git",
-  "_target": "v1.1.3",
+  "_target": "v1.1.4",
   "_originalSource": "leaflet-choropleth",
   "_direct": true
 }

@@ -14,6 +14,7 @@ using Quest.WebCore.Models;
 using Quest.Lib.DependencyInjection;
 using System.Collections.Generic;
 using Quest.WebCore.SignalR;
+using Quest.Lib.Trace;
 
 namespace Quest.WebCore
 {
@@ -24,6 +25,11 @@ namespace Quest.WebCore
 
         public Startup(IHostingEnvironment env)
         {
+            Logger.Write($"Hosting environment:  WebRootPath={env.WebRootPath}");
+            Logger.Write($"                   :  App={env.ApplicationName}");
+            Logger.Write($"                   :  ContentRootPath={env.ContentRootPath}");
+            Logger.Write($"                   :  Env={env.EnvironmentName}");
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddEnvironmentVariables()
@@ -147,6 +153,7 @@ namespace Quest.WebCore
             });
 
             appLifetime.ApplicationStopped.Register(() => this.ApplicationContainer.Dispose());
+
 
         }
     }

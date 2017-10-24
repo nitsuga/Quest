@@ -27,8 +27,11 @@ namespace Quest.WebCore.Modules
         /// <returns></returns>
         public static List<Assembly> GetPluginAssemblies()
         {
+            //TODO: this code needs to search recursively for dlls in the WebRootPath
+#if false
+
             // Identify the location of the Plugins folder
-            var pluginDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+            var pluginDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
 
             var pluginAssemblies =
                 from file in new DirectoryInfo(pluginDirectory).GetFiles()
@@ -36,6 +39,8 @@ namespace Quest.WebCore.Modules
                 select Assembly.Load(AssemblyName.GetAssemblyName(file.FullName));
 
             return pluginAssemblies.ToList();
+#endif
+            return new List<Assembly>();
         }
 
 
