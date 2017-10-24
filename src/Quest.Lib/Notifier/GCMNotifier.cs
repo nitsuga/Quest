@@ -99,7 +99,7 @@ namespace Quest.Lib.Notifier
 
             _gcmBroker.OnNotificationSucceeded += (notification) =>
             {
-                Logger.Write("GCM Notification Sent!", GetType().Name, TraceEventType.Information);
+                Logger.Write("GCM Notification Sent!", GetType().Name, TraceEventType.Information); 
             };
 
             _gcmBroker.Start();
