@@ -33,7 +33,7 @@
           "Target": 0,
           "Position": "panel-btn-left",
           "Action": "swap",
-          "Label": null,
+          "Label": "Swap",
           "Icon": "glyphicon-triangle-left"
         },
         {
