@@ -31,7 +31,7 @@ hud.plugins.chat = (function() {
 
     function startConnection(url, configureConnection) {
         return function start(transport) {
-            console.log(`Starting connection using ${signalR.TransportType[transport]} transport`)
+            console.log('Starting connection using ${signalR.TransportType[transport]} transport');
             var connection = new signalR.HubConnection(url, { transport: transport });
             if (configureConnection && typeof configureConnection === 'function') {
                 configureConnection(connection);
