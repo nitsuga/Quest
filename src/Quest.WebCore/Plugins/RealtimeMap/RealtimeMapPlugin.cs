@@ -18,7 +18,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
     public class RealtimeMapPlugin : IHudPlugin
     {
         ILifetimeScope _scope;
-        private IHostingEnvironment _env;
+        private IHostingEnvironment _env; 
 
         public RealtimeMapPlugin(ILifetimeScope scope, IHostingEnvironment env)
         {
