@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
+using Quest.Lib.DependencyInjection;
 
 namespace Quest.WebCore.SignalR
 {
-    public interface IUserTracker<out THub>
+    public interface IUserTracker
     {
         Task<IEnumerable<UserDetails>> UsersOnline();
         Task AddUser(HubConnectionContext connection, UserDetails userDetails);
@@ -19,8 +20,6 @@ namespace Quest.WebCore.SignalR
 
     public class UserDetails
     {
-
-
         public UserDetails(string connectionId, string name)
         {
             ConnectionId = connectionId;
@@ -33,9 +32,9 @@ namespace Quest.WebCore.SignalR
 
     public class HubWithPresence : Hub
     {
-        private IUserTracker<HubWithPresence> _userTracker;
+        private IUserTracker _userTracker;
 
-        public HubWithPresence(IUserTracker<HubWithPresence> userTracker)
+        public HubWithPresence(IUserTracker userTracker)
         {
             _userTracker = userTracker;
         }
@@ -56,9 +55,10 @@ namespace Quest.WebCore.SignalR
         }
     }
 
-    public class InMemoryUserTracker<THub> : IUserTracker<THub>
+    [Injection(typeof(IUserTracker), Lifetime.Singleton)]
+    public class InMemoryUserTracker : IUserTracker
     {
-        private readonly ConcurrentDictionary<HubConnectionContext, UserDetails> _usersOnline
+        private readonly ConcurrentDictionary<HubConnectionContext, UserDetails> _usersOnline 
             = new ConcurrentDictionary<HubConnectionContext, UserDetails>();
 
         public event Action<UserDetails[]> UsersJoined;
@@ -86,9 +86,10 @@ namespace Quest.WebCore.SignalR
         }
     }
 
+    [Injection()]
     public class CentralHub : HubWithPresence
     {
-        public CentralHub(IUserTracker<CentralHub> userTracker)
+        public CentralHub(IUserTracker userTracker)
             : base(userTracker)
         {
         }
@@ -110,9 +111,10 @@ namespace Quest.WebCore.SignalR
             return Clients.Client(Context.ConnectionId).InvokeAsync("UsersLeft", users);
         }
 
-        public async Task Send(string message)
+        public async Task Send(string user, string message)
         {
-            await Clients.All.InvokeAsync("Send", Context.User.Identity.Name, message);
+            //Context.User.Identity.Name
+            await Clients.All.InvokeAsync("Send", user, message);
         }
     }
 
