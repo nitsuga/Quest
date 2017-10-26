@@ -1,5 +1,47 @@
 ﻿var hud = (function () {
 
+    var _send = function (msg) {
+        connection.invoke('send', username, $(messageTextbox).val());
+    }
+
+    // start a connection with the central hub
+    function startConnection(url, configureConnection) {
+        return function start(transport) {
+            console.log('Starting connection using ${signalR.TransportType[transport]} transport');
+            var connection = new signalR.HubConnection(url, { transport: transport });
+            if (configureConnection && typeof configureConnection === 'function') {
+                configureConnection(connection);
+            }
+            return connection.start()
+                .then(function () {
+                    return connection;
+                })
+                .catch(function (error) {
+                    console.log(`Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}`);
+                    if (transport !== signalR.TransportType.LongPolling) {
+                        return start(transport + 1);
+                    }
+                    return Promise.reject(error);
+                });
+        }(signalR.TransportType.WebSockets);
+    }
+
+    var _initESB = function () {
+
+        // Start the connection.
+        startConnection('/hub', function (connection) {
+            // Create a function that the hub can call to broadcast messages.
+            connection.on('send', function (name, message) {
+            });
+        })
+        .then(function (connection) {
+            console.log('connection started');
+        })
+        .catch(error => {
+            console.error(error.message);
+        });
+    };
+
     var _getPanelContent = function (panelSrcId, panelRole) {
 
         var source;
@@ -289,6 +331,11 @@
     };
 
     var _initialize = function () {
+
+        // hook up to service bus
+        _initESB();
+
+        // bind handlers - maybe use behaviours for this
         _bindPanelButtonHandlers();
     }
 

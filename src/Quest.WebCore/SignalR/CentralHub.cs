@@ -1,97 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using System.Collections.Concurrent;
 using Quest.Lib.DependencyInjection;
+using System.Threading;
+using System.Net.WebSockets;
 
 namespace Quest.WebCore.SignalR
 {
-    public interface IUserTracker
-    {
-        Task<IEnumerable<UserDetails>> UsersOnline();
-        Task AddUser(HubConnectionContext connection, UserDetails userDetails);
-        Task RemoveUser(HubConnectionContext connection);
-
-        event Action<UserDetails[]> UsersJoined;
-        event Action<UserDetails[]> UsersLeft;
-    }
-
-    public class UserDetails
-    {
-        public UserDetails(string connectionId, string name)
-        {
-            ConnectionId = connectionId;
-            Name = name;
-        }
-
-        public string ConnectionId { get; }
-        public string Name { get; }
-    }
-
-    public class HubWithPresence : Hub
-    {
-        private IUserTracker _userTracker;
-
-        public HubWithPresence(IUserTracker userTracker)
-        {
-            _userTracker = userTracker;
-        }
-
-        public Task<IEnumerable<UserDetails>> GetUsersOnline()
-        {
-            return _userTracker.UsersOnline();
-        }
-
-        public virtual Task OnUsersJoined(UserDetails[] user)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnUsersLeft(UserDetails[] user)
-        {
-            return Task.CompletedTask;
-        }
-    }
-
-    [Injection(typeof(IUserTracker), Lifetime.Singleton)]
-    public class InMemoryUserTracker : IUserTracker
-    {
-        private readonly ConcurrentDictionary<HubConnectionContext, UserDetails> _usersOnline 
-            = new ConcurrentDictionary<HubConnectionContext, UserDetails>();
-
-        public event Action<UserDetails[]> UsersJoined;
-        public event Action<UserDetails[]> UsersLeft;
-
-        public Task<IEnumerable<UserDetails>> UsersOnline()
-            => Task.FromResult(_usersOnline.Values.AsEnumerable());
-
-        public Task AddUser(HubConnectionContext connection, UserDetails userDetails)
-        {
-            _usersOnline.TryAdd(connection, userDetails);
-            UsersJoined(new[] { userDetails });
-
-            return Task.CompletedTask;
-        }
-
-        public Task RemoveUser(HubConnectionContext connection)
-        {
-            if (_usersOnline.TryRemove(connection, out var userDetails))
-            {
-                UsersLeft(new[] { userDetails });
-            }
-
-            return Task.CompletedTask;
-        }
-    }
-
     [Injection()]
     public class CentralHub : HubWithPresence
     {
+        Thread timer;
+
         public CentralHub(IUserTracker userTracker)
             : base(userTracker)
         {
+            timer = new Thread(new ThreadStart(() =>
+            {
+                //var client = new ClientWebSocket();
+                //client.ConnectAsync("http://localhost/hub", CancellationToken.None);
+                //Task.WhenAll(Receu)
+                //Microsoft.AspNetCore.SignalR.Client.HubConnection =new Microsoft.AspNetCore.SignalR.Client.HubConnection()
+                //this.Send
+                Timer t = new Timer((x) =>
+                {
+                    // Clients.All.InvokeAsync("Send", DateTime.Now.ToLongTimeString());
+                }, null, 3000, 3000);
+            }));
+
+            timer.Start();
+
         }
 
         public override async Task OnConnectedAsync()
@@ -115,6 +54,19 @@ namespace Quest.WebCore.SignalR
         {
             //Context.User.Identity.Name
             await Clients.All.InvokeAsync("Send", user, message);
+        }
+
+        public async Task LeaveGroup(string user, string group)
+        {
+            await Groups.RemoveAsync(user, group);
+        }
+
+        public async Task JoinGroup(string user, string group)
+        {
+            await Groups.AddAsync(user, group);
+
+            //Context.User.Identity.Name
+            //await Clients.All.InvokeAsync("Send", user, message);
         }
     }
 

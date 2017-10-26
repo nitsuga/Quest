@@ -29,47 +29,11 @@ hud.plugins.chat = (function() {
         }
     };
 
-    function startConnection(url, configureConnection) {
-        return function start(transport) {
-            console.log('Starting connection using ${signalR.TransportType[transport]} transport');
-            var connection = new signalR.HubConnection(url, { transport: transport });
-            if (configureConnection && typeof configureConnection === 'function') {
-                configureConnection(connection);
-            }
-            return connection.start()
-                .then(function () {
-                    return connection;
-                })
-                .catch(function (error) {
-                    console.log(`Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}`);
-                    if (transport !== signalR.TransportType.LongPolling) {
-                        return start(transport + 1);
-                    }
-                    return Promise.reject(error);
-                });
-        }(signalR.TransportType.WebSockets);
-    }
-
+    
     var _initChatConnection = function(chatContainer) {
-
-        // Reference the auto-generated proxy for the hub.
-
-        //_hub = new signalR.HubConnection('/hub');
-
-        //_hub.on('send', data => {
-        //    console.log(data);
-        //});
-
-        //_hub.connection.start();
 
         // Find the message container
         var messageList = $(chatContainer).find('div.chat-msg-container > ul[data-role="discussion"]');
-
-        // Create a function that the hub can call back to display messages.
-        //_hub.client.addNewMessageToPage = function (name, message) {
-            // Add the message to the page.
-            //$(messageList).append('<li><strong>' + _htmlEncode(name)  + '</strong>: ' + _htmlEncode(message) + '</li>');
-        //};
 
         // Find the username
         var username = $(chatContainer).attr('data-username');
@@ -108,15 +72,6 @@ hud.plugins.chat = (function() {
             .catch(error => {
                 console.error(error.message);
             });
-        // Initialize the query string for the hub connection with the user's name
-        //$.connection.hub.qs = "userId=" + username;
-
-        // Start the connection.
-        //_subscribeToConnectionStart(function () {
-
-            
-
-        //});
     };
 
     var _initChat = function() {
