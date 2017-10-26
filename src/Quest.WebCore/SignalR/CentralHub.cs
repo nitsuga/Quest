@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Quest.Lib.DependencyInjection;
 using System.Threading;
 using System.Net.WebSockets;
+using Quest.Common.Messages;
+using Quest.Lib.ServiceBus;
+using Quest.Common.ServiceBus;
 
 namespace Quest.WebCore.SignalR
 {
@@ -12,25 +17,12 @@ namespace Quest.WebCore.SignalR
     public class CentralHub : HubWithPresence
     {
         Thread timer;
+        AsyncMessageCache _messageCache;
 
-        public CentralHub(IUserTracker userTracker)
+        public CentralHub(IUserTracker userTracker, AsyncMessageCache messageCache)
             : base(userTracker)
         {
-            timer = new Thread(new ThreadStart(() =>
-            {
-                //var client = new ClientWebSocket();
-                //client.ConnectAsync("http://localhost/hub", CancellationToken.None);
-                //Task.WhenAll(Receu)
-                //Microsoft.AspNetCore.SignalR.Client.HubConnection =new Microsoft.AspNetCore.SignalR.Client.HubConnection()
-                //this.Send
-                Timer t = new Timer((x) =>
-                {
-                    // Clients.All.InvokeAsync("Send", DateTime.Now.ToLongTimeString());
-                }, null, 3000, 3000);
-            }));
-
-            timer.Start();
-
+            _messageCache = messageCache;
         }
 
         public override async Task OnConnectedAsync()
@@ -67,6 +59,28 @@ namespace Quest.WebCore.SignalR
 
             //Context.User.Identity.Name
             //await Clients.All.InvokeAsync("Send", user, message);
+        }
+
+        public IObservable<IServiceBusMessage> StreamMessages()
+        {
+            return Observable.Create(
+                async (IObserver<IServiceBusMessage> observer) =>
+                {
+                    _messageCache.MsgSource.NewMessage += (x,y)=> {
+                        observer.OnNext(y.Payload);                            
+                    };
+                    await Task.Delay(10);
+                });
+        }
+
+        private void MsgSource_NewMessage(object sender, Common.ServiceBus.NewMessageArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<String> GetAllStreams()
+        {
+            return new List<string> { "Resources", "Incidents" };
         }
     }
 

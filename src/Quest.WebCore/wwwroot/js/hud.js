@@ -26,6 +26,18 @@
         }(signalR.TransportType.WebSockets);
     }
 
+    function startStreaming(connection) {
+        connection.stream("StreamMessages").subscribe({
+            complete: (message) => { },
+            next: (message) => {
+                console.log("got message: " + message)
+            },
+            error: function (err) {
+                logger.log(err);
+            }
+        });
+    }
+
     var _initESB = function () {
 
         // Start the connection.
@@ -33,9 +45,16 @@
             // Create a function that the hub can call to broadcast messages.
             connection.on('send', function (name, message) {
             });
+
+            connection.on('SetUsersOnline', function (users) {
+                console.log("SetUsersOnline:" + users)
+            });
+            
         })
         .then(function (connection) {
             console.log('connection started');
+
+            startStreaming(connection);
         })
         .catch(error => {
             console.error(error.message);
