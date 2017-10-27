@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Quest.Common.Messages;
 using System.Diagnostics;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.MapMatching.HMMViterbi
 {

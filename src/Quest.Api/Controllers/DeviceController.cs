@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
+using Quest.Common.Messages.Device;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Api.Controllers
 {

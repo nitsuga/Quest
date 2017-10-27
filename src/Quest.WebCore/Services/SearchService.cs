@@ -3,6 +3,8 @@ using System;
 using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
+using Quest.Common.Messages.Gazetteer;
+using Quest.Common.Messages.Gazetteer.Gazetteer;
 
 namespace Quest.WebCore.Services
 {

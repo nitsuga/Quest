@@ -1,5 +1,6 @@
 ﻿using System;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Common.Simulation
 {

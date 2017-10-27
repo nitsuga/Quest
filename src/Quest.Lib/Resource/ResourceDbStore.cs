@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Quest.Common.Messages;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Resource;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;

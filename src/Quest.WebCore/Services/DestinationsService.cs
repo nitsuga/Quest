@@ -5,6 +5,7 @@ using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using Quest.Mobile.Models;
 using System.Threading.Tasks;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.WebCore.Services
 {

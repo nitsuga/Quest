@@ -14,6 +14,8 @@ using Quest.Common.Messages;
 using Quest.Lib.Utils;
 using Quest.Lib.Simulation.Destinations;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Simulation.Resources
 {

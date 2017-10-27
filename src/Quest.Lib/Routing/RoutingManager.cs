@@ -15,6 +15,7 @@ using Quest.Lib.Trace;
 using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Data;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Routing
 {
@@ -160,9 +161,7 @@ namespace Quest.Lib.Routing
             while (!engine.IsReady)
             {
                 Thread.Sleep(1000);
-//                ServiceBusClient.Broadcast(new RoutingEngineStatus { Ready = engine.IsReady });
             }
-//            ServiceBusClient.Broadcast(new RoutingEngineStatus { Ready = engine.IsReady });
         }
 
         private void CalculateEta()
@@ -319,7 +318,7 @@ namespace Quest.Lib.Routing
         {
             return new RoutingEngineStatus() { Ready = _routingdata.IsInitialised };
         }
-
+        
         private RoutingResponse RouteRequestHandler(NewMessageArgs t)
         {
             try

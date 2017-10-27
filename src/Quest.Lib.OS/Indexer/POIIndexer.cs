@@ -10,6 +10,7 @@ using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using System.IO;
 using Quest.Lib.Csv;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.OS.Indexer
 {

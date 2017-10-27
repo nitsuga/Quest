@@ -7,6 +7,7 @@ using Quest.Lib.Utils;
 using Tfl.Api.Presentation.Entities;
 using Quest.Common.Messages;
 using Quest.Lib.Trace;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.Search.Indexers
 {

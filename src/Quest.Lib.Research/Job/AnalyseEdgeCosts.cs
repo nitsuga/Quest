@@ -21,6 +21,7 @@ using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
 using System.Data.SqlClient;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Research.Job
 {

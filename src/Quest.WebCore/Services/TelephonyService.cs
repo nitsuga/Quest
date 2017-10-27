@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Messages.Telephony;
 using Quest.Lib.ServiceBus;
 
 namespace Quest.WebCore.Services

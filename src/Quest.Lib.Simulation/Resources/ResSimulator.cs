@@ -9,6 +9,8 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Simulation.DataModelSim;
 using Quest.Lib.Data;
 using Quest.Lib.Coords;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Simulation.Resources
 {

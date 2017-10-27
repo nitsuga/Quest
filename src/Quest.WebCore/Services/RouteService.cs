@@ -1,5 +1,6 @@
 ﻿using GeoAPI.Geometries;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Routing;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
 using System;
@@ -61,7 +62,7 @@ namespace Quest.WebCore.Services
             RouteRequest request = new RouteRequest()
             {
                 FromLocation = new Coordinate(fc.Easting, fc.Northing),
-                ToLocation = new Coordinate(tc.Easting, tc.Northing),
+                ToLocations = new Coordinate[] { new Coordinate(tc.Easting, tc.Northing) },
                 DistanceMax = int.MaxValue,
                 DurationMax = int.MaxValue,
                 HourOfWeek = hour,

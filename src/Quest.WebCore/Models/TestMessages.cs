@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Device;
+using Quest.Common.Messages.Telephony;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;

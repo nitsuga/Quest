@@ -16,6 +16,8 @@ using Quest.Common.Messages;
 using GeoAPI.Geometries;
 using Quest.Lib.Simulation.Destinations;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Simulation.Resources
 {
@@ -144,7 +146,7 @@ namespace Quest.Lib.Simulation.Resources
             var result = _router.CalculateQuickestRoute(new RouteRequest
             {
                 FromLocation = startPoint,
-                ToLocation = endPoint,
+                ToLocations = new Coordinate[] { endPoint },
                 VehicleType = resource.VehicleType,
                 HourOfWeek = EventQueue.Now.Hour
             });

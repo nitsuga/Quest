@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Nest;
 using Quest.Lib.Trace;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.Search.Elastic
 {
@@ -33,7 +34,7 @@ namespace Quest.Lib.Search.Elastic
             var result = client.CreateIndex(ElasticSettings.Historyindex, s => s
                 .InitializeUsing(indexState)
                 .Mappings(ms => ms
-                    .Map<Common.Messages.SearchRequest>((TypeMappingDescriptor<Common.Messages.SearchRequest> m) => m
+                    .Map<Common.Messages.Gazetteer.SearchRequest>((TypeMappingDescriptor<Common.Messages.Gazetteer.SearchRequest> m) => m
                         .AutoMap()
                         .AllField(a => a.Enabled(false))
                     ))

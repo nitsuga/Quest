@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Quest.Common.Messages;
 using Quest.Lib.Net;
+using Quest.Common.Messages.Telephony;
 
 namespace Quest.Lib.EISEC
 {
@@ -150,7 +151,7 @@ namespace Quest.Lib.EISEC
                 var reqPkt = new EisecPoll();
                 SendPacketToEisec(reqPkt.Serialize());
             }
-            catch (Exception ex)
+            catch 
             {
             }
 
@@ -499,7 +500,7 @@ namespace Quest.Lib.EISEC
                 return new EisecResponse(ReturnCode.Success);
             }
 
-            catch (Exception ex)
+            catch 
             {
             }
 
@@ -541,7 +542,7 @@ namespace Quest.Lib.EISEC
 
                 return SendPasswordChangeRequest(newPassword);
             }
-            catch (Exception ex)
+            catch 
             {
             }
 
@@ -564,7 +565,7 @@ namespace Quest.Lib.EISEC
                 /* Now send logoff */
                 return SendLogoutRequest();
             }
-            catch (Exception ex)
+            catch 
             {
             }
             return new EisecResponse(ReturnCode.Exception);
@@ -607,7 +608,7 @@ namespace Quest.Lib.EISEC
                 _logonEisecResponse = new EisecResponse(ReturnCode.Success, "logged on successfully", 0, null);
                 _logonEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -625,7 +626,7 @@ namespace Quest.Lib.EISEC
                 {
                     reject.Deserialize(response);
                 }
-                catch (Exception ex1)
+                catch 
                 {
                 }
 
@@ -637,7 +638,7 @@ namespace Quest.Lib.EISEC
                 _logonEisecResponse = ChangePasswordOnline(newPw);
                 _logonEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -681,7 +682,7 @@ namespace Quest.Lib.EISEC
                 _logonEisecResponse = new EisecResponse(ReturnCode.LogonRejected, message, rejectCode, null);
                 _logonEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -708,7 +709,7 @@ namespace Quest.Lib.EISEC
                 _passwordEisecResponse = new EisecResponse(ReturnCode.Success, "Password changed successfully", 0, null);
                 _passwordEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -750,7 +751,7 @@ namespace Quest.Lib.EISEC
                 _passwordEisecResponse = new EisecResponse(ReturnCode.PasswordRejected, message, rejectCode, null);
                 _passwordEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -831,7 +832,7 @@ namespace Quest.Lib.EISEC
                 // signal completion of this command
                 _logoutEvent.Set();
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }

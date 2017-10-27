@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Messages.Incident;
 using Quest.Common.Utils;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;

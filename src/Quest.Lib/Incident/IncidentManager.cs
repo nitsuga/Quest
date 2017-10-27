@@ -7,6 +7,9 @@ using Quest.Lib.Processor;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
+using Quest.Common.Messages.Telephony;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Incident;
 
 namespace Quest.Lib.Incident
 {
@@ -76,7 +79,7 @@ namespace Quest.Lib.Incident
         //TODO: CPEventStatusListHandler
         private Response CPEventStatusListHandler(NewMessageArgs t)
         {
-            var item = t.Payload as CPEventStatusList;
+            var item = t.Payload as CadEventStatusList;
             //_incidentHandler.CPEventStatusListHandler(item, _notificationSettings);
             return null;
         }

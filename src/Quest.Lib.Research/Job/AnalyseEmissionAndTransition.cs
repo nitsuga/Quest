@@ -21,6 +21,8 @@ using Quest.Lib.Utils;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Research.Job
 {

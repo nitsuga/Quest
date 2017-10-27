@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quest.Common.Messages.GIS;
+using System;
 
 namespace Quest.Common.Messages
 {

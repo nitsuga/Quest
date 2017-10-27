@@ -2,6 +2,7 @@
 using GeoAPI.Geometries;
 using Quest.Common.Messages;
 using Quest.Lib.Constants;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Routing.Speeds
 {

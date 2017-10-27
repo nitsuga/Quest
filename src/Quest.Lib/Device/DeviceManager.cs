@@ -9,6 +9,8 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
+using Quest.Common.Messages.Device;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Device
 {

@@ -12,6 +12,8 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using Quest.Lib.Utils;
 using Quest.Lib.ServiceBus;
+using Quest.Common.Messages.Gazetteer;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.WebCore.Controllers
 {
@@ -237,7 +239,7 @@ namespace Quest.WebCore.Controllers
                 if (displayGroup != null)
                     Enum.TryParse<SearchResultDisplayGroup>(displayGroup, out displayGroupEnum);
 
-                var request = new Common.Messages.SearchRequest()
+                var request = new SearchRequest()
                 {
                     includeAggregates = includeAggregates,
                     searchMode = (SearchMode)searchMode,

@@ -13,6 +13,10 @@ using Quest.Lib.Data;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Search.Elastic;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Device;
+using Quest.Common.Messages.GIS;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Device
 {

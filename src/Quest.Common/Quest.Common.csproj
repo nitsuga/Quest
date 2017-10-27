@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Messages\MDTMessage.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GeoJSON.Net" Version="1.1.64" />
     <PackageReference Include="NEST" Version="5.5.0" />
     <PackageReference Include="NetTopologySuite" Version="1.14.0" />

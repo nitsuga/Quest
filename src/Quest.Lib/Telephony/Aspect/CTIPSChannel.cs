@@ -6,6 +6,7 @@ using System.Timers;
 using Quest.Lib.Trace;
 using Quest.Common.Messages;
 using System.ServiceModel;
+using Quest.Common.Messages.Telephony;
 
 namespace Quest.Lib.Telephony.AspectCTIPS
 {

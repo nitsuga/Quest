@@ -6,6 +6,7 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Tfl.Api.Presentation.Entities;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.Search.Indexers
 {

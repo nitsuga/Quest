@@ -1,6 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using NetTopologySuite.Geometries;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.OS.Routing.ITN
 {

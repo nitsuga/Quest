@@ -1,4 +1,5 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Messages.Routing;
 using Quest.Lib.Trace;
 
 namespace Quest.Lib.Routing.Speeds

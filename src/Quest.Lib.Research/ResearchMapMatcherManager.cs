@@ -6,6 +6,7 @@ using Quest.Lib.Utils;
 using Quest.Common.Messages;
 using Autofac;
 using Quest.Lib.DependencyInjection;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Research
 {

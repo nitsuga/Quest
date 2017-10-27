@@ -18,6 +18,12 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Globalization;
 using Quest.Lib.Device;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.GIS;
+using Quest.Common.Messages.Gazetteer;
+using Quest.Common.Messages.Device;
+using Quest.Common.Messages.Incident;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Resource
 {

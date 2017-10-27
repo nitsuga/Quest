@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Quest.Common.Messages;
+using Quest.Common.Messages.GIS;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;

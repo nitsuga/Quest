@@ -1,5 +1,6 @@
 ﻿using GeoAPI.Geometries;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Resource;
 using Quest.Common.Simulation;
 using System;
 using System.Collections.Generic;

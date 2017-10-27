@@ -14,6 +14,7 @@ using Quest.Lib.ServiceBus;
 using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.MapMatching
 {

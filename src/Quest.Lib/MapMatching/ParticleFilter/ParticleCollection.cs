@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
 using Quest.Common.Messages;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.MapMatching.ParticleFilter
 {

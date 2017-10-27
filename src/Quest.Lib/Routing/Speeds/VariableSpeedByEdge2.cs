@@ -9,6 +9,7 @@ using Quest.Lib.Trace;
 using System.Threading;
 using Quest.Lib.Data;
 using System.Threading.Tasks;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Routing.Speeds
 {

@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GeoAPI.Geometries;
-using Nest;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Utilities;
 using Quest.Lib.Utils;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Gazetteer;
+using Nest;
 
 namespace Quest.Lib.Search.Elastic
 {
@@ -139,7 +140,7 @@ namespace Quest.Lib.Search.Elastic
         }
 
 
-        public SearchResponse SemanticSearch(Common.Messages.SearchRequest baserequest)
+        public SearchResponse SemanticSearch(Common.Messages.Gazetteer.SearchRequest baserequest)
         {
             Initialise();
 
@@ -314,7 +315,7 @@ namespace Quest.Lib.Search.Elastic
             //TODO: Search OverlayDocuments as well
 
             // perform the search
-            Common.Messages.SearchRequest baserequest = new Common.Messages.SearchRequest()
+            Common.Messages.Gazetteer.SearchRequest baserequest = new Common.Messages.Gazetteer.SearchRequest()
             {
                 skip = 0,
                 take=999,
@@ -398,7 +399,7 @@ namespace Quest.Lib.Search.Elastic
 
         }
 
-        private SearchResponse BasicSearch(Common.Messages.SearchRequest request)
+        private SearchResponse BasicSearch(Common.Messages.Gazetteer.SearchRequest request)
         {
             // flag if spatial limits have been applied
             bool spatialLimited = false;
@@ -410,7 +411,7 @@ namespace Quest.Lib.Search.Elastic
             // the minscore gets overriden if we doing a coordinate search 
             double minscore = 0;
 
-            QueryContainer queryContainer = null;
+            Nest.QueryContainer queryContainer = null;
 
             switch (request.searchMode)
             {
@@ -601,13 +602,13 @@ namespace Quest.Lib.Search.Elastic
         }
 
         
-        private ISearchResponse<LocationDocument> DoSearch(SearchDescriptor<LocationDocument> descriptor)
+        private Nest.ISearchResponse<LocationDocument> DoSearch(Nest.SearchDescriptor<LocationDocument> descriptor)
         {
             var searchresults = _client.Search<LocationDocument>(descriptor);
             return searchresults;
         }
 
-        private void AddAudit(Common.Messages.SearchRequest baserequest, SearchResponse results)
+        private void AddAudit(Common.Messages.Gazetteer.SearchRequest baserequest, SearchResponse results)
         {
             try
             {
@@ -668,7 +669,7 @@ namespace Quest.Lib.Search.Elastic
             return result;
         }
 
-        private SearchResponse CoordinateSearch(Common.Messages.SearchRequest baserequest, PointGeoShape point, string filter,
+        private SearchResponse CoordinateSearch(Common.Messages.Gazetteer.SearchRequest baserequest, PointGeoShape point, string filter,
             string range)
         {
             if (point == null) throw new ArgumentNullException(nameof(point));
@@ -765,7 +766,7 @@ namespace Quest.Lib.Search.Elastic
             return new PointGeoShape { Coordinates = new GeoCoordinate(coord.Latitude, coord.Longitude) };
         }
        
-        private void UpdateAggregations(SearchResponse searchResult, Common.Messages.SearchRequest searchRequest)
+        private void UpdateAggregations(SearchResponse searchResult, Common.Messages.Gazetteer.SearchRequest searchRequest)
         {
             AssignDocumentGroupKeys(searchResult, searchRequest);
 
@@ -807,7 +808,7 @@ namespace Quest.Lib.Search.Elastic
             //    groupscores.OrderByDescending(x => x.Value).ThenBy(x => x.Key).Select(x => groups[x.Key]).ToList();
         }
 
-        private static void AssignDocumentGroupKeys(SearchResponse searchResult, Common.Messages.SearchRequest searchRequest)
+        private static void AssignDocumentGroupKeys(SearchResponse searchResult, Common.Messages.Gazetteer.SearchRequest searchRequest)
         {
             Action<LocationDocument> grouper;
 
@@ -880,7 +881,7 @@ namespace Quest.Lib.Search.Elastic
         }
 
 
-        private void DemoteBusStops(SearchResponse searchResult, Common.Messages.SearchRequest searchRequest)
+        private void DemoteBusStops(SearchResponse searchResult, Common.Messages.Gazetteer.SearchRequest searchRequest)
         {
             // documents are already order by score descending
             foreach (var doc in searchResult.Documents)
@@ -939,7 +940,7 @@ namespace Quest.Lib.Search.Elastic
         {
             var range = 150;
 
-            var baserequest = new Common.Messages.SearchRequest
+            var baserequest = new Common.Messages.Gazetteer.SearchRequest
             {
                 searchMode = 0,
                 searchText = text.ToUpper(),
@@ -976,7 +977,7 @@ namespace Quest.Lib.Search.Elastic
 
             if (left.Length > 0 && right.Length > 0)
             {
-                var baserequest = new Common.Messages.SearchRequest
+                var baserequest = new Common.Messages.Gazetteer.SearchRequest
                 { 
                     indexGroup = indexGroup,
                     searchMode = SearchMode.EXACT,
@@ -1063,7 +1064,7 @@ namespace Quest.Lib.Search.Elastic
 
             if (left.Length > 0 && right.Length > 0)
             {
-                var baserequest = new Common.Messages.SearchRequest
+                var baserequest = new Common.Messages.Gazetteer.SearchRequest
                 {
                     searchMode = SearchMode.EXACT,
                     searchText = left.ToUpper(),

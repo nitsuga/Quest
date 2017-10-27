@@ -1,6 +1,8 @@
 using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Quest.Common.Messages;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Resource;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Device;
 using Quest.Lib.Resource;

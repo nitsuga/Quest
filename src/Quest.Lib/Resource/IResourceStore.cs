@@ -1,4 +1,6 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Resource
 {

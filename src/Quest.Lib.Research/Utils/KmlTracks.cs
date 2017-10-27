@@ -8,6 +8,7 @@ using SharpKml.Dom;
 using SharpKml.Engine;
 using SharpKml.Dom.GX;
 using Quest.Lib.DependencyInjection;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Research.Utils
 {

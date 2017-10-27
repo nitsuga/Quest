@@ -10,6 +10,8 @@ using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Quest.Lib.Processor;
 using Quest.Common.ServiceBus;
+using Quest.Common.Messages.Telephony;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.EISEC
 {

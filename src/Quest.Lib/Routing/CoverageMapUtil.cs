@@ -10,6 +10,7 @@ using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Data;
 using Quest.Lib.DependencyInjection;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Routing
 {

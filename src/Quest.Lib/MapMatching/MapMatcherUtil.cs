@@ -6,6 +6,7 @@ using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Routing;
 using Quest.Lib.Trace;
 using Autofac;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.MapMatching
 {

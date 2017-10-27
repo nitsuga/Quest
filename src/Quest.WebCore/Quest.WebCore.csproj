@@ -116,6 +116,7 @@
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Properties\PublishProfiles\" />
+    <Folder Include="Quest\Common\Messages\" />
     <Folder Include="Views\Plugin\" />
   </ItemGroup>
 

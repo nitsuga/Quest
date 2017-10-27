@@ -368,7 +368,7 @@ namespace Quest.Lib.Utils
         //    }
         //}
 
-        public static PolygonizeResult Polygonize(SearchResponse results, double range)
+        public static PolygonizeResult Polygonize(Common.Messages.Gazetteer.SearchResponse results, double range)
         {
             CoordinateTransformationFactory ctFact = new CoordinateTransformationFactory();
             IGeographicCoordinateSystem wgs84 = GeographicCoordinateSystem.WGS84;

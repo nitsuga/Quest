@@ -2,6 +2,7 @@
 using GeoAPI.Geometries;
 using Quest.Common.Messages;
 using System.Collections.Generic;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Common.Simulation
 {

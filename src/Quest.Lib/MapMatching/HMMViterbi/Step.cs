@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Quest.Common.Messages;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.MapMatching.HMMViterbi
 {

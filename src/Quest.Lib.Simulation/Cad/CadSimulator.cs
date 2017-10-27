@@ -15,6 +15,9 @@ using Quest.Lib.Simulation.Resources;
 using Quest.Lib.Simulation.Incidents;
 using GeoAPI.Geometries;
 using Quest.Common.Utils;
+using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.Incident;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Simulation.Cad
 {

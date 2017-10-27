@@ -7,6 +7,8 @@ using Quest.Lib.Trace;
 using Quest.Common.Messages;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Common.Messages.Gazetteer;
+using Quest.Common.Messages.Gazetteer.Gazetteer;
 
 namespace Quest.Lib.Search.Elastic
 {

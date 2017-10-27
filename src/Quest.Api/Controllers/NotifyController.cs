@@ -4,6 +4,7 @@ using Quest.Lib.ServiceBus;
 using Quest.Common.Messages;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Quest.Common.Messages.Device;
 
 namespace Quest.Api.Controllers
 {

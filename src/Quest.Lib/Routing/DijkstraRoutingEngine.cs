@@ -13,6 +13,7 @@ using Quest.Common.Messages;
 using Quest.Lib.Routing.Speeds;
 using Quest.Lib.Utils;
 using Quest.Lib.Trace;
+using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.Routing
 {
@@ -560,7 +561,8 @@ namespace Quest.Lib.Routing
             Logger.Write("Routing Manager: RouteRequestHandler called", TraceEventType.Information, "Routing Manager");
 
             var start = _data.GetEdgeFromPoint(request.FromLocation);
-            var ends = new List<EdgeWithOffset> { _data.GetEdgeFromPoint(request.ToLocation) };
+
+            var ends = _data.GetEdgesFromPoints(request.ToLocations) ;
 
             var internalRequest = new RouteRequestMultiple()
             {

@@ -9,6 +9,7 @@ using Quest.Lib.ServiceBus;
 using Quest.Lib.Net;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Common.Messages.Telephony;
 
 // Simulates an EISEC server for testing purposes. It opens up a socket and listens for requests. When a client
 // connects, it queues the request using the thread pool. The Connection Worker method gets executed by a pool thread

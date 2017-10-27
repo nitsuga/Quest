@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Telephony;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Net;
 using Quest.Lib.Processor;

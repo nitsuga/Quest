@@ -17,6 +17,9 @@ using Quest.Lib.ServiceBus;
 using Quest.Common.Messages;
 using Quest.Lib.Coords;
 using Quest.Lib.Device;
+using Quest.Common.Messages.CAD;
+using Quest.Common.Messages.Incident;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Northgate
 {
