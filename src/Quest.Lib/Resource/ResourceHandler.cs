@@ -24,6 +24,7 @@ using Quest.Common.Messages.Gazetteer;
 using Quest.Common.Messages.Device;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Messages.Resource;
+using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Resource
 {

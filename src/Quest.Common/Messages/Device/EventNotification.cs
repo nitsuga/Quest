@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quest.Common.Messages.Notification;
+using System;
 
 namespace Quest.Common.Messages.Device
 {

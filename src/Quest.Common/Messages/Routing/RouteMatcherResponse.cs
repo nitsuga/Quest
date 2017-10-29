@@ -12,11 +12,11 @@ namespace Quest.Common.Messages.Routing
 
         public List<RoadLinkEdgeSpeed> Results;
 
-        public Visual Fixes;
+        public Visual.Visual Fixes;
 
-        public Visual Route;
+        public Visual.Visual Route;
 
-        public Visual Particles;
+        public Visual.Visual Particles;
 
         /// <summary>
         /// Text of the network in GraphVis format. Generated if GenerateGraphVis=true

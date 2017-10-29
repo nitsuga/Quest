@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Quest.Common.Messages
+namespace Quest.Common.Messages.Gazetteer
 {
     [Serializable]
     public class IndexRequest : Request

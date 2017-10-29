@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Quest.Common.Messages;
+using Quest.Common.Messages.System;
 
 namespace Quest.Lib.Processor
 {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.Mail;
 using Quest.Lib.Trace;
 using Quest.Common.Messages;
+using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Notifier
 {

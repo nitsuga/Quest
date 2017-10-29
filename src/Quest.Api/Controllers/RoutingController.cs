@@ -5,6 +5,7 @@ using Quest.Common.Messages;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Quest.Common.Messages.Device;
+using Quest.Common.Messages.Notification;
 
 namespace Quest.Api.Controllers
 {

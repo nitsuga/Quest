@@ -12,6 +12,7 @@ using Apache.NMS.ActiveMQ.Commands;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Quest.Common.ServiceBus;
+using Quest.Common.Messages.System;
 
 namespace Quest.Lib.ServiceBus
 {

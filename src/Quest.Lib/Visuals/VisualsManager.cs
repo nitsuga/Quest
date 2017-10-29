@@ -8,6 +8,7 @@ using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Microsoft.Extensions.Caching.Memory;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.Lib.Visuals
 {

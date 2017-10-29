@@ -4,6 +4,7 @@ using Quest.Lib.Utils;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Processor;
 using Quest.Common.ServiceBus;
+using Quest.Common.Messages.TimedEvent;
 
 namespace Quest.Lib.Simulation
 {

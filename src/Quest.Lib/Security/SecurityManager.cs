@@ -11,6 +11,7 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;
 using Quest.Lib.Data;
+using Quest.Common.Messages.Security;
 
 namespace Quest.Lib.Security
 {

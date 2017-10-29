@@ -20,6 +20,7 @@ using Quest.Lib.Device;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Messages.Resource;
+using Quest.Common.Messages.System;
 
 namespace Quest.Lib.Northgate
 {

@@ -2,6 +2,7 @@
 using GeoJSON.Net.Feature;
 using Quest.Common.Messages;
 using Autofac;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.Lib.Visuals
 {

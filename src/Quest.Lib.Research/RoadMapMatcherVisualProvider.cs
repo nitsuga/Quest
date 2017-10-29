@@ -7,6 +7,7 @@ using Quest.Lib.Visuals;
 using Autofac;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.Lib.Research
 {

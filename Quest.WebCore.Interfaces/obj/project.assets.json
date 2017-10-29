@@ -664,7 +664,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\marcus.poulton\\.nuget\\packages\\": {},
+    "C:\\Users\\Marcus\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
@@ -673,17 +673,17 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "C:\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
+      "projectUniqueName": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
       "projectName": "Quest.WebCore.Interfaces",
-      "projectPath": "C:\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
-      "packagesPath": "C:\\Users\\marcus.poulton\\.nuget\\packages\\",
-      "outputPath": "C:\\Quest\\Quest.WebCore.Interfaces\\obj\\",
+      "projectPath": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
+      "packagesPath": "C:\\Users\\Marcus\\.nuget\\packages\\",
+      "outputPath": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\marcus.poulton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Marcus\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

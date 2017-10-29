@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quest.Common.Messages.Job;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,7 +17,7 @@ namespace Quest.WebCore.Services
     {
         [Required]
         [Display(Name = "Template")]
-        public Common.Messages.JobTemplate Template { get; set; }
+        public JobTemplate Template { get; set; }
 
         [Required]
         [Display(Name = "Url")]

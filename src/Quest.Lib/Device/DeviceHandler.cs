@@ -17,6 +17,7 @@ using Quest.Common.Messages.Device;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;
+using Quest.Common.Messages.Destination;
 
 namespace Quest.Lib.Device
 {

@@ -16,6 +16,7 @@ using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.Lib.Routing
 {

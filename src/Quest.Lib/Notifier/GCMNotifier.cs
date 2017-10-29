@@ -5,6 +5,7 @@ using PushSharp.Google;
 using Quest.Common.Messages;
 using System.Collections.Generic;
 using PushSharp.Common;
+using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Notifier
 {

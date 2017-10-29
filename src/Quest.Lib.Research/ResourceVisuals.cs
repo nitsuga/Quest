@@ -6,6 +6,7 @@ using FeatureCollection = GeoJSON.Net.Feature.FeatureCollection;
 using Autofac;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.Lib.Research
 {

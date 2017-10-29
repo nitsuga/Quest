@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Lib", "Quest.Lib\Quest.Lib.csproj", "{68E95B32-4B37-48F3-8560-9E063F527B13}"
 EndProject
@@ -45,15 +45,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.WebCore", "Quest.WebC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Core", "Quest.Core\Quest.Core.csproj", "{2DB84272-45F7-4551-B784-7E2353470DC0}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Api", "Quest.Api\Quest.Api.csproj", "{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.UnitTests", "..\Quest.UnitTests\Quest.UnitTests.csproj", "{7C1FB119-D9A8-45C1-84C3-D86DEF8EA985}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{62251DB7-1242-4211-A94E-93DD58F94AD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.WebCore.Interfaces", "..\Quest.WebCore.Interfaces\Quest.WebCore.Interfaces.csproj", "{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.WebCore.Interfaces", "..\Quest.WebCore.Interfaces\Quest.WebCore.Interfaces.csproj", "{6BD7C8C4-B6F2-4EB7-AE29-693344A00909}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -285,30 +283,6 @@ Global
 		{2DB84272-45F7-4551-B784-7E2353470DC0}.Release|x64.Build.0 = Release|Any CPU
 		{2DB84272-45F7-4551-B784-7E2353470DC0}.Release|x86.ActiveCfg = Release|Any CPU
 		{2DB84272-45F7-4551-B784-7E2353470DC0}.Release|x86.Build.0 = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|ARM.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|x64.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Debug|x86.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|Any CPU.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|ARM.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|ARM.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|x64.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|x64.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|x86.ActiveCfg = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Docker|x86.Build.0 = Debug|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|ARM.ActiveCfg = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|ARM.Build.0 = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x64.ActiveCfg = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x64.Build.0 = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x86.ActiveCfg = Release|Any CPU
-		{2EDCF1FC-7DB4-4005-82F8-F4F414654F7D}.Release|x86.Build.0 = Release|Any CPU
 		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3661C3E1-8D02-4BF6-A161-70AE9BC0D21F}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -394,7 +368,7 @@ Global
 		{6BD7C8C4-B6F2-4EB7-AE29-693344A00909} = {62251DB7-1242-4211-A94E-93DD58F94AD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
 		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
+		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
 	EndGlobalSection
 EndGlobal

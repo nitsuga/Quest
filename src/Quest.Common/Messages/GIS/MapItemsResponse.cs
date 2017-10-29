@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quest.Common.Messages.Destination;
+using System;
 using System.Collections.Generic;
 
 namespace Quest.Common.Messages.GIS

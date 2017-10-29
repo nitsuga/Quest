@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Quest.Common.Messages;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Common.Messages.Security;
 
 namespace Quest.WebCore.Models
 {

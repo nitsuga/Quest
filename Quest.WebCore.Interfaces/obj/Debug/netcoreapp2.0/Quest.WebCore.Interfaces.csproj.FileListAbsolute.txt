@@ -15,3 +15,12 @@ C:\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfac
 C:\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
 C:\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb
 C:\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csprojResolveAssemblyReference.cache
+C:\data\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.deps.json
+C:\data\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
+C:\data\Quest\Quest.WebCore.Interfaces\bin\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csprojResolveAssemblyReference.cache
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csproj.CoreCompileInputs.cache
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.AssemblyInfoInputs.cache
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.AssemblyInfo.cs
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
+C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb

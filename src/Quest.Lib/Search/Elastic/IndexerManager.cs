@@ -9,6 +9,7 @@ using Quest.Common.Messages;
 using Autofac;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
+using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.Search.Elastic
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quest.Common.Messages.Visual;
+using System;
 
 namespace Quest.Common.Messages.Routing
 {

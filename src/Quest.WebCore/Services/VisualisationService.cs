@@ -6,6 +6,7 @@ using Quest.Common.Messages;
 using System;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.WebCore.Services
 {

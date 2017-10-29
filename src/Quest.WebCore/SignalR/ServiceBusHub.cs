@@ -23,7 +23,7 @@ namespace Quest.WebCore.SignalR
 
         private Dictionary<string, string[]> _groupMessages = new Dictionary<string, string[]>
         {
-            { "ResourceUpdate", new string[] {"Resources" } },
+            { "ResourceUpdate", new string[] {"Resources.Available" } },
             { "IncidentUpdate", new string[] {"Incidents" } },
         };
 

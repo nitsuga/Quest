@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Quest.Common.Messages;
 using Quest.Lib.Utils;
+using Quest.Common.Messages.System;
 
 /// <summary>
 /// Lightweight processor
