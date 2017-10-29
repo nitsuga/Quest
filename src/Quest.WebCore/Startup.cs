@@ -87,6 +87,7 @@ namespace Quest.WebCore
             services.AddSingleton<TelephonyService>();
             services.AddSingleton<VisualisationService>();
             services.AddSingleton<SecurityService>();
+            services.AddSingleton<ServiceBusHub>();
 
             services.AddProcessRunnerService();
 
@@ -112,6 +113,8 @@ namespace Quest.WebCore
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            //app.UseSession( new SessionOptions());
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

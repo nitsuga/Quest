@@ -1,34 +1,29 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Quest.Lib.DependencyInjection;
 using System.Threading;
-using System.Net.WebSockets;
-using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
-using Quest.Common.ServiceBus;
 
 namespace Quest.WebCore.SignalR
 {
+    /// <summary>
+    ///  central hub where messages from clients arrive and are dispatched to other users
+    ///  users may join arbitary groups.
+    /// </summary>
     [Injection()]
     public class CentralHub : HubWithPresence
     {
-        Thread timer;
-        AsyncMessageCache _messageCache;
-
-        public CentralHub(IUserTracker userTracker, AsyncMessageCache messageCache)
+        public CentralHub(IUserTracker userTracker)
             : base(userTracker)
         {
-            _messageCache = messageCache;
         }
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Client(Context.ConnectionId).InvokeAsync("SetUsersOnline", await GetUsersOnline());
 
+            await Clients.Client(Context.ConnectionId).InvokeAsync("SetUsersOnline", await GetUsersOnline());
             await base.OnConnectedAsync();
         }
 
@@ -44,44 +39,21 @@ namespace Quest.WebCore.SignalR
 
         public async Task Send(string user, string message)
         {
-            //Context.User.Identity.Name
             await Clients.All.InvokeAsync("Send", user, message);
         }
 
         public async Task LeaveGroup(string user, string group)
         {
             await Groups.RemoveAsync(user, group);
+            await Clients.All.InvokeAsync("LeaveGroup", user);
         }
 
         public async Task JoinGroup(string user, string group)
         {
             await Groups.AddAsync(user, group);
-
-            //Context.User.Identity.Name
-            //await Clients.All.InvokeAsync("Send", user, message);
+            await Clients.All.InvokeAsync("JoinGroup", user);
         }
 
-        public IObservable<IServiceBusMessage> StreamMessages()
-        {
-            return Observable.Create(
-                async (IObserver<IServiceBusMessage> observer) =>
-                {
-                    _messageCache.MsgSource.NewMessage += (x,y)=> {
-                        observer.OnNext(y.Payload);                            
-                    };
-                    await Task.Delay(10);
-                });
-        }
-
-        private void MsgSource_NewMessage(object sender, Common.ServiceBus.NewMessageArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<String> GetAllStreams()
-        {
-            return new List<string> { "Resources", "Incidents" };
-        }
     }
 
     public interface IHubMessage

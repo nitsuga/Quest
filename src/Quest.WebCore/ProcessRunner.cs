@@ -1,8 +1,10 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
+using Quest.WebCore.SignalR;
 using System;
 
 namespace Quest.WebCore
@@ -24,7 +26,7 @@ namespace Quest.WebCore
 
     public class ProcessRunner: IProcessRunner
     {
-        IServiceCollection _serviceCollection;
+        private IServiceCollection _serviceCollection;
 
         public ProcessRunner(IServiceCollection serviceCollection)
         {
@@ -39,6 +41,9 @@ namespace Quest.WebCore
 
             var serviceBusClient = container.GetService<Common.ServiceBus.IServiceBusClient>();
             serviceBusClient.Initialise(queue);
+
+            var sbHub = container.GetService<ServiceBusHub>();
+            sbHub.Initialise();
 
             //var msgCache = container.GetService<AsyncMessageCache>();
         }

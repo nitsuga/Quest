@@ -2,7 +2,7 @@
 
     var _send = function (msg) {
         connection.invoke('send', username, $(messageTextbox).val());
-    }
+    };
 
     // start a connection with the central hub
     function startConnection(url, configureConnection) {
@@ -17,7 +17,7 @@
                     return connection;
                 })
                 .catch(function (error) {
-                    console.log(`Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}`);
+                    console.log('Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}');
                     if (transport !== signalR.TransportType.LongPolling) {
                         return start(transport + 1);
                     }
@@ -28,9 +28,11 @@
 
     function startStreaming(connection) {
         connection.stream("StreamMessages").subscribe({
-            complete: (message) => { },
+            complete: (message) => {
+                console.log("completed message: " + message);
+            },
             next: (message) => {
-                console.log("got message: " + message)
+                console.log("got message: " + message);
             },
             error: function (err) {
                 logger.log(err);
@@ -47,14 +49,14 @@
             });
 
             connection.on('SetUsersOnline', function (users) {
-                console.log("SetUsersOnline:" + users)
+                console.log("SetUsersOnline:" + users);
             });
             
         })
         .then(function (connection) {
             console.log('connection started');
 
-            startStreaming(connection);
+            //startStreaming(connection);
         })
         .catch(error => {
             console.error(error.message);
@@ -115,7 +117,7 @@
                             }
                         });
                     }
-                    , 100);
+                        , 100);
                 }
 
             },
@@ -124,11 +126,11 @@
             }
         });
 
-    }
+    };
 
     // load the specific plugin into the target panel
     var _loadPanel = function (pluginName, panelRole) {
-        
+
         var selector = '[data-panel-role=' + panelRole + ']';
         var containerPanel = $(selector).first();
         var pluginRole = $(containerPanel).attr('data-panel-role');
@@ -161,7 +163,7 @@
                 alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
             }
         });
-    }
+    };
 
     // swap two panels
     var _swap = function(panelRole) {
@@ -356,7 +358,7 @@
 
         // bind handlers - maybe use behaviours for this
         _bindPanelButtonHandlers();
-    }
+    };
 
     return {
         initialize: _initialize,
@@ -366,6 +368,6 @@
         expand: _expand,
         swap: _swap,
         showmenu: _showmenu
-    }
+    };
 
 })();

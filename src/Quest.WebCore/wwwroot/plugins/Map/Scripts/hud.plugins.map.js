@@ -59,6 +59,7 @@ hud.plugins.map = (function() {
             inertiaDeceleration: 10000
         });
 
+        hub.on
     };
 
 
