@@ -3,6 +3,7 @@
 hud.plugins = hud.plugins || {};
 
 var markersi, markersr, markersd, georesLayer;
+var select_avail, select_busy, select_c1, select_c2, select_c3, select_c4, select_held, select_aeuc, select_fruc, select_stn, select_sbp, select_hos;
 
 hud.plugins.rtmap = (function() {
 
@@ -74,37 +75,65 @@ hud.plugins.rtmap = (function() {
         select_held = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-held']";
         select_aeuc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-aeuc']";
         select_fruc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-fruc']";
+        select_stn = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-stn']";
+        select_sbp = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-sbp']";
+        select_hos = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-hos']";
 
         $(select_avail).on("click", function () {
             avail = hud.toggleButton(select_avail);
-            _doResources(avail, false);
+            _doResources();
         });
 
         $(select_busy).on("click", function () {
             hud.toggleButton(select_busy);
+            _doResources();
         });
 
         $(select_c1).on("click", function () {
             hud.toggleButton(select_c1);
+            _doResources();
         });
         $(select_c2).on("click", function () {
             hud.toggleButton(select_c2);
+            _doResources();
         });
         $(select_c3).on("click", function () {
             hud.toggleButton(select_c3);
+            _doResources();
         });
         $(select_c4).on("click", function () {
             hud.toggleButton(select_c4);
+            _doResources();
         });
 
         $(select_held).on("click", function () {
             hud.toggleButton(select_held);
+            _doResources();
         });
+
         $(select_aeuc).on("click", function () {
             hud.toggleButton(select_aeuc);
+            _doResources();
         });
+
         $(select_fruc).on("click", function () {
             hud.toggleButton(select_fruc);
+            _doResources();
+        });
+
+        $(select_hos).on("click", function () {
+            hud.toggleButton(select_hos);
+            _doResources();
+        });
+
+        $(select_sbp).on("click", function () {
+            hud.toggleButton(select_sbp);
+            _doResources();
+        });
+
+        $(select_stn).on("click", function () {
+            hud.toggleButton(select_stn);
+            _doResources();
         });
 
 
@@ -112,14 +141,11 @@ hud.plugins.rtmap = (function() {
         hud.joinGroup("Resource.Available");
     };
 
-    var _doResources = function(avail, busy) {
+    var _doResources = function() {
         //Create a new empty resources layer and add to map
         if (markersr !== undefined) markersr.clearLayers();
 
         _createResourcesLayer();
-
-        if (avail === false && busy === false)
-            return;
 
         $("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
 
@@ -128,13 +154,13 @@ hud.plugins.rtmap = (function() {
             url: _getURL("RTM/GetMapItems"),
             data:
             {
-                ResourcesAvailable: avail,
-                ResourcesBusy: busy,
-                IncidentsImmediate: false,
+                ResourcesAvailable: hud.getButtonState(select_avail),
+                ResourcesBusy: hud.getButtonState(select_busy),
+                IncidentsImmediate: hud.getButtonState(select_c1),
                 IncidentsOther: false,
-                Hospitals: true,
-                Standby: true,
-                Stations: true
+                Hospitals: hud.getButtonState(select_hos),
+                Standby: hud.getButtonState(select_sbp),
+                Stations: hud.getButtonState(select_stn),
             },
             dataType: "json",
             success: function (layer) {
@@ -146,45 +172,50 @@ hud.plugins.rtmap = (function() {
                 }
                 else {
 
+                    if (layer.Result == null)
+                        return;
 
                     // add resources to the map
-                    layer.Result.Resources.forEach(function (item) {
-                        // for each item construct equiv geojson item
-                        var geojsonFeature = {
-                            "type": "Feature",
-                            "id": item.FleetNo,
-                            "properties": {
-                                "name": item.Callsign,
-                                "MarkerType": item.ResourceTypeGroup,
-                                "MarkerStatus": item.StatusCategory
-                            },
-                            "geometry": {
-                                "type": "Point",
-                                "coordinates": [item.Position.Longitude, item.Position.Latitude]
-                            }
-                        };
-                        georesLayer.addData(geojsonFeature);
-                    });
+                    if (layer.Result.Resources !== undefined) {
+                        layer.Result.Resources.forEach(function (item) {
+                            // for each item construct equiv geojson item
+                            var geojsonFeature = {
+                                "type": "Feature",
+                                "id": item.FleetNo,
+                                "properties": {
+                                    "name": item.Callsign,
+                                    "MarkerType": item.ResourceTypeGroup,
+                                    "MarkerStatus": item.StatusCategory
+                                },
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [item.Position.Longitude, item.Position.Latitude]
+                                }
+                            };
+                            georesLayer.addData(geojsonFeature);
+                        });
+                    }
 
-                    // add Destinations to the map
-                    layer.Result.Destinations.forEach(function (item) {
-                        // for each item construct equiv geojson item
-                        var geojsonFeature = {
-                            "type": "Feature",
-                            "id": item.Id,
-                            "properties": {
-                                "name": item.Name,
-                                "MarkerType": "DES",
-                                "MarkerStatus": _getDestinationMarkerStatus(item)
-                            },
-                            "geometry": {
-                                "type": "Point",
-                                "coordinates": [item.Position.Longitude, item.Position.Latitude]
-                            }
-                        };
-                        georesLayer.addData(geojsonFeature);
-                    });
-
+                    if (layer.Result.Destinations !== undefined) {
+                        // add Destinations to the map
+                        layer.Result.Destinations.forEach(function (item) {
+                            // for each item construct equiv geojson item
+                            var geojsonFeature = {
+                                "type": "Feature",
+                                "id": item.Id,
+                                "properties": {
+                                    "name": item.Name,
+                                    "MarkerType": "DES",
+                                    "MarkerStatus": _getDestinationMarkerStatus(item)
+                                },
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [item.Position.Longitude, item.Position.Latitude]
+                                }
+                            };
+                            georesLayer.addData(geojsonFeature);
+                        });
+                    }
                 }
 
                 $("*").css("cursor", "default");
