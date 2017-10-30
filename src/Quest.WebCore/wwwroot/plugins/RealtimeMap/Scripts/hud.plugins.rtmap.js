@@ -62,7 +62,49 @@ hud.plugins.rtmap = (function() {
 
 
         $("#sys_hub").on("Resource.Available", function () {
-            
+
+        });
+
+        select_avail = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-avail']";
+        select_busy = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-busy']";
+        select_c1 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c1']";
+        select_c2 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c2']";
+        select_c3 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c3']";
+        select_c4 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c4']";
+        select_held = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-held']";
+        select_aeuc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-aeuc']";
+        select_fruc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-fruc']";
+
+        $(select_avail).on("click", function () {
+            avail = hud.toggleButton(select_avail);
+            _doResources(avail, false);
+        });
+
+        $(select_busy).on("click", function () {
+            hud.toggleButton(select_busy);
+        });
+
+        $(select_c1).on("click", function () {
+            hud.toggleButton(select_c1);
+        });
+        $(select_c2).on("click", function () {
+            hud.toggleButton(select_c2);
+        });
+        $(select_c3).on("click", function () {
+            hud.toggleButton(select_c3);
+        });
+        $(select_c4).on("click", function () {
+            hud.toggleButton(select_c4);
+        });
+
+        $(select_held).on("click", function () {
+            hud.toggleButton(select_held);
+        });
+        $(select_aeuc).on("click", function () {
+            hud.toggleButton(select_aeuc);
+        });
+        $(select_fruc).on("click", function () {
+            hud.toggleButton(select_fruc);
         });
 
 
@@ -70,10 +112,7 @@ hud.plugins.rtmap = (function() {
         hud.joinGroup("Resource.Available");
     };
 
-    var _doResources = function() {
-        var avail = hud.getStoreAsBool("#layer-res-avail");
-        var busy = hud.getStoreAsBool("#layer-res-busy");
-
+    var _doResources = function(avail, busy) {
         //Create a new empty resources layer and add to map
         if (markersr !== undefined) markersr.clearLayers();
 
@@ -86,7 +125,7 @@ hud.plugins.rtmap = (function() {
 
         //Make a new request for the new selection
         $.ajax({
-            url: getURL("Home/GetResources"),
+            url: _getURL("RTM/GetResources"),
             data:
             {
                 avail: avail,
@@ -102,7 +141,6 @@ hud.plugins.rtmap = (function() {
                 }
                 else {
                     georesLayer.addData(layer.Result);
-                    map.spin(false);
                 }
                 $("*").css("cursor", "default");
             }
@@ -178,6 +216,19 @@ hud.plugins.rtmap = (function() {
         //doDestinations();
         //doAllCoverage();
         //SetupNotifications();
+    }
+
+    var _getURL = function(url) {
+        var s = _getBaseURL() + "/" + url;
+        //console.debug("g url = " + s);
+        return s;
+    }
+
+    var _getBaseURL = function() {
+        var url = location.href;  // entire url including querystring - also: window.location.href;
+        var baseUrl = url.substring(0, url.indexOf("/", 10));
+        //console.debug("b url = " + baseURL);
+        return baseUrl;
     }
 
     /// <summary>

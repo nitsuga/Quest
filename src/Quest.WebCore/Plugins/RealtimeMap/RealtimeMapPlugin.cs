@@ -1,12 +1,112 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Quest.Lib.DependencyInjection;
+using Quest.Lib.ServiceBus;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Quest.WebCore.Plugins.RealtimeMap
 {
+    public class RTMController : Controller
+    {
+        private AsyncMessageCache _messageCache;
+        private ResourceService _resourceService;
+        private IncidentService _incidentService;
+        private DestinationService _destinationService;
+        private SearchService _searchService;
+        private RouteService _routeService;
+        private TelephonyService _telephonyService;
+        private SecurityService _securityService;
+        private readonly IPluginService _pluginService;
+
+        public RTMController(AsyncMessageCache messageCache,
+                IPluginService pluginFactory,
+                ResourceService resourceService,
+                IncidentService incidentService,
+                DestinationService destinationService,
+                SearchService searchService,
+                RouteService routeService,
+                TelephonyService telephonyService,
+                VisualisationService visualisationService,
+                SecurityService securityService
+            )
+        {
+            _messageCache = messageCache;
+            _resourceService = resourceService;
+            _incidentService = incidentService;
+            _destinationService = destinationService;
+            _searchService = searchService;
+            _routeService = routeService;
+            _telephonyService = telephonyService;
+            _securityService = securityService;
+            _pluginService = pluginFactory;
+        }
+
+        [HttpGet]
+        public ActionResult GetResources(bool avail = false, bool busy = false)
+        {
+            try
+            {
+                var r1 = _resourceService.GetResources(avail, busy);
+                var js = JsonConvert.SerializeObject(r1);
+                var result = new ContentResult
+                {
+                    Content = js,
+                    ContentType = "application/json"
+                };
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                var js = JsonConvert.SerializeObject(new { error = ex.Message });
+                var result = new ContentResult
+                {
+                    Content = js,
+                    ContentType = "application/json"
+                };
+                return result;
+
+            }
+        }
+
+
+        [HttpGet]
+        public ActionResult GetIncidents(bool includeCatA = false, bool includeCatB = false)
+        {
+            try
+            {
+                var incs = _incidentService.GetIncidents(includeCatA, includeCatB);
+                var js = JsonConvert.SerializeObject(incs);
+                var result = new ContentResult
+                {
+                    Content = js,
+                    ContentType = "application/json"
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = "ERROR: Cannot complete Incidents" + ex.Message;
+                var error = new ContentResult
+                {
+                    Content = errorMsg,
+                    ContentType = "application/json"
+                };
+
+                return error;
+
+                //throw new Exception("Couldn't get list of resources", ex);
+            }
+        }
+
+    }
+
     /// <summary>
     /// This plugin is internal to the main Hud framework.
     /// It generates the Html presented to the user to allow them to select from a list of available plugins

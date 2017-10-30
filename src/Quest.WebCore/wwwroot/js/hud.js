@@ -440,6 +440,23 @@
         setSlider(name, v);
     }
 
+    var _setButton = function (selector, state) {
+        if (state) {
+            $(selector).removeClass("panel-btn-off");
+            $(selector).addClass("panel-btn-on");
+        }
+        else {
+            $(selector).removeClass("panel-btn-on");
+            $(selector).addClass("panel-btn-off");
+        }
+        return state;
+    }
+
+    var _toggleButton = function (selector) {
+        ison = $(selector).hasClass("panel-btn-on");
+        return _setButton(selector, !ison);
+    }
+
     var _initLocalStorage = function () {
         // support the case where localstorage is not intrinsically available.
         if (!window.localStorage) {
@@ -537,6 +554,8 @@
         getStoreAsBool: _getStoreAsBool,
         getStore: _getStore,
         setStore: _setStore,
+        setButton: _setButton,
+        toggleButton: _toggleButton
     };
 
 })();
