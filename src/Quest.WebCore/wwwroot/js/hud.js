@@ -1,15 +1,23 @@
 ﻿var hud = (function () {
 
+    // connection the signalR
     var _connection;
+
+    // our username
     var _username;
+
+    // element emitting signalR events
     var _hubevents;
 
+    // remember which message group are being subscribed to
     var groups = {};
 
+    // send a message to the hub
     var _send = function (msg) {
         _connection.invoke('send', _username, $(messageTextbox).val());
     };
 
+    // join a message group
     var _joinGroup = function (group) {
         var group_count = groups[group];
         if (group_count === undefined || group_count===0)
@@ -24,6 +32,7 @@
         groups[group] = group_count;
     };
 
+    // leave a message group
     var _leaveGroup = function (group) {
         var group_count = groups[group];
         if (group_count === undefined || group_count === 0)
@@ -86,7 +95,7 @@
 
             // Create a function that the hub can call to broadcast messages to a specific group.
             connection.on('groupmessage', function (name, group, message) {
-                $("#hub").trigger(group, message);
+                $("#sys_hub").trigger(group, message);
             });
 
             connection.on('setusersonline', function (users) {
@@ -102,20 +111,6 @@
         .catch(error => {
             console.error(error.message);
         });
-    };
-
-    var _getPanelContent = function (panelSrcId, panelRole) {
-
-        var source;
-        var isSingleton = $('#' + panelSrcId).attr('data-singleton');
-
-        if (isSingleton === 'true') {
-            source = $('#' + panelSrcId).find('div[data-role="main"]');
-        } else {
-            source = $('#' + panelSrcId).find('div[data-role="' + panelRole + '"]');
-        }
-
-        return $(source).html();
     };
 
     // load the specific layout into the div id
@@ -158,7 +153,7 @@
                             }
                         });
                     }
-                        , 100);
+                        , 1000);
                 }
 
             },
@@ -204,6 +199,20 @@
                 alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
             }
         });
+    };
+
+    var _getPanelContent = function (panelSrcId, panelRole) {
+
+        var source;
+        var isSingleton = $('#' + panelSrcId).attr('data-singleton');
+
+        if (isSingleton === 'true') {
+            source = $('#' + panelSrcId).find('div[data-role="main"]');
+        } else {
+            source = $('#' + panelSrcId).find('div[data-role="' + panelRole + '"]');
+        }
+
+        return $(source).html();
     };
 
     // swap two panels
@@ -391,6 +400,109 @@
                 }
             });
     };
+    
+    var _setStore = function(cname, cvalue, exdays) {
+        localStorage.setItem(cname, cvalue);
+    }
+
+    var _getStore = function (cname) {
+        return localStorage.getItem(cname);
+    }
+
+    var _getStoreAsBool = function(cname) {
+        return (localStorage.getItem(cname) === "true") ? true : false;
+    }
+
+    // set a bootstrap slider from the store
+    var _setSliderFromStore = function(name) {
+        if (name === '#')
+            return;
+        var v = getStoreAsBool(name);
+        setSlider(name, v);
+    }
+
+    // save bootstrap slider value
+    var _setStoreFromSlider = function(name) {
+        if (name === '#')
+            return;
+        var v = $(name).prop('checked');
+        setStore(name, v, 365);
+    }
+
+    var _setSlider = function(name, position) {
+        $(name).bootstrapToggle(position ? 'on' : 'off');
+    }
+
+    var _toggleSlider = function(name) {
+        var v = !($(name).hasClass("off"));
+        v = !v;
+        setStore(name, v, 365);
+        setSlider(name, v);
+    }
+
+    var _initLocalStorage = function () {
+        // support the case where localstorage is not intrinsically available.
+        if (!window.localStorage) {
+            Object.defineProperty(window, "localStorage", new (function () {
+                var aKeys = [], oStorage = {};
+                Object.defineProperty(oStorage, "getItem", {
+                    value: function (sKey) { return sKey ? this[sKey] : null; },
+                    writable: false,
+                    configurable: false,
+                    enumerable: false
+                });
+                Object.defineProperty(oStorage, "key", {
+                    value: function (nKeyId) { return aKeys[nKeyId]; },
+                    writable: false,
+                    configurable: false,
+                    enumerable: false
+                });
+                Object.defineProperty(oStorage, "setItem", {
+                    value: function (sKey, sValue) {
+                        if (!sKey) { return; }
+                        document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
+                    },
+                    writable: false,
+                    configurable: false,
+                    enumerable: false
+                });
+                Object.defineProperty(oStorage, "length", {
+                    get: function () { return aKeys.length; },
+                    configurable: false,
+                    enumerable: false
+                });
+                Object.defineProperty(oStorage, "removeItem", {
+                    value: function (sKey) {
+                        if (!sKey) { return; }
+                        document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+                    },
+                    writable: false,
+                    configurable: false,
+                    enumerable: false
+                });
+                this.get = function () {
+                    var iThisIndx;
+                    for (var sKey in oStorage) {
+                        iThisIndx = aKeys.indexOf(sKey);
+                        if (iThisIndx === -1) { oStorage.setItem(sKey, oStorage[sKey]); }
+                        else { aKeys.splice(iThisIndx, 1); }
+                        delete oStorage[sKey];
+                    }
+                    for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) { oStorage.removeItem(aKeys[0]); }
+                    for (var aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
+                        aCouple = aCouples[nIdx].split(/\s*=\s*/);
+                        if (aCouple.length > 1) {
+                            oStorage[iKey = unescape(aCouple[0])] = unescape(aCouple[1]);
+                            aKeys.push(iKey);
+                        }
+                    }
+                    return oStorage;
+                };
+                this.configurable = false;
+                this.enumerable = true;
+            })());
+        }
+    }
 
     var _initialize = function () {
 
@@ -400,6 +512,8 @@
 
         // hook up to service bus
         _initESB();
+
+        _initLocalStorage();
 
         // bind handlers - maybe use behaviours for this
         _bindPanelButtonHandlers();
@@ -414,7 +528,15 @@
         swap: _swap,
         showmenu: _showmenu,
         joinGroup: _joinGroup,
-        leaveGroup: _leaveGroup
+        leaveGroup: _leaveGroup,
+        setStore: _setStore,
+        toggleSlider: _toggleSlider,
+        setSlider: _setSlider,
+        setStoreFromSlider: _setStoreFromSlider,
+        setSliderFromStore: _setSliderFromStore,
+        getStoreAsBool: _getStoreAsBool,
+        getStore: _getStore,
+        setStore: _setStore,
     };
 
 })();

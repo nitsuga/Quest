@@ -72,10 +72,10 @@ namespace Quest.WebCore.SignalR
 
             _connection.On<UserDetails[]>("usersjoined", (parms) => UsersJoined(parms));
             _connection.On<UserDetails[]>("usersleft", (parms) => UsersLeft(parms));
-            _connection.On<UserDetails[]>("send", (parms) => { });
-            _connection.On<UserDetails[]>("leavegroup", (parms) => { });
-            _connection.On<UserDetails[]>("joingroup", (parms) => { });
-            _connection.On<UserDetails[]>("groupmessage", (parms) => { });
+            _connection.On<string, string>("send", (name, message) => { });
+            _connection.On<string, string>("leavegroup", (name, group) => { });
+            _connection.On<string, string>("joingroup", (name, group) => { });
+            _connection.On<string, string, string>("groupmessage", (name, group, message) => { });
 
             _connection.StartAsync();
         }

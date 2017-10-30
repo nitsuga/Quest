@@ -42,7 +42,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
 
         public string OnInit()
         {
-            return "hud.plugins.map.initMap(panelRole)";
+            return "hud.plugins.rtmap.initMap(panelRole)";
         }
 
         public string OnPanelMoved()
@@ -63,7 +63,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         private string DrawContainer(string role)
         {
             const string templateFileName = "Map.html";
-            var templateFolder = _env.WebRootPath + "/plugins/Map/Lib";
+            var templateFolder = _env.WebRootPath + "/plugins/RealtimeMap/Lib";
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
             gazHtml = gazHtml.Replace("id=mapdivplaceholder", $"id='map{role}'");
             return gazHtml;

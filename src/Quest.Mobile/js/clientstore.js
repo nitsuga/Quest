@@ -23,7 +23,6 @@ function setSliderFromStore(name) {
 function setStoreFromSlider(name) {
     if (name === '#')
         return;
-    //var v = !($(name).hasClass("off"));
     var v = $(name).prop('checked');
     setStore(name, v, 365);
 }
@@ -31,18 +30,6 @@ function setStoreFromSlider(name) {
 
 function setSlider(name, position) {
     $(name).bootstrapToggle(position ? 'on':'off');
-    ////alert(position);
-    //var c = $(name).find("input[type=checkbox]");
-    //if (position == false) {
-    //    var offtoggle = $(name).attr('class', 'toggle ' + $(name).find('.toggle-off').attr('class').replace(/toggle-off/g, ''));
-    //    c.prop("checked", false);
-    //    $(name).addClass('off');
-    //}
-    //else {
-    //    $(name).attr('class', 'toggle ' + $(name).find('.toggle-on').attr('class').replace(/toggle-on/g, ''));
-    //    c.prop("checked", true);
-    //    $(name).removeClass('off');
-    //}
 }
 
 function toggleSlider(name) {

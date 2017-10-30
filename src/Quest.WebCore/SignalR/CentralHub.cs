@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Quest.Lib.DependencyInjection;
 using Quest.Lib.Trace;
+using System;
 
 namespace Quest.WebCore.SignalR
 {
@@ -22,6 +23,11 @@ namespace Quest.WebCore.SignalR
         {
             await Clients.Client(Context.ConnectionId).InvokeAsync("setusersonline", await GetUsersOnline());
             await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            await base.OnDisconnectedAsync(exception);
         }
 
         public override Task OnUsersJoined(UserDetails[] users)
@@ -48,14 +54,14 @@ namespace Quest.WebCore.SignalR
 
         public async Task LeaveGroup(string user, string group)
         {
-            await Groups.RemoveAsync(user, group);
+            await Groups.RemoveAsync(Context.ConnectionId, group);
             await Clients.All.InvokeAsync("leavegroup", user, group);
             Logger.Write($"LeaveGroup {user}->{group}");
         }
 
         public async Task JoinGroup(string user, string group)
         {
-            await Groups.AddAsync(user, group);
+            await Groups.AddAsync(Context.ConnectionId, group);
             await Clients.All.InvokeAsync("joingroup", user, group);
             Logger.Write($"JoinGroup {user}->{group}");
         }

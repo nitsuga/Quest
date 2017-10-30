@@ -108,6 +108,15 @@
     <Content Update="components.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\plugins\RealtimeMap\Scripts\leaflet.draw.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\plugins\RealtimeMap\Scripts\leaflet.heat.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\plugins\RealtimeMap\Scripts\leaflet.usermarker.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="wwwroot\plugins\PluginSelector\Scripts\hud.plugins.pluginSelector.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -133,7 +142,7 @@
     <None Include="wwwroot\plugins\Gazetteer\Content\hud.gaz.css" />
     <None Include="wwwroot\plugins\Gazetteer\Lib\Gazetteer.html" />
     <None Include="wwwroot\plugins\Gazetteer\Scripts\hud.plugins.gaz.js" />
-    <None Include="wwwroot\plugins\Map\Scripts\hud.plugins.map.js" />
+    <None Include="wwwroot\plugins\RealtimeMap\Scripts\hud.plugins.rtmap.js" />
   </ItemGroup>
 
 </Project>
