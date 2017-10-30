@@ -30,13 +30,13 @@ namespace Quest.UnitTests
 
             serviceBusClient.Initialise("Test");
 
-            ResourceUpdate newresource = new ResourceUpdate
+            ResourceUpdateRequest newresource = new ResourceUpdateRequest
             {
                 Resource = new QuestResource
                 {
                     Callsign = $"C1000",
                     FleetNo = $"1000",
-                    Position = new GeoAPI.Geometries.Coordinate(0, 0),
+                    Position = new  Quest.Common.Messages.GIS.LatLongCoord(0, 0),
                     ResourceType = "UNK",
                     Status = "OFF"
                 },

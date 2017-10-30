@@ -13,10 +13,11 @@ namespace Quest.Common.Messages
         public string RoutingKey;
         public string Source;
         public string Destination;
+        public string MsgType;
 
         public override string ToString()
         {
-            return $"Meta: c={CorrelationId} rpy={ReplyTo} key={RoutingKey} src={Source} dst={Destination}";
+            return $"Meta: type={MsgType} c={CorrelationId} rpy={ReplyTo} key={RoutingKey} src={Source} dst={Destination}";
         }
     }
 }

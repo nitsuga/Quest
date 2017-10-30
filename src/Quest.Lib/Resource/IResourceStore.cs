@@ -10,7 +10,7 @@ namespace Quest.Lib.Resource
         QuestResource GetByFleetNo(string fleetno);
         QuestResource GetByCallsign(string callsign);
         int GetOffroadStatusId();
-        ResourceUpdateResult Update(ResourceUpdate item);
+        ResourceUpdateResult Update(ResourceUpdateRequest item);
         void Clear();
     }    
 }

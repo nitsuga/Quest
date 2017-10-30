@@ -15,7 +15,7 @@ namespace Quest.Common.Messages.GIS
         public List<ResourceItem> Resources;
         // these are children of the resources
         //public List<DeviceItem> Devices;
-        public List<EventMapItem> Events;
+        public List<IncidentItem> Events;
         public List<QuestDestination> Destinations;
 
         // the revision returned

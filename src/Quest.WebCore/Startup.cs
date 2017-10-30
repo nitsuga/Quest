@@ -77,8 +77,6 @@ namespace Quest.WebCore
             builder.RegisterModule(new Modules.PluginModule());
 
             // Add application services.
-            //services.AddSingleton<IServiceBusClient, ActiveMqClientAsync>();
-            //services.AddSingleton<AsyncMessageCache>();
             services.AddSingleton<ResourceService>();
             services.AddSingleton<IncidentService>();
             services.AddSingleton<DestinationService>();
@@ -90,6 +88,10 @@ namespace Quest.WebCore
             services.AddSingleton<ServiceBusHub>();
 
             services.AddProcessRunnerService();
+
+            // use LDAP authenication here when the time comes..
+            // http://www.justinbuchanan.com/blog/post/2017/03/24/Authenticate-ASPNET-Core-Identity-Users-via-Active-Directory-or-LDAP-Password
+            //services.AddAuthentication(IISDefaults.AuthenticationScheme);
 
             // Populate the services.
             builder.Populate(services);
@@ -156,8 +158,6 @@ namespace Quest.WebCore
             });
 
             appLifetime.ApplicationStopped.Register(() => this.ApplicationContainer.Dispose());
-
-
         }
     }
 }

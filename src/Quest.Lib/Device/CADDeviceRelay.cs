@@ -9,7 +9,7 @@ namespace Quest.Lib.Device
 
     public class CADDeviceRelay
     {
-        public System.EventHandler<IncidentUpdate> IncidentUpdate;
+        public System.EventHandler<IncidentUpdateRequest> IncidentUpdate;
         //public System.EventHandler<StatusUpdate> StatusUpdate;
 
         public CADDeviceRelay()

@@ -59,7 +59,11 @@ hud.plugins.map = (function() {
             inertiaDeceleration: 10000
         });
 
-        hub.on
+        $("#sys_hub").on("Resource.Available", function () {
+            alert("resource available changed");
+        });
+
+        hud.joinGroup("Resource.Available");
     };
 
 

@@ -39,11 +39,11 @@ namespace Quest.WebCore
 
             Logger.Write($"Web: Attaching to queue {queue}", GetType().Name);
 
-            var serviceBusClient = container.GetService<Common.ServiceBus.IServiceBusClient>();
-            serviceBusClient.Initialise(queue);
+            //var serviceBusClient = container.GetService<Common.ServiceBus.IServiceBusClient>();
+            //serviceBusClient.Initialise(queue);
 
             var sbHub = container.GetService<ServiceBusHub>();
-            sbHub.Initialise();
+            sbHub.Initialise(queue);
 
             //var msgCache = container.GetService<AsyncMessageCache>();
         }

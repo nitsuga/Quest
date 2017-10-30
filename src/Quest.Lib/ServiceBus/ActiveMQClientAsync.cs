@@ -161,7 +161,8 @@ namespace Quest.Lib.ServiceBus
                     ReplyTo = srcqueue,
                     RoutingKey = "",
                     Source = srcqueue,
-                    Destination = destqueue
+                    Destination = destqueue,
+                    MsgType = message.GetType().Name
                 }
             };
 
@@ -422,7 +423,8 @@ namespace Quest.Lib.ServiceBus
                 ReplyTo = QueueName,
                 RoutingKey = "",
                 Source = QueueName,
-                Destination = ""
+                Destination = "",
+                MsgType = message.GetType().Name
             };
 
             Broadcast(message, metadata);

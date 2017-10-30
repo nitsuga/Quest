@@ -42,6 +42,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Quest\**" />
+    <Content Remove="Quest\**" />
+    <EmbeddedResource Remove="Quest\**" />
+    <None Remove="Quest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Extensions\ControllerExtensions.cs" />
     <Compile Remove="Models\IdentityModels.cs" />
     <Compile Remove="Models\LocationSearchJob.cs" />
@@ -116,7 +123,6 @@
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="Quest\Common\Messages\" />
     <Folder Include="Views\Plugin\" />
   </ItemGroup>
 

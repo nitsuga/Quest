@@ -1,20 +1,17 @@
-﻿using System;
+﻿using Quest.Common.Messages.GIS;
+using System;
 
 namespace Quest.Common.Messages.Resource
 {
-
     /// <summary>
-    /// A resource update has been received from CAD - this is a full update
+    /// notification that a resource has changed in the system
     /// </summary>
     [Serializable]
     public class ResourceUpdate : MessageBase
     {
-        public QuestResource Resource;
-        public DateTime UpdateTime;
+        public string Callsign;
 
-        public override string ToString()
-        {
-            return $"ResourceUpdate {Resource.Callsign} Status={Resource.Status} type={Resource.ResourceType} event={Resource.EventId}";
-        }
+        // optional item details (missing if the item has been deleted)
+        public ResourceItem Item;
     }
 }

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Quest.Lib.DependencyInjection;
-using System.Threading;
-using Quest.Lib.ServiceBus;
+using Quest.Lib.Trace;
 
 namespace Quest.WebCore.SignalR
 {
@@ -22,36 +20,44 @@ namespace Quest.WebCore.SignalR
 
         public override async Task OnConnectedAsync()
         {
-
-            await Clients.Client(Context.ConnectionId).InvokeAsync("SetUsersOnline", await GetUsersOnline());
+            await Clients.Client(Context.ConnectionId).InvokeAsync("setusersonline", await GetUsersOnline());
             await base.OnConnectedAsync();
         }
 
         public override Task OnUsersJoined(UserDetails[] users)
         {
-            return Clients.Client(Context.ConnectionId).InvokeAsync("UsersJoined", users);
+            return Clients.Client(Context.ConnectionId).InvokeAsync("usersjoined", users);
         }
 
         public override Task OnUsersLeft(UserDetails[] users)
         {
-            return Clients.Client(Context.ConnectionId).InvokeAsync("UsersLeft", users);
+            return Clients.Client(Context.ConnectionId).InvokeAsync("usersleft", users);
         }
 
         public async Task Send(string user, string message)
         {
-            await Clients.All.InvokeAsync("Send", user, message);
+            await Clients.All.InvokeAsync("send", user, message);
+        }
+
+        public async Task GroupMessage(string user, string group, string message)
+        {
+            var grp = Clients.Group(group);
+            await grp?.InvokeAsync("groupmessage", user, group, message);
+            Logger.Write($"GroupMessage {user}->{group}->{message}");
         }
 
         public async Task LeaveGroup(string user, string group)
         {
             await Groups.RemoveAsync(user, group);
-            await Clients.All.InvokeAsync("LeaveGroup", user);
+            await Clients.All.InvokeAsync("leavegroup", user, group);
+            Logger.Write($"LeaveGroup {user}->{group}");
         }
 
         public async Task JoinGroup(string user, string group)
         {
             await Groups.AddAsync(user, group);
-            await Clients.All.InvokeAsync("JoinGroup", user);
+            await Clients.All.InvokeAsync("joingroup", user, group);
+            Logger.Write($"JoinGroup {user}->{group}");
         }
 
     }

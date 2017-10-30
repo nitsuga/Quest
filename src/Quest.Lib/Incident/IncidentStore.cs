@@ -28,7 +28,7 @@ namespace Quest.Lib.Incident
             });
         }
 
-        public QuestIncident Update(IncidentUpdate item)
+        public QuestIncident Update(IncidentUpdateRequest item)
         {
             return _dbFactory.Execute<QuestContext, QuestIncident>((db) =>
             {

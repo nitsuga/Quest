@@ -7,6 +7,6 @@ namespace Quest.Lib.Incident
     {
         void Close(string serial);
         QuestIncident Get(string id);
-        QuestIncident Update(IncidentUpdate item);
+        QuestIncident Update(IncidentUpdateRequest item);
     }
 }

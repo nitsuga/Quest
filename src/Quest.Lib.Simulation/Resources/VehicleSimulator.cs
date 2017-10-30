@@ -239,8 +239,8 @@ namespace Quest.Lib.Simulation.Resources
         /// <param name="resource"></param>
         private void CalcNewLocation(SimResource resource)
         {
-            double dx = resource.Destination.X- resource.Position.X;
-            double dy = resource.Destination.Y - resource.Position.Y;
+            double dx = resource.Destination.X- resource.Position.Longitude;
+            double dy = resource.Destination.Y - resource.Position.Latitude;
 
             if (dx < 50 && dy < 50)
             {
@@ -249,10 +249,10 @@ namespace Quest.Lib.Simulation.Resources
             else
             {
                 if (dx != 0)
-                    resource.Position.X += (int)(dx / Math.Abs(dx) * 25.0);
+                    resource.Position.Longitude += (int)(dx / Math.Abs(dx) * 25.0);
 
                 if (dy != 0)
-                    resource.Position.Y += (int)(dy / Math.Abs(dy) * 25.0);
+                    resource.Position.Latitude += (int)(dy / Math.Abs(dy) * 25.0);
             }
             resource.LastChanged = DateTime.Now;
         }
@@ -308,11 +308,12 @@ namespace Quest.Lib.Simulation.Resources
                 conn = route.Connections[0];
                 var rp = conn.Edge.Geometry.GetCoordinateN(0);
 
+                //TODO: Coordinate system is wrong
                 // calculate distance along the route
                 int meters = (int)Math.Sqrt(
-                    (Resource.Position.X - rp.X) * (Resource.Position.X - rp.X)
+                    (Resource.Position.Longitude - rp.X) * (Resource.Position.Longitude - rp.X)
                             +
-                    (Resource.Position.Y - rp.Y) * (Resource.Position.Y - rp.Y)
+                    (Resource.Position.Latitude - rp.Y) * (Resource.Position.Latitude - rp.Y)
                     );
 
                 // cartesian to polar 

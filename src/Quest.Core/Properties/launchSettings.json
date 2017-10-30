@@ -2,9 +2,9 @@
   "profiles": {
     "Quest.Core": {
       "commandName": "Project",
-      "workingDirectory": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.Core\\bin\\Debug\\netcoreapp2.0",
+      "workingDirectory": "bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager",
+        "Modules": "SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager",
         "Session": "Dev"
       }
     }

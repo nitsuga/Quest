@@ -50,7 +50,7 @@ namespace Quest.Lib.Simulation.Cad
             var _routingEngine = _scope.ResolveNamed<IRouteEngine>(defaultengine);
 
             // create a list of actions associated with each object type arriving from the queue
-            MsgHandler.AddHandler<IncidentUpdate>(IncidentUpdateHandler);
+            MsgHandler.AddHandler<IncidentUpdateRequest>(IncidentUpdateHandler);
             MsgHandler.AddHandler<AssignVehicle>(AssignVehicle);
             MsgHandler.AddHandler<CancelVehicle>(CancelVehicle);
             MsgHandler.AddHandler<StatusChange>(StatusChange);

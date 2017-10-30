@@ -55,7 +55,7 @@ namespace Quest.Lib.Resource
         /// <param name="settings"></param>
         /// <param name="client"></param>
         /// <param name="msgSource"></param>
-        public ResourceUpdateResult ResourceUpdate(ResourceUpdate resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config)
+        public ResourceUpdateResult ResourceUpdate(ResourceUpdateRequest resourceUpdate, IServiceBusClient msgSource, BuildIndexSettings config)
         {
             // update the resource record
             var resupdate = _resStore.Update(resourceUpdate);
@@ -68,8 +68,8 @@ namespace Quest.Lib.Resource
             // save details to elastic if we have location info
             if (res.Position != null)
             {
-                var point = new PointGeoShape(new GeoCoordinate(res.Position.Y, res.Position.X));
-                var geo = new GeoLocation(res.Position.Y, res.Position.X);
+                var point = new PointGeoShape(new GeoCoordinate(res.Position.Latitude, res.Position.Longitude));
+                var geo = new GeoLocation(res.Position.Latitude, res.Position.Longitude);
 
                 if (config != null)
                 {
@@ -102,7 +102,7 @@ namespace Quest.Lib.Resource
             if (resupdate.OldResource.EventId != resupdate.NewResource.EventId)
                 SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.EventId, "C&C Assigned", msgSource);
 
-            msgSource.Broadcast(new ResourceDatabaseUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
+            msgSource.Broadcast(new ResourceUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
 
             return resupdate;
         }
@@ -113,8 +113,8 @@ namespace Quest.Lib.Resource
             {
                 ID = res.Callsign+res.Agency??"",
                 revision = res.Revision ?? 0,
-                X = res.Position.X,
-                Y = res.Position.Y,
+                X = res.Position.Longitude,
+                Y = res.Position.Latitude,
                 Resource = res
             };
         }
@@ -131,24 +131,6 @@ namespace Quest.Lib.Resource
 
         public void ResourceLogon(ResourceLogon item)
         {
-        }
-
-        private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
-        {
-            if (available == true)
-                return "Available";
-            if (enroute == true)
-                return "Enroute";
-            if (busy == true)
-                return "Busy";
-            if (rest == true)
-                return "Rest";
-            return "Offroad";
-        }
-
-        private string GetStatusDescription(DataModel.ResourceStatus status)
-        {
-            return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
 
         public void BeginDump(BeginDump item)

@@ -1,17 +1,54 @@
 ﻿var hud = (function () {
 
+    var _connection;
+    var _username;
+    var _hubevents;
+
+    var groups = {};
+
     var _send = function (msg) {
-        connection.invoke('send', username, $(messageTextbox).val());
+        _connection.invoke('send', _username, $(messageTextbox).val());
+    };
+
+    var _joinGroup = function (group) {
+        var group_count = groups[group];
+        if (group_count === undefined || group_count===0)
+        {
+            // first time registration
+            group_count = 1;
+            _connection.invoke('joingroup', _username, group);
+        }
+        else
+            // up the number of registrations
+            group_count += 1;
+        groups[group] = group_count;
+    };
+
+    var _leaveGroup = function (group) {
+        var group_count = groups[group];
+        if (group_count === undefined || group_count === 0)
+            return; // already unsubscribed
+        group_count -= 1;
+        groups[group] = group_count;
+        if (group_count===0)
+            _connection.invoke('leavegroup', _username, group);
+        groups[group] = group_count;
+       
     };
 
     // start a connection with the central hub
     function startConnection(url, configureConnection) {
+
         return function start(transport) {
+
             console.log('Starting connection using ${signalR.TransportType[transport]} transport');
             var connection = new signalR.HubConnection(url, { transport: transport });
+
+            // execut ecallback if provided
             if (configureConnection && typeof configureConnection === 'function') {
                 configureConnection(connection);
             }
+
             return connection.start()
                 .then(function () {
                     return connection;
@@ -24,31 +61,35 @@
                     return Promise.reject(error);
                 });
         }(signalR.TransportType.WebSockets);
-    }
 
-    function startStreaming(connection) {
-        connection.stream("StreamMessages").subscribe({
-            complete: (message) => {
-                console.log("completed message: " + message);
-            },
-            next: (message) => {
-                console.log("got message: " + message);
-            },
-            error: function (err) {
-                logger.log(err);
-            }
-        });
     }
 
     var _initESB = function () {
 
         // Start the connection.
         startConnection('/hub', function (connection) {
-            // Create a function that the hub can call to broadcast messages.
+
+            _connection = connection;
+
+            connection.on('joingroup', function (name, group) {
+                // someone has joined a group
+                console.log("joingroup:" + group + ":" + name);
+            });
+
+            connection.on('leavegroup', function (name, group) {
+                // someone has left a group
+                console.log("leavegroup:" + group + ":" + name);
+            });
+
             connection.on('send', function (name, message) {
             });
 
-            connection.on('SetUsersOnline', function (users) {
+            // Create a function that the hub can call to broadcast messages to a specific group.
+            connection.on('groupmessage', function (name, group, message) {
+                $("#hub").trigger(group, message);
+            });
+
+            connection.on('setusersonline', function (users) {
                 console.log("SetUsersOnline:" + users);
             });
             
@@ -353,6 +394,10 @@
 
     var _initialize = function () {
 
+        _username = $("#sys_username").data('username');
+
+        _hubevents = $("#sys_hub");
+
         // hook up to service bus
         _initESB();
 
@@ -367,7 +412,9 @@
         fullscreen: _fullscreen,
         expand: _expand,
         swap: _swap,
-        showmenu: _showmenu
+        showmenu: _showmenu,
+        joinGroup: _joinGroup,
+        leaveGroup: _leaveGroup
     };
 
 })();

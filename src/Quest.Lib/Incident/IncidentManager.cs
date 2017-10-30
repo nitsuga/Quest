@@ -71,7 +71,7 @@ namespace Quest.Lib.Incident
 
         private Response IncidentUpdateHandler(NewMessageArgs t)
         {
-            var item = t.Payload as IncidentUpdate;
+            var item = t.Payload as IncidentUpdateRequest;
             _incidentHandler.IncidentUpdate(item, _notificationSettings, ServiceBusClient, _incStore);
             return null;
         }

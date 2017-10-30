@@ -31,7 +31,7 @@ namespace Quest.Lib.Resource
             return 0;
         }
 
-        public QuestResource Update(ResourceUpdate item)
+        public QuestResource Update(ResourceUpdateRequest item)
         {
             return null;
         }
@@ -41,7 +41,7 @@ namespace Quest.Lib.Resource
             throw new System.NotImplementedException();
         }
 
-        ResourceUpdateResult IResourceStore.Update(ResourceUpdate item)
+        ResourceUpdateResult IResourceStore.Update(ResourceUpdateRequest item)
         {
             throw new System.NotImplementedException();
         }

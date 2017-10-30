@@ -134,7 +134,7 @@ namespace Quest.Lib.Device
             if (!string.IsNullOrEmpty(request.FleetNo))
             {
                 // update associated resource record
-                ResourceUpdate newresource = new ResourceUpdate
+                ResourceUpdateRequest newresource = new ResourceUpdateRequest
                 {
                     Resource = new QuestResource
                     {
@@ -399,8 +399,10 @@ namespace Quest.Lib.Device
                     Message = "unknown device"
                 };
 
-            deviceRecord.Latitude = (float?)request.Vector.Latitude ?? 0;
-            deviceRecord.Longitude = (float?)request.Vector.Longitude ?? 0;
+            
+
+            deviceRecord.Latitude = (float?)request.Vector.Coord.Latitude ?? 0;
+            deviceRecord.Longitude = (float?)request.Vector.Coord.Longitude ?? 0;
             deviceRecord.HDoP = (float)request.Vector.HDoP;
             deviceRecord.Speed = (float)request.Vector.Speed;
             deviceRecord.Course = (float)request.Vector.Course;
@@ -416,13 +418,13 @@ namespace Quest.Lib.Device
                     QuestResource resource = new QuestResource
                     {
                         FleetNo = deviceRecord.FleetNo,
-                        Position = new GeoAPI.Geometries.Coordinate(request.Vector.Longitude, request.Vector.Latitude),
+                        Position = new LatLongCoord(request.Vector.Coord.Longitude, request.Vector.Coord.Latitude),
                         HDoP = (float)request.Vector.HDoP,
                         Speed = (float)request.Vector.Speed,
                         Course = (float)request.Vector.Course
                     };
 
-                    ResourceUpdate resupdate = new ResourceUpdate
+                    ResourceUpdateRequest resupdate = new ResourceUpdateRequest
                     {
                         Resource = resource,
                         UpdateTime = DateTime.UtcNow
@@ -538,7 +540,7 @@ namespace Quest.Lib.Device
                 RequestId = request.RequestId,
                 Resources = new List<ResourceItem>(),
                 Destinations = new List<QuestDestination>(),
-                Events = new List<EventMapItem>(),
+                Events = new List<IncidentItem>(),
                 //Devices = new List<ResourceItem>(),
                 Success = true,
                 Message = "successful"
@@ -643,9 +645,9 @@ namespace Quest.Lib.Device
             });
         }
 
-        private List<EventMapItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
+        private List<IncidentItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
         {
-            return _dbFactory.Execute<QuestContext, List<EventMapItem>>((db) =>
+            return _dbFactory.Execute<QuestContext, List<IncidentItem>>((db) =>
             {
                 var results = new List<DataModel.Incident>();
 
@@ -655,7 +657,7 @@ namespace Quest.Lib.Device
                 if (includeCatB)
                     results.AddRange(db.Incident.Where(x => !x.Priority.StartsWith("R") && x.Revision > revision));
 
-                var features = new List<EventMapItem>();
+                var features = new List<IncidentItem>();
 
                 foreach (var inc in results)
                 {
@@ -663,23 +665,25 @@ namespace Quest.Lib.Device
                     {
                         if (inc.Latitude != null)
                         {
-                            var incsFeature = new EventMapItem
+                            var incsFeature = new IncidentItem
                             {
                                 ID = inc.IncidentId.ToString(),
                                 revision = inc.Revision ?? 0,
                                 X = inc.Longitude ?? 0,
                                 Y = inc.Latitude ?? 0,
-                                EventId = inc.Serial,
-                                Notes = inc.Determinant,
-                                Priority = inc.Priority,
-                                Status = inc.Status,
-                                Determinant = inc.Determinant,
-                                DeterminantDescription = inc.DeterminantDescription,
-                                Location = inc.Location,
-                                LocationComment = inc.LocationComment,
-                                PatientAge = inc.PatientAge,
-                                PatientSex = inc.PatientSex,
-                                ProblemDescription = inc.ProblemDescription
+                                Incident = new Common.Messages.Incident.QuestIncident
+                                 {
+                                     Serial = inc.Serial,
+                                     Determinant = inc.Determinant,
+                                     Priority = inc.Priority,
+                                     Status = inc.Status, 
+                                     DeterminantDescription = inc.DeterminantDescription,
+                                     Location = inc.Location,
+                                     LocationComment = inc.LocationComment,
+                                     PatientAge = inc.PatientAge,
+                                     PatientSex = inc.PatientSex,
+                                     ProblemDescription = inc.ProblemDescription
+                                 }
                             };
 
                             features.Add(incsFeature);

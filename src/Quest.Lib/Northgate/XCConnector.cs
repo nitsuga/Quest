@@ -646,14 +646,14 @@ namespace Quest.Lib.Northgate
 
             var pos = GetPosition(_resformat, parts);
 
-            ResourceUpdate update = new ResourceUpdate()
+            ResourceUpdateRequest update = new ResourceUpdateRequest()
             {
                 Resource = new QuestResource()
                 {
                     Callsign = GetValueString("Callsign", _resformat, parts),
                     ResourceType = GetValueString("ResourceType", _resformat, parts),
                     Status = GetValueString("Status", _resformat, parts),
-                    Position = new GeoAPI.Geometries.Coordinate(pos.Longitude, pos.Latitude),
+                    Position = new  Common.Messages.GIS.LatLongCoord(pos.Longitude, pos.Latitude),
                     Speed = GetValueInt("Speed", _resformat, parts),
                     Course = GetValueInt("Direction", _resformat, parts),
                     Skill = GetValueString("Skill", _resformat, parts),
@@ -687,7 +687,7 @@ namespace Quest.Lib.Northgate
 
             var pos = GetPosition(_incformat, parts);
 
-            IncidentUpdate update = new IncidentUpdate()
+            IncidentUpdateRequest update = new IncidentUpdateRequest()
             {
                 Serial = GetValueString("Serial", _incformat, parts),
                 Status = GetValueString("Status", _incformat, parts),

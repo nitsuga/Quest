@@ -1,4 +1,5 @@
 ﻿using GeoAPI.Geometries;
+using Quest.Common.Messages.GIS;
 using System;
 
 namespace Quest.Common.Messages.Resource
@@ -87,7 +88,7 @@ namespace Quest.Common.Messages.Resource
         /// <summary>
         /// coordinates in lat/lon
         /// </summary>
-        public Coordinate Position;
+        public LatLongCoord Position;
 
         /// <summary>
         /// destination e.g. standby, hospital, station etc

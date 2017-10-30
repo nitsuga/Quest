@@ -42,6 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="simcomponents.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\IndexData\indexgroups.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -178,7 +181,6 @@
     <ProjectReference Include="..\Quest.Common\Quest.Common.csproj" />
     <ProjectReference Include="..\Quest.Lib.OS\Quest.Lib.OS.csproj" />
     <ProjectReference Include="..\Quest.Lib.Research\Quest.Lib.Research.csproj" />
-    <ProjectReference Include="..\Quest.Lib.Simulation\Quest.Lib.Simulation.csproj" />
     <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj" />
   </ItemGroup>
 

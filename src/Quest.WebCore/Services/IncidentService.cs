@@ -66,27 +66,27 @@ namespace Quest.WebCore.Services
         ///  //TODO: LD => Check mappings with MP
         /// </summary>
         /// <returns></returns>
-        public static IncidentFeature GetIncidentUpdateFeature(EventMapItem inc)
+        public static IncidentFeature GetIncidentUpdateFeature(IncidentItem inc)
         {
             var geometry = new Point(new Position(inc.Y, inc.X));
             var properties = new GTIncidentFeatureProperties
             {
-                Description = inc.DeterminantDescription,
-                Determinant = inc.Determinant,
-                Location = inc.Location,
-                Priority = inc.Priority,
-                Status = inc.Status,
-                IncidentId = inc.EventId,
-                AssignedResources = inc.AssignedResources,
-                Age = inc.PatientAge ?? "?",
-                LocationComment = inc.LocationComment ?? "",
-                ProblemDescription = inc.ProblemDescription ?? "",
-                Sex = inc.PatientSex ?? "?"
+                Description = inc.Incident.DeterminantDescription,
+                Determinant = inc.Incident.Determinant,
+                Location = inc.Incident.Location,
+                Priority = inc.Incident.Priority,
+                Status = inc.Incident.Status,
+                IncidentId = inc.Incident.Serial,
+                AssignedResources = inc.Incident.AssignedResources,
+                Age = inc.Incident.PatientAge ?? "?",
+                LocationComment = inc.Incident.LocationComment ?? "",
+                ProblemDescription = inc.Incident.ProblemDescription ?? "",
+                Sex = inc.Incident.PatientSex ?? "?"
             };
 
             var feature = new IncidentFeature(geometry, properties)
             {
-                ID = inc.EventId.ToString(),
+                ID = inc.ID.ToString(),
                 FeatureType = "inc",
                 Action = "u",
             };

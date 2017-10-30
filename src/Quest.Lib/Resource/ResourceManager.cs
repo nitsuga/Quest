@@ -38,9 +38,9 @@ namespace Quest.Lib.Resource
         protected override void OnPrepare()
         {
             // create a list of actions associated with each object type arriving from the queue
-            MsgHandler.AddHandler("DeleteResource", DeleteResourceHandler);
-            MsgHandler.AddHandler("ResourceLogon", ResourceLogonHandler);
-            MsgHandler.AddHandler("ResourceUpdate", ResourceUpdateHandler);
+            MsgHandler.AddHandler<DeleteResource>(DeleteResourceHandler);
+            MsgHandler.AddHandler<ResourceLogon>(ResourceLogonHandler);
+            MsgHandler.AddHandler<ResourceUpdateRequest>(ResourceUpdateHandler);
             MsgHandler.AddHandler<BeginDump>(BeginDumpHandler);
         }
 
@@ -69,7 +69,7 @@ namespace Quest.Lib.Resource
         /// <param name="t"></param>
         private Response ResourceUpdateHandler(NewMessageArgs t)
         {
-            var resourceUpdate = t.Payload as ResourceUpdate;
+            var resourceUpdate = t.Payload as ResourceUpdateRequest;
 
             if (resourceUpdate != null)
                 _resourceHandler.ResourceUpdate(resourceUpdate, ServiceBusClient, _config);

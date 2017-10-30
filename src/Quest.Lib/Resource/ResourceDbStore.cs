@@ -2,6 +2,7 @@
 using Quest.Common.Messages;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Destination;
+using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
@@ -73,7 +74,7 @@ namespace Quest.Lib.Resource
         /// </summary>
         /// <param name="update"></param>
         /// <returns></returns>
-        public ResourceUpdateResult Update(ResourceUpdate update)
+        public ResourceUpdateResult Update(ResourceUpdateRequest update)
         {
             return _dbFactory.Execute<QuestContext, ResourceUpdateResult>((db) =>
             {
@@ -102,8 +103,8 @@ namespace Quest.Lib.Resource
                         Eta = res.Eta,
                         EventType = res.EventType,
                         FleetNo = res.FleetNo,
-                        Latitude = (float?)res?.Position?.Y,
-                        Longitude = (float?)res?.Position?.X,
+                        Latitude = (float?)res?.Position?.Latitude,
+                        Longitude = (float?)res?.Position?.Longitude,
                         EventId = res.EventId,
                         Speed = res.Speed,
                         Skill = res.Skill,
@@ -195,8 +196,8 @@ namespace Quest.Lib.Resource
                 }
                 else
                 {
-                    Latitude = update.Resource.Position.Y;
-                    Longitude = update.Resource.Position.X;
+                    Latitude = update.Resource.Position.Latitude;
+                    Longitude = update.Resource.Position.Longitude;
                 }
 
                 //create a new record for this moving dimension
@@ -232,12 +233,32 @@ namespace Quest.Lib.Resource
 
                 return new ResourceUpdateResult
                 {
-                    NewResource = FromDatabase(newres),
-                    OldResource = FromDatabase(oldres)
+                    OldResource = FromDatabase(oldres),
+                    NewResource = FromDatabase(newres)
                 };
                 
             });
         }
+
+
+        private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
+        {
+            if (available == true)
+                return "Available";
+            if (enroute == true)
+                return "Enroute";
+            if (busy == true)
+                return "Busy";
+            if (rest == true)
+                return "Rest";
+            return "Offroad";
+        }
+
+        private string GetStatusDescription(DataModel.ResourceStatus status)
+        {
+            return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
+        }
+
 
         QuestResource FromDatabase(DataModel.Resource newres)
         {
@@ -250,7 +271,7 @@ namespace Quest.Lib.Resource
                 Eta = newres.Eta,
                 EventType = newres.EventType,
                 FleetNo = newres.FleetNo,
-                Position = new GeoAPI.Geometries.Coordinate(newres.Longitude ?? 0, newres.Latitude ?? 0),
+                Position = new LatLongCoord(newres.Longitude ?? 0, newres.Latitude ?? 0),
                 EventId = newres.EventId,
                 Speed = newres.Speed,
                 ResourceType = newres.ResourceType.ResourceType1,
@@ -259,7 +280,8 @@ namespace Quest.Lib.Resource
                 Status = newres.ResourceStatus.Status,
                 Comment = newres.Comment,
                 LastUpdated = newres.StartDate,
-                };
+                StatusCategory = GetStatusDescription(newres.ResourceStatus)
+            };
         }
 
         public void Clear()

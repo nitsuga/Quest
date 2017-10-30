@@ -78,7 +78,7 @@ namespace Quest.Lib.Simulation.Resources
                     else
                         c = new LatLng(0,0);
 
-                    ResourceUpdate msg = new ResourceUpdate()
+                    ResourceUpdateRequest msg = new ResourceUpdateRequest()
                     {
                         UpdateTime = i.AvlsDateTime ?? DateTime.MinValue,
                         Resource = new QuestResource

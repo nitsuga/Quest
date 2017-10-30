@@ -75,7 +75,7 @@ namespace Quest.WebCore.Services
 
         }
 
-        public ResourceFeature GetResourceUpdateFeature(ResourceDatabaseUpdate item)
+        public ResourceFeature GetResourceUpdateFeature(ResourceUpdate item)
         {
             if (item.Item != null)
                 return GetResourceUpdateFeature(item.Item);
