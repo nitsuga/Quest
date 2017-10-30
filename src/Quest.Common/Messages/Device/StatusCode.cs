@@ -5,8 +5,7 @@ namespace Quest.Common.Messages.Device
     /// <summary>
     ///     contains a definition of a single status code
     /// </summary>
-    [Serializable]
-    
+    [Serializable]    
     public class StatusCode
     {
         /// <summary>

@@ -23,6 +23,9 @@ namespace Quest.Common.Messages.GIS
 
         public bool Stations { get; set; }
 
+        /// <summary>
+        /// Only return items changed after this revision number
+        /// </summary>
         public long Revision { get; set; }
 
         public override string ToString()

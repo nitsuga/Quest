@@ -10,21 +10,6 @@ namespace Quest.Common.Messages.Device
     
     public class GetStatusCodesRequest : Request
     {
-        [Serializable]
-        
-        public enum Mode
-        {
-            AllCodes,
-            Context, // only those in context to my current status
-            Specified // only those in context to the given status
-        }
-
-        
-        public Mode SearchMode { get; set; }
-
-        
-        public string FromStatus { get; set; }
-
         public override string ToString()
         {
             return ""; // String.Format("EventUpdate EventId={0} Updated={1}", EventId, Updated);

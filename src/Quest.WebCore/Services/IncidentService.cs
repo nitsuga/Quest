@@ -46,7 +46,7 @@ namespace Quest.WebCore.Services
 
             if (results != null)
             {
-                foreach (var res in results.Events)
+                foreach (var res in results.Incidents)
                 {
                     var feature = GetIncidentUpdateFeature(res);
                     if (feature != null)

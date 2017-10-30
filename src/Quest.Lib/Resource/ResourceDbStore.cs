@@ -7,6 +7,7 @@ using Quest.Common.Messages.Resource;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Quest.Lib.Resource
@@ -83,13 +84,17 @@ namespace Quest.Lib.Resource
                     return null;
 
                 // find the most up-to-date resource record;
-                var oldres = db.Resource
+                var oldres_list = db.Resource
                     .Include(x => x.Callsign)
                     .Include(x => x.ResourceStatus)
                     .Include(x => x.ResourceType)
-                    .FirstOrDefault(x => x.FleetNo == update.Resource.FleetNo && x.EndDate == null);
+                    .OrderByDescending(x => x.ResourceId)
+                    .Where(x => x.FleetNo == update.Resource.FleetNo && x.EndDate == null)
+                    .ToList();
 
-                if (oldres == null)
+                DataModel.Resource oldres = null;
+
+                if (oldres_list == null || oldres_list.Count()==0)
                 {
                     var res = update.Resource;
                     //create a new record for this moving dimension
@@ -114,9 +119,12 @@ namespace Quest.Lib.Resource
                 }
                 else
                 {
-                    // mark record as old
-                    oldres.EndDate = update.UpdateTime;
+                    // mark records as old
+                    foreach (var v in oldres_list)
+                        v.EndDate = update.UpdateTime;
                     db.SaveChanges();
+
+                    oldres = oldres_list.FirstOrDefault();
                 }
 
 
@@ -240,8 +248,24 @@ namespace Quest.Lib.Resource
             });
         }
 
+        public List<QuestResource> GetResources(long revision, bool avail = false, bool busy = false)
+        {
+            return _dbFactory.Execute<QuestContext, List<QuestResource>>((db) =>
+            {
+                // get all *current* resources
+                var resources = db.Resource
+                        .Include(x => x.Callsign)
+                        .Include(x => x.ResourceStatus)
+                        .Include(x => x.ResourceType)
+                        .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
+                        .Where(x => x.EndDate == null && x.Revision> revision)
+                        .ToList();
 
-        private string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
+                return FromDatabase(resources).ToList();
+            });
+        }
+
+        public string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
         {
             if (available == true)
                 return "Available";
@@ -256,16 +280,23 @@ namespace Quest.Lib.Resource
 
         private string GetStatusDescription(DataModel.ResourceStatus status)
         {
+            if (status == null)
+                return "???";
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
 
+        private IEnumerable<QuestResource> FromDatabase(IEnumerable<DataModel.Resource> resources)
+        {
+            foreach(var r in resources)
+                yield return FromDatabase(r);
+        }
 
-        QuestResource FromDatabase(DataModel.Resource newres)
+        private QuestResource FromDatabase(DataModel.Resource newres)
         {
             return new QuestResource
             {
                 Agency = newres.Agency,
-                Callsign = newres.Callsign.Callsign1,
+                Callsign = newres.Callsign?.Callsign1,
                 Destination = newres.Destination,
                 Course = newres.Course,
                 Eta = newres.Eta,
@@ -274,10 +305,12 @@ namespace Quest.Lib.Resource
                 Position = new LatLongCoord(newres.Longitude ?? 0, newres.Latitude ?? 0),
                 EventId = newres.EventId,
                 Speed = newres.Speed,
-                ResourceType = newres.ResourceType.ResourceType1,
+                ResourceType = newres.ResourceType?.ResourceType1,
+                ResourceTypeGroup = newres.ResourceType?.ResourceTypeGroup,
+                Revision =newres.Revision,
                 Skill = newres.Skill,
                 Sector = newres.Sector,
-                Status = newres.ResourceStatus.Status,
+                Status = newres.ResourceStatus?.Status,
                 Comment = newres.Comment,
                 LastUpdated = newres.StartDate,
                 StatusCategory = GetStatusDescription(newres.ResourceStatus)

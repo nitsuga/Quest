@@ -11,11 +11,8 @@ namespace Quest.Common.Messages.GIS
     
     public class MapItemsResponse : Response
     {
-
         public List<ResourceItem> Resources;
-        // these are children of the resources
-        //public List<DeviceItem> Devices;
-        public List<IncidentItem> Events;
+        public List<IncidentItem> Incidents;
         public List<QuestDestination> Destinations;
 
         // the revision returned

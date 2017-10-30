@@ -1,4 +1,5 @@
-﻿using Quest.Common.Messages;
+﻿using System.Collections.Generic;
+using Quest.Common.Messages;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;
 
@@ -42,6 +43,16 @@ namespace Quest.Lib.Resource
         }
 
         ResourceUpdateResult IResourceStore.Update(ResourceUpdateRequest item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public List<QuestResource> GetResources(long revision, bool avail = false, bool busy = false)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
         {
             throw new System.NotImplementedException();
         }

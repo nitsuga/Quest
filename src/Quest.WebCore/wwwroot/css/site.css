@@ -182,11 +182,13 @@ a.panel-btn {
 .panel-btn-on {
     border: solid 3px;
     padding: 0px;
+    color: yellow !important;
 }
 
 .panel-btn-off {
     padding: 3px;
     border: none;
+    color: #4cff00 !important;
 }
 
 .buttonicon {

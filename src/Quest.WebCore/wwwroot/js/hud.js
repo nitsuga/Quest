@@ -440,7 +440,7 @@
         setSlider(name, v);
     }
 
-    var _setButton = function (selector, state) {
+    var _setButtonState = function (selector, state) {
         if (state) {
             $(selector).removeClass("panel-btn-off");
             $(selector).addClass("panel-btn-on");
@@ -452,9 +452,12 @@
         return state;
     }
 
+    var _getButtonState = function (selector) {
+        return $(selector).hasClass("panel-btn-on");
+    }
     var _toggleButton = function (selector) {
-        ison = $(selector).hasClass("panel-btn-on");
-        return _setButton(selector, !ison);
+        ison = _getButtonState(selector);
+        return _setButtonState(selector, !ison);
     }
 
     var _initLocalStorage = function () {
@@ -546,7 +549,6 @@
         showmenu: _showmenu,
         joinGroup: _joinGroup,
         leaveGroup: _leaveGroup,
-        setStore: _setStore,
         toggleSlider: _toggleSlider,
         setSlider: _setSlider,
         setStoreFromSlider: _setStoreFromSlider,
@@ -554,7 +556,8 @@
         getStoreAsBool: _getStoreAsBool,
         getStore: _getStore,
         setStore: _setStore,
-        setButton: _setButton,
+        setButtonState: _setButtonState,
+        getButtonState: _getButtonState,
         toggleButton: _toggleButton
     };
 
