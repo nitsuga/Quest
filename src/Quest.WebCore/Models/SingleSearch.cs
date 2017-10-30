@@ -1,5 +1,4 @@
 using System;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.WebCore.Services

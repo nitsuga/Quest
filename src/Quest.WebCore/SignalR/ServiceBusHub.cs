@@ -1,11 +1,7 @@
 ﻿using Quest.Common.ServiceBus;
-using Quest.Lib.DependencyInjection;
-using System;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Incident;
 using Quest.Lib.Trace;

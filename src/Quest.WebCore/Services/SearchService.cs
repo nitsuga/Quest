@@ -1,6 +1,5 @@
 ﻿#pragma warning disable 0169,649
 using System;
-using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
 using Quest.Common.Messages.Gazetteer;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using GeoJSON.Net.Geometry;
-using Quest.Common.Messages;
 using Quest.Mobile.Models;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;

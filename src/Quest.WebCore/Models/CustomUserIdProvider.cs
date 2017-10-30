@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-
-namespace Quest.WebCore.Models
+﻿namespace Quest.WebCore.Models
 {
     //public class CustomUserIdProvider : IUserIdProvider
     //{

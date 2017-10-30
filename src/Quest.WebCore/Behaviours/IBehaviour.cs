@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Quest.WebCore.Behaviours
+﻿namespace Quest.WebCore.Behaviours
 {
     /// <summary>
     /// behaviours link events to actions. e.g. if the system sees an event such as a Mobile phone eisec event

@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Security;
+﻿using Quest.Common.Messages.Security;
 using Quest.Lib.ServiceBus;
 using System;
 using System.Collections.Generic;

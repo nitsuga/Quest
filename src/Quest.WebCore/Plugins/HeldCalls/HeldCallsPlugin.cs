@@ -1,12 +1,8 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Encodings.Web;
 
 namespace Quest.WebCore.Plugins.HeldCalls
 {

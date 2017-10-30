@@ -1,7 +1,4 @@
-﻿using System;
-using System.Web;
-using Quest.WebCore.Interfaces;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Quest.WebCore.Models
 {

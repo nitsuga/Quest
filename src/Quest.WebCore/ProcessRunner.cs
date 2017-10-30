@@ -1,8 +1,6 @@
 ﻿using Autofac;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
 using Quest.WebCore.SignalR;
 using System;

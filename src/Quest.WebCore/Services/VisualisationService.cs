@@ -2,7 +2,6 @@
 //#define CALLVMDIRECT
 
 using System.Collections.Generic;
-using Quest.Common.Messages;
 using System;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
