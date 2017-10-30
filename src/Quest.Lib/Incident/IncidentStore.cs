@@ -1,10 +1,12 @@
 ﻿using Quest.Common.Messages;
+using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Utils;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Quest.Lib.Incident
@@ -26,6 +28,52 @@ namespace Quest.Lib.Incident
                 var inc = Cloner.CloneJson<QuestIncident>(dbinc);
                 return inc;
             });
+        }
+
+        public List<QuestIncident> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
+        {
+            return _dbFactory.Execute<QuestContext, List<QuestIncident>>((db) =>
+            {
+                var results = new List<DataModel.Incident>();
+
+                if (includeCatA)
+                    results.AddRange(db.Incident.Where(x => x.Priority.StartsWith("C1") && x.Revision > revision));
+
+                if (includeCatB)
+                    results.AddRange(db.Incident.Where(x => !x.Priority.StartsWith("C1") && x.Revision > revision));
+
+                var features = new List<QuestIncident>();
+
+                foreach (var inc in results)
+                {
+                    if (inc.Longitude != null)
+                    {
+                        if (inc.Latitude != null)
+                        {
+                            var incsFeature = new QuestIncident
+                            {
+                                Id = inc.IncidentId.ToString(),
+                                Serial = inc.Serial,
+                                Determinant = inc.Determinant,
+                                Priority = inc.Priority,
+                                Status = inc.Status,
+                                DeterminantDescription = inc.DeterminantDescription,
+                                Location = inc.Location,
+                                LocationComment = inc.LocationComment,
+                                PatientAge = inc.PatientAge,
+                                PatientSex = inc.PatientSex,
+                                ProblemDescription = inc.ProblemDescription,
+                                Position = new LatLongCoord(inc.Longitude ?? 0, inc.Latitude ?? 0),
+                            };
+
+                            features.Add(incsFeature);
+                        }
+                    }
+                }
+
+                return features;
+            });
+
         }
 
         public QuestIncident Update(IncidentUpdateRequest item)

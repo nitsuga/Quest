@@ -10,6 +10,6 @@ namespace Quest.Common.Messages.Incident
     public class IncidentUpdate : Request
     {
         public string serial;
-        public IncidentItem Item;
+        public QuestIncident Item;
     }
 }

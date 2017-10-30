@@ -13,7 +13,7 @@ namespace Quest.Common.Messages.Resource
         /// <summary>
         /// global revision number
         /// </summary>
-        public long? Revision;
+        public long Revision;
 
         /// <summary>
         /// PK: callsign

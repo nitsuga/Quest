@@ -63,9 +63,47 @@ namespace Quest.Lib.Resource
             var res = resupdate.NewResource;
 
             // create a notification to say that resource details are persisted
-            ResourceItem ri = GetResourceItemFromView(resupdate.NewResource);
 
+            //TODO: turn on/off elastic search saving
             // save details to elastic if we have location info
+            // UpdateElastic(config, resupdate.NewResource);
+
+            // send out message that the resource has changed
+            msgSource.Broadcast(new ResourceUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = res });
+
+            // detect change in status
+            if (resupdate.OldResource.Status != resupdate.NewResource.Status)
+            {
+                msgSource.Broadcast(new ResourceStatusChange()
+                {
+                    Callsign = resupdate.NewResource.Callsign,
+                    FleetNo = resupdate.NewResource.FleetNo,
+                    OldStatus= resupdate.OldResource.Status,
+                    NewStatus= resupdate.NewResource.Status,
+                    OldStatusCategory = resupdate.OldResource.StatusCategory,
+                    NewStatusCategory = resupdate.NewResource.StatusCategory
+                });
+
+                SendStatusNotification(resourceUpdate.Resource.FleetNo, "Update", msgSource);
+            }
+
+            // detect change in event
+            if (resupdate.OldResource.EventId != resupdate.NewResource.EventId)
+            {
+                SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.EventId, "C&C Assigned", msgSource);
+            }
+
+
+            return resupdate;
+        }
+
+        /// <summary>
+        /// Update Elastic store with the latest resource details
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="res"></param>
+        void UpdateElastic(BuildIndexSettings config, QuestResource res)
+        {
             if (res.Position != null)
             {
                 var point = new PointGeoShape(new GeoCoordinate(res.Position.Latitude, res.Position.Longitude));
@@ -74,12 +112,11 @@ namespace Quest.Lib.Resource
                 if (config != null)
                 {
                     // save in elastic
-                    var indextext = resourceUpdate.Resource.Callsign + " " + res.FleetNo ?? "" + " " + resourceUpdate.Resource.ResourceType ?? "" + " " +
-                                    resourceUpdate.Resource.Status ?? "";
+                    var indextext = res.Callsign + " " + res.FleetNo ?? "" + " " + res.ResourceType ?? "" + " " + res.Status ?? "";
 
                     var add = new LocationDocument
                     {
-                        ID = "RES " + resourceUpdate.Resource.Callsign,
+                        ID = "RES " + res.Callsign,
                         Type = "Res",
                         Source = "Quest",
                         indextext = indextext,
@@ -93,31 +130,8 @@ namespace Quest.Lib.Resource
                     ElasticIndexer.CommitBultRequest(config, descriptor);
                 }
             }
-
-            // detect change in status
-            if (resupdate.OldResource.Status != resupdate.NewResource.Status)
-                SendStatusNotification(resourceUpdate.Resource.FleetNo, "Update", msgSource);
-
-            // detect change in event
-            if (resupdate.OldResource.EventId != resupdate.NewResource.EventId)
-                SendEventNotification(resourceUpdate.Resource.FleetNo, resourceUpdate.Resource.EventId, "C&C Assigned", msgSource);
-
-            msgSource.Broadcast(new ResourceUpdate() { Callsign = resourceUpdate.Resource.Callsign, Item = ri });
-
-            return resupdate;
         }
-
-        private ResourceItem GetResourceItemFromView( QuestResource res)
-        {
-            return new ResourceItem
-            {
-                ID = res.Callsign+res.Agency??"",
-                revision = res.Revision ?? 0,
-                X = res.Position.Longitude,
-                Y = res.Position.Latitude,
-                Resource = res
-            };
-        }
+        
 
         /// <summary>
         ///     delete resource marks the resource as the status specificed in the "DeviceManager.DeletedStatus" setting

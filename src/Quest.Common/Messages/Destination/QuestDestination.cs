@@ -7,8 +7,9 @@ namespace Quest.Common.Messages.Destination
     /// A single destination
     /// </summary>
     [Serializable]    
-    public class QuestDestination: PointMapItem
+    public class QuestDestination
     {
+        public string Id;
         public string Name;
         public string Group;
         public bool IsEnabled;
@@ -17,5 +18,6 @@ namespace Quest.Common.Messages.Destination
         public bool IsRoad;
         public bool IsStation;
         public bool IsStandby;
+        public LatLongCoord Position;
     }
 }

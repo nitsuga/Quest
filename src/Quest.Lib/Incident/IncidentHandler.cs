@@ -13,21 +13,12 @@ namespace Quest.Lib.Incident
         {
             var inc = persist.Update(item);
 
-            var incsFeature = new IncidentItem
-            {
-                ID = inc.IncidentID.ToString(),
-                revision = inc.Revision ?? 0,
-                X = inc.Longitude ?? 0,
-                Y = inc.Latitude ?? 0,
-                Incident=inc
-            };
-
             // updates go to assigned devices and to nearby ones of the right grade
             //TODO:
             //var devices = db.Devices.ToList().Where(x => IsNearbyDeviceOrAssigned(x, inc.Latitude, inc.Longitude, inc.Serial)).ToList();
 
             //SendEventNotification(devices, inc, settings, "Update");
-            msgSource.Broadcast(new IncidentUpdate() { serial = inc.Serial, Item = incsFeature });
+            msgSource.Broadcast(new IncidentUpdate() { serial = inc.Serial, Item = inc });
 
         }
 

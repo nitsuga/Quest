@@ -55,7 +55,7 @@
 
 
 /* --------- destinations -------------*/
-.leaflet-usermarker-des {
+.leaflet-usermarker-DES {
     display: block;
     fill: transparent;
     width: 8px;
@@ -64,35 +64,35 @@
     border-bottom: 10px solid yellow;
 }
 
-.des-RD {
+.DES-RD {
     border-bottom: 10px solid yellow;
 }
 
-.des-SBP {
+.DES-SBP {
+    border-bottom: 10px solid blue;
+}
+
+.DES-SBP0 {
     border-bottom: 10px solid gray;
 }
 
-.des-SBP0 {
-    border-bottom: 10px solid gray;
-}
-
-.des-SBP1 {
+.DES-SBP1 {
     border-bottom: 10px solid orange;
 }
 
-.des-SBP2 {
+.DES-SBP2 {
     border-bottom: 10px solid red;
 }
 
-.des-STA {
+.DES-STA {
     border-bottom: 10px solid green;
 }
 
-.des-HOS {
+.DES-HOS {
     border-bottom: 10px solid lightblue;
 }
 
-.des-AE {
+.DES-AE {
     border-bottom: 10px solid blue;
 }
 

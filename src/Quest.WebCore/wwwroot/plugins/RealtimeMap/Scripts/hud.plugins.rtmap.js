@@ -125,11 +125,16 @@ hud.plugins.rtmap = (function() {
 
         //Make a new request for the new selection
         $.ajax({
-            url: _getURL("RTM/GetResources"),
+            url: _getURL("RTM/GetMapItems"),
             data:
             {
-                avail: avail,
-                busy: busy
+                ResourcesAvailable: avail,
+                ResourcesBusy: busy,
+                IncidentsImmediate: false,
+                IncidentsOther: false,
+                Hospitals: true,
+                Standby: true,
+                Stations: true
             },
             dataType: "json",
             success: function (layer) {
@@ -140,11 +145,66 @@ hud.plugins.rtmap = (function() {
 
                 }
                 else {
-                    georesLayer.addData(layer.Result);
+
+
+                    // add resources to the map
+                    layer.Result.Resources.forEach(function (item) {
+                        // for each item construct equiv geojson item
+                        var geojsonFeature = {
+                            "type": "Feature",
+                            "id": item.FleetNo,
+                            "properties": {
+                                "name": item.Callsign,
+                                "MarkerType": item.ResourceTypeGroup,
+                                "MarkerStatus": item.StatusCategory
+                            },
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [item.Position.Longitude, item.Position.Latitude]
+                            }
+                        };
+                        georesLayer.addData(geojsonFeature);
+                    });
+
+                    // add Destinations to the map
+                    layer.Result.Destinations.forEach(function (item) {
+                        // for each item construct equiv geojson item
+                        var geojsonFeature = {
+                            "type": "Feature",
+                            "id": item.Id,
+                            "properties": {
+                                "name": item.Name,
+                                "MarkerType": "DES",
+                                "MarkerStatus": _getDestinationMarkerStatus(item)
+                            },
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [item.Position.Longitude, item.Position.Latitude]
+                            }
+                        };
+                        georesLayer.addData(geojsonFeature);
+                    });
+
                 }
+
                 $("*").css("cursor", "default");
             }
         });
+    }
+
+    var _getDestinationMarkerStatus = function(questDestination)
+    {
+        if (questDestination.IsAandE)
+            return "AE";
+        if (questDestination.IsHospital)
+            return "HOS";
+        if (questDestination.IsStation)
+            return "STA";
+        if (questDestination.IsStandby)
+            return "SBP";
+        if (questDestination.IsRoad)
+            return "RD";
+        return "";
     }
 
     // remove a feature form the map
@@ -181,7 +241,7 @@ hud.plugins.rtmap = (function() {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
                 pointToLayer: function (feature, latlng) {
-                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.ResourceTypeGroup, s: feature.properties.StatusCategory });
+                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus});
                     marker.title = feature.properties.Callsign;
                     return marker;
                 },

@@ -13,6 +13,7 @@ using Quest.Lib.Utils;
 using Quest.Lib.ServiceBus;
 using Quest.Common.Messages.Gazetteer;
 using Quest.Common.Messages.Routing;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.WebCore.Controllers
 {
@@ -51,34 +52,9 @@ namespace Quest.WebCore.Controllers
             _pluginService = pluginFactory;
         }
 
-        async Task<HomeViewModel> DefaultHomeViewModel()
-        {
-            var user = HttpContext.User.Identity.Name;
-
-            if (user == null)
-                user = "Guest";
-
-            var claims = await _securityService.GetAppClaims(user);
-            //var user = await _userManager.FindByNameAsync(User.Identity.Name);
-
-            var groupResult = await _searchService.GetIndexGroups();
-
-            HomeViewModel model = new HomeViewModel
-            {
-                User = user,
-                Claims = claims,
-                IndexGroups = groupResult?.Groups,
-            };
-            return model;
-        }
-
-
         // GET: Home
         public ActionResult Index()
         {
-            //var summary = CookieProxy.GetSelectedPluginLayout(Request, Response);
-            //var model = _pluginService.GetLayoutModel(layout);
-
             var model = new HudModel
             {
                 Scripts = _pluginService.GetScripts(),
@@ -88,7 +64,8 @@ namespace Quest.WebCore.Controllers
 
             return View(model);
         }
-        
+
+#if false
         //  old stuff below here
 
         public async Task<IActionResult> Map()
@@ -152,7 +129,6 @@ namespace Quest.WebCore.Controllers
 
             return result;
         }
-
         
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]
@@ -188,7 +164,6 @@ namespace Quest.WebCore.Controllers
                 };
             }
         }
-
         
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]
@@ -215,7 +190,6 @@ namespace Quest.WebCore.Controllers
 
             return result;
         }
-
         
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]
@@ -392,37 +366,7 @@ namespace Quest.WebCore.Controllers
                 return error;
             }
         }
-
-        
-        [HttpGet]
-        public ActionResult GetResources(bool avail = false, bool busy = false)
-        {
-            try
-            {
-                var r1 = _resourceService.GetResources(avail, busy);
-                var js = JsonConvert.SerializeObject(r1);
-                var result = new ContentResult
-                {
-                    Content = js,
-                    ContentType = "application/json"
-                };
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                var js = JsonConvert.SerializeObject(new { error = ex.Message });
-                var result = new ContentResult
-                {
-                    Content = js,
-                    ContentType = "application/json"
-                };
-                return result;
-
-            }
-        }
-
-        
+   
         [HttpGet]
         public ActionResult GetIncidents(bool includeCatA = false, bool includeCatB = false)
         {
@@ -452,49 +396,7 @@ namespace Quest.WebCore.Controllers
             }
         }
 
-
-
-#if false
         
-                [HttpGet]
-        public ActionResult GetVehicleCoverage(int vehtype)
-        {
-            var builder = new StringBuilder();
-            var writer = new StringWriter(builder);
-            var ser = new JsonSerializer();
-            GetCoverageResponse map;
-            try
-            {
-                GetCoverageRequest request = new GetCoverageRequest { vehtype = vehtype };
-
-                map = _routeService.GetVehicleCoverage(request);
-                if (map == null)
-                    map = new GetCoverageResponse() { Message = "no vehicle coverage available", Success = false };
-
-                var serializer = new JsonSerializer();
-                //var serializer = new JavaScriptSerializer();
-                //serializer.MaxJsonLength = Int32.MaxValue;
-                var result = new ContentResult
-                {
-                    Content = serializer.SerializeToString(map),
-                    ContentType = "application/json"
-                };
-
-                return result;
-            }
-            catch (Exception)
-            {
-                var errorMsg = "ERROR: Cannot get list of Resources";
-                ser.Serialize(writer, errorMsg);
-                var error = new ContentResult
-                {
-                    Content = builder.ToString(),
-                    ContentType = "application/json"
-                };
-
-                return error;
-            }
-        }
 
         [HttpGet]
         [ResponseCache(NoStore =true, Location =ResponseCacheLocation.None)]

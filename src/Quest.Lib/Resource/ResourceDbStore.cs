@@ -307,7 +307,7 @@ namespace Quest.Lib.Resource
                 Speed = newres.Speed,
                 ResourceType = newres.ResourceType?.ResourceType1,
                 ResourceTypeGroup = newres.ResourceType?.ResourceTypeGroup,
-                Revision =newres.Revision,
+                Revision =newres.Revision??0,
                 Skill = newres.Skill,
                 Sector = newres.Sector,
                 Status = newres.ResourceStatus?.Status,

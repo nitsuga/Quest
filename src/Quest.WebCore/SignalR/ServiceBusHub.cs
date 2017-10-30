@@ -108,13 +108,33 @@ namespace Quest.WebCore.SignalR
                     var resource = e.Payload as ResourceUpdate;
 
                     var json = JsonConvert.SerializeObject(resource, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
-                    var group = $"Resource.{resource.Item.Resource.StatusCategory}";
+                    var group = $"Resource.{resource.Item.StatusCategory}";
                     _connection.InvokeAsync("groupmessage", "ServiceBusHub", group, json);
+                    break;
+
+                case "ResourceStatusChange":
+                    // ESB notifies us that a resource has changed its status
+                    var resource_status_update = e.Payload as ResourceStatusChange;
+
+                    // only interested in notifying major changes e.g. Available->Busy , not just AOR->ASB
+                    if (resource_status_update.NewStatusCategory != resource_status_update.OldStatusCategory)
+                    {
+                        var json1 = JsonConvert.SerializeObject(resource_status_update, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+
+                        // broadcast notification to both client groups
+                        var oldgroup = $"Resource.{resource_status_update.OldStatusCategory}";
+                        if (oldgroup.Length > 0)
+                            _connection.InvokeAsync("groupmessage", "ServiceBusHub", oldgroup, json1);
+
+                        var newgroup = $"Resource.{resource_status_update.NewStatusCategory}";
+                        if (newgroup.Length > 0)
+                            _connection.InvokeAsync("groupmessage", "ServiceBusHub", newgroup, json1);
+                    }
                     break;
 
                 case "IncidentUpdate":
                     var incident = e.Payload as IncidentUpdate;
-                    var priority = $"Resource.{incident.Item.Incident.Priority}";
+                    var priority = $"Resource.{incident.Item.Priority}";
                     _connection.InvokeAsync("groupmessage", "ServiceBusHub", priority, incident);
                     break;
             }

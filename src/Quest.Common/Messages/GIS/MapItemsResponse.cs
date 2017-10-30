@@ -1,4 +1,6 @@
 ﻿using Quest.Common.Messages.Destination;
+using Quest.Common.Messages.Incident;
+using Quest.Common.Messages.Resource;
 using System;
 using System.Collections.Generic;
 
@@ -11,8 +13,8 @@ namespace Quest.Common.Messages.GIS
     
     public class MapItemsResponse : Response
     {
-        public List<ResourceItem> Resources;
-        public List<IncidentItem> Incidents;
+        public List<QuestResource> Resources;
+        public List<QuestIncident> Incidents;
         public List<QuestDestination> Destinations;
 
         // the revision returned

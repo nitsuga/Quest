@@ -1,11 +1,12 @@
 ﻿using System;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Common.Messages.Incident
 {
     public partial class QuestIncident
     {
         public int IncidentID { get; set; }
-        public long? Revision { get; set; }
+        public long Revision { get; set; }
         public string Status { get; set; }
         public string Serial { get; set; }
         public string IncidentType { get; set; }
@@ -28,7 +29,9 @@ namespace Quest.Common.Messages.Incident
         public string CallerTelephone { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
-        public DateTime? StartDate;
-        public DateTime? EndDate;
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public LatLongCoord Position { get; set; }
+        public string Id { get; set; }
     }
 }

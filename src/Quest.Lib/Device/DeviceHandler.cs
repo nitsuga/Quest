@@ -18,6 +18,7 @@ using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Destination;
+using Quest.Common.Messages.Incident;
 
 namespace Quest.Lib.Device
 {
@@ -471,9 +472,9 @@ namespace Quest.Lib.Device
             var response = new MapItemsResponse
             {
                 RequestId = request.RequestId,
-                Resources = new List<ResourceItem>(),
+                Resources = new List<QuestResource>(),
                 Destinations = new List<QuestDestination>(),
-                Incidents = new List<IncidentItem>(),
+                Incidents = new List<QuestIncident>(),
                 Success = true,
                 Message = "successful"
             };
@@ -484,24 +485,23 @@ namespace Quest.Lib.Device
             {
                 // work out which ones were on display at the original revision
                 var resources = _resStore.GetResources(request.Revision, request.ResourcesAvailable, request.ResourcesBusy);
-                var resourceItems = GetResourceItem(resources);
                 // get resources
-                response.Resources.AddRange(resourceItems);
+                response.Resources.AddRange(resources);
             }
 
             if (request.IncidentsImmediate || request.IncidentsOther)
             {
-                response.Incidents.AddRange(GetIncidents(request.Revision, request.IncidentsImmediate,
-                    request.IncidentsOther));
+                var incidents = _incStore.GetIncidents(request.Revision, request.IncidentsImmediate, request.IncidentsOther);
+                response.Incidents.AddRange(incidents);
             }
 
             // calculate the maximum revision being returned.
             long c1 = 0, c2 = 0, c3 = 0;
             if (response.Resources.Count > 0)
-                c1 = response.Resources.Max(x => x.revision);
+                c1 = response.Resources.Max(x => x.Revision);
 
             if (response.Incidents.Count > 0)
-                c2 = response.Incidents.Max(x => x.revision);
+                c2 = response.Incidents.Max(x => x.Revision);
 
             response.Revision = Math.Max(Math.Max(c1, c2), c3);
 
@@ -518,56 +518,6 @@ namespace Quest.Lib.Device
             return null;
         }
 
-        private List<IncidentItem> GetIncidents(long revision, bool includeCatA = false, bool includeCatB = false)
-        {
-            return _dbFactory.Execute<QuestContext, List<IncidentItem>>((db) =>
-            {
-                var results = new List<DataModel.Incident>();
-
-                if (includeCatA)
-                    results.AddRange(db.Incident.Where(x => x.Priority.StartsWith("R") && x.Revision > revision));
-
-                if (includeCatB)
-                    results.AddRange(db.Incident.Where(x => !x.Priority.StartsWith("R") && x.Revision > revision));
-
-                var features = new List<IncidentItem>();
-
-                foreach (var inc in results)
-                {
-                    if (inc.Longitude != null)
-                    {
-                        if (inc.Latitude != null)
-                        {
-                            var incsFeature = new IncidentItem
-                            {
-                                ID = inc.IncidentId.ToString(),
-                                revision = inc.Revision ?? 0,
-                                X = inc.Longitude ?? 0,
-                                Y = inc.Latitude ?? 0,
-                                Incident = new Common.Messages.Incident.QuestIncident
-                                 {
-                                     Serial = inc.Serial,
-                                     Determinant = inc.Determinant,
-                                     Priority = inc.Priority,
-                                     Status = inc.Status, 
-                                     DeterminantDescription = inc.DeterminantDescription,
-                                     Location = inc.Location,
-                                     LocationComment = inc.LocationComment,
-                                     PatientAge = inc.PatientAge,
-                                     PatientSex = inc.PatientSex,
-                                     ProblemDescription = inc.ProblemDescription
-                                 }
-                            };
-
-                            features.Add(incsFeature);
-                        }
-                    }
-                }
-
-                return features;
-            });
-        }
-
         private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
         {
             return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
@@ -580,51 +530,45 @@ namespace Quest.Lib.Device
                     .ToList()
                     .Select(x =>
                     {
-                        var point = Lib.Utils.GeomUtils.GetPointFromWkt(x.Wkt);
+                        var point = GeomUtils.GetPointFromWkt(x.Wkt);
+                        var latlng = LatLongConverter.OSRefToWGS84(point.X, point.Y);
                         return new QuestDestination
                         {
-                            ID = x.DestinationId.ToString(),
+                            Id = x.DestinationId.ToString(),
                             IsHospital = x.IsHospital ?? false,
                             IsAandE = x.IsAandE ?? false,
                             IsRoad = x.IsRoad ?? false,
                             IsStandby = x.IsStandby ?? false,
                             IsStation = x.IsStation ?? false,
                             Name = x.Destination,
-                            X = point.X,
-                            Y = point.Y
+                            Position = new LatLongCoord(latlng.Longitude, latlng.Latitude)
                         };
 
                     }
                     )
                     .ToList();
 
-                foreach (var res in d)
-                {
-                    var latlng = LatLongConverter.OSRefToWGS84(res.X, res.Y);
-                    res.X = latlng.Longitude;
-                    res.Y = latlng.Latitude;
-                }
                 return d;
             });
         }
 
-        private IEnumerable<ResourceItem> GetResourceItem(IEnumerable<QuestResource> res)
-        {
-            foreach (var r in res)
-                yield return GetResourceItem(r);
-        }
+        //private IEnumerable<ResourceItem> GetResourceItem(IEnumerable<QuestResource> res)
+        //{
+        //    foreach (var r in res)
+        //        yield return GetResourceItem(r);
+        //}
 
-        private ResourceItem GetResourceItem(QuestResource res)
-        {
-            return new ResourceItem
-            {
-                ID = res.FleetNo,
-                revision = res.Revision ?? 0,
-                X = res.Position.Longitude,
-                Y = res.Position.Latitude,
-                Resource = res
-            };
-        }
+        //private ResourceItem GetResourceItem(QuestResource res)
+        //{
+        //    return new ResourceItem
+        //    {
+        //        ID = res.FleetNo,
+        //        revision = res.Revision ?? 0,
+        //        X = res.Position.Longitude,
+        //        Y = res.Position.Latitude,
+        //        Resource = res
+        //    };
+        //}
 
         private string GetStatusDescription(DataModel.ResourceStatus status)
         {

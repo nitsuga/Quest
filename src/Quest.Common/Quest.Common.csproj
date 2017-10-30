@@ -5,6 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Messages\GIS\EventMapItem.cs" />
+    <Compile Remove="Messages\GIS\PointMapItem.cs" />
+    <Compile Remove="Messages\GIS\ResourceItem.cs" />
     <Compile Remove="Messages\MDTMessage.cs" />
   </ItemGroup>
 

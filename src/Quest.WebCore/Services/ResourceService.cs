@@ -34,7 +34,13 @@ namespace Quest.WebCore.Services
         /// <param name="avail"></param>
         /// <param name="busy"></param>
         /// <returns></returns>
-        public async Task<ResourceFeatureCollection> GetResources(bool avail = false, bool busy = false)
+        public async Task<MapItemsResponse> GetMapItems(MapItemsRequest request)
+        {
+            var results =await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+            return results;
+        }
+#if false
+        public async Task<ResourceFeatureCollection> GetResourcesGeo(bool avail = false, bool busy = false)
         {
             MapItemsRequest request = new MapItemsRequest()
             {
@@ -48,7 +54,7 @@ namespace Quest.WebCore.Services
                 Stations = false
             };
 
-            var results =await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+            var results = await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
 
             var features = new List<ResourceFeature>();
             if (results != null)
@@ -137,6 +143,7 @@ namespace Quest.WebCore.Services
             { }
             return null;
         }
+#endif
 
         public async Task<CancelDeviceResponse> CancelDevice(string callsign, string eventId)
         {
