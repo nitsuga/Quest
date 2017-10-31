@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Quest.WebCore.Controllers
 {
+    /// <summary>
+    /// json services for loading layouts and plugins
+    /// </summary>
     public class PluginController : Controller
     {
         private readonly IPluginService _pluginService;

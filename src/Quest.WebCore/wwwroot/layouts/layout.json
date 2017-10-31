@@ -4,7 +4,7 @@
   "Selectable": false,
   "Panels": [
     {
-      "Role": 0,
+      "Panel": 0,
       "Plugin": "LayoutSelector",
       "Style": "col-md-12 full-height",
       "Actions": [

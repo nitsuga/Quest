@@ -25,6 +25,8 @@ namespace Quest.Common.Messages.GIS
 
         public bool Stations { get; set; }
 
+        public bool ResourceToSbp { get; set; }
+
         /// <summary>
         /// Only return items changed after this revision number
         /// </summary>

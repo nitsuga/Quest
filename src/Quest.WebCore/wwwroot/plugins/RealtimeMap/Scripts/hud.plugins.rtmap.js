@@ -6,7 +6,7 @@ hud.plugins.rtmap = (function() {
 
     var markersi, markersr, markersd, georesLayer;
 
-    var _initMap = function (role) {
+    var _initMap = function (panel) {
         L_PREFER_CANVAS = true;
 
         var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -48,7 +48,7 @@ hud.plugins.rtmap = (function() {
         lng = -0.2;
         zoom = 12;
 
-        var mapdiv = 'map' + role;
+        var mapdiv = 'map' + panel;
 
         map = new L.Map(mapdiv, {
             center: new L.LatLng(lat, lng),
@@ -60,65 +60,83 @@ hud.plugins.rtmap = (function() {
             inertiaDeceleration: 10000
         });
 
-        _registerButtons(role);
+        //_registerButtons(panel);
 
+        hud.selectPanelMenu(panel, 0);
         
         // listen for hub messages on these groups
         $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msgtxt) {
-            _handleMessage(role, georesLayer, msgtxt);
+            _handleMessage(panel, georesLayer, msgtxt);
+        });
+
+        // listen for panel actions
+        $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
+            _handleAction(panel, action);
         });
 
     };
 
-    var _handleMessage = function(role, georesLayer, msgtxt)
-    {
+    // handle message from service bus
+    var _handleMessage = function (panel, georesLayer, msgtxt) {
         var msg = JSON.parse(msgtxt);
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 _updateResource(georesLayer, msg.Item);
                 break;
             case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
-                _updateResourceStatus(role, georesLayer, msg);
+                _updateResourceStatus(panel, georesLayer, msg);
                 break;
-        }    
-    }
+        }
+    };
 
     // get selector for a named button
-    var _buttonSelector = function (role, name) {
-        return "div[data-panel-role='" + role + "'] .map-container a[data-role='" + name + "']";
-    }
+    var _buttonSelector = function (panel, name) {
+        return "div[data-panel-role='" + panel + "'] .map-container a[data-action='" + name + "']";
+    };
+        
+    // handle actions from button push
+    var _handleAction = function (panel, action) {
+        hud.toggleButton(panel, 'select-action', action);
+        _updateMap(panel);
+    };
 
     // attach click handlers to all the panel buttons
-    var _registerButtons = function (role) {
-        select_button = "div[data-panel-role='" + role + "'] .map-container .panel-btn";
-        $(select_button).on("click", function (btn) {
-            hud.toggleButton(btn.currentTarget);
-            // get name of button
-            btn_role = $(btn.currentTarget).attr('data-role');
-            switch (btn_role)
-            {
-                case 'select_avail', 'select_busy', 'select_c1', 'select_c2', 'select_c3', 'select_c4', 'select_held', 'select_aeuc', 'select_fruc', 'select_stn', 'select_sbp', 'select_hos':
-                    break;
-            }
-            _updateMap(role);
-        });
-    }
+    //var _registerButtons = function (panel) {
+    //    select_button = "div[data-panel-role='" + panel + "'] .map-container .panel-btn";
+    //    $(select_button).on("click", function (btn) {
+    //        // get name of button
+    //        btn_role = $(btn.currentTarget).attr('data-role');
+    //        btn_action = $(btn.currentTarget).attr('data-action');
+    //        switch (btn_role)
+    //        {
+    //            case 'select-map':
+    //                // select map 'btn_action'
+    //                hud.toggleButton(btn.currentTarget);
+    //                _updateMap(panel);
+    //                break;
+    //            case 'select-action':
+    //                hud.toggleButton(btn.currentTarget);
+    //                _updateMap(panel);
+    //                break;
+    //        }
+    //    });
+    //}
 
-    var _updateMap = function(role) {
+    var _updateMap = function (panel) {
 
 
         //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
 
-        resourcesAvailable = hud.getButtonState(_buttonSelector(role, "select-avail"));
-        resourcesBusy = hud.getButtonState(_buttonSelector(role, "select-busy"));
-        incidentsImmediate = hud.getButtonState(_buttonSelector(role, "select-c1"));
+        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
+        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
+        incidentsImmediate = hud.getButtonState(panel, "select-action", "select-c1");
         incidentsOther = false;
-        hospitals = hud.getButtonState(_buttonSelector(role, "select-hos"));
-        standby = hud.getButtonState(_buttonSelector(role, "select-sbp"));
-        stations = hud.getButtonState(_buttonSelector(role, "select-stn"));
-        aeu = hud.getButtonState(_buttonSelector(role, "select-aeu"));
-        fru = hud.getButtonState(_buttonSelector(role, "select-fru"));
-        oth = hud.getButtonState(_buttonSelector(role, "select-oth"));
+        hospitals = hud.getButtonState(panel, "select-action", "select-hos");
+        standby = hud.getButtonState(panel, "select-action", "select-sbp");
+        stations = hud.getButtonState(panel, "select-action",  "select-stn");
+        aeu = hud.getButtonState(panel, "select-action", "select-aeu");
+        fru = hud.getButtonState(panel, "select-action", "select-fru");
+        oth = hud.getButtonState(panel, "select-action", "select-oth");
 
         //TODO: get these from the controller
         var resourceGroups = [];
@@ -142,7 +160,7 @@ hud.plugins.rtmap = (function() {
                 IncidentsOther: incidentsOther,
                 Hospitals: hospitals,
                 Standby: standby,
-                Stations: stations,
+                Stations: stations
             },
             dataType: "json",
             success: function (layer) {
@@ -173,28 +191,28 @@ hud.plugins.rtmap = (function() {
                 }
 
                 // now register for updates
-                hud.joinLeaveGroup("Resource.Available", role, resourcesAvailable);
-                hud.joinLeaveGroup("Resource.Busy", role, resourcesBusy);
-                hud.joinLeaveGroup("Resource.Enroute", role, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Available", panel, resourcesAvailable);
+                hud.joinLeaveGroup("Resource.Busy", panel, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Enroute", panel, resourcesBusy);
 
             } // success
             //$("*").css("cursor", "default");
         });
-    }
+    };
 
     // the status of a resource has changed. we need to remove it if we're not showing
     // this type of resource
-    var _updateResourceStatus = function (role, layer, item) {
+    var _updateResourceStatus = function (panel, layer, item) {
 
-        resourcesAvailable = hud.getButtonState(_buttonSelector(role, "select-avail"));
-        resourcesBusy = hud.getButtonState(_buttonSelector(role, "select-busy"));
+        resourcesAvailable = hud.getButtonState(_buttonSelector(panel, "select-avail"));
+        resourcesBusy = hud.getButtonState(_buttonSelector(panel, "select-busy"));
 
         if (resourcesAvailable === false && item.NewStatusCategory !== "Available")
             _removeExistingFeature(layer, item.FleetNo);
 
         if (resourcesBusy === false && (item.NewStatusCategory !== "Busy" || item.NewStatusCategory !== "Enroute"))
             _removeExistingFeature(layer, item.FleetNo);
-    }
+    };
 
 
     var _updateResource = function (layer, item) {
@@ -214,7 +232,7 @@ hud.plugins.rtmap = (function() {
         };
         _removeExistingFeature(layer, item.FleetNo);
         layer.addData(geojsonFeature);
-    }
+    };
 
     var _updateDestinations = function (destinations, layer) {
 
@@ -242,10 +260,9 @@ hud.plugins.rtmap = (function() {
         });
 
         layer.addData(features);
-    }
+    };
 
-    var _getDestinationMarkerStatus = function(questDestination)
-    {
+    var _getDestinationMarkerStatus = function (questDestination) {
         if (questDestination.IsAandE)
             return "AE";
         if (questDestination.IsHospital)
@@ -257,7 +274,7 @@ hud.plugins.rtmap = (function() {
         if (questDestination.IsRoad)
             return "RD";
         return "";
-    }
+    };
 
     // remove a feature form the map
     var _removeExistingFeature = function (layer, id) {
@@ -270,7 +287,7 @@ hud.plugins.rtmap = (function() {
                 }
             }
         });
-    }
+    };
 
     var _createResourcesLayer = function () {
         try {
@@ -293,7 +310,7 @@ hud.plugins.rtmap = (function() {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
                 pointToLayer: function (feature, latlng) {
-                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus});
+                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus });
                     marker.title = feature.properties.Callsign;
                     return marker;
                 },
@@ -320,24 +337,24 @@ hud.plugins.rtmap = (function() {
         catch (e) {
             console.log(e.message);
         }
-    }
+    };
+        
+    var _updateStaticMapData = function (panel) {
+        _updateMap(panel);
+    };
 
-    var _updateStaticMapData = function(role) {
-        _updateMap(role);
-    }
-
-    var _getURL = function(url) {
+    var _getURL = function (url) {
         var s = _getBaseURL() + "/" + url;
         //console.debug("g url = " + s);
         return s;
-    }
+    };
 
-    var _getBaseURL = function() {
+    var _getBaseURL = function () {
         var url = location.href;  // entire url including querystring - also: window.location.href;
         var baseUrl = url.substring(0, url.indexOf("/", 10));
         //console.debug("b url = " + baseURL);
         return baseUrl;
-    }
+    };
 
     /// <summary>
     /// Re-centre the maps to new co-ordinates
@@ -346,16 +363,16 @@ hud.plugins.rtmap = (function() {
     };
 
     var _panAndMarkLocation = function (locationName, lat, lng) {
-    }
+    };
 
     var _setZoomLevel = function(z) {
     };
 
     var _redrawMaps = function () {
-    }
+    };
 
     var _lockMap = function (mode) {
-    }
+    };
 
     return {
         initMap: _initMap,
@@ -364,5 +381,6 @@ hud.plugins.rtmap = (function() {
         setZoom: _setZoomLevel,
         panTo: _panTo,
         panAndMarkLocation: _panAndMarkLocation
-}
+    };
+
 })();

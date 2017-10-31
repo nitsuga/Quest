@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Quest.Common.Messages.GIS;
+using Quest.Common.Messages.Resource;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
 using System;
@@ -73,6 +74,12 @@ namespace Quest.WebCore.Plugins.RealtimeMap
                 return result;
 
             }
+        }
+
+        [HttpPost]
+        public ActionResult AssignResource(ResourceAssign request)
+        {
+            return null;
         }
     }
 }

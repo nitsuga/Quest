@@ -4,7 +4,7 @@
   "Selectable": true,
   "Panels": [
     {
-      "Role": 0,
+      "Panel": 0,
       "Plugin": null,
       "Style": "col-md-6 twothird-height right-border",
       "Actions": [
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "Role": 1,
+      "Panel": 1,
       "Plugin": null,
       "Style": "col-md-6 twothird-height",
       "Actions": [
@@ -46,13 +46,13 @@
       ]
     },
     {
-      "Role": null,
+      "Panel": null,
       "Plugin": null,
       "Style": null,
       "Actions": []
     },
     {
-      "Role": 2,
+      "Panel": 2,
       "Plugin": null,
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [
@@ -80,7 +80,7 @@
       ]
     },
     {
-      "Role": 3,
+      "Panel": 3,
       "Plugin": null,
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "Role": 4,
+      "Panel": 4,
       "Plugin": null,
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [
@@ -150,7 +150,7 @@
       ]
     },
     {
-      "Role": 5,
+      "Panel": 5,
       "Plugin": null,
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [

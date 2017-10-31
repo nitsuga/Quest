@@ -4,7 +4,7 @@
   "Selectable": true,
   "Panels": [
     {
-      "Role": 0,
+      "Panel": 0,
       "Plugin": "RealtimeMapPlugin",
       "Style": "col-md-9 full-height right-border",
       "Actions": [
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "Role": 1,
+      "Panel": 1,
       "Plugin": "GazetteerPlugin",
       "Style": "col-md-3 half-height bottom-border",
       "Actions": [
@@ -53,7 +53,7 @@
       ]
     },
     {
-      "Role": 2,
+      "Panel": 2,
       "Plugin": "PropertiesPlugin",
       "Style": "col-md-3 half-height ",
       "Actions": [

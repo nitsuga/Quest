@@ -233,6 +233,10 @@ a.panel-btn {
     color: #4cff00 !important;
 }
 
+.panel-btn-hide {
+    visibility: hidden;
+}
+
 .buttonicon {
     position: relative;
     top: 1px;

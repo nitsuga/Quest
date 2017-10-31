@@ -10,7 +10,7 @@ namespace Quest.WebCore.Models
         /// <summary>
         /// window number or null for row break
         /// </summary>
-        public int? Role;
+        public int? Panel;
 
         /// <summary>
         /// name of plugin for this window
