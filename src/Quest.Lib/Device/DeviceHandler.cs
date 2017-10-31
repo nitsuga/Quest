@@ -484,7 +484,7 @@ namespace Quest.Lib.Device
             if (request.ResourcesAvailable || request.ResourcesBusy)
             {
                 // work out which ones were on display at the original revision
-                var resources = _resStore.GetResources(request.Revision, request.ResourcesAvailable, request.ResourcesBusy);
+                var resources = _resStore.GetResources(request.Revision, request.ResourceGroups, request.ResourcesAvailable, request.ResourcesBusy);
                 // get resources
                 response.Resources.AddRange(resources);
             }

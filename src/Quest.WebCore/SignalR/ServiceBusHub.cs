@@ -22,21 +22,10 @@ namespace Quest.WebCore.SignalR
         private UserDetails[] users;
         private HubConnection _connection;
 
-        private Dictionary<string, string[]> _groupMessages = new Dictionary<string, string[]>
-        {
-            { "ResourceUpdate", new string[] {"Resources.Available" } },
-            { "IncidentUpdate", new string[] {"Incidents" } },
-        };
-
         public ServiceBusHub(IServiceBusClient msgSource, IUserTracker userTracker)
         {
             _userTracker = userTracker;
             _msgSource = msgSource;
-        }
-
-        ~ServiceBusHub()
-        {
-
         }
 
         public void Initialise(string queue)
@@ -56,18 +45,9 @@ namespace Quest.WebCore.SignalR
         {
             var builder = new HubConnectionBuilder();
 
-            //JsonSerializerSettings json_settings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            //    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            //    //TypeNameHandling = TypeNameHandling.All,
-            //    //TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-            //};
-
             _connection = builder
                 .WithUrl("http://localhost:63147/hub")
                 .WithConsoleLogger()
-                //.WithJsonProtocol(json_settings)
                 .Build();
 
             _connection.On<UserDetails[]>("usersjoined", (parms) => UsersJoined(parms));
@@ -107,7 +87,11 @@ namespace Quest.WebCore.SignalR
                 case "ResourceUpdate":
                     var resource = e.Payload as ResourceUpdate;
 
-                    var json = JsonConvert.SerializeObject(resource, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+                    var json = JsonConvert.SerializeObject(resource, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    });
+
                     var group = $"Resource.{resource.Item.StatusCategory}";
                     _connection.InvokeAsync("groupmessage", "ServiceBusHub", group, json);
                     break;
@@ -119,7 +103,11 @@ namespace Quest.WebCore.SignalR
                     // only interested in notifying major changes e.g. Available->Busy , not just AOR->ASB
                     if (resource_status_update.NewStatusCategory != resource_status_update.OldStatusCategory)
                     {
-                        var json1 = JsonConvert.SerializeObject(resource_status_update, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+
+                        var json1 = JsonConvert.SerializeObject(resource_status_update, new JsonSerializerSettings
+                        {
+                            TypeNameHandling = TypeNameHandling.All
+                        });
 
                         // broadcast notification to both client groups
                         var oldgroup = $"Resource.{resource_status_update.OldStatusCategory}";

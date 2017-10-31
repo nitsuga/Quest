@@ -10,7 +10,7 @@ namespace Quest.Lib.Resource
         bool FleetNoExists(string fleetno);
         QuestResource GetByFleetNo(string fleetno);
         QuestResource GetByCallsign(string callsign);
-        List<QuestResource> GetResources(long revision, bool avail = false, bool busy = false);
+        List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail = false, bool busy = false);
         string GetStatusDescription(bool available, bool busy, bool enroute, bool rest);
         int GetOffroadStatusId();
         ResourceUpdateResult Update(ResourceUpdateRequest item);

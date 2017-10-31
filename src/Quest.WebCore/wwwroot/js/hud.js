@@ -17,31 +17,41 @@
         _connection.invoke('send', _username, $(messageTextbox).val());
     };
 
-    // join a message group
-    var _joinGroup = function (group) {
-        var group_count = groups[group];
-        if (group_count === undefined || group_count===0)
-        {
-            // first time registration
-            group_count = 1;
-            _connection.invoke('joingroup', _username, group);
-        }
+    var _joinLeaveGroup = function (group, role, join) {
+        if (join)
+            _joinGroup(group, role)
         else
-            // up the number of registrations
-            group_count += 1;
-        groups[group] = group_count;
+            _leaveGroup(group, role);
     };
 
-    // leave a message group
-    var _leaveGroup = function (group) {
-        var group_count = groups[group];
-        if (group_count === undefined || group_count === 0)
+    // join a role to the message group
+    var _joinGroup = function (group, role) {
+        var group_list = groups[group];
+        if (group_list === undefined) {
+            group_list = [];
+        }
+        var index = group_list.indexOf(role);
+        if (index === -1) {
+            group_list.push(role); // up the number of registrations            
+            if (group_list.length===1)
+                // first time registration
+                _connection.invoke('joingroup', _username, group);
+        }
+        groups[group] = group_list;
+    };
+
+    // leave a message group.
+    var _leaveGroup = function (group, role) {
+        var group_list = groups[group];
+        if (group_list === undefined)
             return; // already unsubscribed
-        group_count -= 1;
-        groups[group] = group_count;
-        if (group_count===0)
+        var index = group_list.indexOf(role);
+        if (index === -1)
+            return; // role not found
+        group_list.splice(index, 1);    // remove the role
+        if (group_list.length===0)      // no-one left in the group
             _connection.invoke('leavegroup', _username, group);
-        groups[group] = group_count;
+        groups[group] = group_list;
        
     };
 
@@ -549,6 +559,7 @@
         showmenu: _showmenu,
         joinGroup: _joinGroup,
         leaveGroup: _leaveGroup,
+        joinLeaveGroup: _joinLeaveGroup,
         toggleSlider: _toggleSlider,
         setSlider: _setSlider,
         setStoreFromSlider: _setStoreFromSlider,

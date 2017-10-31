@@ -47,12 +47,12 @@ namespace Quest.Lib.Resource
             throw new System.NotImplementedException();
         }
 
-        public List<QuestResource> GetResources(long revision, bool avail = false, bool busy = false)
+        public string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetStatusDescription(bool available, bool busy, bool enroute, bool rest)
+        public List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail = false, bool busy = false)
         {
             throw new System.NotImplementedException();
         }

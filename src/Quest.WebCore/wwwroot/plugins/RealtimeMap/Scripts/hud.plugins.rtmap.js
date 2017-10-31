@@ -2,10 +2,9 @@
 
 hud.plugins = hud.plugins || {};
 
-var markersi, markersr, markersd, georesLayer;
-var select_avail, select_busy, select_c1, select_c2, select_c3, select_c4, select_held, select_aeuc, select_fruc, select_stn, select_sbp, select_hos;
-
 hud.plugins.rtmap = (function() {
+
+    var markersi, markersr, markersd, georesLayer;
 
     var _initMap = function (role) {
         L_PREFER_CANVAS = true;
@@ -61,166 +60,188 @@ hud.plugins.rtmap = (function() {
             inertiaDeceleration: 10000
         });
 
+        _registerButtons(role);
 
-        $("#sys_hub").on("Resource.Available", function () {
-
+        
+        // listen for hub messages on these groups
+        $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msgtxt) {
+            _handleMessage(role, georesLayer, msgtxt);
         });
 
-        select_avail = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-avail']";
-        select_busy = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-busy']";
-        select_c1 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c1']";
-        select_c2 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c2']";
-        select_c3 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c3']";
-        select_c4 = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-c4']";
-        select_held = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-held']";
-        select_aeuc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-aeuc']";
-        select_fruc = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-fruc']";
-        select_stn = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-stn']";
-        select_sbp = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-sbp']";
-        select_hos = "div[data-panel-role='" + role + "'] .map-container a[data-role='select-hos']";
-
-        $(select_avail).on("click", function () {
-            avail = hud.toggleButton(select_avail);
-            _doResources();
-        });
-
-        $(select_busy).on("click", function () {
-            hud.toggleButton(select_busy);
-            _doResources();
-        });
-
-        $(select_c1).on("click", function () {
-            hud.toggleButton(select_c1);
-            _doResources();
-        });
-        $(select_c2).on("click", function () {
-            hud.toggleButton(select_c2);
-            _doResources();
-        });
-        $(select_c3).on("click", function () {
-            hud.toggleButton(select_c3);
-            _doResources();
-        });
-        $(select_c4).on("click", function () {
-            hud.toggleButton(select_c4);
-            _doResources();
-        });
-
-        $(select_held).on("click", function () {
-            hud.toggleButton(select_held);
-            _doResources();
-        });
-
-        $(select_aeuc).on("click", function () {
-            hud.toggleButton(select_aeuc);
-            _doResources();
-        });
-
-        $(select_fruc).on("click", function () {
-            hud.toggleButton(select_fruc);
-            _doResources();
-        });
-
-        $(select_hos).on("click", function () {
-            hud.toggleButton(select_hos);
-            _doResources();
-        });
-
-        $(select_sbp).on("click", function () {
-            hud.toggleButton(select_sbp);
-            _doResources();
-        });
-
-        $(select_stn).on("click", function () {
-            hud.toggleButton(select_stn);
-            _doResources();
-        });
-
-
-        // register for resource available messages
-        hud.joinGroup("Resource.Available");
     };
 
-    var _doResources = function() {
-        //Create a new empty resources layer and add to map
-        if (markersr !== undefined) markersr.clearLayers();
+    var _handleMessage = function(role, georesLayer, msgtxt)
+    {
+        var msg = JSON.parse(msgtxt);
+        switch (msg.$type) {
+            case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
+                _updateResource(georesLayer, msg.Item);
+                break;
+            case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
+                _updateResourceStatus(role, georesLayer, msg);
+                break;
+        }    
+    }
 
-        _createResourcesLayer();
+    // get selector for a named button
+    var _buttonSelector = function (role, name) {
+        return "div[data-panel-role='" + role + "'] .map-container a[data-role='" + name + "']";
+    }
 
-        $("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
+    // attach click handlers to all the panel buttons
+    var _registerButtons = function (role) {
+        select_button = "div[data-panel-role='" + role + "'] .map-container .panel-btn";
+        $(select_button).on("click", function (btn) {
+            hud.toggleButton(btn.currentTarget);
+            // get name of button
+            btn_role = $(btn.currentTarget).attr('data-role');
+            switch (btn_role)
+            {
+                case 'select_avail', 'select_busy', 'select_c1', 'select_c2', 'select_c3', 'select_c4', 'select_held', 'select_aeuc', 'select_fruc', 'select_stn', 'select_sbp', 'select_hos':
+                    break;
+            }
+            _updateMap(role);
+        });
+    }
+
+    var _updateMap = function(role) {
+
+
+        //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
+
+        resourcesAvailable = hud.getButtonState(_buttonSelector(role, "select-avail"));
+        resourcesBusy = hud.getButtonState(_buttonSelector(role, "select-busy"));
+        incidentsImmediate = hud.getButtonState(_buttonSelector(role, "select-c1"));
+        incidentsOther = false;
+        hospitals = hud.getButtonState(_buttonSelector(role, "select-hos"));
+        standby = hud.getButtonState(_buttonSelector(role, "select-sbp"));
+        stations = hud.getButtonState(_buttonSelector(role, "select-stn"));
+        aeu = hud.getButtonState(_buttonSelector(role, "select-aeu"));
+        fru = hud.getButtonState(_buttonSelector(role, "select-fru"));
+        oth = hud.getButtonState(_buttonSelector(role, "select-oth"));
+
+        //TODO: get these from the controller
+        var resourceGroups = [];
+        if (aeu) resourceGroups.push("AMB");
+        if (fru) resourceGroups.push("CAR");
+        if (oth) {
+            resourceGroups.push("BIKE");
+            resourceGroups.push("MBIKE");
+            resourceGroups.push("HELI");
+        }
 
         //Make a new request for the new selection
         $.ajax({
             url: _getURL("RTM/GetMapItems"),
             data:
             {
-                ResourcesAvailable: hud.getButtonState(select_avail),
-                ResourcesBusy: hud.getButtonState(select_busy),
-                IncidentsImmediate: hud.getButtonState(select_c1),
-                IncidentsOther: false,
-                Hospitals: hud.getButtonState(select_hos),
-                Standby: hud.getButtonState(select_sbp),
-                Stations: hud.getButtonState(select_stn),
+                ResourceGroups: resourceGroups,
+                ResourcesAvailable: resourcesAvailable,
+                ResourcesBusy: resourcesBusy,
+                IncidentsImmediate: incidentsImmediate,
+                IncidentsOther: incidentsOther,
+                Hospitals: hospitals,
+                Standby: standby,
+                Stations: stations,
             },
             dataType: "json",
             success: function (layer) {
+                //Create a new empty resources layer and add to map
+                if (markersr !== undefined) markersr.clearLayers();
+
+                _createResourcesLayer();
 
                 if (layer.error !== undefined) {
                     $("#message").html(layer.error);
                     $("#message").show();
-
-                }
-                else {
-
-                    if (layer.Result == null)
-                        return;
-
-                    // add resources to the map
-                    if (layer.Result.Resources !== undefined) {
-                        layer.Result.Resources.forEach(function (item) {
-                            // for each item construct equiv geojson item
-                            var geojsonFeature = {
-                                "type": "Feature",
-                                "id": item.FleetNo,
-                                "properties": {
-                                    "name": item.Callsign,
-                                    "MarkerType": item.ResourceTypeGroup,
-                                    "MarkerStatus": item.StatusCategory
-                                },
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [item.Position.Longitude, item.Position.Latitude]
-                                }
-                            };
-                            georesLayer.addData(geojsonFeature);
-                        });
-                    }
-
-                    if (layer.Result.Destinations !== undefined) {
-                        // add Destinations to the map
-                        layer.Result.Destinations.forEach(function (item) {
-                            // for each item construct equiv geojson item
-                            var geojsonFeature = {
-                                "type": "Feature",
-                                "id": item.Id,
-                                "properties": {
-                                    "name": item.Name,
-                                    "MarkerType": "DES",
-                                    "MarkerStatus": _getDestinationMarkerStatus(item)
-                                },
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [item.Position.Longitude, item.Position.Latitude]
-                                }
-                            };
-                            georesLayer.addData(geojsonFeature);
-                        });
-                    }
+                    return;
                 }
 
-                $("*").css("cursor", "default");
-            }
+                if (layer.Result === null)
+                    return;
+
+                // add resources to the map
+                if (layer.Result.Resources !== undefined) {
+                    layer.Result.Resources.forEach(function (item) {
+                        _updateResource(georesLayer, item);
+                    });
+                }
+
+                if (layer.Result.Destinations !== undefined) {
+                    // add Destinations to the map
+                    _updateDestinations(layer.Result.Destinations, georesLayer);
+                }
+
+                // now register for updates
+                hud.joinLeaveGroup("Resource.Available", role, resourcesAvailable);
+                hud.joinLeaveGroup("Resource.Busy", role, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Enroute", role, resourcesBusy);
+
+            } // success
+            //$("*").css("cursor", "default");
         });
+    }
+
+    // the status of a resource has changed. we need to remove it if we're not showing
+    // this type of resource
+    var _updateResourceStatus = function (role, layer, item) {
+
+        resourcesAvailable = hud.getButtonState(_buttonSelector(role, "select-avail"));
+        resourcesBusy = hud.getButtonState(_buttonSelector(role, "select-busy"));
+
+        if (resourcesAvailable === false && item.NewStatusCategory !== "Available")
+            _removeExistingFeature(layer, item.FleetNo);
+
+        if (resourcesBusy === false && (item.NewStatusCategory !== "Busy" || item.NewStatusCategory !== "Enroute"))
+            _removeExistingFeature(layer, item.FleetNo);
+    }
+
+
+    var _updateResource = function (layer, item) {
+        // for each item construct equiv geojson item
+        var geojsonFeature = {
+            "type": "Feature",
+            "id": item.FleetNo,
+            "properties": {
+                "name": item.Callsign,
+                "MarkerType": item.ResourceTypeGroup,
+                "MarkerStatus": item.StatusCategory
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [item.Position.Longitude, item.Position.Latitude]
+            }
+        };
+        _removeExistingFeature(layer, item.FleetNo);
+        layer.addData(geojsonFeature);
+    }
+
+    var _updateDestinations = function (destinations, layer) {
+
+        destinations.forEach(function (item) {
+            _removeExistingFeature(layer, item.Id);
+        });
+
+        var features = [];
+        destinations.forEach(function (item) {
+            // for each item construct equiv geojson item
+            var geojsonFeature = {
+                "type": "Feature",
+                "id": item.Id,
+                "properties": {
+                    "name": item.Name,
+                    "MarkerType": "DES",
+                    "MarkerStatus": _getDestinationMarkerStatus(item)
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [item.Position.Longitude, item.Position.Latitude]
+                }
+            };
+            features.push(geojsonFeature);
+        });
+
+        layer.addData(features);
     }
 
     var _getDestinationMarkerStatus = function(questDestination)
@@ -241,7 +262,7 @@ hud.plugins.rtmap = (function() {
     // remove a feature form the map
     var _removeExistingFeature = function (layer, id) {
         //Leaflet idiosyncracy, cant loop features for a specific layer ?
-        map.eachLayer(function (lyr) {
+        layer.eachLayer(function (lyr) {
             if (lyr.feature !== null && lyr.feature.properties !== null) {
                 if (lyr.feature.id === id) {
                     layer.removeLayer(lyr);
@@ -301,12 +322,8 @@ hud.plugins.rtmap = (function() {
         }
     }
 
-    var updateStaticMapData = function() {
-        //doIncidents();
-        _doResources();
-        //doDestinations();
-        //doAllCoverage();
-        //SetupNotifications();
+    var _updateStaticMapData = function(role) {
+        _updateMap(role);
     }
 
     var _getURL = function(url) {

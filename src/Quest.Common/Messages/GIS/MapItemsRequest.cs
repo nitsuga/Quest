@@ -9,6 +9,8 @@ namespace Quest.Common.Messages.GIS
     
     public class MapItemsRequest : Request
     {
+        public string[] ResourceGroups;
+
         public bool ResourcesAvailable { get; set; }
         
         public bool ResourcesBusy { get; set; }

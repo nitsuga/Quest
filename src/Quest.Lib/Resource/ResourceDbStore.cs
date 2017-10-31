@@ -248,20 +248,30 @@ namespace Quest.Lib.Resource
             });
         }
 
-        public List<QuestResource> GetResources(long revision, bool avail = false, bool busy = false)
+        public List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail = false, bool busy = false)
         {
             return _dbFactory.Execute<QuestContext, List<QuestResource>>((db) =>
             {
+                if (resourceGroups == null)
+                    resourceGroups = new string[] { };
                 // get all *current* resources
                 var resources = db.Resource
                         .Include(x => x.Callsign)
                         .Include(x => x.ResourceStatus)
                         .Include(x => x.ResourceType)
-                        .Where(x => x.ResourceStatus.Busy == true || x.ResourceStatus.Available == true)
-                        .Where(x => x.EndDate == null && x.Revision> revision)
-                        .ToList();
+                        .Where(x => (x.EndDate == null) && (x.Revision > revision))
+                        .Where(x => resourceGroups.Length == 0 || (resourceGroups.Length > 0 && resourceGroups.Contains(x.ResourceType.ResourceTypeGroup)));
 
-                return FromDatabase(resources).ToList();
+                if (avail && busy)
+                    return FromDatabase(resources).ToList();
+
+                if (avail)
+                    return FromDatabase(resources.Where(x => x.ResourceStatus.Available == true)).ToList();
+
+                if (busy)
+                    return FromDatabase(resources.Where(x => x.ResourceStatus.Busy == true)).ToList();
+
+                return FromDatabase(resources.Where(x => x.ResourceStatus.Busy == false && x.ResourceStatus.Available==false)).ToList();
             });
         }
 

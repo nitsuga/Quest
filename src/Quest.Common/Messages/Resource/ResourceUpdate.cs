@@ -14,15 +14,4 @@ namespace Quest.Common.Messages.Resource
         // optional item details (missing if the item has been deleted)
         public QuestResource Item;
     }
-
-    [Serializable]
-    public class ResourceStatusChange : MessageBase
-    {
-        public string Callsign;
-        public string FleetNo;
-        public string OldStatus;
-        public string NewStatus;
-        public string OldStatusCategory;
-        public string NewStatusCategory;
-    }
 }
