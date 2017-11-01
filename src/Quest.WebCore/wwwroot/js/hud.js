@@ -484,7 +484,7 @@
     };
 
     var _setButtonState = function (panel, role, action, state) {
-        selector = "div[data-panel-role='" + panel + "'] a[data-role='" + role + "'][data-action='" + action + "'] ";
+        selector = "div[data-panel-role='" + panel + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
         if (state) {
             $(selector).removeClass("panel-btn-off");
             $(selector).addClass("panel-btn-on");
@@ -497,7 +497,7 @@
     };
 
     var _getButtonState = function (panel, role, action) {
-        selector = "div[data-panel-role='" + panel + "'] a[data-role='" + role + "'][data-action='" + action + "'] ";
+        selector = "div[data-panel-role='" + panel + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
         return $(selector).hasClass("panel-btn-on");
     };
 

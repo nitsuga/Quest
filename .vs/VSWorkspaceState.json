@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\src"
+    "\\src",
+    "\\src\\Quest.WebCore",
+    "\\src\\Quest.WebCore\\Controllers"
   ],
   "SelectedNode": "\\src\\Quest.sln",
   "PreviewInSolutionExplorer": false

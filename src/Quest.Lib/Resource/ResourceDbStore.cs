@@ -259,8 +259,8 @@ namespace Quest.Lib.Resource
                         .Include(x => x.Callsign)
                         .Include(x => x.ResourceStatus)
                         .Include(x => x.ResourceType)
-                        .Where(x => (x.EndDate == null) && (x.Revision > revision))
-                        .Where(x => resourceGroups.Length == 0 || (resourceGroups.Length > 0 && resourceGroups.Contains(x.ResourceType.ResourceTypeGroup)));
+                        .Where(x => (x.EndDate == null) && (x.Revision > revision)).ToList();
+                        //.Where(x => resourceGroups.Length == 0 || (resourceGroups.Length > 0 && resourceGroups.Contains(x.ResourceType.ResourceTypeGroup)));
 
                 if (avail && busy)
                     return FromDatabase(resources).ToList();
