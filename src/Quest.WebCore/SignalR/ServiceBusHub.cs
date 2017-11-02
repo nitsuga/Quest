@@ -19,7 +19,7 @@ namespace Quest.WebCore.SignalR
         public IServiceBusClient _msgSource;
 
         private IUserTracker _userTracker;
-        private UserDetails[] users;
+        //private UserDetails[] users;
         private HubConnection _connection;
 
         public ServiceBusHub(IServiceBusClient msgSource, IUserTracker userTracker)

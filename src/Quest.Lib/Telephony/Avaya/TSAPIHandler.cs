@@ -706,7 +706,7 @@ namespace Quest.Lib.Telephony.Avaya
             {
                 int makeCall = Csta.cstaMakeCall(acsHandle, numInvokeId, chDevice, calledDevice, ref privData);
             }
-            catch (System.Exception eMakeCall)
+            catch 
             {
                 return;
             }
@@ -750,7 +750,7 @@ namespace Quest.Lib.Telephony.Avaya
             {
                 polledEvent = Csta.acsGetEventPoll(acsHandle, ref eventBuf, ref eventBufSize, ref privData, ref numEvents);
             }
-            catch (System.Exception eEventPoll)
+            catch 
             {
                 return;
             }

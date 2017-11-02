@@ -5,8 +5,10 @@ namespace Quest.Lib.Search.Indexers
 {
     internal class OsmIndexer : ElasticIndexer
     {
+#if false
         private Dictionary<int, string> _tags;
         private int[] _keeptags;
+#endif
 
         public override void StartIndexing(BuildIndexSettings config)
         {

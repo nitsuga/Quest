@@ -285,7 +285,7 @@ namespace Quest.Lib.EISEC
                 // attempt to send the queued requests
                 return SendQueryToEisec(request);
             }
-            catch (Exception ex)
+            catch 
             {
             }
 

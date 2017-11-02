@@ -84,7 +84,6 @@ namespace Quest.Lib.Northgate
         private DateTime _lastHeartbeatSent;
         private Thread worker;
         private StatusCode _status = StatusCode.Disconnected;
-        private int _timeout = 3;
         private int _retries = 5;
         private String _subscriptions = "";
 
@@ -92,7 +91,6 @@ namespace Quest.Lib.Northgate
         private bool _isPrimary = false;
         private ManualResetEvent _quiting = new ManualResetEvent(false);
         private ElasticSettings _elastic;
-        private BuildIndexSettings _config;
         private DeviceHandler _deviceHandler;
         private IDeviceStore _devStore;
         private IResourceStore _resStore;

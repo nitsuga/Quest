@@ -674,7 +674,7 @@ namespace Quest.Lib.EISEC
 
                     SetDisconnected($"Logon rejected");
                 }
-                catch (Exception ex1)
+                catch 
                 {
                 }
 
@@ -701,7 +701,7 @@ namespace Quest.Lib.EISEC
                     _config.User.Password = _pendingPasswordChange;
                     _parent.UpdatePassword(_index, _pendingPasswordChange);
                 }
-                catch (Exception ex1)
+                catch 
                 {
                 }
 
@@ -743,7 +743,7 @@ namespace Quest.Lib.EISEC
 
                     SetDisconnected(message);
                 }
-                catch (Exception ex1)
+                catch 
                 {
                 }
 
@@ -778,7 +778,7 @@ namespace Quest.Lib.EISEC
                     // remember the address found and store it with the request
                     _parent.SetAddress(reqNo, addrResp.Details);
             }
-            catch (Exception ex)
+            catch 
             {
             }
         }
@@ -805,7 +805,7 @@ namespace Quest.Lib.EISEC
 
                 _parent.SetAddress(reqNo, addr);
             }
-            catch (Exception ex)
+            catch
             {
             }
         }

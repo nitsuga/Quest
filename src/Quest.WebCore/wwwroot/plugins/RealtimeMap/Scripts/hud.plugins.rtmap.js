@@ -2,7 +2,11 @@
 
 hud.plugins = hud.plugins || {};
 
-hud.plugins.rtmap = (function() {
+var rtmap_maps = {};
+var rtmap_baseLayers;
+var rtmap_overlayLayers;
+
+hud.plugins.rtmap = (function () {
 
     var markersi, markersr, markersd, georesLayer;
 
@@ -11,59 +15,76 @@ hud.plugins.rtmap = (function() {
 
         var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
         var osmAttrib = "Map data © OpenStreetMap contributors";
-        osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+        var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
         var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="http://mapbox.com">Mapbox</a>',
             mbUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw";
 
-        var grayscale = L.tileLayer(mbUrl, { id: "mapbox.light", attribution: mbAttr }),
-            streets = L.tileLayer(mbUrl, { id: "mapbox.streets", attribution: mbAttr });
+        //https://leaflet-extras.github.io/leaflet-providers/preview/
 
-        //var googleLayer1 = new L.Google('ROADMAP');
-        //var googleLayer2 = new L.Google('SATELLITE');
-        //var googleLayer3 = new L.Google('HYBRID');
-        //var googleLayer4 = new L.Google('TERRAIN');
+        var grayscale = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            subdomains: 'abcd',
+            minZoom: 0,
+            maxZoom: 20,
+            ext: 'png'
+        });
 
-        barts = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
-        stations = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+        var barts = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
 
-        baseLayers = {
+        var stations = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+
+        var carto_dark = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        });
+
+        var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        rtmap_baseLayers = {
             "OSM": osm,
+            "Barts": barts,
             "Grayscale": grayscale,
-            "Mapbox Streets": streets,
-            "Barts": barts //,
-            //"Google Road": googleLayer1,
-            //"Google Satellite": googleLayer2,
-            //"Google Hybrid": googleLayer3,
-            //"Google Terrain": googleLayer4
+            "Dark": carto_dark,
+            "Satellite": Esri_WorldImagery,
+            "None": null
         };
-        baseLayer = osm;
+        var baseLayer = osm;
 
-        var overlayLayers = {
+        rtmap_overlayLayers = {
             "Stations": stations
         };
 
-        lat = 51.5;
-        lng = -0.2;
-        zoom = 12;
+        var lat = 51.5;
+        var lng = -0.2;
+        var zoom = 12;
 
         var mapdiv = 'map' + panel;
 
-        map = new L.Map(mapdiv, {
+        var map = new L.Map(mapdiv, {
             center: new L.LatLng(lat, lng),
             zoom: zoom,
             layers: baseLayer,
-            zoomControl: false,
+            zoomControl: true,
             continuousWorld: true,
             worldCopyJump: false,
             inertiaDeceleration: 10000
         });
 
-        //_registerButtons(panel);
+        // save the map object in a dictionary so it can be accessed later
+        rtmap_maps[panel] = map;
 
+        // select the primary menu
         hud.selectPanelMenu(panel, 0);
-        
+
+        // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
+        // are handled automatically by hud.js
+        _registerButtons(panel);
+
         // listen for hub messages on these groups
         $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msgtxt) {
             _handleMessage(panel, georesLayer, msgtxt);
@@ -93,39 +114,33 @@ hud.plugins.rtmap = (function() {
     var _buttonSelector = function (panel, name) {
         return "div[data-panel-role='" + panel + "'] .map-container a[data-action='" + name + "']";
     };
-        
+
     // handle actions from button push
     var _handleAction = function (panel, action) {
-        hud.toggleButton(panel, 'select-action', action);
-        _updateMap(panel);
+        switch (action)
+        {
+            case "lock-map":
+                break;
+            default:
+                hud.toggleButton(panel, 'select-action', action);
+                _updateMap(panel);
+        }
     };
 
     // attach click handlers to all the panel buttons
-    //var _registerButtons = function (panel) {
-    //    select_button = "div[data-panel-role='" + panel + "'] .map-container .panel-btn";
-    //    $(select_button).on("click", function (btn) {
-    //        // get name of button
-    //        btn_role = $(btn.currentTarget).attr('data-role');
-    //        btn_action = $(btn.currentTarget).attr('data-action');
-    //        switch (btn_role)
-    //        {
-    //            case 'select-map':
-    //                // select map 'btn_action'
-    //                hud.toggleButton(btn.currentTarget);
-    //                _updateMap(panel);
-    //                break;
-    //            case 'select-action':
-    //                hud.toggleButton(btn.currentTarget);
-    //                _updateMap(panel);
-    //                break;
-    //        }
-    //    });
-    //}
+    var _registerButtons = function (panel) {
+        $('[data-panel-role=' + panel + '] a[data-role="select-map"]').on('click', function (e) {
+            e.preventDefault();
+            selected_map = $(e.currentTarget).attr('data-action');
+            _selectBaseLayer(panel, selected_map);
+        });
+    }
 
     var _updateMap = function (panel) {
 
-
         //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
+
+        var map = rtmap_maps[panel];
 
         resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
         resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
@@ -167,7 +182,7 @@ hud.plugins.rtmap = (function() {
                 //Create a new empty resources layer and add to map
                 if (markersr !== undefined) markersr.clearLayers();
 
-                _createResourcesLayer();
+                _createResourcesLayer(map);
 
                 if (layer.error !== undefined) {
                     $("#message").html(layer.error);
@@ -213,7 +228,6 @@ hud.plugins.rtmap = (function() {
         if (resourcesBusy === false && (item.NewStatusCategory !== "Busy" || item.NewStatusCategory !== "Enroute"))
             _removeExistingFeature(layer, item.FleetNo);
     };
-
 
     var _updateResource = function (layer, item) {
         // for each item construct equiv geojson item
@@ -289,7 +303,7 @@ hud.plugins.rtmap = (function() {
         });
     };
 
-    var _createResourcesLayer = function () {
+    var _createResourcesLayer = function (map) {
         try {
             var useclusters = hud.getStoreAsBool("#use-clusters");
 
@@ -339,10 +353,6 @@ hud.plugins.rtmap = (function() {
         }
     };
         
-    var _updateStaticMapData = function (panel) {
-        _updateMap(panel);
-    };
-
     var _getURL = function (url) {
         var s = _getBaseURL() + "/" + url;
         //console.debug("g url = " + s);
@@ -359,24 +369,34 @@ hud.plugins.rtmap = (function() {
     /// <summary>
     /// Re-centre the maps to new co-ordinates
     /// </summary
-    var _panTo = function (lat, lng) {
+    var _panTo = function (panel, lat, lng) {
+        var map = rtmap_maps[panel];
     };
 
-    var _panAndMarkLocation = function (locationName, lat, lng) {
+    var _panAndMarkLocation = function (panel, locationName, lat, lng) {
+        var map = rtmap_maps[panel];
     };
 
-    var _setZoomLevel = function(z) {
+    var _setZoomLevel = function (panel, z) {
+        var map = rtmap_maps[panel];
     };
 
-    var _redrawMaps = function () {
+    var _selectBaseLayer = function (panel, layerName) {
+        var map = rtmap_maps[panel];
+        for (var layer in rtmap_baseLayers) {
+            if (map.hasLayer(rtmap_baseLayers[layer]))
+                map.removeLayer(rtmap_baseLayers[layer]);
+        }
+        map.addLayer(rtmap_baseLayers[layerName]);
     };
 
-    var _lockMap = function (mode) {
+    var _lockMap = function (panel, mode) {
+        hud.setButtonState(panel, "select-action", "lock-map", mode)
     };
 
     return {
         initMap: _initMap,
-        redrawMaps: _redrawMaps,
+        selectBaseLayer: _selectBaseLayer,
         lockMap: _lockMap,
         setZoom: _setZoomLevel,
         panTo: _panTo,

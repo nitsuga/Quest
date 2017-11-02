@@ -8,7 +8,7 @@ namespace Quest.Lib.Notifier
 {
     public class AppleNotifier : INotifier
     {
-        private ApnsServiceBroker _apnsBroker;
+        //private ApnsServiceBroker _apnsBroker;
 
         public void Setup()
         {
