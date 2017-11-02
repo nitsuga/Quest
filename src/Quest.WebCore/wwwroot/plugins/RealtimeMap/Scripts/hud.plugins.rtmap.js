@@ -86,8 +86,8 @@ hud.plugins.rtmap = (function () {
         _registerButtons(panel);
 
         // listen for hub messages on these groups
-        $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msgtxt) {
-            _handleMessage(panel, georesLayer, msgtxt);
+        $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
+            _handleMessage(panel, group, georesLayer, msg);
         });
 
         // listen for panel actions
@@ -98,8 +98,7 @@ hud.plugins.rtmap = (function () {
     };
 
     // handle message from service bus
-    var _handleMessage = function (panel, georesLayer, msgtxt) {
-        var msg = JSON.parse(msgtxt);
+    var _handleMessage = function (panel, group, georesLayer, msg) {
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 _updateResource(georesLayer, msg.Item);
@@ -117,8 +116,7 @@ hud.plugins.rtmap = (function () {
 
     // handle actions from button push
     var _handleAction = function (panel, action) {
-        switch (action)
-        {
+        switch (action) {
             case "lock-map":
                 break;
             default:
@@ -134,7 +132,7 @@ hud.plugins.rtmap = (function () {
             selected_map = $(e.currentTarget).attr('data-action');
             _selectBaseLayer(panel, selected_map);
         });
-    }
+    };
 
     var _updateMap = function (panel) {
 
@@ -235,7 +233,9 @@ hud.plugins.rtmap = (function () {
             "type": "Feature",
             "id": item.FleetNo,
             "properties": {
-                "name": item.Callsign,
+                "Type": "Resource",
+                "Value": item,
+                "Name": item.Callsign,
                 "MarkerType": item.ResourceTypeGroup,
                 "MarkerStatus": item.StatusCategory
             },
@@ -261,7 +261,9 @@ hud.plugins.rtmap = (function () {
                 "type": "Feature",
                 "id": item.Id,
                 "properties": {
-                    "name": item.Name,
+                    "Type": "Destination",
+                    "Value": item,
+                    "Name": item.Name,
                     "MarkerType": "DES",
                     "MarkerStatus": _getDestinationMarkerStatus(item)
                 },
@@ -330,17 +332,9 @@ hud.plugins.rtmap = (function () {
                 },
                 onEachFeature: function (feature, layer) {
                     layer.on("click", function () {
-                        $(".resCallsignValue").html(feature.properties.Callsign + " (" + feature.properties.Fleet + ") " + feature.properties.ResourceType);
-                        $(".resStatusValue").html(feature.properties.currStatus);
-                        $(".resTimeValue").html(feature.properties.Timestamp);
-                        $(".resAreaValue").html(feature.properties.Area);
-                        $(".resDestinationValue").html(feature.properties.Destination);
-                        $(".resEtaValue").html(feature.properties.ETA);
-                        $(".resIncidentValue").html(feature.properties.IncSerial);
-                        $(".resSkillValue").html(feature.properties.Skill);
-                        $(".resCommentValue").html(feature.properties.Comment);
-                        //$(".resStandbyValue").html(feature.properties.Standby);
-                        $("#modalResourceDetails").modal("show");
+
+                        // trigger local event to broadcast this object
+                        hud.sendLocal("ObjectSelected", { "Type": feature.properties.Type, "Value": feature.properties.Value });
                     });
                 }
             });
@@ -391,7 +385,7 @@ hud.plugins.rtmap = (function () {
     };
 
     var _lockMap = function (panel, mode) {
-        hud.setButtonState(panel, "select-action", "lock-map", mode)
+        hud.setButtonState(panel, "select-action", "lock-map", mode);
     };
 
     return {

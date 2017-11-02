@@ -12,9 +12,14 @@
     // remember which message group are being subscribed to
     var groups = {};
 
+    // send a message locally on this session. These messages are NOT sent to the hub
+    var _sendLocal = function (event, msg) {
+        $("#sys_hub").trigger(event, msg);
+    };
+
     // send a message to the hub
-    var _send = function (msg) {
-        _connection.invoke('send', _username, $(messageTextbox).val());
+    var _sendGroup = function (msg) {
+        _connection.invoke('groupmessage', _username, group, message);
     };
 
     var _joinLeaveGroup = function (group, panel, join) {
@@ -105,7 +110,8 @@
 
             // Create a function that the hub can call to broadcast messages to a specific group.
             connection.on('groupmessage', function (name, group, message) {
-                $("#sys_hub").trigger(group, message);
+                var msg = JSON.parse(message);
+                $("#sys_hub").trigger(group, msg);
             });
 
             connection.on('setusersonline', function (users) {
@@ -604,8 +610,9 @@
         setButtonState: _setButtonState,
         getButtonState: _getButtonState,
         toggleButton: _toggleButton,
-        selectPanelMenu: _selectPanelMenu
-
+        selectPanelMenu: _selectPanelMenu,
+        sendLocal: _sendLocal,
+        sendGroup: _sendGroup
     };
 
 })();

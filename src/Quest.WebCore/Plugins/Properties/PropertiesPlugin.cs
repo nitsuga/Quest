@@ -42,7 +42,7 @@ namespace Quest.WebCore.Plugins.Properties
 
         public string OnInit()
         {
-            return "hud.plugins.properties.initialize()";
+            return "hud.plugins.properties.initialize(panelRole)";
         }
 
         public string OnPanelMoved()

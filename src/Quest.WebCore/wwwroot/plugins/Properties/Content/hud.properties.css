@@ -3,6 +3,11 @@
     height: 100%;
 }
 
+.properties-header
+{
+    color: aqua;
+}
+
 ul.properties-results {
     height: calc(100% - 72px);
     overflow-y: auto;
