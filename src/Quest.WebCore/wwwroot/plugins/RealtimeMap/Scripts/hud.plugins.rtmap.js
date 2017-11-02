@@ -163,7 +163,7 @@ hud.plugins.rtmap = (function () {
 
         //Make a new request for the new selection
         $.ajax({
-            url: _getURL("RTM/GetMapItems"),
+            url: hud.getURL("RTM/GetMapItems"),
             data:
             {
                 ResourceGroups: resourceGroups,
@@ -347,19 +347,6 @@ hud.plugins.rtmap = (function () {
         }
     };
         
-    var _getURL = function (url) {
-        var s = _getBaseURL() + "/" + url;
-        //console.debug("g url = " + s);
-        return s;
-    };
-
-    var _getBaseURL = function () {
-        var url = location.href;  // entire url including querystring - also: window.location.href;
-        var baseUrl = url.substring(0, url.indexOf("/", 10));
-        //console.debug("b url = " + baseURL);
-        return baseUrl;
-    };
-
     /// <summary>
     /// Re-centre the maps to new co-ordinates
     /// </summary

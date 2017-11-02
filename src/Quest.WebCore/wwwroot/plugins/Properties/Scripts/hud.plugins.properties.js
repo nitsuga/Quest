@@ -21,23 +21,14 @@ hud.plugins.properties = (function() {
 
     };
 
-    // handle message from service bus
     var _handleMessage = function (panel, evt, data) {
         switch (evt.type) {
             case "ObjectSelected":
                 console.log("caught ObjectSelected: " + data.Type + "=" + data.Value);
+                _loadTemplate(panel, data)
                 break;
         }
     };
-
-    var _handleMessage = function (panel, evt, data) {
-        switch (evt.type) {
-            case "ObjectSelected":
-                console.log("caught ObjectSelected: " + data.Type + "=" + data.Value);
-                break;
-        }
-    };
-
 
     // handle actions from button push
     var _handleAction = function (panel, action) {
@@ -46,6 +37,30 @@ hud.plugins.properties = (function() {
                 hud.toggleButton(panel, 'select-action', action);
         }
     };
+
+    var _loadTemplate = function (panelRole, data) {
+
+        var selector = "[data-panel-role='" + panelRole + "'] [data-role='properties-container']";
+
+        var body = JSON.stringify(data);
+
+        $.ajax({
+            url: hud.getURL("Properties/RenderProperties"),
+            type: 'POST',
+            data: body,
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            success: function (json) {
+                if (json.html.length > 0) {
+                    $(selector).html(json.html);
+                }
+            },
+            error: function (result) {
+                alert('error from hud.plugins.properties\r\n' + result.responseText);
+            }
+        });
+    };
+
 
     return {
         initialize: _initialize

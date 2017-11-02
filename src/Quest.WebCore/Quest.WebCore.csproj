@@ -43,9 +43,13 @@
 
   <ItemGroup>
     <Compile Remove="Quest\**" />
+    <Compile Remove="Views\Plugin\**" />
     <Content Remove="Quest\**" />
+    <Content Remove="Views\Plugin\**" />
     <EmbeddedResource Remove="Quest\**" />
+    <EmbeddedResource Remove="Views\Plugin\**" />
     <None Remove="Quest\**" />
+    <None Remove="Views\Plugin\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -132,7 +136,6 @@
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="Views\Plugin\" />
   </ItemGroup>
 
   <ItemGroup>

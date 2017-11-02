@@ -88,6 +88,21 @@
 
     }
 
+    // get a full url 
+    var _getURL = function (partialurl) {
+        var s = _getBaseURL() + "/" + partialurl;
+        return s;
+    };
+
+    var _getBaseURL = function () {
+        var url = location.href;  // entire url including querystring - also: window.location.href;
+        var baseUrl = url.substring(0, url.indexOf("/", 10));
+        //console.debug("b url = " + baseURL);
+        return baseUrl;
+    };
+
+
+
     var _initESB = function () {
 
         // Start the connection.
@@ -612,7 +627,9 @@
         toggleButton: _toggleButton,
         selectPanelMenu: _selectPanelMenu,
         sendLocal: _sendLocal,
-        sendGroup: _sendGroup
+        sendGroup: _sendGroup,
+        getURL: _getURL,
+        getBaseURL: _getBaseURL
     };
 
 })();
