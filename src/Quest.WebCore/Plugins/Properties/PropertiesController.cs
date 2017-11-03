@@ -19,9 +19,9 @@ namespace Quest.WebCore.Plugins.PropertiesPlugin
         {
             var type = obj["Type"].Value;
             var value = obj["Value"];
-            //HudProperty data = JsonConvert.DeserializeObject<HudProperty>(obj);
+
             // render it
-            var view = PartialView($"~/plugins/Properties/{type}", value);
+            var view = PartialView($"/Views/Shared/Plugins/Properties/{type}.cshtml", value);
             return view;
         }
     }

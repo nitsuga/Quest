@@ -48,12 +48,10 @@ hud.plugins.properties = (function() {
             url: hud.getURL("Properties/RenderProperties"),
             type: 'POST',
             data: body,
-            dataType: 'json',
+            dataType: "html",
             contentType: "application/json; charset=utf-8",
-            success: function (json) {
-                if (json.html.length > 0) {
-                    $(selector).html(json.html);
-                }
+            success: function (html) {
+                $(selector).html(html);
             },
             error: function (result) {
                 alert('error from hud.plugins.properties\r\n' + result.responseText);
