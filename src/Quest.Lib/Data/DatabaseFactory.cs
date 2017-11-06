@@ -28,6 +28,7 @@ namespace Quest.Lib.Data
             {
                 using (var db = localscope.Resolve<DB>())
                 {
+                    db.Database.SetCommandTimeout(new TimeSpan(0, 10, 0));
                     action(db);
                 }
             }
@@ -39,6 +40,7 @@ namespace Quest.Lib.Data
             {
                 using (var db = localscope.Resolve<DB>())
                 {
+                    db.Database.SetCommandTimeout(new TimeSpan(0, 10, 0));
                     db.Database.AutoTransactionsEnabled = false;
                     db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                     action(db);
@@ -58,6 +60,7 @@ namespace Quest.Lib.Data
             {
                 using (var db = localscope.Resolve<DB>())
                 {
+                    db.Database.SetCommandTimeout(new TimeSpan(0, 10, 0));
                     return action(db);
                 }
             }
@@ -69,6 +72,7 @@ namespace Quest.Lib.Data
             {
                 using (var db = localscope.Resolve<DB>())
                 {
+                    db.Database.SetCommandTimeout(new TimeSpan(0, 10, 0));
                     db.Database.AutoTransactionsEnabled = false;
                     db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                     return action(db);

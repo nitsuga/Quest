@@ -673,11 +673,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
+      "projectUniqueName": "E:\\Dropbox\\Quest\\Git\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
       "projectName": "Quest.WebCore.Interfaces",
-      "projectPath": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
+      "projectPath": "E:\\Dropbox\\Quest\\Git\\Quest\\Quest.WebCore.Interfaces\\Quest.WebCore.Interfaces.csproj",
       "packagesPath": "C:\\Users\\Marcus\\.nuget\\packages\\",
-      "outputPath": "C:\\data\\Quest\\Quest.WebCore.Interfaces\\obj\\",
+      "outputPath": "E:\\Dropbox\\Quest\\Git\\Quest\\Quest.WebCore.Interfaces\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

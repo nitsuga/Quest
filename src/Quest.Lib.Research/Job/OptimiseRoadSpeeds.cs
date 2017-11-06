@@ -36,6 +36,8 @@ namespace Quest.Lib.Research.Job
     /// The idea is the that route prediction in more accurate with the road type estimator
     /// but the eta is more accurate with the road link estimator. A combination of the two
     /// should produce accurate results (!!)
+    /// 
+    /// Note this can optimise the ETA for Similarity.
     /// </summary>
     [Injection("OptimiseRoadSpeeds", typeof(IProcessor))]
     public class OptimiseRoadSpeeds : ServiceBusProcessor
@@ -44,7 +46,7 @@ namespace Quest.Lib.Research.Job
         private ILifetimeScope _scope;
         private RoutingData _data;
         private IDatabaseFactory _dbFactory;
-        private DijkstraRoutingEngine _selectedRouteEngine;
+        private DijkstraRoutingEngine _routingEngine;
         private TrackLoader _trackLoader;
 
         // list of tracks to analyse
@@ -61,7 +63,7 @@ namespace Quest.Lib.Research.Job
            MessageHandler msgHandler,
            TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
-            _selectedRouteEngine = selectedRouteEngine;
+            _routingEngine = selectedRouteEngine;
             _scope = scope;
             _data = data;
             _dbFactory = dbFactory;
@@ -93,7 +95,7 @@ namespace Quest.Lib.Research.Job
                 var routes = db.IncidentRoutes
                     //  .Where(x => x.IncidentId >= 20161101000000 && x.IncidentId < 20161201000000 && x.IsBadGPS == false)
                     .Where(x => x.IncidentId >= 20161001000000 && x.IncidentId < 20161101000000 && x.IsBadGps == false)
-                    .Take(100)
+                    .Take(500)
                     .ToList();
 
                 foreach (var route in routes)
@@ -103,30 +105,41 @@ namespace Quest.Lib.Research.Job
                         .OrderBy(x => x.DateTime)
                         .ToList();
 
-                    tracks.Add(new MyTrack { Route = items, VehicleId = (int)route.VehicleId, IncidentRouteId = route.IncidentRouteId });
+                    // make sure we have enough data
+                    if (items.Count>20)
+                        tracks.Add(new MyTrack { Route = items, VehicleId = (int)route.VehicleId, IncidentRouteId = route.IncidentRouteId });
+
+                    if (tracks.Count > 200)
+                        break;
                 }
             });
 
             NelderMeadSimplex optimiser = new NelderMeadSimplex();
 
+            var roadspeed_perturbation = 15; // initial amount of variation
+            var roadnode_perturbation = 10; // initial amount of variation
+
             // our starting point is to use the same constants as the LAS routing engine
             SimplexConstant[] constants = new SimplexConstant[] {
-                new SimplexConstant(29, 1),
-                new SimplexConstant(3,  1),
-                new SimplexConstant(24, 1),
-                new SimplexConstant(14, 1),
-                new SimplexConstant(19, 1),
-                new SimplexConstant(35, 1),
-                new SimplexConstant(2,  1),
-                new SimplexConstant(5,  1),
-                new SimplexConstant(5,  1)
+                new SimplexConstant(2.5,  roadnode_perturbation),   // node delay
+                new SimplexConstant(29, roadspeed_perturbation),
+                new SimplexConstant(3,  roadspeed_perturbation),
+                new SimplexConstant(24, roadspeed_perturbation),
+                new SimplexConstant(14, roadspeed_perturbation),
+                new SimplexConstant(19, roadspeed_perturbation),
+                new SimplexConstant(35, roadspeed_perturbation),
+                new SimplexConstant(2,  roadspeed_perturbation),
+                new SimplexConstant(5,  roadspeed_perturbation),
+                new SimplexConstant(5,  roadspeed_perturbation)
             };
 
-            double convergenceTolerance = 0.01;
+            double convergenceTolerance = 0.001;
             int maxEvaluations = 10000;
             int innerInterations = 0;
 
             var result = optimiser.Regress(constants, convergenceTolerance, maxEvaluations, ObjectiveFunction, innerInterations);
+
+            Logger.Write($"Best={1-result.ErrorValue} Constants = {string.Join(",", result.Constants)}");
 
         }
 
@@ -139,16 +152,21 @@ namespace Quest.Lib.Research.Job
 
             // calculate the routes for each of our tracks using this estimator and measure its
             // similarity to the original route
-            foreach (var route in tracks)
+            tracks.AsParallel().ForAll( route =>
             {
-                var similarity = AnalyseTrack(route, estimator);
-
+                var similarity = AnalyseTrackSimilarity(route, estimator);
+                // var similarity = AnalyseTrackEta(route, estimator);
+                
                 if (similarity > 0)
                     similarity_results.Add(similarity);
-            }
+            });
 
             // return the average similarity
-            return similarity_results.Average();
+            var avg = similarity_results.Average();
+            Logger.Write($"Average track Similarity={avg}");
+
+            var error = 1- similarity_results.Average();
+            return error;
         }
 
         /// <summary>
@@ -157,7 +175,7 @@ namespace Quest.Lib.Research.Job
         /// <param name="track">actual route data</param>
         /// <param name="edgeCalculator">edge calculator to use</param>
         /// <returns></returns>
-        private double AnalyseTrack(MyTrack track, OptimsingRoadTypeSpeedCalculator edgeCalculator)
+        private double AnalyseTrackSimilarity(MyTrack track, OptimsingRoadTypeSpeedCalculator edgeCalculator)
         {
             var first = track.Route.First();
             var last = track.Route.Last();
@@ -186,10 +204,9 @@ namespace Quest.Lib.Research.Job
                     SearchType = RouteSearchType.Quickest,
                     EndLocations = new List<EdgeWithOffset> { lastPoint },
                     VehicleType = track.VehicleId == 1 ? "AEU" : "FRU",
-                    RoadSpeedCalculator = edgeCalculator.GetType().Name
                 };
 
-                var result = _selectedRouteEngine.CalculateRouteMultiple(request);
+                var result = _routingEngine.CalculateRouteMultiple(request, edgeCalculator);
 
                 if (result.Items.Count > 0)
                 {
@@ -203,7 +220,7 @@ namespace Quest.Lib.Research.Job
                         var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
 
                         var similarity = RouteSimilarity(original, routing);
-                        Logger.Write($"Track {track.IncidentRouteId} Similarity={similarity}");
+                        //Logger.Write($"Track {track.IncidentRouteId} Similarity={similarity}");
 
                         return similarity;
                     }
@@ -220,6 +237,69 @@ namespace Quest.Lib.Research.Job
 
             return -1; // somethign went wrong
         }
+
+        private double AnalyseTrackEta(MyTrack track, OptimsingRoadTypeSpeedCalculator edgeCalculator)
+        {
+            var first = track.Route.First();
+            var last = track.Route.Last();
+
+            var starttime = first.DateTime;
+            var endtime = last.DateTime;
+
+            var actualDuration = (endtime - starttime).TotalSeconds;
+            var how = starttime.HourOfWeek();
+
+            var startEdge = _data.Dict[first.RoadLinkEdgeId ?? 0];
+            var lastEdge = _data.Dict[last.RoadLinkEdgeId ?? 0];
+
+            var startPoint = new EdgeWithOffset { Edge = startEdge, AngleRadians = 0, Coord = startEdge.Geometry.Coordinates[0] };
+            var lastPoint = new EdgeWithOffset { Edge = lastEdge, AngleRadians = 0, Coord = lastEdge.Geometry.Coordinates[lastEdge.Geometry.NumPoints - 1] };
+
+            try
+            {
+                var request = new RouteRequestMultiple
+                {
+                    DistanceMax = 15000,
+                    DurationMax = 1800,
+                    InstanceMax = 1,
+                    StartLocation = startPoint,
+                    HourOfWeek = how,
+                    SearchType = RouteSearchType.Quickest,
+                    EndLocations = new List<EdgeWithOffset> { lastPoint },
+                    VehicleType = track.VehicleId == 1 ? "AEU" : "FRU",
+                };
+
+                var result = _routingEngine.CalculateRouteMultiple(request, edgeCalculator);
+
+                if (result.Items.Count > 0)
+                {
+                    try
+                    {
+                        // first route found
+                        var engineroute = result.Items[0];
+
+                        // calculate quantile road link matches
+                        var routing = engineroute.Connections.Select(x => x.Edge).ToList().ToArray();
+
+                        var similarity = 1 - (Math.Abs(actualDuration - engineroute.Duration) / actualDuration);
+                        //Logger.Write($"Track {track.IncidentRouteId} Similarity={similarity}");
+
+                        return similarity;
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return -1; // somethign went wrong
+        }
+
 
         private float RouteSimilarity(int[] original, IReadOnlyCollection<RoadEdge> routing)
         {
@@ -263,7 +343,14 @@ namespace Quest.Lib.Research.Job
             {
                 Logger.Write($"Constants = {string.Join(",", parms.constants)}");
 
-                Initialise(0, 0, 0, parms.constants);
+                var roadspeeds = parms.constants.Skip(1).ToArray();
+                var nodeDelay = parms.constants[0];
+
+                for (int i = 0; i < roadspeeds.Length - 1; i++)
+                    if (roadspeeds[i] <= 0)
+                        roadspeeds[i] = 1;
+
+                Initialise(0, 0, nodeDelay, roadspeeds);
             }
         }
 

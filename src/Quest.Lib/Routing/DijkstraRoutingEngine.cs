@@ -45,29 +45,35 @@ namespace Quest.Lib.Routing
 
         public bool IsReady => _data.IsInitialised;
 
+        public RoutingResponse CalculateRouteMultiple(RouteRequestMultiple request)
+        {
+
+            // wait until ready
+            while (!IsReady)
+                Thread.Sleep(250);
+
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
+            IRoadSpeedCalculator speedCalc = _scope.ResolveNamed<IRoadSpeedCalculator>(request.RoadSpeedCalculator);
+
+            if (speedCalc == null)
+                return new RoutingResponse
+                {
+                    Message = $"Can't find speed calculator {request.RoadSpeedCalculator}",
+                    Success = false
+                };
+
+            return CalculateRouteMultiple(request, speedCalc);
+        }
+
         /// <summary>
         ///     calculate the route to multiple targets
         /// </summary>
         /// <returns></returns>
-        public RoutingResponse CalculateRouteMultiple(RouteRequestMultiple request)
+        public RoutingResponse CalculateRouteMultiple(RouteRequestMultiple request, IRoadSpeedCalculator speedCalc)
         {
             try
             {
-                // wait until ready
-                while (!IsReady)
-                    Thread.Sleep(250);
-
-                if (request == null) throw new ArgumentNullException(nameof(request));
-
-                IRoadSpeedCalculator speedCalc = _scope.ResolveNamed<IRoadSpeedCalculator>(request.RoadSpeedCalculator);
-
-                if (speedCalc == null)
-                    return new RoutingResponse
-                    {
-                        Message = $"Can't find speed calculator {request.RoadSpeedCalculator}",
-                        Success = false
-                    };
-
                 //Logger.Write($"Request: road links: {_data.ConnectionIndex.Count} calculator: {request.RoadSpeedCalculator} end points: {request.EndLocations.Count}", TraceEventType.Information, this.GetType().Name);
                 //Logger.Write($"Request: start  id: {request.StartLocation.Edge.RoadLinkEdgeId} name: {request.StartLocation.Edge.RoadName}", TraceEventType.Information, this.GetType().Name);
 

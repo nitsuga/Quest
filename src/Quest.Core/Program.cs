@@ -87,7 +87,8 @@ namespace Quest.Core
                 var loggerFactory = ServiceProvider.GetService<ILoggerFactory>();
                 loggerFactory
                     .AddConsole()
-                    .AddDebug();
+                    .AddDebug(LogLevel.Warning);
+
 
                 // get the processor runner
                 var runner = ApplicationContainer.Resolve<ProcessRunner>();
