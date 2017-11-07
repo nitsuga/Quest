@@ -24,4 +24,3 @@ C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Int
 C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.dll
 C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.pdb
 C:\data\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csprojResolveAssemblyReference.cache
-E:\Dropbox\Quest\Git\Quest\Quest.WebCore.Interfaces\obj\Debug\netcoreapp2.0\Quest.WebCore.Interfaces.csprojResolveAssemblyReference.cache

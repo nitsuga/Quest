@@ -1,6 +1,6 @@
 ﻿{
-  "Name": "Gazetteer",
-  "Image": "Gazetteer",
+  "Name": "Area Cover",
+  "Image": "AAC",
   "Selectable": true,
   "Panels": [
     {

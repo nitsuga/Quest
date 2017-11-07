@@ -64,7 +64,7 @@ namespace Quest.Common.Messages.Routing
         /// <summary>
         /// type of vehicle
         /// </summary>
-        public string VehicleType;
+         public string VehicleType;
 
     }
 }

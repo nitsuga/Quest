@@ -31,9 +31,12 @@ hud.plugins.rtmap = (function () {
             ext: 'png'
         });
 
-        var barts = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+        // stuff from the map server
+        mapserverurl = _getMapServer();
 
-        var stations = L.tileLayer.wms("http://86.29.75.151:8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+        var barts = L.tileLayer.wms("http://" + mapserverurl +":8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+
+        var stations = L.tileLayer.wms("http://" + mapserverurl +":8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
 
         var carto_dark = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
@@ -74,6 +77,8 @@ hud.plugins.rtmap = (function () {
             worldCopyJump: false,
             inertiaDeceleration: 10000
         });
+
+        L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
 
         // save the map object in a dictionary so it can be accessed later
         rtmap_maps[panel] = map;
@@ -133,6 +138,12 @@ hud.plugins.rtmap = (function () {
             _selectBaseLayer(panel, selected_map);
         });
     };
+
+    var _getMapServer = function () {
+        $.get(hud.getURL("RTM/GetMapServer"), function (data) {
+            return data;
+        });
+    }
 
     var _updateMap = function (panel) {
 

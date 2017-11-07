@@ -43,6 +43,12 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             _pluginService = pluginFactory;
         }
 
+        [HttpGet]
+        public string GetMapServer()
+        {
+            return "localhost";
+        }
+
         /// <summary>
         /// Get selected map items to display
         /// </summary>
