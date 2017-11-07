@@ -1,0 +1,40 @@
+﻿.aac-container {
+    height: 100%;
+    background-color: rgba(0,0,0,0.0);
+    color: aliceblue;
+    padding: 20px;
+    text-align: center;
+}
+
+    .aac-container h4
+    {
+        color: white;
+    }
+
+.aac-pill {
+    border: 1pt solid black;
+    width: 80px;
+    -moz-border-radius: 10%;
+    -webkit-border-radius: 10%;
+    border-radius: 10%;
+}
+
+.pane-hidden {
+    visibility: hidden;
+    height: 0;
+}
+/*.pane-visible {
+    visibility: visible;
+    height: 100%;
+}*/
+.aac-uncovered {
+    background-color: lightcoral;
+}
+
+.aac-covered {
+    background-color: lightgreen;
+}
+
+.aac-normal {
+    background-color: lightgreen;
+}

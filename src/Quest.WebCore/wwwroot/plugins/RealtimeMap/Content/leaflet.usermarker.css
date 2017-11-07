@@ -54,14 +54,51 @@
 
 
 
+/* --------- standby points -------------*/
+.leaflet-usermarker-SBP {
+    display: block;
+    fill: transparent;
+    width: 8px;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
+}
+
+.SBP-Uncovered {
+    border-bottom: 16px solid red;
+}
+
+.SBP-Covered {
+    border-bottom: 16px solid green;
+}
+
+.SBP-Actioned {
+    border-bottom: 16px solid #1112d6;
+}
+
+
+/* --------- Hospital -------------*/
+.leaflet-usermarker-HOS {
+    display: block;
+    fill: transparent;
+    width: 8px;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
+}
+
+.HOS-undefined {
+    border-bottom: 10px solid purple;
+}
+
 /* --------- destinations -------------*/
 .leaflet-usermarker-DES {
     display: block;
     fill: transparent;
     width: 8px;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid yellow;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
 }
 
 .DES-RD {
@@ -69,31 +106,31 @@
 }
 
 .DES-SBP {
-    border-bottom: 10px solid blue;
+    fill: blue;
 }
 
 .DES-SBP0 {
-    border-bottom: 10px solid gray;
+    border-bottom: 14px solid gray;
 }
 
 .DES-SBP1 {
-    border-bottom: 10px solid orange;
+    border-bottom: 14px solid orange;
 }
 
 .DES-SBP2 {
-    border-bottom: 10px solid red;
+    border-bottom: 14px solid red;
 }
 
 .DES-STA {
-    border-bottom: 10px solid green;
+    border-bottom: 14px solid green;
 }
 
 .DES-HOS {
-    border-bottom: 10px solid purple;
+    border-bottom: 14px solid purple;
 }
 
 .DES-AE {
-    border-bottom: 10px solid blue;
+    border-bottom: 14px solid blue;
 }
 
 
@@ -129,7 +166,7 @@
 }
 
 .AMB-Available {
-    background: green;
+    background: #4cd016;
 }
 
 .AMB-Offroad {

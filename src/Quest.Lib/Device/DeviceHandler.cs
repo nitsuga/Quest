@@ -467,108 +467,10 @@ namespace Quest.Lib.Device
             };
         }
 
-        public MapItemsResponse GetMapItems(MapItemsRequest request)
-        {
-            var response = new MapItemsResponse
-            {
-                RequestId = request.RequestId,
-                Resources = new List<QuestResource>(),
-                Destinations = new List<QuestDestination>(),
-                Incidents = new List<QuestIncident>(),
-                Success = true,
-                Message = "successful"
-            };
-
-            response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
-
-            if (request.ResourcesAvailable || request.ResourcesBusy)
-            {
-                // work out which ones were on display at the original revision
-                var resources = _resStore.GetResources(request.Revision, request.ResourceGroups, request.ResourcesAvailable, request.ResourcesBusy);
-                // get resources
-                response.Resources.AddRange(resources);
-            }
-
-            if (request.IncidentsImmediate || request.IncidentsOther)
-            {
-                var incidents = _incStore.GetIncidents(request.Revision, request.IncidentsImmediate, request.IncidentsOther);
-                response.Incidents.AddRange(incidents);
-            }
-
-            // calculate the maximum revision being returned.
-            long c1 = 0, c2 = 0, c3 = 0;
-            if (response.Resources.Count > 0)
-                c1 = response.Resources.Max(x => x.Revision);
-
-            if (response.Incidents.Count > 0)
-                c2 = response.Incidents.Max(x => x.Revision);
-
-            response.Revision = Math.Max(Math.Max(c1, c2), c3);
-
-            if (response.Revision == 0)
-                response.Revision = response.CurrRevision;
-
-            Debug.Print($"Map rev in={request.Revision} rev out={response.Revision} rev cur = {response.CurrRevision} count inc={response.Incidents.Count} res={response.Resources.Count}");
-
-            return response;
-        }
-
         public GetHistoryResponse GetHistory(GetHistoryRequest request)
         {
             return null;
         }
-
-        private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
-        {
-            return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
-            {
-                var d = db.Destinations
-                    .Where(x => ((hospitals == true && x.IsHospital == true))
-                             || ((stations == true && x.IsStation == true))
-                             || ((standby == true && x.IsStandby == true))
-                              )
-                    .ToList()
-                    .Select(x =>
-                    {
-                        var point = GeomUtils.GetPointFromWkt(x.Wkt);
-                        var latlng = LatLongConverter.OSRefToWGS84(point.X, point.Y);
-                        return new QuestDestination
-                        {
-                            Id = x.DestinationId.ToString(),
-                            IsHospital = x.IsHospital ?? false,
-                            IsAandE = x.IsAandE ?? false,
-                            IsRoad = x.IsRoad ?? false,
-                            IsStandby = x.IsStandby ?? false,
-                            IsStation = x.IsStation ?? false,
-                            Name = x.Destination,
-                            Position = new LatLongCoord(latlng.Longitude, latlng.Latitude)
-                        };
-
-                    }
-                    )
-                    .ToList();
-
-                return d;
-            });
-        }
-
-        //private IEnumerable<ResourceItem> GetResourceItem(IEnumerable<QuestResource> res)
-        //{
-        //    foreach (var r in res)
-        //        yield return GetResourceItem(r);
-        //}
-
-        //private ResourceItem GetResourceItem(QuestResource res)
-        //{
-        //    return new ResourceItem
-        //    {
-        //        ID = res.FleetNo,
-        //        revision = res.Revision ?? 0,
-        //        X = res.Position.Longitude,
-        //        Y = res.Position.Latitude,
-        //        Resource = res
-        //    };
-        //}
 
         private string GetStatusDescription(DataModel.ResourceStatus status)
         {

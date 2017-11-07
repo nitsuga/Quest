@@ -13,10 +13,10 @@ namespace Quest.Lib.DataModel
         public bool? IsRoad { get; set; }
         public bool? IsPolice { get; set; }
         public bool? IsAandE { get; set; }
-        public bool? IsOld { get; set; }
-        public int? CoverageTier { get; set; }
         public string Status { get; set; }
-        public DateTime? Timestamp { get; set; }
+        public DateTime? LastUpdate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string Wkt { get; set; }
     }
 }

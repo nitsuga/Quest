@@ -95,7 +95,7 @@ a.panel-btn {
 
     .panel-btn.panel-btn-left {
         left: 0;
-        top: 90%;
+        bottom: 0;
         /*transform: translateY(-16px);*/
     }
 
@@ -220,6 +220,19 @@ a.panel-btn {
     top: 90%;
     transform: translateX(0px);
 }
+
+/*bottom row*/
+.panel-btn.panel-btn-p1b {
+    left: 15%;
+    bottom: 0;
+    transform: translateY(-0px);
+}
+.panel-btn.panel-btn-p6b {
+    left: 90%;
+    top: 90%;
+    transform: translateX(-80px);
+}
+
 
 .panel-btn-on {
     border: solid 3px;

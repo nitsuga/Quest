@@ -21,6 +21,10 @@ namespace Quest.Lib.Trackers
         private IDatabaseFactory _dbFactory;
         private Timer t;
 
+        string[] status = new string[] { "Available", "Busy", "Enroute", "Rest", "Offroad" };
+        string[] statuscode = new string[] { "AOR", "TRN", "ENR", "RNA", "OOS" };
+
+
         public ResourceSimulator(
             IDatabaseFactory dbFactory,
             IServiceBusClient serviceBusClient,
@@ -76,7 +80,8 @@ namespace Quest.Lib.Trackers
                 var y = (r.NextDouble() - 0.5) * 0.002;
 
                 var v = vehicles[i];
-                v.StatusCategory = (((int)(counter / 5) % 2) == 0) ? "Available" : "Busy";
+                v.StatusCategory = status[counter % 5]; 
+                v.Status = statuscode[counter % 5];
                 v.Position = new LatLongCoord { Longitude = v.Position.Longitude + x, Latitude = v.Position.Latitude + x };
 
                 ServiceBusClient.Broadcast(new ResourceUpdateRequest()

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Quest.WebCore.Plugins.AAC
 {
@@ -41,7 +42,7 @@ namespace Quest.WebCore.Plugins.AAC
 
         public string OnInit()
         {
-            return string.Empty;
+            return "hud.plugins.aac.initAAC(panelRole)";
         }
 
         public string OnPanelMoved()
@@ -61,7 +62,11 @@ namespace Quest.WebCore.Plugins.AAC
 
         private string DrawContainer(string role)
         {
-            return $"<div id='{role}'><h3>AAC</h3></div>";
+            const string templateFileName = "AAC.html";
+            var templateFolder = _env.WebRootPath + "/plugins/AAC/Lib";
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            html = html.Replace("id=roleplaceholder", $"id='AAC{role}'");
+            return html;
         }
     }
 }

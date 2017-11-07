@@ -112,11 +112,6 @@ hud.plugins.rtmap = (function () {
         }
     };
 
-    // get selector for a named button
-    var _buttonSelector = function (panel, name) {
-        return "div[data-panel-role='" + panel + "'] .map-container a[data-action='" + name + "']";
-    };
-
     // handle actions from button push
     var _handleAction = function (panel, action) {
         switch (action) {
@@ -224,8 +219,8 @@ hud.plugins.rtmap = (function () {
     // this type of resource
     var _updateResourceStatus = function (panel, layer, item) {
 
-        resourcesAvailable = hud.getButtonState(_buttonSelector(panel, "select-avail"));
-        resourcesBusy = hud.getButtonState(_buttonSelector(panel, "select-busy"));
+        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
+        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
 
         if (resourcesAvailable === false && item.NewStatusCategory !== "Available")
             _removeExistingFeature(layer, item.FleetNo);
@@ -271,8 +266,8 @@ hud.plugins.rtmap = (function () {
                     "Type": "Destination",
                     "Value": item,
                     "Name": item.Name,
-                    "MarkerType": "DES",
-                    "MarkerStatus": _getDestinationMarkerStatus(item)
+                    "MarkerType": _getDestinationMarkerType(item),
+                    "MarkerStatus": item.Status
                 },
                 "geometry": {
                     "type": "Point",
@@ -285,7 +280,7 @@ hud.plugins.rtmap = (function () {
         layer.addData(features);
     };
 
-    var _getDestinationMarkerStatus = function (questDestination) {
+    var _getDestinationMarkerType = function (questDestination) {
         if (questDestination.IsAandE)
             return "AE";
         if (questDestination.IsHospital)

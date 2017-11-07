@@ -147,7 +147,9 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Timestamp).HasColumnType("datetime");
+                entity.Property(e => e.LastUpdate).HasColumnType("datetime");
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Wkt).IsUnicode(false);
             });

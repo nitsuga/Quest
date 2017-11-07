@@ -41,7 +41,6 @@ namespace Quest.Lib.Device
             MsgHandler.AddHandler<GetHistoryRequest>(GetHistoryRequestHandler);
             MsgHandler.AddHandler<GetStatusCodesRequest>(GetStatusCodesRequestHandler);
             MsgHandler.AddHandler<MakePatientObservationRequest>(MakePatientObservationRequestHandler);
-            MsgHandler.AddHandler<MapItemsRequest>(GetMapItemsRequestHandler);
             MsgHandler.AddHandler<PatientDetailsRequest>(PatientDetailsRequestHandler);
             MsgHandler.AddHandler<PositionUpdateRequest>(PositionUpdateRequestHandler);
             MsgHandler.AddHandler<SetStatusRequest>(SetStatusRequestHandler);
@@ -137,16 +136,6 @@ namespace Quest.Lib.Device
             if (request != null)
             {
                 return _deviceHandler.MakePatientObservation(request);
-            }
-            return null;
-        }
-
-        private Response GetMapItemsRequestHandler(NewMessageArgs t)
-        {
-            var request = t.Payload as MapItemsRequest;
-            if (request != null)
-            {
-                return _deviceHandler.GetMapItems(request);
             }
             return null;
         }

@@ -18,6 +18,7 @@ namespace Quest.Common.Messages.Destination
         public bool IsRoad;
         public bool IsStation;
         public bool IsStandby;
+        public string Status;
         public LatLongCoord Position;
     }
 }

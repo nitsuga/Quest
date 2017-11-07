@@ -898,6 +898,17 @@
       ],
       "injectProperties": true,
       "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Lib.Geo.GeoManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "GeoManager"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance"
     }
 
 
