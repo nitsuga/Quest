@@ -12,6 +12,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("RealtimeMapPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
+    [Injection(typeof(RealtimeMapPlugin), Lifetime.PerDependency)]
     public class RealtimeMapPlugin : IHudPlugin
     {
         ILifetimeScope _scope;
@@ -67,6 +68,16 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
             gazHtml = gazHtml.Replace("id=mapdivplaceholder", $"id='map{role}'");
             return gazHtml;
+        }
+
+        public MapSettings GetSettings()
+        {
+            return new MapSettings {
+                 Latitude=51.5,
+                 Longitude=-0.2,
+                 Zoom=12,
+                 MapServer = "192.168.0.3:8090"
+            };
         }
     }
 }

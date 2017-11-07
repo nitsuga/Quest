@@ -5,6 +5,7 @@ hud.plugins = hud.plugins || {};
 var rtmap_maps = {};
 var rtmap_baseLayers;
 var rtmap_overlayLayers;
+var rtmap_settings;
 
 hud.plugins.rtmap = (function () {
 
@@ -13,93 +14,90 @@ hud.plugins.rtmap = (function () {
     var _initMap = function (panel) {
         L_PREFER_CANVAS = true;
 
-        var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-        var osmAttrib = "Map data © OpenStreetMap contributors";
-        var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
-        var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-            mbUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw";
+        $.get(hud.getURL("RTM/GetSettings"), function (data) {
+            rtmap_settings = data;
 
-        //https://leaflet-extras.github.io/leaflet-providers/preview/
+            var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+            var osmAttrib = "Map data © OpenStreetMap contributors";
+            var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+            var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+                '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                mbUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw";
 
-        var grayscale = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
-            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            subdomains: 'abcd',
-            minZoom: 0,
-            maxZoom: 20,
-            ext: 'png'
+            //https://leaflet-extras.github.io/leaflet-providers/preview/
+
+            var grayscale = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                subdomains: 'abcd',
+                minZoom: 0,
+                maxZoom: 20,
+                ext: 'png'
+            });
+
+            var barts = L.tileLayer.wms("http://" + rtmap_settings.mapServer + "/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+
+            var stations = L.tileLayer.wms("http://" + rtmap_settings.mapServer + "/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
+
+            var carto_dark = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            });
+
+            var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            });
+
+            rtmap_baseLayers = {
+                "OSM": osm,
+                "Barts": barts,
+                "Grayscale": grayscale,
+                "Dark": carto_dark,
+                "Satellite": Esri_WorldImagery,
+                "None": null
+            };
+            var baseLayer = osm;
+
+            rtmap_overlayLayers = {
+                "Stations": stations
+            };
+
+            var mapdiv = 'map' + panel;
+
+            var map = new L.Map(mapdiv, {
+                center: new L.LatLng(rtmap_settings.latitude, rtmap_settings.longitude),
+                zoom: rtmap_settings.zoom,
+                layers: baseLayer,
+                zoomControl: true,
+                continuousWorld: true,
+                worldCopyJump: false,
+                inertiaDeceleration: 10000
+            });
+
+            L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
+
+            // save the map object in a dictionary so it can be accessed later
+            rtmap_maps[panel] = map;
+
+            // select the primary menu
+            hud.selectPanelMenu(panel, 0);
+
+            // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
+            // are handled automatically by hud.js
+            _registerButtons(panel);
+
+            // listen for hub messages on these groups
+            $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
+                _handleMessage(panel, group, georesLayer, msg);
+            });
+
+            // listen for panel actions
+            $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
+                _handleAction(panel, action);
+            });
+
         });
-
-        // stuff from the map server
-        mapserverurl = _getMapServer();
-
-        var barts = L.tileLayer.wms("http://" + mapserverurl +":8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700", { layers: "Barts", format: "image/png", maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
-
-        var stations = L.tileLayer.wms("http://" + mapserverurl +":8090/cgi-bin/mapserv?MAP=/maps/extent.map", { layers: "Stations", format: "image/png", transparent: true, maxZoom: 22, minZoom: 0, continuousWorld: true, noWrap: true });
-
-        var carto_dark = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-        });
-
-        var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        });
-
-        rtmap_baseLayers = {
-            "OSM": osm,
-            "Barts": barts,
-            "Grayscale": grayscale,
-            "Dark": carto_dark,
-            "Satellite": Esri_WorldImagery,
-            "None": null
-        };
-        var baseLayer = osm;
-
-        rtmap_overlayLayers = {
-            "Stations": stations
-        };
-
-        var lat = 51.5;
-        var lng = -0.2;
-        var zoom = 12;
-
-        var mapdiv = 'map' + panel;
-
-        var map = new L.Map(mapdiv, {
-            center: new L.LatLng(lat, lng),
-            zoom: zoom,
-            layers: baseLayer,
-            zoomControl: true,
-            continuousWorld: true,
-            worldCopyJump: false,
-            inertiaDeceleration: 10000
-        });
-
-        L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
-
-        // save the map object in a dictionary so it can be accessed later
-        rtmap_maps[panel] = map;
-
-        // select the primary menu
-        hud.selectPanelMenu(panel, 0);
-
-        // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
-        // are handled automatically by hud.js
-        _registerButtons(panel);
-
-        // listen for hub messages on these groups
-        $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-            _handleMessage(panel, group, georesLayer, msg);
-        });
-
-        // listen for panel actions
-        $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
-            _handleAction(panel, action);
-        });
-
     };
 
     // handle message from service bus
@@ -122,6 +120,10 @@ hud.plugins.rtmap = (function () {
     // handle actions from button push
     var _handleAction = function (panel, action) {
         switch (action) {
+            case "select-overlay":
+                var isOn = hud.toggleButton(panel, 'select-overlay', action);
+                _selectLayer(panel, action, isOn);
+                break;
             case "lock-map":
                 break;
             default:
@@ -138,12 +140,6 @@ hud.plugins.rtmap = (function () {
             _selectBaseLayer(panel, selected_map);
         });
     };
-
-    var _getMapServer = function () {
-        $.get(hud.getURL("RTM/GetMapServer"), function (data) {
-            return data;
-        });
-    }
 
     var _updateMap = function (panel) {
 
@@ -380,6 +376,17 @@ hud.plugins.rtmap = (function () {
                 map.removeLayer(rtmap_baseLayers[layer]);
         }
         map.addLayer(rtmap_baseLayers[layerName]);
+    };
+
+    var _selectLayer = function (panel, layerName, on) {
+        var map = rtmap_maps[panel];
+
+        if (on)
+            map.addLayer(rtmap_overlayLayers[layerName]);
+        else
+            if (map.hasLayer(rtmap_overlayLayers[layerName]))
+                map.removeLayer(rtmap_overlayLayers[layerName]);
+
     };
 
     var _lockMap = function (panel, mode) {

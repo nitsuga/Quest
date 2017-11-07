@@ -19,8 +19,11 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         private TelephonyService _telephonyService;
         private SecurityService _securityService;
         private readonly IPluginService _pluginService;
+        RealtimeMapPlugin _plugin;
 
-        public RTMController(AsyncMessageCache messageCache,
+        public RTMController(
+                RealtimeMapPlugin plugin,
+                AsyncMessageCache messageCache,
                 IPluginService pluginFactory,
                 ResourceService resourceService,
                 IncidentService incidentService,
@@ -32,21 +35,14 @@ namespace Quest.WebCore.Plugins.RealtimeMap
                 SecurityService securityService
             )
         {
-            _messageCache = messageCache;
+            _plugin = plugin;
             _resourceService = resourceService;
-            _incidentService = incidentService;
-            _destinationService = destinationService;
-            _searchService = searchService;
-            _routeService = routeService;
-            _telephonyService = telephonyService;
-            _securityService = securityService;
-            _pluginService = pluginFactory;
         }
 
         [HttpGet]
-        public string GetMapServer()
+        public MapSettings GetSettings()
         {
-            return "localhost";
+            return _plugin.GetSettings();
         }
 
         /// <summary>
@@ -87,5 +83,14 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         {
             return null;
         }
+    }
+
+    [Serializable]
+    public class MapSettings
+    {
+        public string MapServer;
+        public double Zoom;
+        public double Latitude;
+        public double Longitude;
     }
 }
