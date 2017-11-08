@@ -23,6 +23,7 @@
     };
 
     var _joinLeaveGroup = function (group, panel, join) {
+        console.log('Join group leave ${group} ${panel} ${join}');
         if (join)
             _joinGroup(group, panel);
         else
@@ -31,6 +32,7 @@
 
     // join a panel to the message group
     var _joinGroup = function (group, panel) {
+        console.log('Join group ${group} ${panel}');
         var group_list = groups[group];
         if (group_list === undefined) {
             group_list = [];
@@ -47,6 +49,7 @@
 
     // leave a message group.
     var _leaveGroup = function (group, panel) {
+        console.log('Leave group ${group} ${panel}');
         var group_list = groups[group];
         if (group_list === undefined)
             return; // already unsubscribed
@@ -195,6 +198,9 @@
     // load the specific plugin into the target panel
     var _loadPanel = function (pluginName, panelRole) {
 
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
         var selector = '[data-panel-role=' + panelRole + ']';
         var containerPanel = $(selector).first();
         var pluginRole = $(containerPanel).attr('data-panel-role');
@@ -234,6 +240,8 @@
     };
 
     var _getPanelContent = function (panelSrcId, panelRole) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
 
         var source;
         var isSingleton = $('#' + panelSrcId).attr('data-singleton');
@@ -248,7 +256,11 @@
     };
 
     // swap two panels
-    var _swap = function(panelRole) {
+    var _swap = function (panelRole) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
+        console.log('Swap %d', panelRole);
 
         // Get the panel to be moved to the main panel
         var sidePanel = $('#side-panel-wrapper div.hud-panel[data-panel-role="' + panelRole + '"]');
@@ -292,7 +304,11 @@
     };
 
     // make this panel full screen
-    var _fullscreen = function(panelRole)  {
+    var _fullscreen = function (panelRole) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
+        console.log('Fullscreen %d', panelRole);
 
         var selector = '[data-panel-role=' + panelRole + ']';
         var containerPanel = $(selector).first();
@@ -305,20 +321,32 @@
     };
 
     // expand the panel
-    var _expand = function(panelRoleSource, panelRoleTarget)  {
+    var _expand = function (panelRoleSource, panelRoleTarget) {
+
+        if (typeof panelRoleSource === "string")
+            panelRoleSource = parseInt(panelRoleSource);
+
+        if (typeof panelRoleTarget === "string")
+            panelRoleTarget = parseInt(panelRoleTarget);
+
+        console.log('Expand %d into %d',panelRoleSource, panelRoleTarget);
         var selectorFrom = '[data-panel-role=' + panelRoleSource + ']';
         var containerPanelFrom = $(selectorFrom).first();
     };
 
     // show menu in the panel
-    var _showmenu = function(panelRole)  {
-        console.log("Menu btn clicked");
+    var _showmenu = function (panelRole) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+        console.log('Show Menu %d', panelRole);
         _loadPanel("PluginSelector", panelRole);
     };
 
         // wire up handlers for this panel
     var _bindPanelButtonHandlers = function (panelRole) {
-        
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
         // The menu hamburger loads the plugin selector into the relevant panel
         $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').on('click',
             function (e) {
@@ -492,20 +520,27 @@
     };
 
     // select a particular set of panel buttons
-    var _selectPanelMenu = function (panel, menu) {
+    var _selectPanelMenu = function (panelRole, menu) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
+        console.log('selectPanelMenu %d %d', panelRole, menu);
         // all anchors with panel-btn-p* 
-        otherbuttons = "div[data-panel-role='" + panel + "'] a[data-role|='select']";
-        //otherbuttons = "div[data-panel-role='" + role + "'] a[class|='panel-btn-p'][data-menu!='" + menu + "'] ";
+        otherbuttons = "div[data-panel-role='" + panelRole + "'] a[data-role|='select']";
         $(otherbuttons).removeClass("panel-btn-hide");
         $(otherbuttons).addClass("panel-btn-hide");
 
         // all anchors with panel-btn-p* and the menu we want
-        buttons = "div[data-panel-role='" + panel + "'] a[data-menu='" + menu + "'] ";
+        buttons = "div[data-panel-role='" + panelRole + "'] a[data-menu='" + menu + "'] ";
         $(buttons).removeClass("panel-btn-hide");
     };
 
-    var _setButtonState = function (panel, role, action, state) {
-        selector = "div[data-panel-role='" + panel + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
+    var _setButtonState = function (panelRole, role, action, state) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+        
+        console.log('setButtonState %d %s %s %s', panelRole, role, action, state);
+        selector = "div[data-panel-role='" + panelRole + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
         if (state) {
             $(selector).removeClass("panel-btn-off");
             $(selector).addClass("panel-btn-on");
@@ -517,14 +552,22 @@
         return state;
     };
 
-    var _getButtonState = function (panel, role, action) {
-        selector = "div[data-panel-role='" + panel + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
+    var _getButtonState = function (panelRole, role, action) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
+        selector = "div[data-panel-role='" + panelRole + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
+        console.log('getButtonState %d %s %s found %d', panelRole, role, action, $(selector).length);
         return $(selector).hasClass("panel-btn-on");
     };
 
-    var _toggleButton = function (panel, role, action) {
-        ison = _getButtonState(panel, role, action);
-        return _setButtonState(panel, role, action, !ison);
+    var _toggleButton = function (panelRole, role, action) {
+        if (typeof panelRole === "string")
+            panelRole = parseInt(panelRole);
+
+        console.log('toggleButtonState Menu %d %s %s', panelRole, role, action);
+        ison = _getButtonState(panelRole, role, action);
+        return _setButtonState(panelRole, role, action, !ison);
     };
         
     var _initLocalStorage = function () {

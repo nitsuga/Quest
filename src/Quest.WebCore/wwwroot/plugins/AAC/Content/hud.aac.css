@@ -3,7 +3,6 @@
     background-color: rgba(0,0,0,0.0);
     color: aliceblue;
     padding: 20px;
-    text-align: center;
 }
 
     .aac-container h4
@@ -20,7 +19,7 @@
 }
 
 .pane-hidden {
-    visibility: hidden;
+    visibility: collapse;
     height: 0;
 }
 /*.pane-visible {

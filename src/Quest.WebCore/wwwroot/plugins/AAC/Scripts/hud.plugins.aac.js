@@ -10,7 +10,7 @@ hud.plugins.aac = (function () {
 
         // listen for hub messages on these groups
         $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-            _handleMessage(panel, group, georesLayer, msg);
+            _handleMessage(panel, group, msg);
         });
 
         // listen for panel actions
@@ -20,7 +20,7 @@ hud.plugins.aac = (function () {
     };
 
     // handle message from service bus
-    var _handleMessage = function (panel, group, georesLayer, msg) {
+    var _handleMessage = function (panel, group, msg) {
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 break;
@@ -46,7 +46,7 @@ hud.plugins.aac = (function () {
                 }
                 break;
             default:
-                _updateMap(panel);
+                break;
         }
     };
 
