@@ -28,6 +28,8 @@
 /src/Quest.UnitTest/obj
 /src/Quest.XC/bin
 /src/Quest.XC/obj
+/src/Quest.HEMSLinkTest/bin
+/src/Quest.HEMSLinkTest/obj
 /src/TfL.Api.Common/bin
 /src/TfL.Api.Common/obj
 /src/Quest.Cmd/Quest.Cmd.csproj.user
