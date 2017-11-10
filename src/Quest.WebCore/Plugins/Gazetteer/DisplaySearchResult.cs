@@ -2,7 +2,7 @@
 using Nest;
 using Quest.Common.Messages.Gazetteer;
 
-namespace Quest.WebCore.Models
+namespace Quest.WebCore.Plugins.Gazetteer
 {
     public class DisplaySearchResult
     {

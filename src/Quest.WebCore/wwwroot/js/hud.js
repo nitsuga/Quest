@@ -347,6 +347,9 @@
         if (typeof panelRole === "string")
             panelRole = parseInt(panelRole);
 
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').off('click');
+
         // The menu hamburger loads the plugin selector into the relevant panel
         $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').on('click',
             function (e) {
@@ -355,6 +358,9 @@
                 var pluginRole = $(panel).attr('data-panel-role');
                 _showmenu(pluginRole);
             });
+
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="select-menu"]').off('click');
 
         // menus on the panel
         $('[data-panel-role=' + panelRole + '] a[data-role="select-menu"]').on('click',
@@ -365,6 +371,9 @@
                 _selectPanelMenu(panelRole, btn_action);
             });
 
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="select-action"]').off('click');
+
         // actions on the panel
         $('[data-panel-role=' + panelRole + '] a[data-role="select-action"]').on('click',
             function (e) {
@@ -374,6 +383,9 @@
                 $('[data-panel-role=' + panelRole + ']').trigger("action", btn_action);
             });
 
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="expand"]').off('click');
+
         $('[data-panel-role=' + panelRole + '] a[data-role="expand"]').on('click',
             function (e) {
                 e.preventDefault();
@@ -381,6 +393,9 @@
                 var pluginRole = $(panel).attr('data-panel-role');
                 _expand(pluginRole);
             });
+
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="fullscreen"]').off('click');
 
         $('[data-panel-role=' + panelRole + '] a[data-role="fullscreen"]').on('click',
             function (e) {
@@ -390,6 +405,8 @@
                 _fullscreen(pluginRole);
             });
 
+        // remove previous handlers
+        $('[data-panel-role=' + panelRole + '] a[data-role="swap"]').off('click');
         $('[data-panel-role=' + panelRole + '] a[data-role="swap"]').on('click',
             function (e) {
                 e.preventDefault();

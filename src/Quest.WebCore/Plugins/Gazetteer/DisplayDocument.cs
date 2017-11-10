@@ -1,6 +1,6 @@
 ﻿using Nest;
 
-namespace Quest.WebCore.Models
+namespace Quest.WebCore.Plugins.Gazetteer
 {
     public class DisplayDocument
     {

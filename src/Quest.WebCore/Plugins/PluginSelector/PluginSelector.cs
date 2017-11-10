@@ -91,7 +91,7 @@ namespace Quest.WebCore.Plugins.PluginSelector
 
             var pluginList = _scope.Resolve<IEnumerable<IHudPlugin>>();
 
-            var allPlugins = pluginList.Where(x=>x.IsMenuItem).ToList();
+            var allPlugins = pluginList.Where(x=>x.IsMenuItem).OrderBy(x=>x.Name).ToList();
 
             if (allPlugins.Count == 0)
             {
@@ -102,10 +102,8 @@ namespace Quest.WebCore.Plugins.PluginSelector
             else
             {
                 var h3 = new TagBuilder("h3");
-                //h3.InnerHtml.Append("Select plugin");
-                //div.InnerHtml.AppendHtml(h3);
 
-                for (var r = 0; r < 3; r++)
+                for (var r = 0; r < (allPlugins.Count/3)+1; r++)
                 {
                     var row = new TagBuilder("div");
                     row.AddCssClass("row");

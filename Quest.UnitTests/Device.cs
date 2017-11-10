@@ -271,32 +271,6 @@ namespace Quest.UnitTests
         }
 
         [TestMethod]
-        public void Device_09_MapItemsRequest()
-        {
-            var sessionid = Login();
-
-            Assert.IsNotNull(sessionid);
-
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            //var scope = Common.ApplicationContainer.BeginLifetimeScope();
-            var deviceHandler = Common.ApplicationContainer.Resolve<DeviceHandler>();
-            var serviceBusClient = Common.ApplicationContainer.Resolve<IServiceBusClient>();
-
-            serviceBusClient.Initialise("Test");
-
-            MapItemsRequest request = new MapItemsRequest()
-            {
-                RequestId = "",
-                SessionId = sessionid,
-            };
-
-            var result = deviceHandler.GetMapItems(request);
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.Success);
-        }
-
-        [TestMethod]
         public void Device_10_PatientDetailsRequest_NotImplemented()
         {
             var sessionid = Login();

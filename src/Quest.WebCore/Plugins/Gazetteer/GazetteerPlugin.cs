@@ -67,5 +67,16 @@ namespace Quest.WebCore.Plugins.Gazetteer
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
             return gazHtml;
         }
+
+        public GazSettings GetSettings()
+        {
+            return new GazSettings
+            {
+                Latitude = 51.5,
+                Longitude = -0.2,
+                Zoom = 12,
+                MapServer = "192.168.0.3:8090"
+            };
+        }
     }
 }
