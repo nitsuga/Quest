@@ -1,12 +1,12 @@
 ﻿{
-  "Name": "Single",
-  "Image": "Single",
+  "Name": "AAC-2",
+  "Image": "AAC",
   "Selectable": true,
   "Panels": [
     {
       "Panel": 0,
-      "Plugin": "PluginSelector",
-      "Style": "col-md-9 full-height right-border",
+      "Plugin": "AACPlugin",
+      "Style": "col-md-6 full-height right-border",
       "Actions": [
         {
           "Target": 0,
@@ -26,14 +26,14 @@
     },
     {
       "Panel": 1,
-      "Plugin": null,
-      "Style": "col-md-3 half-height bottom-border",
+      "Plugin": "RealtimeMapPlugin",
+      "Style": "col-md-6 half-height bottom-border",
       "Actions": [
         {
           "Target": 0,
           "Position": "panel-btn-left",
           "Action": "swap",
-          "Label": null,
+          "Label": "Swap",
           "Icon": "glyphicon-triangle-left"
         },
         {
@@ -54,8 +54,8 @@
     },
     {
       "Panel": 2,
-      "Plugin": null,
-      "Style": "col-md-3 half-height ",
+      "Plugin": "PropertiesPlugin",
+      "Style": "col-md-6 half-height ",
       "Actions": [
         {
           "Target": 4,
