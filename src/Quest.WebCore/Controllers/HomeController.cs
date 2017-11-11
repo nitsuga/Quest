@@ -22,8 +22,6 @@ namespace Quest.WebCore.Controllers
         private AsyncMessageCache _messageCache;
         private IncidentService _incidentService;
         private DestinationService _destinationService;
-        private SearchService _searchService;
-        private RouteService _routeService;
         private TelephonyService _telephonyService;
         private SecurityService _securityService;
         private readonly IPluginService _pluginService;
@@ -32,8 +30,6 @@ namespace Quest.WebCore.Controllers
                 IPluginService pluginFactory,
                 IncidentService incidentService,
                 DestinationService destinationService,
-                SearchService searchService,
-                RouteService routeService,
                 TelephonyService telephonyService,
                 VisualisationService visualisationService,
                 SecurityService securityService
@@ -42,8 +38,6 @@ namespace Quest.WebCore.Controllers
             _messageCache = messageCache;
             _incidentService = incidentService;
             _destinationService = destinationService;
-            _searchService = searchService;
-            _routeService = routeService;
             _telephonyService = telephonyService;
             _securityService = securityService;
             _pluginService = pluginFactory;

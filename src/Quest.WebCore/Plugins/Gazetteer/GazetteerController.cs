@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Quest.Common.Messages.Gazetteer;
-using Quest.Common.Messages.GIS;
+using Quest.Common.Messages.Gazetteer.Gazetteer;
 using Quest.Common.Messages.Resource;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
@@ -15,19 +15,16 @@ namespace Quest.WebCore.Plugins.Gazetteer
     public class GazetteerController : Controller
     {
         private AsyncMessageCache _messageCache;
-        private SearchService _searchService;
-        private readonly IPluginService _pluginService;
-        GazetteerPlugin _plugin;
+        private GazetteerPlugin _plugin;
 
         public GazetteerController(
                 GazetteerPlugin plugin,
                 AsyncMessageCache messageCache,
-                IPluginService pluginFactory,
-                SearchService searchService
+                IPluginService pluginFactory
             )
         {
+            _messageCache = messageCache;
             _plugin = plugin;
-            _searchService = searchService;
         }
 
         [HttpGet]
@@ -37,8 +34,23 @@ namespace Quest.WebCore.Plugins.Gazetteer
         }
 
         [HttpGet]
+        public async Task<SearchResponse> InfoSearch(InfoSearchRequest request)
+        {
+            var result = await _messageCache.SendAndWaitAsync<SearchResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<IndexGroupResponse> GetIndexGroups()
+        {
+            IndexGroupRequest request = new IndexGroupRequest();
+            var result = await _messageCache.SendAndWaitAsync<IndexGroupResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
+        }
+
+        [HttpGet]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public ActionResult StartIndexing(string Index, string Indexers, string IndexMode, int Shards, int Replicas, bool UseMaster)
+        public async Task<ActionResult> StartIndexing(string Index, string Indexers, string IndexMode, int Shards, int Replicas, bool UseMaster)
         {
             IndexRequest request = new IndexRequest
             {
@@ -50,7 +62,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
                 UseMaster = UseMaster
             };
 
-            var results = _searchService.Index(request);
+            var results = await _messageCache.SendAndWaitAsync<IndexResponse>(request, new TimeSpan(0, 0, 10));
             var js = JsonConvert.SerializeObject(results);
             var result = new ContentResult
             {
@@ -63,40 +75,45 @@ namespace Quest.WebCore.Plugins.Gazetteer
 
         [HttpGet]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public async Task<ActionResult> SemanticSearch(string searchText, int searchMode, bool includeAggregates, int skip, int take, double w, double s, double e, double n, bool boundsfilter, string filterterms, string displayGroup, string indexGroup)
+        public async Task<ActionResult> SemanticSearch(SemanticSearchRequest request)
         {
             try
             {
                 BBFilter bb = null;
-                if (boundsfilter)
-                    bb = new BBFilter() { br_lat = s, br_lon = e, tl_lat = n, tl_lon = w };
+                if (request.BoundsFilter)
+                    bb = new BBFilter() {
+                        br_lat = request.S,
+                        br_lon = request.E,
+                        tl_lat = request.N,
+                        tl_lon = request.W
+                    };
 
                 var filters = new List<TermFilter>();
 
-                if (!string.IsNullOrEmpty(filterterms))
+                if (!string.IsNullOrEmpty(request.FilterTerms))
                 {
-                    filters = (List<TermFilter>)JsonConvert.DeserializeObject(filterterms, typeof(List<TermFilter>));
+                    filters = (List<TermFilter>)JsonConvert.DeserializeObject(request.FilterTerms, typeof(List<TermFilter>));
                 }
 
                 SearchResultDisplayGroup displayGroupEnum = SearchResultDisplayGroup.description;
-                if (displayGroup != null)
-                    Enum.TryParse<SearchResultDisplayGroup>(displayGroup, out displayGroupEnum);
+                if (request.DisplayGroup != null)
+                    Enum.TryParse<SearchResultDisplayGroup>(request.DisplayGroup, out displayGroupEnum);
 
-                var request = new SearchRequest()
+                var gazrequest = new SearchRequest()
                 {
-                    includeAggregates = includeAggregates,
-                    searchMode = (SearchMode)searchMode,
-                    take = take,
-                    skip = skip,
-                    searchText = searchText,
+                    includeAggregates = request.IncludeAggregates,
+                    searchMode = (SearchMode)request.SearchMode,
+                    take = request.Take,
+                    skip = request.Skip,
+                    searchText = request.SearchText,
                     box = bb,
                     filters = filters,
                     displayGroup = displayGroupEnum,
                     username = User.Identity.Name,
-                    indexGroup = indexGroup
+                    indexGroup = request.IndexGroup
                 };
 
-                var searchResult = await _searchService.SemanticSearch(request);
+                var searchResult = await _messageCache.SendAndWaitAsync<SearchResponse>(gazrequest, new TimeSpan(0, 0, 10));
 
                 var data = GetDisplaySearchResult(searchResult);
 
@@ -104,7 +121,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
                 {
                     var js = JsonConvert.SerializeObject(data);
 
-                    var msg = string.Format("Search: '{0}' mode={1} bound {6} {2}/{3} {4}/{5} filters='{7}' found {8} in {9}ms", searchText, searchMode, w, n, e, s, boundsfilter ? "on" : "off", filterterms, searchResult.Count, searchResult.millisecs);
+                    var msg = string.Format("Search: '{0}' mode={1} bound {6} {2}/{3} {4}/{5} filters='{7}' found {8} in {9}ms", request.SearchText, request.SearchMode, request.W, request.N, request.E, request.S, request.BoundsFilter ? "on" : "off", request.FilterTerms, searchResult.Count, searchResult.millisecs);
                     var result = new ContentResult
                     {
                         Content = js,
@@ -168,11 +185,5 @@ namespace Quest.WebCore.Plugins.Gazetteer
 
             return data;
         }
-
-        [HttpPost]
-        public ActionResult AssignResource(ResourceAssign request)
-        {
-            return null;
-        }
-    }
+   }
 }

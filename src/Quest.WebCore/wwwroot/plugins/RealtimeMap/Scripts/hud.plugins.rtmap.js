@@ -97,6 +97,10 @@ hud.plugins.rtmap = (function () {
                 _handleAction(panel, action);
             });
 
+            map.on('moveend resize zoomend', function (ev) {
+                hud.sendLocal("MapBounds", map.getBounds());
+            });
+            
         });
     };
 

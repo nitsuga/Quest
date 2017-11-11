@@ -62,6 +62,8 @@
     <Compile Remove="Services\ResourceService.cs" />
     <Compile Remove="Services\RouteInfo.cs" />
     <Compile Remove="Services\RouteJob.cs" />
+    <Compile Remove="Services\RouteService.cs" />
+    <Compile Remove="Services\SearchService.cs" />
   </ItemGroup>
 
   <ItemGroup>

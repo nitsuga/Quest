@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
 using System.Collections.Generic;
+using System;
 
 namespace Quest.WebCore.Plugins.Routing
 {
@@ -27,6 +28,11 @@ namespace Quest.WebCore.Plugins.Routing
         /// The name of the plugin
         /// </summary>
         public string Name => "RoutingPlugin"; // <-- must be the same as the injected Name
+
+        internal RoutingSettings GetSettings()
+        {
+            throw new NotImplementedException();
+        }
 
         public Dictionary<string, object> Properties { get; set; }
 

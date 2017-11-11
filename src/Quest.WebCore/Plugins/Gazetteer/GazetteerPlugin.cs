@@ -12,6 +12,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("GazetteerPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
+    [Injection(typeof(GazetteerPlugin))]
     public class GazetteerPlugin : IHudPlugin
     {
         ILifetimeScope _scope;
@@ -42,7 +43,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
 
         public string OnInit()
         {
-            return "hud.plugins.gaz.initialize()";
+            return "hud.plugins.gaz.initialize(panelRole)";
         }
 
         public string OnPanelMoved()

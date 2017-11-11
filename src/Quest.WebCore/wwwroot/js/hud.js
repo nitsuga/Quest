@@ -220,6 +220,9 @@
                     panelContent.html(json.html);
                 }
 
+                // bind handlers - maybe use behaviours for this
+                _bindPanelButtonHandlers(panelRole);
+
                 console.log(json.onInit);
                 if (json.onInit.length > 0) {
                     eval(json.onInit);
@@ -228,9 +231,6 @@
                 if (json.onPanelMoved.length > 0) {
                     $(containerPanel).attr('data-on-moved', json.onPanelMoved);
                 }
-
-                // bind handlers - maybe use behaviours for this
-                _bindPanelButtonHandlers(panelRole);
 
             },
             error: function (result) {
@@ -344,6 +344,12 @@
 
         // wire up handlers for this panel
     var _bindPanelButtonHandlers = function (panelRole) {
+
+        console.log("bindPanelButtonHandlers " + panelRole);
+
+        // clear ALL handlers on this panel
+        $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').off();
+
         if (typeof panelRole === "string")
             panelRole = parseInt(panelRole);
 

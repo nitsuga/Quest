@@ -5,11 +5,10 @@ namespace Quest.Common.Messages.GIS
     /// <summary>
     ///     sent by a device to request nearby locations
     /// </summary>
-    [Serializable]
-    
+    [Serializable]    
     public class MapItemsRequest : Request
     {
-        public string[] ResourceGroups;
+        public string[] ResourceGroups { get; set; }
 
         public bool ResourcesAvailable { get; set; }
         

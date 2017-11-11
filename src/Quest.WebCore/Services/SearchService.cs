@@ -37,12 +37,6 @@ namespace Quest.WebCore.Services
             return f;
         }
 
-        public async Task<SearchResponse> SemanticSearch(SearchRequest request)
-        {
-            var result =await _msgClientCache.SendAndWaitAsync<SearchResponse>(request, new TimeSpan(0, 0, 10));
-            return result;
-        }
-
         public async Task<IndexResponse> Index(IndexRequest request)
         {
             var result = await _msgClientCache.SendAndWaitAsync<IndexResponse>(request, new TimeSpan(0, 0, 10));

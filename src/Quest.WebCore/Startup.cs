@@ -76,8 +76,6 @@ namespace Quest.WebCore
             // Add application services.
             services.AddSingleton<IncidentService>();
             services.AddSingleton<DestinationService>();
-            services.AddSingleton<SearchService>();
-            services.AddSingleton<RouteService>();
             services.AddSingleton<TelephonyService>();
             services.AddSingleton<VisualisationService>();
             services.AddSingleton<SecurityService>();

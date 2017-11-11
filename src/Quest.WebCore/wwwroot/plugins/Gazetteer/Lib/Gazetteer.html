@@ -1,12 +1,41 @@
 ﻿<div class="gaz-container" data-role="gaz-container">
-    <h4>GAZ</h4>
-    <div class="gaz-search-container" data-role="gaz-search-container">
-        <div class="input-group">
-            <input type="text" class="form-control" data-role="gaz-search-input" placeholder="Enter post code" />
-            <div class="input-group-btn">
-                <button class="btn btn-default" data-role="gaz-search">Search</button>
-            </div>
+
+    <div class="row-fluid">
+        <div>
+            <input autofocus="autofocus" id="search_input_text" type="text" class="form-control search" placeholder="Search (shift ` to clear)" />
         </div>
     </div>
-    <ul class="gaz-search-results" data-role="gaz-search-results"></ul>
+
+    <div class="row-fluid">
+        <input id="final_text" type="text" class="form-control search" placeholder="Search (shift ` to clear)" />
+        <button type="button" class="btn btn-primary pull-right search-controls" id="send-btn"><i class="fa fa-share "></i>&nbsp;&nbsp;Go</button>
+    </div>
+
+    <div class="row-fluid">
+        <span id="message"></span>
+        <span id="message-wait" style="visibility: collapse">searching..</span>
+    </div>
+
+    <div class="row-fluid">
+        <button type="button" class="btn btn-default search-controls" id="boundsfilter" data-toggle="tooltip" title="lock to map">
+            <i class="fa fa-unlock"></i>
+        </button>
+        <button type="button" class="btn btn-default search-controls" id="relax" data-toggle="tooltip" title="search mode">Relax</button>
+        <button type="button" class="btn btn-default search-controls" id="search-coord" style="margin-right: 5px;" title="search coordinates">
+            <i class="fa fa-arrows fa-lg"></i>
+        </button>
+    </div>
+    <div class="row-fluid">
+
+        <div class="row-fluid">
+            <label class="radio-inline"><input type="radio" value="none" name="group-opt-radio" checked="checked">none</label>
+            <label class="radio-inline"><input type="radio" value="thoroughfare" name="group-opt-radio">street</label>
+            <label class="radio-inline"><input type="radio" value="description" name="group-opt-radio">description</label>
+            <label class="radio-inline"><input type="radio" value="type" name="group-opt-radio">type</label>
+        </div>
+    </div>
+
+    <div class="list-results">
+        <div id="grouped-results-list"></div>
+    </div>
 </div>
