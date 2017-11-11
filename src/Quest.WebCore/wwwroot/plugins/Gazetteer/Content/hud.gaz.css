@@ -1,16 +1,16 @@
-﻿
-.gaz-container {
+﻿.gaz-container {
     height: 100%;
+    padding: 20px;
 }
 
-ul.gaz-search-results {
-    height: calc(100% - 72px);
-    overflow-y: auto;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    margin-bottom: 0;
-    list-style-type: none;
-}
+    .gaz-container .list-results {
+        height: calc(100% - 72px);
+        overflow-y: auto;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        margin-bottom: 0;
+        list-style-type: none;
+    }
 
     ul.gaz-search-results > li {
         color:white
