@@ -270,17 +270,13 @@
         console.log('Swap ' + panelRoleSource + " with " + panelRoleTarget);
 
         // move the source into the swap area
-        $("[data-panel-role='" + panelRoleSource + "']").children().appendTo('#swap');
+        $("[data-panel-role='" + panelRoleSource + "'] data-role='panel-content'").children().appendTo('#swap');
 
-        // clear out the source
-        //$("[data-panel-role='" + panelRoleSource + "']:first-child").remove();
-
-        // move the tartget top the source
-        $("[data-panel-role='" + panelRoleTarget + "']").children().appendTo($("[data-panel-role='" + panelRoleSource + "']"));
+        // move the target top the source
+        $("[data-panel-role='" + panelRoleTarget + "'] data-role='panel-content'").children().appendTo($("[data-panel-role='" + panelRoleSource + "'] data-role='panel-content'"));
 
         // move the swap to the target
-        $("#swap").children().appendTo($("[data-panel-role='" + panelRoleTarget + "']"));
-        //$("#swap:first-child").remove();
+        $("#swap").children().appendTo($("[data-panel-role='" + panelRoleTarget + "'] data-role='panel-content'"));
     };
 
     // make this panel full screen
