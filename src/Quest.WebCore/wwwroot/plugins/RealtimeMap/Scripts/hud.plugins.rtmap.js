@@ -198,15 +198,15 @@ hud.plugins.rtmap = (function () {
                     return;
 
                 // add resources to the map
-                if (layer.Result.Resources !== undefined) {
-                    layer.Result.Resources.forEach(function (item) {
+                if (layer.Resources !== undefined) {
+                    layer.Resources.forEach(function (item) {
                         _updateResource(georesLayer, item);
                     });
                 }
 
-                if (layer.Result.Destinations !== undefined) {
+                if (layer.Destinations !== undefined) {
                     // add Destinations to the map
-                    _updateDestinations(layer.Result.Destinations, georesLayer);
+                    _updateDestinations(layer.Destinations, georesLayer);
                 }
 
                 // now register for updates

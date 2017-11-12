@@ -37,11 +37,12 @@
           "Icon": "glyphicon-triangle-left"
         },
         {
-          "Target": 3,
+          "Target": 2,
           "Position": "panel-btn-bottom",
           "Action": "expand",
           "Label": null,
-          "Icon": "glyphicon-triangle-bottom"
+          "Icon": "glyphicon-triangle-bottom",
+          "ExpandedStyle": "col-md-3 full-height bottom-border"
         },
         {
           "Target": 0,
@@ -58,14 +59,14 @@
       "Style": "col-md-3 half-height ",
       "Actions": [
         {
-          "Target": 4,
+          "Target": 1,
           "Position": "panel-btn-top",
           "Action": "expand",
           "Label": null,
           "Icon": "glyphicon-triangle-top"
         },
         {
-          "Target": 1,
+          "Target": 0,
           "Position": "panel-btn-left",
           "Action": "swap",
           "Label": null,

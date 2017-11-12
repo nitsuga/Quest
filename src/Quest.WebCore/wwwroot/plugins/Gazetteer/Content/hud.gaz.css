@@ -1,10 +1,11 @@
 ﻿.gaz-container {
     height: 100%;
-    padding: 20px;
+    padding: 35px 10px 10px 10px;
+    color: lightgrey;
 }
 
     .gaz-container .list-results {
-        height: calc(100% - 72px);
+        height: calc(100% - 150px);
         overflow-y: auto;
         padding-top: 16px;
         padding-bottom: 16px;
@@ -12,6 +13,11 @@
         list-style-type: none;
     }
 
-    ul.gaz-search-results > li {
-        color:white
+    .gaz-container .search-controls {
+        width:80px;
+        height: 30px;
+    }
+    
+    .gaz-container .ul.gaz-search-results > li {
+        color: white
     }

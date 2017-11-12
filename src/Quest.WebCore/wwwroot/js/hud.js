@@ -104,8 +104,6 @@
         return baseUrl;
     };
 
-
-
     var _initESB = function () {
 
         // Start the connection.
@@ -161,13 +159,22 @@
                 // 
                 $(id).empty();
                 $(id).append(json);
+
+                _populatePlugins( layoutName );
             }
         });
+
+
+    };
+
+    var _populatePlugins = function(layoutName)
+    {
+        var url = $('#renderNamedLayoutUrl').attr('data-url') + '/' + layoutName;
 
         // now get the model as well so we can populate the plugins
         var loaderurl = $('#layoutLoaderUrl').attr('data-url') + '/' + layoutName;
 
-        console.log("Populate plugins: " + url);
+        console.log("Populate plugins for layout: " + layoutName);
 
         $.ajax({
             url: loaderurl,
@@ -182,6 +189,10 @@
                             if (panel.panel >= 0 && panel.plugin !== null) {
                                 _loadPanel(panel.plugin, panel.panel);
                             }
+                            else
+                                // bind handlers for the empty panel
+                                _bindPanelButtonHandlers(panel.panel);
+
                         });
                     }
                         , 1000);
@@ -192,11 +203,11 @@
                 alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
             }
         });
-
-    };
+    }
 
     // load the specific plugin into the target panel
     var _loadPanel = function (pluginName, panelRole) {
+        console.log("Plugin Loader: " + pluginName+ " in panel " + panelRole);
 
         if (typeof panelRole === "string")
             panelRole = parseInt(panelRole);
@@ -205,9 +216,7 @@
         var containerPanel = $(selector).first();
         var pluginRole = $(containerPanel).attr('data-panel-role');
         var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName + '?role=' + pluginRole;
-
-        console.log("Plugin Loader: " + url);
-
+        
         $.ajax({
             url: url,
             type: 'GET',
@@ -256,51 +265,22 @@
     };
 
     // swap two panels
-    var _swap = function (panelRole) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+    var _swap = function (panelRoleSource, panelRoleTarget) {
 
-        console.log('Swap %d', panelRole);
+        console.log('Swap ' + panelRoleSource + " with " + panelRoleTarget);
 
-        // Get the panel to be moved to the main panel
-        var sidePanel = $('#side-panel-wrapper div.hud-panel[data-panel-role="' + panelRole + '"]');
-        var sidePanelContent = $(sidePanel).find('div[data-role=panel-content]');
+        // move the source into the swap area
+        $("[data-panel-role='" + panelRoleSource + "']").children().appendTo('#swap');
 
-        // Get the main panel
-        var mainPanel = $('#main-panel-wrapper div.hud-panel[data-panel-role="Panel1"]');
-        var mainPanelContent = $(mainPanel).find('div[data-role=panel-content]');
+        // clear out the source
+        //$("[data-panel-role='" + panelRoleSource + "']:first-child").remove();
 
-        // Make a note of the main panel's inner html
-        var mainPanelContentHtml = $(mainPanelContent).html();
+        // move the tartget top the source
+        $("[data-panel-role='" + panelRoleTarget + "']").children().appendTo($("[data-panel-role='" + panelRoleSource + "']"));
 
-        // Put the side panel contents into the main panel
-        $(mainPanelContent).html($(sidePanelContent).html());
-
-        // Put the former main panel's contents into the side panel
-        $(sidePanelContent).html(mainPanelContentHtml);
-
-        // we need to swap the js attributes
-        var mainPanelOnInit = $(mainPanel).attr('data-on-init');
-        var mainPanelOnMove = $(mainPanel).attr('data-on-moved');
-
-        var sidePanelOnInit = $(sidePanel).attr('data-on-init');
-        var sidePanelOnMove = $(sidePanel).attr('data-on-moved');
-
-        // Put the side panel js attributes onto the main panel
-        $(mainPanel).attr('data-on-init', $(sidePanel).attr('data-on-init'));
-        $(mainPanel).attr('data-on-moved', $(sidePanel).attr('data-on-moved'));
-
-        // Update the side panel js attributes with the former main panel's
-        $(sidePanel).attr('data-on-init', mainPanelOnInit);
-        $(sidePanel).attr('data-on-moved', mainPanelOnMove);
-
-        // Finally, run any OnMoved javascript
-        if (sidePanelOnMove.length > 0)
-            eval(sidePanelOnMove);
-
-        if (mainPanelOnMove.length > 0)
-            eval(mainPanelOnMove);
-
+        // move the swap to the target
+        $("#swap").children().appendTo($("[data-panel-role='" + panelRoleTarget + "']"));
+        //$("#swap:first-child").remove();
     };
 
     // make this panel full screen
@@ -331,7 +311,10 @@
 
         console.log('Expand %d into %d',panelRoleSource, panelRoleTarget);
         var selectorFrom = '[data-panel-role=' + panelRoleSource + ']';
+        var selectorTo = '[data-panel-role=' + panelRoleTarget + ']';
         var containerPanelFrom = $(selectorFrom).first();
+
+        $(selectorTo).hide();
     };
 
     // show menu in the panel
@@ -348,13 +331,10 @@
         console.log("bindPanelButtonHandlers " + panelRole);
 
         // clear ALL handlers on this panel
-        $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').off();
+        $("[data-panel-role='" + panelRole + "']").off();
 
         if (typeof panelRole === "string")
             panelRole = parseInt(panelRole);
-
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').off('click');
 
         // The menu hamburger loads the plugin selector into the relevant panel
         $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').on('click',
@@ -365,9 +345,6 @@
                 _showmenu(pluginRole);
             });
 
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="select-menu"]').off('click');
-
         // menus on the panel
         $('[data-panel-role=' + panelRole + '] a[data-role="select-menu"]').on('click',
             function (e) {
@@ -376,9 +353,6 @@
                 btn_action = $(e.currentTarget).attr('data-action');
                 _selectPanelMenu(panelRole, btn_action);
             });
-
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="select-action"]').off('click');
 
         // actions on the panel
         $('[data-panel-role=' + panelRole + '] a[data-role="select-action"]').on('click',
@@ -389,21 +363,17 @@
                 $('[data-panel-role=' + panelRole + ']').trigger("action", btn_action);
             });
 
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="expand"]').off('click');
-
-        $('[data-panel-role=' + panelRole + '] a[data-role="expand"]').on('click',
+        $('[data-panel-role="' + panelRole + '"] a[data-role="expand"]').on('click',
             function (e) {
                 e.preventDefault();
                 var panel = $(this).parent();
-                var pluginRole = $(panel).attr('data-panel-role');
-                _expand(pluginRole);
+                var panelRoleSource = $(panel).attr('data-panel-role');
+                var panelRoleTarget = $(this).attr('data-target');
+
+                _expand(panelRoleSource, panelRoleTarget);
             });
 
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="fullscreen"]').off('click');
-
-        $('[data-panel-role=' + panelRole + '] a[data-role="fullscreen"]').on('click',
+        $('[data-panel-role="' + panelRole + '"] a[data-role="fullscreen"]').on('click',
             function (e) {
                 e.preventDefault();
                 var panel = $(this).parent();
@@ -411,14 +381,15 @@
                 _fullscreen(pluginRole);
             });
 
-        // remove previous handlers
-        $('[data-panel-role=' + panelRole + '] a[data-role="swap"]').off('click');
-        $('[data-panel-role=' + panelRole + '] a[data-role="swap"]').on('click',
+        $('[data-panel-role="' + panelRole + '"] a[data-role="swap"]').on('click',
             function (e) {
                 e.preventDefault();
                 var panel = $(this).parent();
-                var pluginRole = $(panel).attr('data-panel-role');
-                _swap(pluginRole);
+                var panelRoleSource = $(panel).attr('data-panel-role');
+                var panelRoleTarget = $(this).attr('data-target');
+
+                _swap(panelRoleSource, panelRoleTarget);
+
             });
            
         //$('a.panel-btn').on('click',

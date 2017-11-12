@@ -2,7 +2,7 @@
 <div class="hud-panel" data-role="panel" data-panel-role="@Model.Panel" data-src="mini-top">
     @foreach (var action in Model.Actions)
     {
-        <a href="#" class="panel-btn @action.Position" data-role="@action.Action" data-target="@action.Target">
+        <a href="#" class="panel-btn @action.Position" data-role="@action.Action" data-target="@action.Target" data-ajax="@action.ExpandedStyle">
                 <span class="glyphicon @action.Icon" aria-label="@action.Label"></span>
         </a>
     }
