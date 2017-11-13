@@ -1,8 +1,0 @@
-FROM nopz/mapserver:latest
-MAINTAINER gluteusmaximus
-VOLUME ["/maps"]
-RUN apt-get install gdal-bin
-WORKDIR /maps
-# execute /maps/index.sh after installing any new map tiles
-# test with 
-# http://localhost:8090/cgi-bin/mapserv?MAP=/maps/extent.map&crs=EPSG:27700&service=WMS&request=GetMap&layers=Barts&styles=&format=image%2Fpng&transparent=false&version=1.1.1&continuousWorld=true&height=256&width=256&srs=EPSG%3A3857&bbox=10854.058016495028,6684112.375425522,11006.932073065382,6684265.249482094
