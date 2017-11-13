@@ -41,9 +41,14 @@ hud.plugins.gaz = (function() {
             _boundingbox = data;
         });
 
+        // listen for local hub messages 
+        $("#sys_hub").on("SearchResults", function (evt, data) {
+            _showSearchResults( panel, data );
+        });
+
     };
 
-    _doSearch = function (panel, searchText, mode, take, boundsfilter) {
+    var _doSearch = function (panel, searchText, mode, take, boundsfilter) {
         if (searchText.length === 0)
             return;
 
@@ -73,16 +78,17 @@ hud.plugins.gaz = (function() {
             contentType: "application/json; charset=utf-8",
             success: function (json) {
 
-                _clrSearchItems(panel);
-
                 $("[data-panel-role='" + panel + "'] #message-wait").hide();
 
                 if (json.error !== undefined) {
                     // show an error
                 }
                 else {
-                    _showGroupedSearchItems(panel, json);
-               }
+
+                    // simply emit the results onto the local service bus so that the map and the results list can update
+                    hud.sendLocal("SearchResults", json);
+                }
+
                 $("[data-panel-role='" + panel + "'] #search_input_text").focus();
 
             },
@@ -92,7 +98,13 @@ hud.plugins.gaz = (function() {
         });
     };
 
-    _showGroupedSearchItems = function (panel, items) {
+    // show search results in the results list
+    var _showSearchResults = function (panel, json) {
+        _clrSearchItems(panel);
+        _showGroupedSearchItems(panel, json);
+    }
+
+    var _showGroupedSearchItems = function (panel, items) {
         _clrSearchItems(panel);
 
         var itext = items.Count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -164,7 +176,7 @@ hud.plugins.gaz = (function() {
 
     }
 
-    _addSingleFeatureToResultsList = function (containerId, address, score, latlng) {
+    var _addSingleFeatureToResultsList = function (containerId, address, score, latlng) {
         $(containerId).append($("<a>").attr("class", "list-group-item").attr("href", "#")
             .on("click", function () {
                 //SetFinalAddress(address.d, latlng, 0);
@@ -183,7 +195,7 @@ hud.plugins.gaz = (function() {
             .attr("data-toggle", "tooltip"));
     }
 
-    _clrSearchItems = function (panel) {
+    var _clrSearchItems = function (panel) {
         $("[data-panel-role='" + panel + "'] #result-list").find("li").remove();
         $("[data-panel-role='" + panel + "'] #grouped-results-list").empty();
         $("[data-panel-role='" + panel + "'] #grouped-results-list").html("");

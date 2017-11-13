@@ -1,10 +1,17 @@
-﻿var hud = hud || {};
+var hud = hud || {};
 
 hud.plugins = hud.plugins || {};
 
+// keep track of map objects belonging to different panels
 var rtmap_maps = {};
+
+// set of base map layers
 var rtmap_baseLayers;
+
+// set of overlays
 var rtmap_overlayLayers;
+
+// global settings
 var rtmap_settings;
 
 hud.plugins.rtmap = (function () {
@@ -77,6 +84,10 @@ hud.plugins.rtmap = (function () {
 
             L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
 
+            // add a search layer onto the maps and remember it
+            var searchlayer = new L.featureGroup();
+            map.addLayer(searchlayer);
+
             // save the map object in a dictionary so it can be accessed later
             rtmap_maps[panel] = map;
 
@@ -92,11 +103,15 @@ hud.plugins.rtmap = (function () {
                 _handleMessage(panel, group, georesLayer, msg);
             });
 
+            // listen for local hub messages 
+            $("#sys_hub").on("AddDocument", function (evt, data) {
+                _boundingbox = data;
+            });
+
             // panel was Swapped Expanded
             $("#sys_hub").on("Swapped Expanded Fullscreen", function (evt, data) {
                 map.invalidateSize();
             });
-
 
             // listen for panel actions
             $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
@@ -107,9 +122,164 @@ hud.plugins.rtmap = (function () {
             map.on('moveend resize zoomend', function (ev) {
                 hud.sendLocal("MapBounds", map.getBounds());
             });
+
+            // listen for local hub messages  
+            $("#sys_hub").on("SearchResults", function (evt, data) {
+                _showSearchResults(map, panel, searchlayer, data);
+            });
             
         });
     };
+
+    // show search results on the map
+    var _showSearchResults = function (map, panel, searchlayer, data) {
+
+        searchlayer.clearLayers();
+
+        for (docindex = 0; docindex < data.Documents.length; docindex++) {
+            doc = data.Documents[docindex];
+            score = doc.s;
+            if (doc.l !== undefined && doc.l !== null) {
+                latlng = new L.LatLng(doc.l.lat, doc.l.lon);
+                feature = _getFeature(doc, latlng);
+
+                searchlayer.addLayer(feature);
+            }
+        }
+
+        //var coords = _getCoordinatesFromPoly(data.Bounds);
+        //_addPolygon(searchlayer, coords);
+
+        // zoom in..
+        var isLocked = hud.getButtonState(panel, 'data-action', 'lock-map');
+
+        if (!isLocked && data.Documents.length > 0) {
+            var bounds = searchlayer.getBounds();
+            if (bounds.isValid())
+                map.fitBounds(bounds, { maxZoom: 18 });//works!    
+        }
+
+        map.invalidateSize();
+        
+    }
+
+    // add a polygon to the layer
+    var _addPolygon = function (layer, bounds, append, color) {
+        if (color === undefined)
+            color = "red";
+        if (!append)
+            layer.clearLayers();
+        var feature = L.polygon(bounds, { color: color, fill: false });
+        layer.addLayer(feature);
+    }
+
+    // create a leaflet polygon from a NEST polygon
+    var _getCoordinatesFromPoly = function (shape) {
+        var polylineCoordinates = [];
+        if (shape !== null) {
+            shape.coordinates.forEach(function (coords) {
+                coords.forEach(function (pnt) {
+                    var latlng = new L.LatLng(pnt[1], pnt[0]);
+                    polylineCoordinates.push(latlng);
+                });
+
+            });
+        }
+        return polylineCoordinates;
+    }
+    
+    // return a single feature for this address
+    var _getFeature = function(address, latlng) {
+        var latLongParms = {
+            lng: address.l.lon,
+            lat: address.l.lat
+        };
+
+        var latLongString = JSON.stringify(latLongParms);
+
+        var feature;
+        var content = "";
+
+        var customOptions =
+            {
+                'maxWidth': "500",
+                'minWidth': "300",
+                keepInView: false
+            }
+
+        content += "<h4>" + address.d + "</h4>";
+        if (address.st !== undefined && address.st !== "Active" && address.st !== null) {
+            content += "<p>" + address.st + "</p>";
+        }
+        content += "<input type='hidden' id='latLong' value='" + latLongString + "'>";
+        if (address.url !== undefined && address.url !== "" && address.url !== null) {
+            content += "<a target=\"_blank\" href='" + address.url + "'>" + address.url + "</a>";
+        }
+
+        if (address.v !== undefined && address.v !== "" && address.v !== null) {
+            content += "<video controls autoplay name=\"media\"><source src=" + address.v + " type=\"video/mp4\"></video>";
+        } else {
+            if (address.i !== undefined && address.i !== "" && address.i !== null) {
+                content += "<image src='" + address.i + "'/>";
+            }
+        }
+
+        if (address.c !== undefined && address.c !== "" && address.c !== null) {
+            content += address.c;
+        }
+
+        var polylineCoordinates = [];
+
+        // its a polygon
+        if (address.pg !== null) {
+            address.pg.coordinates.forEach(function (coords) {
+                coords.forEach(function (pnt) {
+                    var latlng = new L.LatLng(pnt[1], pnt[0]);
+                    polylineCoordinates.push(latlng);
+                });
+
+            });
+            feature = L.polygon(polylineCoordinates, { color: "lightyellow" });
+            feature.on("click",
+                function () {
+                    // trigger local event to broadcast this object
+                    hud.sendLocal("ObjectSelected", { "Type": "SearchItem", "Value": address });
+                });
+        }
+        else
+            // its a multi-line
+            if (address.ml !== null) {
+                address.ml.coordinates.forEach(function (coords) {
+                    coords.forEach(function (pnt) {
+                        var latlng = new L.LatLng(pnt[1], pnt[0]);
+                        polylineCoordinates.push(latlng);
+                    });
+
+                }
+                );
+                feature = L.polyline(polylineCoordinates, { color: "blue" });
+
+                feature.on("click",
+                    function () {
+
+                        // trigger local event to broadcast this object
+                        hud.sendLocal("ObjectSelected", { "Type": "SearchItem", "Value": address });
+                        //InformationSearch(latlng.lng, latlng.lat);
+                    });
+            }
+            else {
+                // normal location
+                feature = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: "loc", s: address.t });
+
+                feature.on("click",
+                    function () {
+                        // trigger local event to broadcast this object
+                        hud.sendLocal("ObjectSelected", { "Type": "SearchItem", "Value": address });
+                        //InformationSearch(latlng.lng, latlng.lat);
+                    });
+            }
+        return feature;
+    }
 
     // handle message from service bus
     var _handleMessage = function (panel, group, georesLayer, msg) {
