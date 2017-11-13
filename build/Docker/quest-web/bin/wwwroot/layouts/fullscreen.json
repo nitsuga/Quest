@@ -1,0 +1,28 @@
+﻿{
+  "Name": "Single",
+  "Image": "Full",
+  "Selectable": true,
+  "Panels": [
+    {
+      "Panel": 0,
+      "Plugin": "PluginSelector",
+      "Style": "col-md-12 full-height right-border",
+      "Actions": [
+        {
+          "Target": 0,
+          "Position": "panel-btn-bottom",
+          "Action": "fullscreen",
+          "Label": "Expand panel to full screen",
+          "Icon": "glyphicon-new-window"
+        },
+        {
+          "Target": 0,
+          "Position": "panel-top-left",
+          "Action": "menu",
+          "Label": null,
+          "Icon": "glyphicon-menu-hamburger"
+        }
+      ]
+    }
+  ]
+}
