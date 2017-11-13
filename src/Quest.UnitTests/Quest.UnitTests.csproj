@@ -125,10 +125,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Quest.Common\Quest.Common.csproj" />
-    <ProjectReference Include="..\src\Quest.Lib.OS\Quest.Lib.OS.csproj" />
-    <ProjectReference Include="..\src\Quest.Lib.Research\Quest.Lib.Research.csproj" />
-    <ProjectReference Include="..\src\Quest.Lib\Quest.Lib.csproj" />
+    <ProjectReference Include="..\Quest.Common\Quest.Common.csproj" />
+    <ProjectReference Include="..\Quest.Lib.OS\Quest.Lib.OS.csproj" />
+    <ProjectReference Include="..\Quest.Lib.Research\Quest.Lib.Research.csproj" />
+    <ProjectReference Include="..\Quest.Lib\Quest.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
