@@ -69,7 +69,7 @@ hud.plugins.rtmap = (function () {
                 center: new L.LatLng(rtmap_settings.latitude, rtmap_settings.longitude),
                 zoom: rtmap_settings.zoom,
                 layers: baseLayer,
-                zoomControl: true,
+                zoomControl: false,
                 continuousWorld: true,
                 worldCopyJump: false,
                 inertiaDeceleration: 10000
@@ -92,11 +92,18 @@ hud.plugins.rtmap = (function () {
                 _handleMessage(panel, group, georesLayer, msg);
             });
 
+            // panel was Swapped Expanded
+            $("#sys_hub").on("Swapped Expanded Fullscreen", function (evt, data) {
+                map.invalidateSize();
+            });
+
+
             // listen for panel actions
             $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
                 _handleAction(panel, action);
             });
 
+            // send a MapBounds event if the map changes in any way
             map.on('moveend resize zoomend', function (ev) {
                 hud.sendLocal("MapBounds", map.getBounds());
             });
@@ -130,6 +137,7 @@ hud.plugins.rtmap = (function () {
                 _updateMap(panel);
         }
     };
+
 
     // attach click handlers to all the panel buttons
     var _registerButtons = function (panel) {

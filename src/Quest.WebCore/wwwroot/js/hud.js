@@ -265,52 +265,59 @@
     };
 
     // swap two panels
-    var _swap = function (panelRoleSource, panelRoleTarget) {
+    var _swap = function (panelSource, panelTarget) {
 
-        console.log('Swap ' + panelRoleSource + " with " + panelRoleTarget);
+        console.log('Swap ' + panelSource + " with " + panelTarget);
 
         // move the source into the swap area
-        $("[data-panel-role='" + panelRoleSource + "'] data-role='panel-content'").children().appendTo('#swap');
+        $("[data-panel-role='" + panelSource + "'] div[data-role='panel-content']").children().appendTo('#swap');
 
         // move the target top the source
-        $("[data-panel-role='" + panelRoleTarget + "'] data-role='panel-content'").children().appendTo($("[data-panel-role='" + panelRoleSource + "'] data-role='panel-content'"));
+        $("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content']").children().appendTo($("[data-panel-role='" + panelSource + "'] div[data-role='panel-content']"));
 
         // move the swap to the target
-        $("#swap").children().appendTo($("[data-panel-role='" + panelRoleTarget + "'] data-role='panel-content'"));
+        $("#swap").children().appendTo($("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content']"));
+
+        _sendLocal("Swapped", {
+            "panelSource": panelSource,
+            "panelTarget": panelTarget
+        });
     };
 
     // make this panel full screen
-    var _fullscreen = function (panelRole) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+    var _fullscreen = function (panelSource) {
+        if (typeof panelSource === "string")
+            panelSource = parseInt(panelSource);
 
-        console.log('Fullscreen %d', panelRole);
+        console.log('Fullscreen %d', panelSource);
 
-        var selector = '[data-panel-role=' + panelRole + ']';
-        var containerPanel = $(selector).first();
-        var pluginRole = $(containerPanel).attr('data-panel-role');
-
-        // Expand the main panel to 12 columns
-        $(containerPanel).removeClass('col-md-9').addClass('col-md-12');
-
-        // Hide the side panel
+        _sendLocal("Fullscreen", {
+            "panelSource": panelSource,
+            "panelTarget": panelTarget
+        });
     };
 
     // expand the panel
-    var _expand = function (panelRoleSource, panelRoleTarget) {
+    var _expand = function (panelSource, panelTarget) {
 
-        if (typeof panelRoleSource === "string")
-            panelRoleSource = parseInt(panelRoleSource);
+        if (typeof panelSource === "string")
+            panelSource = parseInt(panelSource);
 
-        if (typeof panelRoleTarget === "string")
-            panelRoleTarget = parseInt(panelRoleTarget);
+        if (typeof panelTarget === "string")
+            panelTarget = parseInt(panelTarget);
 
-        console.log('Expand %d into %d',panelRoleSource, panelRoleTarget);
-        var selectorFrom = '[data-panel-role=' + panelRoleSource + ']';
-        var selectorTo = '[data-panel-role=' + panelRoleTarget + ']';
+        console.log('Expand %d into %d',panelSource, panelTarget);
+        var selectorFrom = '[data-panel-role=' + panelSource + ']';
+        var selectorTo = '[data-panel-role=' + panelTarget + ']';
         var containerPanelFrom = $(selectorFrom).first();
 
         $(selectorTo).hide();
+
+        _sendLocal("Expanded", {
+            "panelSource": panelSource,
+            "panelTarget": panelTarget
+        });
+
     };
 
     // show menu in the panel
@@ -387,87 +394,8 @@
                 _swap(panelRoleSource, panelRoleTarget);
 
             });
-           
-        //$('a.panel-btn').on('click',
-        //    function (e) {
-        //        e.preventDefault();
-
-        //        var role = $(this).attr('data-role');
-
-        //        var sidePanels = $('#side-panel-wrapper > div.row');
-
-        //        var upperSidePanel = $(sidePanels).eq(0);
-        //        var lowerSidePanel = $(sidePanels).eq(1);
-
-        //        switch (role.toLowerCase()) {
-        //            case 'move-to-main':
-        //                var thisPanel = $(this).closest('div[data-role="panel"]');
-        //                _moveToMainPanel($(thisPanel).attr('data-panel-role'));
-        //                break;
-
-        //            case 'expand-full-screen':
-        //                _expandMainPanelToFullScreeen();
-        //                break;
-
-        //            case 'expand-up':
-
-        //                if ($(upperSidePanel).hasClass('half-height')) {
-        //                    // The lower panel expands upwards to fill the viewport height
-        //                    // the upper panel reduces in height to zero, and its buttons are hidden
-        //                    $(upperSidePanel).removeClass('half-height').addClass('no-height');
-        //                    $(lowerSidePanel).removeClass('half-height').addClass('full-height');
-
-        //                    $(upperSidePanel).find('a.panel-btn-bottom, a.panel-btn-left, a.menu-btn').addClass('hidden');
-        //                    $(lowerSidePanel).find('a.panel-btn-top[data-role="expand-down"]').removeClass('hidden');
-        //                    $(lowerSidePanel).find('a.panel-btn-top[data-role="expand-up"]').addClass('hidden');
-        //                } else {
-        //                    // The panels revert to the 50:50 split
-        //                    $(lowerSidePanel).removeClass('no-height').addClass('half-height');
-        //                    $(upperSidePanel).removeClass('full-height').addClass('half-height');
-
-        //                    $(lowerSidePanel).find('a.panel-btn-top[data-role="expand-up"], a.panel-btn-left, a.menu-btn').removeClass('hidden');
-        //                    $(upperSidePanel).find('a.panel-btn-bottom[data-role="expand-up"]').addClass('hidden');
-        //                    $(upperSidePanel).find('a.panel-btn-bottom[data-role="expand-down"]').removeClass('hidden');
-        //                }
-
-        //                // Execute any javascript needed to re-render plugin
-        //                var lowerPanel = $(lowerSidePanel).find('div[data-role="panel"]');
-        //                if ($(lowerPanel).attr('data-on-moved').length > 0) {
-        //                    eval($(lowerPanel).attr('data-on-moved'));
-        //                }
-        //                break;
-
-        //            case 'expand-down':
-
-        //                if ($(upperSidePanel).hasClass('half-height')) {
-        //                    // The upper panel expands to fill the viewport height
-        //                    // the lower panel reduces in height to zero
-        //                    $(upperSidePanel).removeClass('half-height').addClass('full-height');
-        //                    $(lowerSidePanel).removeClass('half-height').addClass('no-height');
-
-        //                    $(lowerSidePanel).find('a.panel-btn-top, a.panel-btn-left, a.menu-btn').addClass('hidden');
-        //                    $(upperSidePanel).find('a.panel-btn-bottom').toggleClass('hidden');
-        //                } else {
-        //                    // The panels revert to the 50:50 split
-        //                    $(upperSidePanel).removeClass('no-height').addClass('half-height');
-        //                    $(lowerSidePanel).removeClass('full-height').addClass('half-height');
-
-        //                    $(upperSidePanel).find('a.panel-btn-bottom[data-role="expand-down"], a.panel-btn-left, a.menu-btn').removeClass('hidden');
-        //                    $(lowerSidePanel).find('a.panel-btn-top[data-role="expand-down"]').addClass('hidden');
-        //                    $(lowerSidePanel).find('a.panel-btn-top[data-role="expand-up"]').removeClass('hidden');
-        //                }
-
-        //                // Execute any javascript needed to re-render plugin
-        //                var upperPanel = $(upperSidePanel).find('div[data-role="panel"]');
-        //                if ($(upperPanel).attr('data-on-moved').length > 0) {
-        //                    eval($(upperPanel).attr('data-on-moved'));
-        //                }
-        //                break;
-
-        //            default:
-        //                break;
-        //        }
-        //    });
+         
+       
     };
     
     var _setStore = function (cname, cvalue, exdays) {
