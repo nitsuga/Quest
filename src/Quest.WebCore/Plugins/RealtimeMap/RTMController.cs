@@ -5,38 +5,25 @@ using Quest.Common.Messages.Resource;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Plugins.RealtimeMap
 {
     public class RTMController : Controller
     {
         private AsyncMessageCache _messageCache;
-        private ResourceService _resourceService;
-        private IncidentService _incidentService;
-        private DestinationService _destinationService;
-        private SearchService _searchService;
-        private RouteService _routeService;
-        private TelephonyService _telephonyService;
-        private SecurityService _securityService;
         private readonly IPluginService _pluginService;
-        RealtimeMapPlugin _plugin;
+        private readonly RealtimeMapPlugin _plugin;
 
         public RTMController(
                 RealtimeMapPlugin plugin,
                 AsyncMessageCache messageCache,
-                IPluginService pluginFactory,
-                ResourceService resourceService,
-                IncidentService incidentService,
-                DestinationService destinationService,
-                SearchService searchService,
-                RouteService routeService,
-                TelephonyService telephonyService,
-                VisualisationService visualisationService,
-                SecurityService securityService
+                IPluginService pluginService
             )
         {
             _plugin = plugin;
-            _resourceService = resourceService;
+            _pluginService = pluginService;
+            _messageCache = messageCache;
         }
 
         [HttpGet]
@@ -51,12 +38,12 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult GetMapItems(MapItemsRequest request)
+        public async Task<ActionResult> GetMapItems(MapItemsRequest request)
         {
             try
             {
-                var r1 = _resourceService.GetMapItems(request);
-                var js = JsonConvert.SerializeObject(r1);
+                var results = await _messageCache.SendAndWaitAsync<MapItemsResponse>(request, new TimeSpan(0, 0, 10));
+                var js = JsonConvert.SerializeObject(results);
                 var result = new ContentResult
                 {
                     Content = js,

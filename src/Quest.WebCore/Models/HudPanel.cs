@@ -18,7 +18,7 @@ namespace Quest.WebCore.Models
         public string Plugin;
 
         /// <summary>
-        /// bootstrap control class
+        /// bootstrap control class for normal, unexpanded, style
         /// </summary>
         public string Style;
 

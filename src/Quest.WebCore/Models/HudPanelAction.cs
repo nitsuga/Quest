@@ -22,6 +22,13 @@
         /// </summary>
         public string Label;
 
+
+        /// <summary>
+        /// expanded style to use
+        /// </summary>
+        public string ExpandedStyle;
+
+
         /// <summary>
         /// e.g. glyphicon-triangle-bottom, glyphicon-triangle-left
         /// </summary>

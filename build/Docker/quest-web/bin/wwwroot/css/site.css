@@ -69,15 +69,17 @@
 
 .panel-btn {
     position: absolute;
-    width: 32px;
+    width: 80px;
     height: 32px;
-    font-size: 24px;
+    font-size: 22px;
     z-index: 999;
 }
 
-    a.panel-btn {
-    color: green;
-    }
+a.panel-btn {
+    color: #4cff00;
+    background:  #010c00;
+    text-align:center;
+}
 
     .panel-btn.panel-btn-top {
         top: 0;
@@ -93,7 +95,7 @@
 
     .panel-btn.panel-btn-left {
         left: 0;
-        top: 90%;
+        bottom: 0;
         /*transform: translateY(-16px);*/
     }
 
@@ -111,28 +113,141 @@
         z-index: 999;
     }
 
+.panel-btn.panel-btn-p1r {
+    left: 100%;
+    top: 10%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p2r {
+    left: 100%;
+    top: 20%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p3r {
+    left: 100%;
+    top: 30%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p4r {
+    left: 100%;
+    top: 40%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p5r {
+    left: 100%;
+    top: 50%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p6r {
+    left: 100%;
+    top: 60%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p7r {
+    left: 100%;
+    top: 70%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p8r {
+    left: 100%;
+    top: 80%;
+    transform: translateX(-80px);
+}
+
+.panel-btn.panel-btn-p9r {
+    left: 100%;
+    top: 90%;
+    transform: translateX(-80px);
+}
+
 .panel-btn.panel-btn-p1 {
     left: 0%;
-    top: 80%;
+    top: 10%;
     transform: translateX(0px);
 }
 
 .panel-btn.panel-btn-p2 {
     left: 0%;
-    top: 70%;
+    top: 20%;
     transform: translateX(0px);
 }
 
 .panel-btn.panel-btn-p3 {
     left: 0%;
-    top: 60%;
+    top: 30%;
     transform: translateX(0px);
 }
 
 .panel-btn.panel-btn-p4 {
     left: 0%;
+    top: 40%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p5 {
+    left: 0%;
     top: 50%;
     transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p6 {
+    left: 0%;
+    top: 60%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p7 {
+    left: 0%;
+    top: 70%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p8 {
+    left: 0%;
+    top: 80%;
+    transform: translateX(0px);
+}
+
+.panel-btn.panel-btn-p9 {
+    left: 0%;
+    top: 90%;
+    transform: translateX(0px);
+}
+
+/*bottom row*/
+.panel-btn.panel-btn-p1b {
+    left: 15%;
+    bottom: 0;
+    transform: translateY(-0px);
+}
+.panel-btn.panel-btn-p6b {
+    left: 90%;
+    top: 90%;
+    transform: translateX(-80px);
+}
+
+
+.panel-btn-on {
+    border: solid 3px;
+    padding: 0px;
+    color: yellow !important;
+}
+
+.panel-btn-off {
+    padding: 3px;
+    border: none;
+    color: #4cff00 !important;
+}
+
+.panel-btn-hide {
+    visibility: hidden;
 }
 
 .buttonicon {

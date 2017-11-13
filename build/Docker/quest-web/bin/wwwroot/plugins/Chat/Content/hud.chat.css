@@ -1,4 +1,8 @@
-﻿.chat-container h4 {
+﻿.chat-container {
+    padding: 16px
+}
+
+.chat-container h4 {
     margin-top: 16px;
     margin-bottom: 16px;
     background-color: cornflowerblue;
@@ -7,6 +11,7 @@
     padding-bottom: 8px;
     padding-left: 16px;
     text-align: center;
+    padding: 10px
 }
 
 .chat-container .chat-msg-container {

@@ -9,13 +9,11 @@ namespace Quest.WebCore.Services
 {
     public class RouteService 
     {
-        SearchService _searchService;
         AsyncMessageCache _msgClientCache;
 
-        public RouteService(SearchService searchService, AsyncMessageCache msgClientCache)
+        public RouteService(AsyncMessageCache msgClientCache)
         {
             _msgClientCache = msgClientCache;
-            _searchService = searchService;
         }
 
         private int GetInt(string text)
@@ -43,13 +41,13 @@ namespace Quest.WebCore.Services
             if (roadSpeedCalculator == "")
                 roadSpeedCalculator = "VariableSpeedCalculator";
 
-            var f = await _searchService.SimpleSearch(from, username);
+            var f = await SimpleSearch(from, username);
             if (f == null || f.Documents.Count == 0)
             {
                 throw new ApplicationException("Cant find the start location");
             }
 
-            var t = await _searchService.SimpleSearch(to, username);
+            var t = await SimpleSearch(to, username);
             if (t.Documents.Count == 0)
             {
                 throw new ApplicationException("Cant find the end location");

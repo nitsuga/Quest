@@ -875,69 +875,6 @@
       "instanceScope": "single-instance"
     },
     {
-      "type": "Quest.Lib.Simulation.Incidents.IncSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "IncSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "quantity": 10,
-        "lowWatermark": 9,
-        "startTime": "1/1/2015",
-        "endTime": "1/1/2016"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.Resources.ResSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "ResSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "quantity": 100,
-        "lowWatermark": 10,
-        "startTime": "1/1/2015",
-        "endTime": "1/1/2016"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.Cad.CadSimulator,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "CadSimulator"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "defaultengine": "DijkstraRoutingEngine"
-      }
-    },
-    {
-      "type": "Quest.Lib.Simulation.TimedEventManager,Quest.Lib.Simulation",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "TimedEventManager"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "startTime": "1/1/2015",
-        "speed": 1
-      }
-    },
-    {
       "type": "Quest.Lib.Research.Job.CompareWithGoogle,Quest.Lib.Research",
       "services": [
         {
@@ -948,6 +885,41 @@
       "injectProperties": true,
       "instanceScope": "single-instance"
     }
+,
+    {
+      "type": "Quest.Lib.Trackers.ResourceSimulator",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "ResourceSimulator"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Lib.Resource.ResourceManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "ResourceManager"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    },
+    {
+      "type": "Quest.Lib.Geo.GeoManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "GeoManager"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance"
+    }
+
 
   ]
 }

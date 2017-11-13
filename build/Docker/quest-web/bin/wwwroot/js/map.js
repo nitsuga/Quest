@@ -6,13 +6,13 @@ var info, legend;
 var ccglayers;
 var covlayer;
 var loc_marker;
-var searchlayer;        // for search items
-var searchGroupsLyr;    // for pulsing
-var BoundaryLyr;        // for nearby polygon 
-var IOIlayer;
+var searchlayer;                // for search items
+var searchGroupsLyr;            // for pulsing
+var BoundaryLyr;                // for nearby polygon 
+var IOIlayer;                   // information of interest
 var georesLayer;
 var geoincLayer;
-var routeLayer;         // layer for displaying routes on
+var routeLayer;                 // layer for displaying routes on
 var wto;                        // keystroke time
 var notificationService;        // link to resource playback
 var searchText = "";
@@ -43,7 +43,6 @@ $(function () {
     updateStaticMapData();
 
     updateDynamicMapData();
-
 
     // initialise the telephony
     initTelephony(map);

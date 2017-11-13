@@ -10,33 +10,24 @@ namespace Quest.WebCore.Plugins.RealtimeMap
     public class AACController : Controller
     {
         private AsyncMessageCache _messageCache;
-        private ResourceService _resourceService;
         private IncidentService _incidentService;
         private DestinationService _destinationService;
-        private SearchService _searchService;
-        private RouteService _routeService;
         private TelephonyService _telephonyService;
         private SecurityService _securityService;
         private readonly IPluginService _pluginService;
 
         public AACController(AsyncMessageCache messageCache,
                 IPluginService pluginFactory,
-                ResourceService resourceService,
                 IncidentService incidentService,
                 DestinationService destinationService,
-                SearchService searchService,
-                RouteService routeService,
                 TelephonyService telephonyService,
                 VisualisationService visualisationService,
                 SecurityService securityService
             )
         {
             _messageCache = messageCache;
-            _resourceService = resourceService;
             _incidentService = incidentService;
             _destinationService = destinationService;
-            _searchService = searchService;
-            _routeService = routeService;
             _telephonyService = telephonyService;
             _securityService = securityService;
             _pluginService = pluginFactory;

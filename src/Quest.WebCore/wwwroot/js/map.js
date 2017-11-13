@@ -817,14 +817,6 @@ function LocationSearch( options )//callback for 3rd party ajax requests
             }
             if ($("#ResultsDialog").dialog("isOpen") !== true) {
                 $("#ResultsDialog").dialog("open");
-                // position newly opened dialog (using its parent container) below $div.
-                //$("#ResultsDialog")
-                //    .dialog('widget')
-                //    .position({
-                //        my: "left top",
-                //        at: "left bottom",
-                //        of: "#SearchDialog"
-                //    });
             }
             $("#search_input_text").focus();
 

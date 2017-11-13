@@ -12,6 +12,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("GazetteerPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
+    [Injection(typeof(GazetteerPlugin))]
     public class GazetteerPlugin : IHudPlugin
     {
         ILifetimeScope _scope;
@@ -42,7 +43,7 @@ namespace Quest.WebCore.Plugins.Gazetteer
 
         public string OnInit()
         {
-            return "hud.plugins.gaz.initialize()";
+            return "hud.plugins.gaz.initialize(panelRole)";
         }
 
         public string OnPanelMoved()
@@ -66,6 +67,17 @@ namespace Quest.WebCore.Plugins.Gazetteer
             var templateFolder = _env.WebRootPath + "/plugins/Gazetteer/Lib";
             var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
             return gazHtml;
+        }
+
+        public GazSettings GetSettings()
+        {
+            return new GazSettings
+            {
+                Latitude = 51.5,
+                Longitude = -0.2,
+                Zoom = 12,
+                MapServer = "192.168.0.3:8090"
+            };
         }
     }
 }
