@@ -45,5 +45,9 @@ src/.vs/Quest/v15/sqlite3/storage.ide
 /build/Docker/volumes/*
 /Quest.UnitTests/bin/Debug/netcoreapp2.0
 /Quest.UnitTests/obj
-Quest.WebCore.Interfaces/obj
-Quest.WebCore.Interfaces/bin
+/src/Quest.WebCore/obj
+/src/Quest.WebCore/bin
+/src/Quest.UnitTests/bin
+/src/Quest.UnitTests/obj
+/src/Quest.WebCore.Interfaces/obj
+/src/Quest.WebCore.Interfaces/bin

@@ -1,1 +1,0 @@
-﻿get-content -tail 20 -wait "D:\SVN\QuestServer\Quest.UnitTest\bin\Debug\indexbuildlog.txt"
