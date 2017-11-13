@@ -438,19 +438,24 @@
     };
 
     // select a particular set of panel buttons
-    var _selectPanelMenu = function (panelRole, menu) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+    var _selectPanelMenu = function (panelSource, menu) {
+        if (typeof panelSource === "string")
+            panelSource = parseInt(panelSource);
 
-        console.log('selectPanelMenu %d %d', panelRole, menu);
+        console.log('selectPanelMenu %d %d', panelSource, menu);
         // all anchors with panel-btn-p* 
-        otherbuttons = "div[data-panel-role='" + panelRole + "'] a[data-role|='select']";
+        otherbuttons = "div[data-panel-role='" + panelSource + "'] a[data-role|='select']";
         $(otherbuttons).removeClass("panel-btn-hide");
         $(otherbuttons).addClass("panel-btn-hide");
 
         // all anchors with panel-btn-p* and the menu we want
-        buttons = "div[data-panel-role='" + panelRole + "'] a[data-menu='" + menu + "'] ";
+        buttons = "div[data-panel-role='" + panelSource + "'] a[data-menu='" + menu + "'] ";
         $(buttons).removeClass("panel-btn-hide");
+
+        _sendLocal("MenuChange", {
+            "panelSource": panelSource,
+            "menu": menu
+        });
     };
 
     var _setButtonState = function (panelRole, role, action, state) {
