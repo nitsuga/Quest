@@ -1,19 +1,20 @@
 ﻿@model HudPanel
-<div class="@Model.Style hud-panel" data-panel-role="@Model.Panel" data-role="panel">
+<div class="@Model.Style" data-style="@Model.Style" data-panel-role="@Model.Panel" data-role="panel" data-expanded="0" data-expanded-style="@Model.ExpandedStyle">
     <div class="row full-height">
-        <div class="col-sm-12 full-height">
-            <div>
+        <div class="col-sm-12 full-height panel_container" >
+            <div class="panel_actions">
                 @foreach (var action in Model.Actions)
                 {
-                    <a href="#" class="panel-btn @action.Position" data-role="@action.Action" data-target="@action.Target" data-ajax="@action.ExpandedStyle">
+                    <a href="#" class="panel-btn @action.Position" data-role="@action.Action" data-target="@action.Target">
                         <span class="glyphicon @action.Icon" aria-label="@action.Label"></span>
                     </a>
                 }
             </div>
-            
-            <div class="hud-panel-content" data-role="panel-content">
-                <!--plugin html goes here -->
-                <div style="color:lightblue;height:100%;vertical-align:middle; align-content:center" class="glyphicon glyphicon-time" ></div>
+            <div data-role="panel-content-container">
+                <div class="hud-panel-content" data-role="panel-content">
+                    <!--plugin html goes here -->
+                    <div style="color:lightblue;height:100%;vertical-align:middle; align-content:center" class="glyphicon glyphicon-time"></div>
+                </div>
             </div>
         </div>
     </div>

@@ -23,6 +23,11 @@ namespace Quest.WebCore.Models
         public string Style;
 
         /// <summary>
+        /// expanded style to use
+        /// </summary>
+        public string ExpandedStyle;
+
+        /// <summary>
         /// list of actions on the panel
         /// </summary>
         public List<HudPanelAction> Actions=new List<HudPanelAction>();

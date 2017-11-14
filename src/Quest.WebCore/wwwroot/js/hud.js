@@ -11,6 +11,9 @@
 
     var _lastpluginid = 999;
 
+    // >=0 if in full screen mode and is the panel id in full mode
+    var _fullscreen_panel = -1;
+
     // remember which message group are being subscribed to
     var groups = {};
 
@@ -275,13 +278,13 @@
         console.log('Swap ' + panelSource + " with " + panelTarget);
 
         // move the source into the swap area
-        $("[data-panel-role='" + panelSource + "'] div[data-role='panel-content']").children().appendTo('#swap');
+        $("[data-panel-role='" + panelSource + "'] div[data-role='panel-content-container']").children().appendTo('#swap');
 
         // move the target top the source
-        $("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content']").children().appendTo($("[data-panel-role='" + panelSource + "'] div[data-role='panel-content']"));
+        $("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content-container']").children().appendTo($("[data-panel-role='" + panelSource + "'] div[data-role='panel-content-container']"));
 
         // move the swap to the target
-        $("#swap").children().appendTo($("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content']"));
+        $("#swap").children().appendTo($("[data-panel-role='" + panelTarget + "'] div[data-role='panel-content-container']"));
 
         _sendLocal("Swapped", {
             "panelSource": panelSource,
@@ -289,16 +292,37 @@
         });
     };
 
+    var _isfullscreen = function () {
+    }
+
     // make this panel full screen
     var _fullscreen = function (panelSource) {
         if (typeof panelSource === "string")
             panelSource = parseInt(panelSource);
 
-        console.log('Fullscreen %d', panelSource);
+        if (_fullscreen_panel !== -1) {
+            console.log('Fullscreen OFF %d', panelSource);
+            $("[data-role='panel']").removeClass("hidden");
+            // normal mode
+            var original_style = $("[data-panel-role='" + _fullscreen_panel + "']").attr("data-style");
+            $("[data-panel-role='" + _fullscreen_panel + "']").removeClass("col-md-12 full-height");
+            $("[data-panel-role='" + _fullscreen_panel + "']").addClass(original_style);
+            _fullscreen_panel = -1;
+        }
+        else {
+            console.log('Fullscreen ON %d', panelSource);
+
+            $("[data-role='panel']").addClass("hidden");
+            var original_style = $("[data-panel-role='" + panelSource + "']").attr("data-style");
+            $("[data-panel-role='" + panelSource + "']").removeClass(original_style);
+            $("[data-panel-role='" + panelSource + "']").removeClass("hidden");
+            $("[data-panel-role='" + panelSource + "']").addClass("col-md-12 full-height");
+
+            _fullscreen_panel = panelSource;
+        }
 
         _sendLocal("Fullscreen", {
-            "panelSource": panelSource,
-            "panelTarget": panelTarget
+            "panelSource": panelSource
         });
     };
 
@@ -311,13 +335,32 @@
         if (typeof panelTarget === "string")
             panelTarget = parseInt(panelTarget);
 
-        console.log('Expand %d into %d',panelSource, panelTarget);
+        console.log('Expand %d into %d', panelSource, panelTarget);
+
         var selectorFrom = '[data-panel-role=' + panelSource + ']';
         var selectorTo = '[data-panel-role=' + panelTarget + ']';
-        var containerPanelFrom = $(selectorFrom).first();
-
-        $(selectorTo).hide();
-
+        var is_expanded = $(selectorFrom).attr("data-expanded");
+        
+        if (is_expanded == "0") {
+            // expand by hiding the targt and growing the source
+            var expanded_style = $(selectorFrom).attr("data-expanded-style");
+            var orig_style = $(selectorFrom).attr("data-style");
+            $(selectorFrom).removeClass(orig_style);
+            $(selectorFrom).addClass(expanded_style);
+            $(selectorTo).addClass("hidden");
+            $(selectorFrom).attr("data-expanded","1");
+        }
+        else
+        {
+            // unexpand by showing the targt and restoring the source style
+            var expanded_style = $(selectorFrom).attr("data-expanded-style");
+            var orig_style = $(selectorFrom).attr("data-style");
+            $(selectorFrom).removeClass(expanded_style);
+            $(selectorFrom).addClass(orig_style);
+            $(selectorTo).removeClass("hidden");
+            $(selectorFrom).attr("data-expanded", "0");
+        }
+        
         _sendLocal("Expanded", {
             "panelSource": panelSource,
             "panelTarget": panelTarget
@@ -334,53 +377,42 @@
     };
 
         // wire up handlers for this panel
-    var _bindPanelButtonHandlers = function (panelRole, pluginId) {
+    var _bindPanelButtonHandlers = function (panelId, pluginId) {
 
-        console.log("bindPanelButtonHandlers panel=" + panelRole + " plugin=" + pluginId);
+        console.log("bindPanelButtonHandlers panel=" + panelId + " plugin=" + pluginId);
 
         //----------------------------------------------
         // clear ALL handlers on this panel
-        $("[data-panel-role='" + panelRole + "']").off();
+        $("[data-panel-role='" + panelId + "']").off();
 
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+        if (typeof panelId === "string")
+            panelId = parseInt(panelId);
 
         // The menu hamburger loads the plugin selector into the relevant panel
-        $('[data-panel-role=' + panelRole + '] a[data-role="menu"]').on('click',
+        $('[data-panel-role=' + panelId + '] a[data-role="menu"]').on('click',
             function (e) {
                 e.preventDefault();
-                var panel = $(this).parent();
-                var pluginRole = $(panel).attr('data-panel-role');
-                _showmenu(panelRole);
+                _showmenu(panelId);
             });
 
-        $('[data-panel-role="' + panelRole + '"] a[data-role="expand"]').on('click',
+        $('[data-panel-role="' + panelId + '"] a[data-role="expand"]').on('click',
             function (e) {
                 e.preventDefault();
-                var panel = $(this).parent();
-                var panelRoleSource = $(panel).attr('data-panel-role');
                 var panelRoleTarget = $(this).attr('data-target');
-
-                _expand(panelRoleSource, panelRoleTarget);
+                _expand(panelId, panelRoleTarget);
             });
 
-        $('[data-panel-role="' + panelRole + '"] a[data-role="fullscreen"]').on('click',
+        $('[data-panel-role="' + panelId + '"] a[data-role="fullscreen"]').on('click',
             function (e) {
                 e.preventDefault();
-                var panel = $(this).parent();
-                var pluginRole = $(panel).attr('data-panel-role');
-                _fullscreen(pluginRole);
+                _fullscreen(panelId);
             });
 
-        $('[data-panel-role="' + panelRole + '"] a[data-role="swap"]').on('click',
+        $('[data-panel-role="' + panelId + '"] a[data-role="swap"]').on('click',
             function (e) {
                 e.preventDefault();
-                var panel = $(this).parent();
-                var panelRoleSource = $(panel).attr('data-panel-role');
                 var panelRoleTarget = $(this).attr('data-target');
-
-                _swap(panelRoleSource, panelRoleTarget);
-
+                _swap(panelId, panelRoleTarget);
             });
 
         //----------------------------------------------
@@ -395,7 +427,8 @@
                     e.preventDefault();
                     btn_role = $(e.currentTarget).attr('data-role');
                     btn_action = $(e.currentTarget).attr('data-action');
-                    _selectMenu(panelRole, btn_action);
+                    btn_action = parseInt(btn_action);
+                    _selectMenu(pluginId, btn_action);
                 });
 
             // actions on the plugin itself
@@ -491,7 +524,7 @@
 
     var _toggleButton = function (pluginId, role, action) {
         
-        console.log('toggleButtonState Menu %d %s %s', panelRole, role, action);
+        console.log('toggleButtonState Menu %d %s %s', pluginId, role, action);
         ison = _getButtonState(pluginId, role, action);
         return _setButtonState(pluginId, role, action, !ison);
     };

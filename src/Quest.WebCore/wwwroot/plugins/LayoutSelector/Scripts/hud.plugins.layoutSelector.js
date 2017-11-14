@@ -4,12 +4,8 @@ hud.plugins = hud.plugins || {};
 
 hud.plugins.layoutSelector = (function() {
 
-    var _initialized = false;
-
     // Hook up to button click events that will load a selected plugin into the parent panel
     var _init = function (panelId, pluginId) {
-
-        if(_initialized === true) return;
 
         $(document).on('click', 'button[data-role="layout-selector"]',
             function(e) {
@@ -17,8 +13,6 @@ hud.plugins.layoutSelector = (function() {
                 var layoutName = $(this).attr('data-layout-name');
                 hud.loadLayout("#panel-container", layoutName);
             });
-
-        _initialized = true;
     };
 
     return {
