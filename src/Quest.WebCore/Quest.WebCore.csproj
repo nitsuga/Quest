@@ -150,7 +150,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\plugins\Chat\Content\hud.chat.css" />
-    <None Include="wwwroot\plugins\Chat\Lib\Chat.html" />
+    <None Include="wwwroot\plugins\Chat\Lib\index.html" />
     <None Include="wwwroot\plugins\Chat\Scripts\hud.plugins.chat.js" />
     <None Include="wwwroot\plugins\Gazetteer\Content\hud.gaz.css" />
     <None Include="wwwroot\plugins\Gazetteer\Lib\index.html" />

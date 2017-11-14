@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Quest.WebCore.Interfaces
 {
@@ -7,29 +8,22 @@ namespace Quest.WebCore.Interfaces
         /// <summary>
         /// The name of the plugin
         /// </summary>
-        string Name { get; }
+        string Name { get; set; }
 
         /// <summary>
         /// Text to display in the menu
         /// </summary>
-        string MenuText { get; }
+        string MenuText { get; set; }
 
         /// <summary>
         /// Is this plugin viewable in the menu?
         /// </summary>
-        bool IsMenuItem { get; }
+        bool IsMenuItem { get; set; }
 
         /// <summary>
         /// A collection of key/value pairs of properties required for this plugin to be rendered correctly
         /// </summary>
         Dictionary<string, object> Properties { get; set; }
-
-        ///// <summary>
-        ///// By default, most plugings should be able to be rendered multiple times on the same screen.
-        ///// However, some components using external technologies - eg.g Google Maps - require that only 
-        ///// single instances be created per page. For such components, set this property to TRUE
-        ///// </summary>
-        //bool IsSingleton { get; }
 
         /// <summary>
         /// A method call to render the Html for the Main Frame of a layout
@@ -42,12 +36,6 @@ namespace Quest.WebCore.Interfaces
         /// </summary>
         /// <returns></returns>
         string OnInit();
-
-        /// <summary>
-        /// A single javascript command that will be executed when the plugin has been moved to a new container
-        /// </summary>
-        /// <returns></returns>
-        string OnPanelMoved();
 
         /// <summary>
         /// Sets the properties of the plugin from a supplied dictioary of properties. Confirms that all the properties required by this plugin
@@ -63,4 +51,5 @@ namespace Quest.WebCore.Interfaces
         void InitializeWithDefaultProperties();
 
     }
+     
 }

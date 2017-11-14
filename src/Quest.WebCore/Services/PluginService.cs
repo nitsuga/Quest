@@ -190,7 +190,6 @@ namespace Quest.WebCore.Services
                 PluginSourceName = plugin.Name,
                 Html = HttpUtility.HtmlDecode(plugin.RenderHtml()),
                 OnInit = HttpUtility.HtmlDecode(plugin.OnInit()),
-                OnPanelMoved = HttpUtility.HtmlDecode(plugin.OnPanelMoved()),
             };
             return source;
         }

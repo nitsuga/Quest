@@ -31,12 +31,6 @@ namespace Quest.WebCore.Plugins.Routing
         }
 
         [HttpGet]
-        public RoutingSettings GetSettings()
-        {
-            return _plugin.GetSettings();
-        }
-
-        [HttpGet]
         public async Task<IndexGroupResponse> GetIndexGroups()
         {
             IndexGroupRequest request = new IndexGroupRequest();

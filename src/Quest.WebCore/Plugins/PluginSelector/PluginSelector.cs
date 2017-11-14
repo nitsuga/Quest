@@ -1,7 +1,9 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Plugins.Lib;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,75 +16,14 @@ namespace Quest.WebCore.Plugins.PluginSelector
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("PluginSelector", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class PluginSelector : IHudPlugin
+    public class PluginSelector : StandardPlugin
     {
-        ILifetimeScope _scope;
-        public PluginSelector(ILifetimeScope scope)
+        public PluginSelector(ILifetimeScope scope, IHostingEnvironment env)
+            : base("PluginSelector", "MENU", "hud.plugins.pluginSelector.init(panelId, pluginId)", string.Empty, scope, env)
         {
-            _scope = scope;
-            Properties = new Dictionary<string, object>();
         }
 
-        /// <summary>
-        /// The name of the plugin
-        /// </summary>
-        public string Name => "PluginSelector"; // <-- must be the same as the injected Name
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public string MenuText => "MENU";
-
-        public bool IsMenuItem => false;
-
-        /// <summary>
-        /// A method call to render the Html for the Main Frame of a layout
-        /// </summary>
-        /// <returns></returns>
-        public string RenderHtml()
-        {
-            return DrawContainer();
-        }
-
-        /// <summary>
-        /// A single javascript command that will kick off any front-end initialization
-        /// </summary>
-        /// <returns></returns>
-        public string OnInit()
-        {
-            return "hud.plugins.pluginSelector.init(panelId, pluginId)";
-        }
-
-        /// <summary>
-        /// A single javascript command that will be executed when the plugin has been moved to a new container
-        /// </summary>
-        /// <returns></returns>
-        public string OnPanelMoved()
-        {
-            return string.Empty;
-        }
-
-        public void InitializeWithProperties(Dictionary<string, object> properties = null)
-        {
-            // Do nothing - no additional properties are required for this plugin
-        }
-
-        public void InitializeWithDefaultProperties()
-        {
-            // Do nothing - no additional properties are required for this plugin
-        }
-
-        /// <summary>
-        /// When called, this method checks the dictioary of properties and confirms that all the properties required by this plugin
-        /// have been set.
-        /// </summary>
-        public bool ValidateProperties()
-        {
-            // This plugin required no additional properties - always return true
-            return true;
-        }
-
-
-        private string DrawContainer()
+        public override string DrawContainer()
         {
             var div = new TagBuilder("div");
             div.MergeAttribute("id", "pluginSelector");

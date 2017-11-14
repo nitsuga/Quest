@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Plugins.Lib;
 using System.Collections.Generic;
 using System.IO;
 
@@ -12,60 +13,11 @@ namespace Quest.WebCore.Plugins.Camera
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("CameraPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class CameraPlugin : IHudPlugin
+    internal class CameraPlugin : StandardPlugin
     {
-        ILifetimeScope _scope;
-        private IHostingEnvironment _env;
-
         public CameraPlugin(ILifetimeScope scope, IHostingEnvironment env)
+            : base("CameraPlugin", "CAM", "hud.plugins.camera.init(panelId, pluginId)", "/plugins/Camera/Lib", scope, env)
         {
-            _scope = scope;
-            _env = env;
-            Properties = new Dictionary<string, object>();
-        }
-
-        /// <summary>
-        /// The name of the plugin
-        /// </summary>
-        public string Name => "CameraPlugin"; // <-- must be the same as the injected Name
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public string MenuText => "CAM";
-
-        public bool IsMenuItem => true;
-
-        public string RenderHtml()
-        {
-            return DrawContainer();
-        }
-
-        public string OnInit()
-        {
-            return "hud.plugins.camera.init(panelId, pluginId)";
-        }
-
-        public string OnPanelMoved()
-        {
-            return string.Empty;
-        }
-
-        public void InitializeWithProperties(Dictionary<string, object> properties)
-        {
-            // Do nothing
-        }
-
-        public void InitializeWithDefaultProperties()
-        {
-            // Do nothing
-        }
-
-        private string DrawContainer()
-        {
-            const string templateFileName = "index.html";
-            var templateFolder = _env.WebRootPath + "/plugins/Camera/Lib";
-            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return html;
         }
     }
 }

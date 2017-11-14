@@ -27,10 +27,5 @@ namespace Quest.WebCore.Models
         /// </summary>
         public string OnInit { get; set; } = string.Empty;
 
-        /// <summary>
-        /// A single javascript command that will be executed when the plugin has been moved to a new container
-        /// </summary>
-        /// <returns></returns>
-        public string OnPanelMoved { get; set; } = string.Empty;
     }
 }

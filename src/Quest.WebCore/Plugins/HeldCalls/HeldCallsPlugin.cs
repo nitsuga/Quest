@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Plugins.Lib;
 using System.Collections.Generic;
 
 namespace Quest.WebCore.Plugins.HeldCalls
@@ -11,55 +12,14 @@ namespace Quest.WebCore.Plugins.HeldCalls
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("HeldCallsPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class HeldCallsPlugin : IHudPlugin
+    internal class HeldCallsPlugin : StandardPlugin
     {
-        ILifetimeScope _scope;
-        private IHostingEnvironment _env;
-
         public HeldCallsPlugin(ILifetimeScope scope, IHostingEnvironment env)
+            : base("HeldCallsPlugin", "HLD", string.Empty, string.Empty, scope, env)
         {
-            _scope = scope;
-            _env = env;
-            Properties = new Dictionary<string, object>();
         }
 
-        /// <summary>
-        /// The name of the plugin
-        /// </summary>
-        public string Name => "HeldCallsPlugin"; // <-- must be the same as the injected Name
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public string MenuText => "HELD";
-
-        public bool IsMenuItem => true;
-
-        public string RenderHtml()
-        {
-            return DrawContainer();
-        }
-
-        public string OnInit()
-        {
-            return string.Empty;
-        }
-
-        public string OnPanelMoved()
-        {
-            return string.Empty;
-        }
-
-        public void InitializeWithProperties(Dictionary<string, object> properties)
-        {
-            // Do nothing
-        }
-
-        public void InitializeWithDefaultProperties()
-        {
-            // Do nothing
-        }
-
-        private string DrawContainer()
+        public override string DrawContainer()
         {
             return "<div>held calls</div>";
         }

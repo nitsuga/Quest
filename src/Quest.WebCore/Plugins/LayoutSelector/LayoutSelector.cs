@@ -1,7 +1,9 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Plugins.Lib;
 using Quest.WebCore.Services;
 using System.Collections.Generic;
 using System.IO;
@@ -15,78 +17,17 @@ namespace Quest.WebCore.Plugins.LayoutSelector
     /// It generates the Html presented to the user to allow them to select from a list of available layouts
     /// </summary>
     [Injection("LayoutSelector", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class LayoutSelector : IHudPlugin
+    public class LayoutSelector : StandardPlugin
     {
-        ILifetimeScope _scope;
-        IPluginService _pluginService;
+        private IPluginService _pluginService;
 
-        public LayoutSelector(ILifetimeScope scope, IPluginService pluginService)
+        public LayoutSelector(ILifetimeScope scope, IPluginService pluginService, IHostingEnvironment env)
+            : base("LayoutSelector", "LAYOUT", "hud.plugins.layoutSelector.init(panelId, pluginId)", string.Empty, scope, env)
         {
-            _scope = scope;
             _pluginService = pluginService;
-            Properties = new Dictionary<string, object>();
         }
 
-        /// <summary>
-        /// The name of the plugin
-        /// </summary>
-        public string Name => "LayoutSelector"; // <-- must be the same as the injected Name
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public string MenuText => "LAYOUT";
-
-        public bool IsMenuItem => true;
-
-        /// <summary>
-        /// A method call to render the Html for the Main Frame of a layout
-        /// </summary>
-        /// <returns></returns>
-        public string RenderHtml()
-        {
-            return DrawContainer();
-        }
-
-        /// <summary>
-        /// A single javascript command that will kick off any front-end initialization
-        /// </summary>
-        /// <returns></returns>
-        public string OnInit()
-        {
-            return "hud.plugins.layoutSelector.init(panelId, pluginId)";
-        }
-
-        /// <summary>
-        /// A single javascript command that will be executed when the plugin has been moved to a new container
-        /// </summary>
-        /// <returns></returns>
-        public string OnPanelMoved()
-        {
-            return string.Empty;
-        }
-
-        public void InitializeWithProperties(Dictionary<string, object> properties = null)
-        {
-            // Do nothing - no additional properties are required for this plugin
-        }
-
-        public void InitializeWithDefaultProperties()
-        {
-            // Do nothing - no additional properties are required for this plugin
-        }
-
-        /// <summary>
-        /// When called, this method checks the dictioary of properties and confirms that all the properties required by this plugin
-        /// have been set.
-        /// </summary>
-        public bool ValidateProperties()
-        {
-            // This plugin required no additional properties - always return true
-            return true;
-        }
-
-
-        private string DrawContainer()
+        public override string DrawContainer()
         {
             var div = new TagBuilder("div");
             div.MergeAttribute("id", "layoutSelector");

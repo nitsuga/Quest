@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
+using Quest.WebCore.Plugins.Lib;
 using System.Collections.Generic;
 using System.IO;
 
@@ -12,60 +13,14 @@ namespace Quest.WebCore.Plugins.Properties
     /// It generates the Html presented to the user to allow them to select from a list of available plugins
     /// </summary>
     [Injection("PropertiesPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
-    public class PropertiesPlugin : IHudPlugin
+    public class PropertiesPlugin : StandardPlugin
     {
         ILifetimeScope _scope;
         private IHostingEnvironment _env;
 
         public PropertiesPlugin(ILifetimeScope scope, IHostingEnvironment env)
+            : base("PropertiesPlugin", "PROP", "hud.plugins.properties.init(panelId, pluginId)", "/plugins/Properties/Lib", scope, env)
         {
-            _scope = scope;
-            _env = env;
-            Properties = new Dictionary<string, object>();
-        }
-
-        /// <summary>
-        /// The name of the plugin
-        /// </summary>
-        public string Name => "PropertiesPlugin"; // <-- must be the same as the injected Name
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public string MenuText => "PROP";
-
-        public bool IsMenuItem => true;
-
-        public string RenderHtml()
-        {
-            return DrawContainer();
-        }
-
-        public string OnInit()
-        {
-            return "hud.plugins.properties.init(panelId, pluginId)";
-        }
-
-        public string OnPanelMoved()
-        {
-            return string.Empty;
-        }
-
-        public void InitializeWithProperties(Dictionary<string, object> properties)
-        {
-            // Do nothing
-        }
-
-        public void InitializeWithDefaultProperties()
-        {
-            // Do nothing
-        }
-
-        private string DrawContainer()
-        {
-            const string templateFileName = "Properties.html";
-            var templateFolder = _env.WebRootPath + "/plugins/Properties/Lib";
-            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return html;
         }
     }
 }

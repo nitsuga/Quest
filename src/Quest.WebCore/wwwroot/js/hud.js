@@ -248,11 +248,6 @@
                 if (json.onInit.length > 0) {
                     eval(json.onInit);
                 }
-
-                if (json.onPanelMoved.length > 0) {
-                    $(containerPanel).attr('data-on-moved', json.onPanelMoved);
-                }
-
             },
             error: function (result) {
                 alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);
@@ -313,8 +308,8 @@
             console.log('Fullscreen ON %d', panelSource);
 
             $("[data-role='panel']").addClass("hidden");
-            var original_style = $("[data-panel-role='" + panelSource + "']").attr("data-style");
-            $("[data-panel-role='" + panelSource + "']").removeClass(original_style);
+            var original_style2 = $("[data-panel-role='" + panelSource + "']").attr("data-style");
+            $("[data-panel-role='" + panelSource + "']").removeClass(original_style2);
             $("[data-panel-role='" + panelSource + "']").removeClass("hidden");
             $("[data-panel-role='" + panelSource + "']").addClass("col-md-12 full-height");
 
@@ -341,7 +336,7 @@
         var selectorTo = '[data-panel-role=' + panelTarget + ']';
         var is_expanded = $(selectorFrom).attr("data-expanded");
         
-        if (is_expanded == "0") {
+        if (is_expanded === "0") {
             // expand by hiding the targt and growing the source
             var expanded_style = $(selectorFrom).attr("data-expanded-style");
             var orig_style = $(selectorFrom).attr("data-style");
@@ -353,10 +348,10 @@
         else
         {
             // unexpand by showing the targt and restoring the source style
-            var expanded_style = $(selectorFrom).attr("data-expanded-style");
-            var orig_style = $(selectorFrom).attr("data-style");
-            $(selectorFrom).removeClass(expanded_style);
-            $(selectorFrom).addClass(orig_style);
+            var expanded_style2 = $(selectorFrom).attr("data-expanded-style");
+            var orig_style2 = $(selectorFrom).attr("data-style");
+            $(selectorFrom).removeClass(expanded_style2);
+            $(selectorFrom).addClass(orig_style2);
             $(selectorTo).removeClass("hidden");
             $(selectorFrom).attr("data-expanded", "0");
         }
