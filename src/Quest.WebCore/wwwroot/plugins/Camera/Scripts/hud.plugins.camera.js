@@ -4,10 +4,10 @@ hud.plugins = hud.plugins || {}
 
 hud.plugins.camera = (function() {
 
-    var _initialize = function() {     
+    var _init = function (panelId, pluginId) {     
     };
 
     return {
-        initialize: _initialize
+        init : _init
     }
 })();

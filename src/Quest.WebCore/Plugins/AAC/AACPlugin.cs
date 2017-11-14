@@ -35,14 +35,14 @@ namespace Quest.WebCore.Plugins.AAC
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.aac.initAAC(panelRole)";
+            return "hud.plugins.aac.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -60,12 +60,11 @@ namespace Quest.WebCore.Plugins.AAC
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
             const string templateFileName = "AAC.html";
             var templateFolder = _env.WebRootPath + "/plugins/AAC/Lib";
             var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            html = html.Replace("id=roleplaceholder", $"id='AAC{role}'");
             return html;
         }
     }

@@ -36,14 +36,14 @@ namespace Quest.WebCore.Plugins.Gazetteer
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.gaz.initialize(panelRole)";
+            return "hud.plugins.gaz.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -61,12 +61,12 @@ namespace Quest.WebCore.Plugins.Gazetteer
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
-            const string templateFileName = "Gazetteer.html";
+            const string templateFileName = "index.html";
             var templateFolder = _env.WebRootPath + "/plugins/Gazetteer/Lib";
-            var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return gazHtml;
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            return html;
         }
 
         public GazSettings GetSettings()

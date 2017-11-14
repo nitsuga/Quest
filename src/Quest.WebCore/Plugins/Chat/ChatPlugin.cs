@@ -35,14 +35,14 @@ namespace Quest.WebCore.Plugins.ChatPlugin
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.chat.initChat()";
+            return "hud.plugins.chat.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -60,12 +60,12 @@ namespace Quest.WebCore.Plugins.ChatPlugin
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
             const string templateFileName = "Chat.html";
             var templateFolder = _env.WebRootPath + "/plugins/Chat/Lib";
-            var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return gazHtml;
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            return html;
         }
     }
 }

@@ -55,15 +55,15 @@
 
 
 .hud-panel {
-    position: absolute;
+    /*position: absolute;
     top: 0;
     left: 0;
     height: 100%;
-    width: 100%;
-    padding: 32px;
+    width: 100%;*/
 }
 
     .hud-panel .hud-panel-content {
+        /*padding: 32px;*/
         height: 100%;
     }
 

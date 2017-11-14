@@ -10,7 +10,7 @@ hud.plugins.gaz = (function() {
     var _boundingbox;
     var _timeout;
 
-    var _initialize = function (panel) {
+    var _init = function (panelId, pluginId) {
 
         $(window).keypress(function (e) {
             var code = e.which || e.keyCode;
@@ -26,15 +26,6 @@ hud.plugins.gaz = (function() {
             return true;
         });
 
-        $("[data-panel-role='" + panel + "'] #search_input_text").on("input", function () {
-            clearTimeout(_timeout);
-            _timeout = setTimeout(function () {
-                var searchText = $("[data-panel-role='" + panel + "'] #search_input_text").val();
-                var boundsfilter = $("#boundsfilter").hasClass("fa-lock");
-                _doSearch(panel, searchText, 0, 100, boundsfilter);
-            }, 500);
-        });
-
 
         // listen for local hub messages 
         $("#sys_hub").on("MapBounds", function (evt, data) {
@@ -43,12 +34,40 @@ hud.plugins.gaz = (function() {
 
         // listen for local hub messages 
         $("#sys_hub").on("SearchResults", function (evt, data) {
-            _showSearchResults( panel, data );
+            _showSearchResults(pluginId, data);
         });
+
+        // has panel been swapped with another, update your panel ID
+        $("#sys_hub").on("Swapped", function (evt, data) {
+        });
+
+        // bind plugin dependent events
+        _bindPanel(pluginId);
+
 
     };
 
-    var _doSearch = function (panel, searchText, mode, take, boundsfilter) {
+    // bind any plugin-related events.
+    // called on init and when the panel content is moved into another panel
+    // we 
+    var _bindPanel = function (pluginId) {
+
+        var selector = hud.pluginSelector(pluginId);
+
+        $(selector).on("input", function () {
+            clearTimeout(_timeout);
+            _timeout = setTimeout(function () {
+                var searchText = $(selector + " #search_input_text").val();
+                var boundsfilter = $(selector + " #boundsfilter").hasClass("fa-lock");
+                _doSearch(pluginId, searchText, 0, 100, boundsfilter);
+            }, 500);
+        });
+    }
+
+    var _doSearch = function (pluginId, searchText, mode, take, boundsfilter) {
+
+        var selector = hud.pluginSelector(pluginId);
+
         if (searchText.length === 0)
             return;
 
@@ -78,7 +97,7 @@ hud.plugins.gaz = (function() {
             contentType: "application/json; charset=utf-8",
             success: function (json) {
 
-                $("[data-panel-role='" + panel + "'] #message-wait").hide();
+                $(selector + " #message-wait").hide();
 
                 if (json.error !== undefined) {
                     // show an error
@@ -89,7 +108,7 @@ hud.plugins.gaz = (function() {
                     hud.sendLocal("SearchResults", json);
                 }
 
-                $("[data-panel-role='" + panel + "'] #search_input_text").focus();
+                $(selector + " #search_input_text").focus();
 
             },
             error: function (result) {
@@ -99,20 +118,23 @@ hud.plugins.gaz = (function() {
     };
 
     // show search results in the results list
-    var _showSearchResults = function (panel, json) {
-        _clrSearchItems(panel);
-        _showGroupedSearchItems(panel, json);
+    var _showSearchResults = function (pluginId, json) {
+        _clrSearchItems(pluginId);
+        _showGroupedSearchItems(pluginId, json);
     }
 
-    var _showGroupedSearchItems = function (panel, items) {
-        _clrSearchItems(panel);
+    var _showGroupedSearchItems = function (pluginId, items) {
+
+        var selector = hud.pluginSelector(pluginId);
+
+        _clrSearchItems(pluginId);
 
         var itext = items.Count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
         if (items.Removed > 0)
-            $("[data-panel-role='" + panel + "'] #message").html("  found: <B>" + itext + "</B> items (" + items.Removed + " dups) in " + items.ms + "ms");
+            $(selector + " #message").html("  found: <B>" + itext + "</B> items (" + items.Removed + " dups) in " + items.ms + "ms");
         else
-            $("[data-panel-role='" + panel + "'] #message").html("  found: " + itext + " items in " + items.ms + "ms");
+            $(selector + " #message").html("  found: " + itext + " items in " + items.ms + "ms");
         var docindex;
         var doc;
         var score;
@@ -127,7 +149,7 @@ hud.plugins.gaz = (function() {
                 if (doc.l !== undefined && doc.l !== null) {
                     latlng = new L.LatLng(doc.l.lat, doc.l.lon);
                     feature = getFeature(doc, latlng);
-                    _addSingleFeatureToResultsList("[data-panel-role='" + panel + "'] #grouped-results-list", doc, feature, score, latlng);
+                    _addSingleFeatureToResultsList(pluginId, selector + " #grouped-results-list", doc, feature, score, latlng);
 
                     if (docindex === 0)
                         SetFinalAddress(doc.d, latlng, 0);
@@ -144,15 +166,15 @@ hud.plugins.gaz = (function() {
                 doc = items.Documents[docindex];
                 if (grp.length > 1) //these are grouped
                 {
-                    $("[data-panel-role='" + panel + "'] #grouped-results-list").append($("<div>").attr("id", "group-results-" + i));
+                    $(selector + " #grouped-results-list").append($("<div>").attr("id", "group-results-" + i));
 
                     if (items.Documents.length <= 20) {
-                        $("[data-panel-role='" + panel + "'] #group-results-" + i).append("<a href='#' class='list-group-item' data-toggle='collapse' data-target='" + "#group-results-sm-" + i + "' data-parent='#menu'>" + "<span class='text-primary'>" + doc.grp + "</span>" + "<span class='glyphicon glyphicon-minus pull-right'></span></a>");
-                        $("[data-panel-role='" + panel + "'] #group-results-" + i).append($("<div>").attr("id", "group-results-sm-" + i).attr("class", "sublinks"));
+                        $(selector + " #group-results-" + i).append("<a href='#' class='list-group-item' data-toggle='collapse' data-target='" + "#group-results-sm-" + i + "' data-parent='#menu'>" + "<span class='text-primary'>" + doc.grp + "</span>" + "<span class='glyphicon glyphicon-minus pull-right'></span></a>");
+                        $(selector + " #group-results-" + i).append($("<div>").attr("id", "group-results-sm-" + i).attr("class", "sublinks"));
                     }
                     else {
-                        $("[data-panel-role='" + panel + "'] #group-results-" + i).append("<a href='#' class='list-group-item' data-toggle='collapse' data-target='" + "#group-results-sm-" + i + "' data-parent='#menu'>" + "<span class='text-primary'>" + doc.grp + "</span>" + "<span class='glyphicon glyphicon-plus pull-right'></span></a>");
-                        $("[data-panel-role='" + panel + "'] #group-results-" + i).append($("<div>").attr("id", "group-results-sm-" + i).attr("class", "sublinks collapse"));
+                        $(selector + " #group-results-" + i).append("<a href='#' class='list-group-item' data-toggle='collapse' data-target='" + "#group-results-sm-" + i + "' data-parent='#menu'>" + "<span class='text-primary'>" + doc.grp + "</span>" + "<span class='glyphicon glyphicon-plus pull-right'></span></a>");
+                        $(selector + " #group-results-" + i).append($("<div>").attr("id", "group-results-sm-" + i).attr("class", "sublinks collapse"));
 
                     }
 
@@ -161,7 +183,7 @@ hud.plugins.gaz = (function() {
                         doc = items.Documents[docindex];
                         score = doc.s;
                         latlng = new L.LatLng(doc.l.lat, doc.l.lon);
-                        _addSingleFeatureToResultsList("[data-panel-role='" + panel + "'] #group-results-sm-" + i, doc, score, latlng);
+                        _addSingleFeatureToResultsList(pluginId, selector + " #group-results-sm-" + i, doc, score, latlng);
                     }
 
                 }
@@ -169,14 +191,17 @@ hud.plugins.gaz = (function() {
                 {
                     score = doc.s;
                     latlng = new L.LatLng(doc.l.lat, doc.l.lon);
-                    _addSingleFeatureToResultsList("[data-panel-role='" + panel + "'] #grouped-results-list", doc, score, latlng);
+                    _addSingleFeatureToResultsList(pluginId, selector + " #grouped-results-list", doc, score, latlng);
                 }
             }
         }
 
     }
 
-    var _addSingleFeatureToResultsList = function (containerId, address, score, latlng) {
+    var _addSingleFeatureToResultsList = function (pluginId, containerId, address, score, latlng) {
+
+        var selector = hud.pluginSelector(pluginId);
+
         $(containerId).append($("<a>").attr("class", "list-group-item").attr("href", "#")
             .on("click", function () {
                 //SetFinalAddress(address.d, latlng, 0);
@@ -195,13 +220,16 @@ hud.plugins.gaz = (function() {
             .attr("data-toggle", "tooltip"));
     }
 
-    var _clrSearchItems = function (panel) {
-        $("[data-panel-role='" + panel + "'] #result-list").find("li").remove();
-        $("[data-panel-role='" + panel + "'] #grouped-results-list").empty();
-        $("[data-panel-role='" + panel + "'] #grouped-results-list").html("");
+    var _clrSearchItems = function (pluginId) {
+
+        var selector = hud.pluginSelector(pluginId);
+
+        $(selector + " #result-list").find("li").remove();
+        $(selector + " #grouped-results-list").empty();
+        $(selector + " #grouped-results-list").html("");
     }
 
     return {
-        initialize: _initialize
+        init: _init
     }
 })();

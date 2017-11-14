@@ -49,10 +49,10 @@ namespace Quest.WebCore.Controllers
         /// creates a plugin model for a spefic plug in a specific slot (role)
         /// </summary>
         /// <param name="id">name of the plugin</param>
-        /// <param name="role">target role</param>
+        /// <param name="panelId">target role</param>
         /// <returns></returns>
         [HttpGet()]
-        public HudPluginModel CreatePlugin(string id, [FromQuery]string role)
+        public HudPluginModel CreatePlugin(string id)
         {
             // Create the plugin object
             var plugin = _pluginService.Create(id);
@@ -64,7 +64,7 @@ namespace Quest.WebCore.Controllers
             // TODO: do we need to carry through plugin state?
             plugin.InitializeWithDefaultProperties();
 
-            var v = _pluginService.GetPluginModel(plugin, role);
+            var v = _pluginService.GetPluginModel(plugin);
 
             return v;
         }

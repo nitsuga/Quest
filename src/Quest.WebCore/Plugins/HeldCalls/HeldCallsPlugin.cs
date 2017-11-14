@@ -34,9 +34,9 @@ namespace Quest.WebCore.Plugins.HeldCalls
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
@@ -59,7 +59,7 @@ namespace Quest.WebCore.Plugins.HeldCalls
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
             return "<div>held calls</div>";
         }

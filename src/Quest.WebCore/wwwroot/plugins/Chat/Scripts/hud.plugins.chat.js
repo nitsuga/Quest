@@ -9,6 +9,41 @@ hud.plugins.chat = (function() {
 
     var _hub;
 
+    var _init = function (panelId, pluginId) {
+
+        // Set up the chat login button click handlers
+        $('div[data-role="chat-login"] button[data-role="chat-login-button"]').on('click',
+            function () {
+                // TODO: this function should authenticate with the server.
+                // For now, we simply accept the username
+                var input = $(this).closest('form').find('input[data-role="chat-username-input"]');
+                var username = $(input).val();
+                if (username.length === 0) {
+                    alert('Please enter a username');
+                    $(input).focus();
+                    return;
+                }
+
+                // Set the username
+                var container = $(this).closest('div.chat-container');
+                $(container).attr('data-username', username);
+
+                // Hide the login form
+                $(this).closest('div[data-role="chat-login"]').hide();
+
+                // Change the title
+                var h4 = $(container).find('h4');
+                $(h4).text(username);
+
+                // Display the message container
+                var messageContainer = $(container).find('div.chat-msg-container');
+                $(messageContainer).removeClass('hidden').show();
+
+                _initChatConnection(container);
+            });
+    };
+
+
     // This optional function html-encodes messages for display in the page.
     var  _htmlEncode = function(value) {
         var encodedValue = $('<div />').text(value).html();
@@ -74,42 +109,8 @@ hud.plugins.chat = (function() {
             });
     };
 
-    var _initChat = function() {
-
-        // Set up the chat login button click handlers
-        $('div[data-role="chat-login"] button[data-role="chat-login-button"]').on('click',
-            function() {
-                // TODO: this function should authenticate with the server.
-                // For now, we simply accept the username
-                var input = $(this).closest('form').find('input[data-role="chat-username-input"]');
-                var username = $(input).val();
-                if (username.length === 0) {
-                    alert('Please enter a username');
-                    $(input).focus();
-                    return;
-                }
-
-                // Set the username
-                var container = $(this).closest('div.chat-container');
-                $(container).attr('data-username', username);
-
-                // Hide the login form
-                $(this).closest('div[data-role="chat-login"]').hide();
-
-                // Change the title
-                var h4 = $(container).find('h4');
-                $(h4).text(username);
-
-                // Display the message container
-                var messageContainer = $(container).find('div.chat-msg-container');
-                $(messageContainer).removeClass('hidden').show();
-
-                _initChatConnection(container);
-            });
-    };
-
     return {
-        initChat: _initChat,
+        init: _init,
         initChatConnection: _initChatConnection
     };
 

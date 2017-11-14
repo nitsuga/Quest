@@ -24,9 +24,9 @@ namespace Quest.WebCore.Services
 
         HudModel GetLayoutModel(HudLayoutSummary summary);
 
-        HudPluginModel GetPluginModel(string pluginName, string role);
+        HudPluginModel GetPluginModel(string pluginName);
 
-        HudPluginModel GetPluginModel(IHudPlugin plugin, string role);
+        HudPluginModel GetPluginModel(IHudPlugin plugin);
 
         /// <summary>
         /// return a list of styles required by the plugins
@@ -181,14 +181,14 @@ namespace Quest.WebCore.Services
             return layout;
         }
 
-        public HudPluginModel GetPluginModel(IHudPlugin plugin, string role)
+        public HudPluginModel GetPluginModel(IHudPlugin plugin)
         {
             HudPluginModel source = new HudPluginModel
             {
                 MenuText = plugin.MenuText,
                 IsMenuItem = plugin.IsMenuItem,
                 PluginSourceName = plugin.Name,
-                Html = HttpUtility.HtmlDecode(plugin.RenderHtml(role)),
+                Html = HttpUtility.HtmlDecode(plugin.RenderHtml()),
                 OnInit = HttpUtility.HtmlDecode(plugin.OnInit()),
                 OnPanelMoved = HttpUtility.HtmlDecode(plugin.OnPanelMoved()),
             };
@@ -199,7 +199,7 @@ namespace Quest.WebCore.Services
         /// Constructor
         /// </summary>
         /// <param name="plugin"></param>
-        public HudPluginModel GetPluginModel(string pluginName, string role)
+        public HudPluginModel GetPluginModel(string pluginName)
         {
             if (string.IsNullOrEmpty(pluginName))
                 return new HudPluginModel();
@@ -207,7 +207,7 @@ namespace Quest.WebCore.Services
             var plugin = Create(pluginName);
 
             if (plugin != null)
-                return GetPluginModel(plugin, role);
+                return GetPluginModel(plugin);
 
             // could return an Error plugin
             return null;

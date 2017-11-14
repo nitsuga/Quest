@@ -35,14 +35,14 @@ namespace Quest.WebCore.Plugins.Blank
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.histmap.initMap(panelRole)";
+            return "hud.plugins.histmap.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -60,9 +60,9 @@ namespace Quest.WebCore.Plugins.Blank
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
-            const string templateFileName = "Index.html";
+            const string templateFileName = "index.html";
             var templateFolder = _env.WebRootPath + "/plugins/HistoricMap/Lib";
             var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
             return html;

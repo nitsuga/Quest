@@ -9,6 +9,8 @@
     // element emitting signalR events
     var _hubevents;
 
+    var _lastpluginid = 999;
+
     // remember which message group are being subscribed to
     var groups = {};
 
@@ -22,24 +24,25 @@
         _connection.invoke('groupmessage', _username, group, message);
     };
 
-    var _joinLeaveGroup = function (group, panel, join) {
-        console.log('Join group leave ${group} ${panel} ${join}');
+    // join or leave a group
+    var _joinLeaveGroup = function (group, pluginId, join) {
+        console.log('Join group leave ${group} ${pluginId} ${join}');
         if (join)
-            _joinGroup(group, panel);
+            _joinGroup(group, pluginId);
         else
-            _leaveGroup(group, panel);
+            _leaveGroup(group, pluginId);
     };
 
-    // join a panel to the message group
-    var _joinGroup = function (group, panel) {
-        console.log('Join group ${group} ${panel}');
+    // join a plugin to the message group
+    var _joinGroup = function (group, pluginId) {
+        console.log('Join group ${group} ${pluginId}');
         var group_list = groups[group];
         if (group_list === undefined) {
             group_list = [];
         }
-        var index = group_list.indexOf(panel);
+        var index = group_list.indexOf(pluginId);
         if (index === -1) {
-            group_list.push(panel); // up the number of registrations            
+            group_list.push(pluginId); // up the number of registrations            
             if (group_list.length===1)
                 // first time registration
                 _connection.invoke('joingroup', _username, group);
@@ -48,15 +51,15 @@
     };
 
     // leave a message group.
-    var _leaveGroup = function (group, panel) {
-        console.log('Leave group ${group} ${panel}');
+    var _leaveGroup = function (group, pluginId) {
+        console.log('Leave group ${group} ${pluginId}');
         var group_list = groups[group];
         if (group_list === undefined)
             return; // already unsubscribed
-        var index = group_list.indexOf(panel);
+        var index = group_list.indexOf(pluginId);
         if (index === -1)
-            return; // panel not found
-        group_list.splice(index, 1);    // remove the panel
+            return; // pluginId not found
+        group_list.splice(index, 1);    // remove the pluginId
         if (group_list.length===0)      // no-one left in the group
             _connection.invoke('leavegroup', _username, group);
         groups[group] = group_list;
@@ -206,16 +209,14 @@
     }
 
     // load the specific plugin into the target panel
-    var _loadPanel = function (pluginName, panelRole) {
-        console.log("Plugin Loader: " + pluginName+ " in panel " + panelRole);
+    var _loadPanel = function (pluginName, panelId) {
+        console.log("Plugin Loader: " + pluginName+ " in panel " + panelId);
 
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+        if (typeof panelId === "string")
+            panelId = parseInt(panelId);
 
-        var selector = '[data-panel-role=' + panelRole + ']';
-        var containerPanel = $(selector).first();
-        var pluginRole = $(containerPanel).attr('data-panel-role');
-        var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName + '?role=' + pluginRole;
+        var selector = '[data-panel-role=' + panelId + ']';
+        var url = $('#pluginLoaderUrl').attr('data-url') + '/' + pluginName;
         
         $.ajax({
             url: url,
@@ -223,14 +224,22 @@
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
             success: function (json) {
+                // this 
+                _lastpluginid++;
+                var pluginId = _lastpluginid;
 
+                // if the panel returns html then insert the content under the placeholder
                 if (json.html.length > 0) {
-                    var panelContent = $(containerPanel).find('div[data-role="panel-content"]');
+                    var panelContent = $(selector).find('div[data-role="panel-content"]');
+
+                    // set the data-pluginid to the plugin id
+                    $("[data-panel-role='" + panelId + "'] .hud-panel-content").attr('data-pluginid', pluginId);
+
                     panelContent.html(json.html);
                 }
 
                 // bind handlers - maybe use behaviours for this
-                _bindPanelButtonHandlers(panelRole);
+                _bindPanelButtonHandlers(panelId, pluginId);
 
                 console.log(json.onInit);
                 if (json.onInit.length > 0) {
@@ -248,21 +257,17 @@
         });
     };
 
-    var _getPanelContent = function (panelSrcId, panelRole) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
+    // returns  ajquery selector for selecting a plugins' parent content div
+    var _pluginSelector = function (pluginId) {
+        return ".hud-panel-content[data-pluginid='" + pluginId + "']";
+    }
 
-        var source;
-        var isSingleton = $('#' + panelSrcId).attr('data-singleton');
-
-        if (isSingleton === 'true') {
-            source = $('#' + panelSrcId).find('div[data-role="main"]');
-        } else {
-            source = $('#' + panelSrcId).find('div[data-role="' + panelRole + '"]');
-        }
-
-        return $(source).html();
-    };
+    // returns the panel number of this plugin
+    var _getPluginPanelId = function (pluginId) {
+        var selector = _pluginSelector(pluginId);
+        var containerPanel = $(selector).closest('div[data-role="panel"]');
+        return containerPanel.attr('data-panel-role');
+    }
 
     // swap two panels
     var _swap = function (panelSource, panelTarget) {
@@ -321,18 +326,19 @@
     };
 
     // show menu in the panel
-    var _showmenu = function (panelRole) {
+    var _showmenu = function (panelId) {
         if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
-        console.log('Show Menu %d', panelRole);
-        _loadPanel("PluginSelector", panelRole);
+            panelRole = parseInt(panelId);
+        console.log('Show Menu %d', panelId);
+        _loadPanel("PluginSelector", panelId);
     };
 
         // wire up handlers for this panel
-    var _bindPanelButtonHandlers = function (panelRole) {
+    var _bindPanelButtonHandlers = function (panelRole, pluginId) {
 
-        console.log("bindPanelButtonHandlers " + panelRole);
+        console.log("bindPanelButtonHandlers panel=" + panelRole + " plugin=" + pluginId);
 
+        //----------------------------------------------
         // clear ALL handlers on this panel
         $("[data-panel-role='" + panelRole + "']").off();
 
@@ -345,25 +351,7 @@
                 e.preventDefault();
                 var panel = $(this).parent();
                 var pluginRole = $(panel).attr('data-panel-role');
-                _showmenu(pluginRole);
-            });
-
-        // menus on the panel
-        $('[data-panel-role=' + panelRole + '] a[data-role="select-menu"]').on('click',
-            function (e) {
-                e.preventDefault();
-                btn_role = $(e.currentTarget).attr('data-role');
-                btn_action = $(e.currentTarget).attr('data-action');
-                _selectPanelMenu(panelRole, btn_action);
-            });
-
-        // actions on the panel
-        $('[data-panel-role=' + panelRole + '] a[data-role="select-action"]').on('click',
-            function (e) {
-                e.preventDefault();
-                btn_role = $(e.currentTarget).attr('data-role');
-                btn_action = $(e.currentTarget).attr('data-action');
-                $('[data-panel-role=' + panelRole + ']').trigger("action", btn_action);
+                _showmenu(panelRole);
             });
 
         $('[data-panel-role="' + panelRole + '"] a[data-role="expand"]').on('click',
@@ -394,8 +382,31 @@
                 _swap(panelRoleSource, panelRoleTarget);
 
             });
-         
-       
+
+        //----------------------------------------------
+        // now bind plugin-specific events
+
+        if (pluginId !== undefined) {
+            var plugin = _pluginSelector(pluginId);
+
+            // menus on the plugin itself
+            $(plugin + ' a[data-role="select-menu"]').on('click',
+                function (e) {
+                    e.preventDefault();
+                    btn_role = $(e.currentTarget).attr('data-role');
+                    btn_action = $(e.currentTarget).attr('data-action');
+                    _selectMenu(panelRole, btn_action);
+                });
+
+            // actions on the plugin itself
+            $(plugin + ' a[data-role="select-action"]').on('click',
+                function (e) {
+                    e.preventDefault();
+                    btn_role = $(e.currentTarget).attr('data-role');
+                    btn_action = $(e.currentTarget).attr('data-action');
+                    $(plugin).trigger("action", btn_action);
+                });
+        }
     };
     
     var _setStore = function (cname, cvalue, exdays) {
@@ -438,32 +449,28 @@
     };
 
     // select a particular set of panel buttons
-    var _selectPanelMenu = function (panelSource, menu) {
-        if (typeof panelSource === "string")
-            panelSource = parseInt(panelSource);
-
-        console.log('selectPanelMenu %d %d', panelSource, menu);
+    var _selectMenu = function (pluginId, menu) {
+        console.log('selectMenu plugin=%d menu=%d', pluginId, menu);
         // all anchors with panel-btn-p* 
-        otherbuttons = "div[data-panel-role='" + panelSource + "'] a[data-role|='select']";
+        otherbuttons = _pluginSelector(pluginId) + " a[data-role|='select']";
         $(otherbuttons).removeClass("panel-btn-hide");
         $(otherbuttons).addClass("panel-btn-hide");
 
         // all anchors with panel-btn-p* and the menu we want
-        buttons = "div[data-panel-role='" + panelSource + "'] a[data-menu='" + menu + "'] ";
+        buttons = _pluginSelector(pluginId) + " a[data-menu='" + menu + "'] ";
         $(buttons).removeClass("panel-btn-hide");
 
         _sendLocal("MenuChange", {
-            "panelSource": panelSource,
+            "pluginId": pluginId,
             "menu": menu
         });
     };
 
-    var _setButtonState = function (panelRole, role, action, state) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
-        
-        console.log('setButtonState %d %s %s %s', panelRole, role, action, state);
-        selector = "div[data-panel-role='" + panelRole + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
+    // set panel button state
+    var _setButtonState = function (pluginId, role, action, state) {
+        console.log('setButtonState %d %s %s %s', pluginId, role, action, state);
+        var selector = _pluginSelector(pluginId) + " [data-role='" + role + "'][data-action='" + action + "'] ";
+
         if (state) {
             $(selector).removeClass("panel-btn-off");
             $(selector).addClass("panel-btn-on");
@@ -475,22 +482,18 @@
         return state;
     };
 
-    var _getButtonState = function (panelRole, role, action) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
-
-        selector = "div[data-panel-role='" + panelRole + "'] [data-role='" + role + "'][data-action='" + action + "'] ";
-        console.log('getButtonState %d %s %s found %d', panelRole, role, action, $(selector).length);
+    var _getButtonState = function (pluginId, role, action) {
+        
+        var selector = _pluginSelector(pluginId) + " [data-role='" + role + "'][data-action='" + action + "'] ";
+        console.log('getButtonState %d %s %s found %d', pluginId, role, action, $(selector).length);
         return $(selector).hasClass("panel-btn-on");
     };
 
-    var _toggleButton = function (panelRole, role, action) {
-        if (typeof panelRole === "string")
-            panelRole = parseInt(panelRole);
-
+    var _toggleButton = function (pluginId, role, action) {
+        
         console.log('toggleButtonState Menu %d %s %s', panelRole, role, action);
-        ison = _getButtonState(panelRole, role, action);
-        return _setButtonState(panelRole, role, action, !ison);
+        ison = _getButtonState(pluginId, role, action);
+        return _setButtonState(pluginId, role, action, !ison);
     };
         
     var _initLocalStorage = function () {
@@ -591,11 +594,14 @@
         setButtonState: _setButtonState,
         getButtonState: _getButtonState,
         toggleButton: _toggleButton,
-        selectPanelMenu: _selectPanelMenu,
+        selectMenu: _selectMenu,
         sendLocal: _sendLocal,
         sendGroup: _sendGroup,
         getURL: _getURL,
-        getBaseURL: _getBaseURL
+        getBaseURL: _getBaseURL,
+        pluginSelector: _pluginSelector,
+        getPluginPanelId: _getPluginPanelId
+
     };
 
 })();

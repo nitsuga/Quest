@@ -35,14 +35,14 @@ namespace Quest.WebCore.Plugins.Properties
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.properties.initialize(panelRole)";
+            return "hud.plugins.properties.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -60,12 +60,12 @@ namespace Quest.WebCore.Plugins.Properties
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
             const string templateFileName = "Properties.html";
             var templateFolder = _env.WebRootPath + "/plugins/Properties/Lib";
-            var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return gazHtml;
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            return html;
         }
     }
 }

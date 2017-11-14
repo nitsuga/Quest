@@ -4,23 +4,24 @@ hud.plugins = hud.plugins || {};
 
 hud.plugins.aac = (function () {
 
-    var _initAAC = function (panel) {
+    var _init = function (panelId, pluginId) {
         // select the primary menu
-        hud.selectPanelMenu(panel, 0);
+        hud.selectMenu(pluginId, 0);
 
         // listen for hub messages on these groups
         $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-            _handleMessage(panel, group, msg);
+            _handleMessage(pluginId, group, msg);
         });
 
         // listen for panel actions
-        $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
-            _handleAction(panel, action);
+        var selector = hud.pluginSelector(pluginId);
+        $(selector).on("action", function (evt, action) {
+            _handleAction(pluginId, action);
         });
     };
 
     // handle message from service bus
-    var _handleMessage = function (panel, group, msg) {
+    var _handleMessage = function (pluginId, group, msg) {
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 break;
@@ -30,19 +31,19 @@ hud.plugins.aac = (function () {
     };
 
     // handle actions from button push
-    var _handleAction = function (panel, action) {
+    var _handleAction = function (pluginId, action) {
         switch (action) {
             case "select-aac-details":
-                var selected = hud.toggleButton(panel, 'select-action', action);
+                var selected = hud.toggleButton(pluginId, 'select-action', action);
                 if (selected)
                 {
-                    _selectPane(panel, "#panel1", false);
-                    _selectPane(panel, "#panel2", true);
+                    _selectPane(pluginId, "#panel1", false);
+                    _selectPane(pluginId, "#panel2", true);
                 }
                 else
                 {
-                    _selectPane(panel, "#panel1", true);
-                    _selectPane(panel, "#panel2", false);
+                    _selectPane(pluginId, "#panel1", true);
+                    _selectPane(pluginId, "#panel2", false);
                 }
                 break;
             default:
@@ -51,16 +52,12 @@ hud.plugins.aac = (function () {
     };
 
     // attach click handlers to all the panel buttons
-    var _registerButtons = function (panel) {
-        $('[data-panel-role=' + panel + '] a[data-role="select-map"]').on('click', function (e) {
-            e.preventDefault();
-            selected_map = $(e.currentTarget).attr('data-action');
-            _selectBaseLayer(panel, selected_map);
-        });
+    var _registerButtons = function (pluginId) {
     };
 
-    var _selectPane = function (panel, pane, state) {
-        selector = "div[data-panel-role='" + panel + "'] "+pane;
+    var _selectPane = function (pluginId, pane, state) {
+        
+        selector = hud.pluginSelector(pluginId) + " "+ pane;
         if (state) {
             $(selector).removeClass("pane-hidden");
         }
@@ -72,7 +69,7 @@ hud.plugins.aac = (function () {
     };
 
     return {
-        initAAC: _initAAC,
+        init: _init,
     };
 
 })();

@@ -2,7 +2,7 @@ var hud = hud || {};
 
 hud.plugins = hud.plugins || {};
 
-// keep track of map objects belonging to different panels
+// keep track of map objects belonging to different map plugins
 var rtmap_maps = {};
 
 // set of base map layers
@@ -18,7 +18,7 @@ hud.plugins.rtmap = (function () {
 
     var markersi, markersr, markersd, georesLayer;
 
-    var _initMap = function (panel) {
+    var _init = function (panelId, pluginId) {
         L_PREFER_CANVAS = true;
 
         $.get(hud.getURL("RTM/GetSettings"), function (data) {
@@ -70,7 +70,9 @@ hud.plugins.rtmap = (function () {
                 "Stations": stations
             };
 
-            var mapdiv = 'map' + panel;
+            // change the map div to be unique for this plugin
+            var mapdiv = 'map' + pluginId;
+            $('#mapdivplaceholder').attr('id', mapdiv);            
 
             var map = new L.Map(mapdiv, {
                 center: new L.LatLng(rtmap_settings.latitude, rtmap_settings.longitude),
@@ -89,18 +91,18 @@ hud.plugins.rtmap = (function () {
             map.addLayer(searchlayer);
 
             // save the map object in a dictionary so it can be accessed later
-            rtmap_maps[panel] = map;
+            rtmap_maps[pluginId] = map;
 
             // select the primary menu
-            hud.selectPanelMenu(panel, 0);
+            hud.selectMenu(pluginId, 0);
 
             // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
             // are handled automatically by hud.js
-            _registerButtons(panel);
+            _registerButtons(pluginId);
 
             // listen for hub messages on these groups
             $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-                _handleMessage(panel, group, georesLayer, msg);
+                _handleMessage(pluginId, group, georesLayer, msg);
             });
 
             // listen for local hub messages 
@@ -114,8 +116,9 @@ hud.plugins.rtmap = (function () {
             });
 
             // listen for panel actions
-            $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
-                _handleAction(panel, action);
+            var selector = hud.pluginSelector(pluginId);
+            $(selector).on("action", function (evt, action) {
+                _handleAction(pluginId, action);
             });
 
             // send a MapBounds event if the map changes in any way
@@ -125,14 +128,14 @@ hud.plugins.rtmap = (function () {
 
             // listen for local hub messages  
             $("#sys_hub").on("SearchResults", function (evt, data) {
-                _showSearchResults(map, panel, searchlayer, data);
+                _showSearchResults(map, pluginId, searchlayer, data);
             });
             
         });
     };
 
     // show search results on the map
-    var _showSearchResults = function (map, panel, searchlayer, data) {
+    var _showSearchResults = function (map, pluginId, searchlayer, data) {
 
         searchlayer.clearLayers();
 
@@ -151,7 +154,8 @@ hud.plugins.rtmap = (function () {
         //_addPolygon(searchlayer, coords);
 
         // zoom in..
-        var isLocked = hud.getButtonState(panel, 'data-action', 'lock-map');
+
+        var isLocked = hud.getButtonState(pluginId, 'data-action', 'lock-map');
 
         if (!isLocked && data.Documents.length > 0) {
             var bounds = searchlayer.getBounds();
@@ -282,58 +286,59 @@ hud.plugins.rtmap = (function () {
     }
 
     // handle message from service bus
-    var _handleMessage = function (panel, group, georesLayer, msg) {
+    var _handleMessage = function (pluginId, group, georesLayer, msg) {
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 _updateResource(georesLayer, msg.Item);
                 break;
             case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
-                _updateResourceStatus(panel, georesLayer, msg);
+                _updateResourceStatus(pluginId, georesLayer, msg);
                 break;
         }
     };
 
     // handle actions from button push
-    var _handleAction = function (panel, action) {
+    var _handleAction = function (pluginId, action) {
         switch (action) {
             case "select-overlay":
-                var isOn = hud.toggleButton(panel, 'select-overlay', action);
-                _selectLayer(panel, action, isOn);
+                var isOn = hud.toggleButton(pluginId, 'select-overlay', action);
+                _selectLayer(pluginId, action, isOn);
                 break;
             case "lock-map":
                 break;
             default:
-                hud.toggleButton(panel, 'select-action', action);
-                _updateMap(panel);
+                hud.toggleButton(pluginId, 'select-action', action);
+                _updateMap(pluginId);
         }
     };
 
 
     // attach click handlers to all the panel buttons
-    var _registerButtons = function (panel) {
-        $('[data-panel-role=' + panel + '] a[data-role="select-map"]').on('click', function (e) {
+    var _registerButtons = function (pluginId) {
+        var selector = hud.pluginSelector(pluginId);
+        $(selector + ' a[data-role="select-map"]').on('click', function (e) {
             e.preventDefault();
             selected_map = $(e.currentTarget).attr('data-action');
-            _selectBaseLayer(panel, selected_map);
+            _selectBaseLayer(pluginId, selected_map);
         });
     };
 
-    var _updateMap = function (panel) {
+    var _updateMap = function (pluginId) {
 
         //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
 
-        var map = rtmap_maps[panel];
+        var map = rtmap_maps[pluginId];
 
-        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
-        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
-        incidentsImmediate = hud.getButtonState(panel, "select-action", "select-c1");
+        resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
+        resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
+        incidentsImmediate = hud.getButtonState(pluginId, "select-action", "select-c1");
         incidentsOther = false;
-        hospitals = hud.getButtonState(panel, "select-action", "select-hos");
-        standby = hud.getButtonState(panel, "select-action", "select-sbp");
-        stations = hud.getButtonState(panel, "select-action",  "select-stn");
-        aeu = hud.getButtonState(panel, "select-action", "select-aeu");
-        fru = hud.getButtonState(panel, "select-action", "select-fru");
-        oth = hud.getButtonState(panel, "select-action", "select-oth");
+        hospitals = hud.getButtonState(pluginId, "select-action", "select-hos");
+        standby = hud.getButtonState(pluginId, "select-action", "select-sbp");
+        stations = hud.getButtonState(pluginId, "select-action",  "select-stn");
+        aeu = hud.getButtonState(pluginId, "select-action", "select-aeu");
+        fru = hud.getButtonState(pluginId, "select-action", "select-fru");
+        oth = hud.getButtonState(pluginId, "select-action", "select-oth");
 
         //TODO: get these from the controller
         var resourceGroups = [];
@@ -388,9 +393,9 @@ hud.plugins.rtmap = (function () {
                 }
 
                 // now register for updates
-                hud.joinLeaveGroup("Resource.Available", panel, resourcesAvailable);
-                hud.joinLeaveGroup("Resource.Busy", panel, resourcesBusy);
-                hud.joinLeaveGroup("Resource.Enroute", panel, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Available", pluginId, resourcesAvailable);
+                hud.joinLeaveGroup("Resource.Busy", pluginId, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Enroute", pluginId, resourcesBusy);
 
             } // success
             //$("*").css("cursor", "default");
@@ -399,10 +404,10 @@ hud.plugins.rtmap = (function () {
 
     // the status of a resource has changed. we need to remove it if we're not showing
     // this type of resource
-    var _updateResourceStatus = function (panel, layer, item) {
+    var _updateResourceStatus = function (pluginId, layer, item) {
 
-        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
-        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
+        resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
+        resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
 
         if (resourcesAvailable === false && item.NewStatusCategory !== "Available")
             _removeExistingFeature(layer, item.FleetNo);
@@ -534,20 +539,20 @@ hud.plugins.rtmap = (function () {
     /// <summary>
     /// Re-centre the maps to new co-ordinates
     /// </summary
-    var _panTo = function (panel, lat, lng) {
-        var map = rtmap_maps[panel];
+    var _panTo = function (pluginId, lat, lng) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _panAndMarkLocation = function (panel, locationName, lat, lng) {
-        var map = rtmap_maps[panel];
+    var _panAndMarkLocation = function (pluginId, locationName, lat, lng) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _setZoomLevel = function (panel, z) {
-        var map = rtmap_maps[panel];
+    var _setZoomLevel = function (pluginId, z) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _selectBaseLayer = function (panel, layerName) {
-        var map = rtmap_maps[panel];
+    var _selectBaseLayer = function (pluginId, layerName) {
+        var map = rtmap_maps[pluginId];
         for (var layer in rtmap_baseLayers) {
             if (map.hasLayer(rtmap_baseLayers[layer]))
                 map.removeLayer(rtmap_baseLayers[layer]);
@@ -555,8 +560,8 @@ hud.plugins.rtmap = (function () {
         map.addLayer(rtmap_baseLayers[layerName]);
     };
 
-    var _selectLayer = function (panel, layerName, on) {
-        var map = rtmap_maps[panel];
+    var _selectLayer = function (pluginId, layerName, on) {
+        var map = rtmap_maps[pluginId];
 
         if (on)
             map.addLayer(rtmap_overlayLayers[layerName]);
@@ -566,12 +571,12 @@ hud.plugins.rtmap = (function () {
 
     };
 
-    var _lockMap = function (panel, mode) {
-        hud.setButtonState(panel, "select-action", "lock-map", mode);
+    var _lockMap = function (pluginId, mode) {
+        hud.setButtonState(pluginId, "select-action", "lock-map", mode);
     };
 
     return {
-        initMap: _initMap,
+        init: _init,
         selectBaseLayer: _selectBaseLayer,
         lockMap: _lockMap,
         setZoom: _setZoomLevel,

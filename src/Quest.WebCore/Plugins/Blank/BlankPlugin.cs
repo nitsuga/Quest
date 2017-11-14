@@ -34,9 +34,9 @@ namespace Quest.WebCore.Plugins.Blank
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
@@ -59,9 +59,9 @@ namespace Quest.WebCore.Plugins.Blank
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
-            return $"<div id='{role}'></div>";
+            return $"<div></div>";
         }
     }
 }

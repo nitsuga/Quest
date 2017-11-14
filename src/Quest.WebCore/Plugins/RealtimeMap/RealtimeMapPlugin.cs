@@ -36,14 +36,14 @@ namespace Quest.WebCore.Plugins.RealtimeMap
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.rtmap.initMap(panelRole)";
+            return "hud.plugins.rtmap.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -61,13 +61,12 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
-            const string templateFileName = "Map.html";
+            const string templateFileName = "index.html";
             var templateFolder = _env.WebRootPath + "/plugins/RealtimeMap/Lib";
-            var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            gazHtml = gazHtml.Replace("id=mapdivplaceholder", $"id='map{role}'");
-            return gazHtml;
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            return html;
         }
 
         public MapSettings GetSettings()

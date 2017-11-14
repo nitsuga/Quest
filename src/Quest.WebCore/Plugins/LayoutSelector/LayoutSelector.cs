@@ -42,9 +42,9 @@ namespace Quest.WebCore.Plugins.LayoutSelector
         /// A method call to render the Html for the Main Frame of a layout
         /// </summary>
         /// <returns></returns>
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawSelectorGrid(role);
+            return DrawContainer();
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Quest.WebCore.Plugins.LayoutSelector
         /// <returns></returns>
         public string OnInit()
         {
-            return "hud.plugins.layoutSelector.initialize()";
+            return "hud.plugins.layoutSelector.init(panelId, pluginId)";
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Quest.WebCore.Plugins.LayoutSelector
         }
 
 
-        private string DrawSelectorGrid(string role)
+        private string DrawContainer()
         {
             var div = new TagBuilder("div");
             div.MergeAttribute("id", "layoutSelector");

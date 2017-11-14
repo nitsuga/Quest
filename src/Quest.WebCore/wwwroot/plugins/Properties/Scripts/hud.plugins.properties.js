@@ -4,43 +4,43 @@ hud.plugins = hud.plugins || {};
 
 hud.plugins.properties = (function() {
 
-    var _initialize = function (panel) {
+    var _init = function (panelId, pluginId) {
 
         // select the primary menu
-        hud.selectPanelMenu(panel, 0);
+        hud.selectMenu(pluginId, 0);
 
         // listen for local hub messages 
         $("#sys_hub").on("ObjectSelected", function (evt, data) {
-            _handleMessage(panel, evt, data);
+            _handleMessage(pluginId, evt, data);
         });
 
         // listen for panel actions
-        $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
-            _handleAction(panel, action);
+        var selector = hud.pluginSelector(pluginId);
+        $(selector).on("action", function (evt, action) {
+            _handleAction(pluginId, action);
         });
-
     };
 
-    var _handleMessage = function (panel, evt, data) {
+    var _handleMessage = function (pluginId, evt, data) {
         switch (evt.type) {
             case "ObjectSelected":
                 console.log("caught ObjectSelected: " + data.Type + "=" + data.Value);
-                _loadTemplate(panel, data)
+                _loadTemplate(pluginId, data)
                 break;
         }
     };
 
     // handle actions from button push
-    var _handleAction = function (panel, action) {
+    var _handleAction = function (pluginId, action) {
         switch (action) {
             default:
-                hud.toggleButton(panel, 'select-action', action);
+                hud.toggleButton(pluginId, 'select-action', action);
         }
     };
 
-    var _loadTemplate = function (panelRole, data) {
+    var _loadTemplate = function (pluginId, data) {
 
-        var selector = "[data-panel-role='" + panelRole + "'] [data-role='properties-container']";
+        var selector = hud.pluginSelector(pluginId) + " [data-role='properties-container']";
 
         var body = JSON.stringify(data);
 
@@ -61,7 +61,7 @@ hud.plugins.properties = (function() {
 
 
     return {
-        initialize: _initialize
+        init: _init
     };
 
 })();

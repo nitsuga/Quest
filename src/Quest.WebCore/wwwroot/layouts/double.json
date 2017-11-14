@@ -5,7 +5,7 @@
   "Panels": [
     {
       "Panel": 0,
-      "Plugin": null,
+      "Plugin": "BlankPlugin",
       "Style": "col-md-6 twothird-height right-border",
       "Actions": [
         {
@@ -26,7 +26,7 @@
     },
     {
       "Panel": 1,
-      "Plugin": null,
+      "Plugin": "BlankPlugin",
       "Style": "col-md-6 twothird-height",
       "Actions": [
         {
@@ -46,14 +46,8 @@
       ]
     },
     {
-      "Panel": null,
-      "Plugin": null,
-      "Style": null,
-      "Actions": []
-    },
-    {
       "Panel": 2,
-      "Plugin": null,
+      "Plugin": "BlankPlugin",
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [
         {
@@ -81,7 +75,7 @@
     },
     {
       "Panel": 3,
-      "Plugin": null,
+      "Plugin": "BlankPlugin",
       "Style": "col-md-3 onethird-height top-border right-border",
       "Actions": [
         {

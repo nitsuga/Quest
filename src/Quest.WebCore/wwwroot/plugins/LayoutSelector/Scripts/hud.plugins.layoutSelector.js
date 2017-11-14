@@ -7,7 +7,7 @@ hud.plugins.layoutSelector = (function() {
     var _initialized = false;
 
     // Hook up to button click events that will load a selected plugin into the parent panel
-    var _initialize = function() {
+    var _init = function (panelId, pluginId) {
 
         if(_initialized === true) return;
 
@@ -22,6 +22,6 @@ hud.plugins.layoutSelector = (function() {
     };
 
     return {
-        initialize: _initialize
+        init: _init
     }
 })();

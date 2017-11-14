@@ -3,13 +3,7 @@
 {
     if (panel.Panel != null)
     {
-        <div class="@panel.Style" id="panel-@panel.Panel">
-            <div class="row full-height">
-                <div class="col-sm-12 full-height">
-                    @Html.Partial("_HudPanel", panel)
-                </div>
-            </div>
-        </div>
+        @Html.Partial("_HudPanel", panel)
     }
     else
     {

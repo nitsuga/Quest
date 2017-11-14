@@ -35,14 +35,14 @@ namespace Quest.WebCore.Plugins.Camera
 
         public bool IsMenuItem => true;
 
-        public string RenderHtml(string role)
+        public string RenderHtml()
         {
-            return DrawContainer(role);
+            return DrawContainer();
         }
 
         public string OnInit()
         {
-            return "hud.plugins.camera.initialize()";
+            return "hud.plugins.camera.init(panelId, pluginId)";
         }
 
         public string OnPanelMoved()
@@ -60,12 +60,12 @@ namespace Quest.WebCore.Plugins.Camera
             // Do nothing
         }
 
-        private string DrawContainer(string role)
+        private string DrawContainer()
         {
-            const string templateFileName = "Gazetteer.html";
-            var templateFolder = _env.WebRootPath + "/plugins/Gazetteer/Lib";
-            var gazHtml = File.ReadAllText($"{templateFolder}/{templateFileName}");
-            return gazHtml;
+            const string templateFileName = "index.html";
+            var templateFolder = _env.WebRootPath + "/plugins/Camera/Lib";
+            var html = File.ReadAllText($"{templateFolder}/{templateFileName}");
+            return html;
         }
     }
 }
