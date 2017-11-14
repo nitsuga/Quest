@@ -5,6 +5,10 @@ hud.plugins = hud.plugins || {};
 // keep track of map objects belonging to different map plugins
 var rtmap_maps = {};
 
+var georesLayer = {};
+
+var searchlayer = {};
+
 // set of base map layers
 var rtmap_baseLayers;
 
@@ -16,9 +20,8 @@ var rtmap_settings;
 
 hud.plugins.rtmap = (function () {
 
-    var markersi, markersr, markersd, georesLayer;
-
     var _init = function (panelId, pluginId) {
+
         L_PREFER_CANVAS = true;
 
         $.get(hud.getURL("RTM/GetSettings"), function (data) {
@@ -86,12 +89,15 @@ hud.plugins.rtmap = (function () {
 
             L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
 
-            // add a search layer onto the maps and remember it
-            var searchlayer = new L.featureGroup();
-            map.addLayer(searchlayer);
-
             // save the map object in a dictionary so it can be accessed later
             rtmap_maps[pluginId] = map;
+
+            // create geo overlay
+            georesLayer[pluginId] = _createResourcesLayer(map);
+
+            // add a search layer onto the maps and remember it
+            searchlayer[pluginId] = new L.featureGroup();
+            map.addLayer(searchlayer[pluginId]);
 
             // select the primary menu
             hud.selectMenu(pluginId, 0);
@@ -102,7 +108,7 @@ hud.plugins.rtmap = (function () {
 
             // listen for hub messages on these groups
             $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-                _handleMessage(pluginId, group, georesLayer, msg);
+                _handleMessage(pluginId, group, msg);
             });
 
             // listen for local hub messages 
@@ -128,16 +134,17 @@ hud.plugins.rtmap = (function () {
 
             // listen for local hub messages  
             $("#sys_hub").on("SearchResults", function (evt, data) {
-                _showSearchResults(map, pluginId, searchlayer, data);
+                _showSearchResults(map, pluginId, data);
             });
             
         });
     };
 
     // show search results on the map
-    var _showSearchResults = function (map, pluginId, searchlayer, data) {
+    var _showSearchResults = function (map, pluginId, data) {
 
-        searchlayer.clearLayers();
+        var layer = searchlayer[pluginId];
+        layer.clearLayers();
 
         for (docindex = 0; docindex < data.Documents.length; docindex++) {
             doc = data.Documents[docindex];
@@ -145,8 +152,7 @@ hud.plugins.rtmap = (function () {
             if (doc.l !== undefined && doc.l !== null) {
                 latlng = new L.LatLng(doc.l.lat, doc.l.lon);
                 feature = _getFeature(doc, latlng);
-
-                searchlayer.addLayer(feature);
+                layer.addLayer(feature);
             }
         }
 
@@ -158,7 +164,7 @@ hud.plugins.rtmap = (function () {
         var isLocked = hud.getButtonState(pluginId, 'data-action', 'lock-map');
 
         if (!isLocked && data.Documents.length > 0) {
-            var bounds = searchlayer.getBounds();
+            var bounds = layer.getBounds();
             if (bounds.isValid())
                 map.fitBounds(bounds, { maxZoom: 18 });//works!    
         }
@@ -286,13 +292,13 @@ hud.plugins.rtmap = (function () {
     }
 
     // handle message from service bus
-    var _handleMessage = function (pluginId, group, georesLayer, msg) {
+    var _handleMessage = function (pluginId, group, msg) {
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
-                _updateResource(georesLayer, msg.Item);
+                _updateResource(pluginId, msg.Item);
                 break;
             case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
-                _updateResourceStatus(pluginId, georesLayer, msg);
+                _updateResourceStatus(pluginId, msg);
                 break;
         }
     };
@@ -366,10 +372,6 @@ hud.plugins.rtmap = (function () {
             },
             dataType: "json",
             success: function (layer) {
-                //Create a new empty resources layer and add to map
-                if (markersr !== undefined) markersr.clearLayers();
-
-                _createResourcesLayer(map);
 
                 if (layer.error !== undefined) {
                     $("#message").html(layer.error);
@@ -383,13 +385,13 @@ hud.plugins.rtmap = (function () {
                 // add resources to the map
                 if (layer.Resources !== undefined) {
                     layer.Resources.forEach(function (item) {
-                        _updateResource(georesLayer, item);
+                        _updateResource(pluginId, item);
                     });
                 }
 
                 if (layer.Destinations !== undefined) {
                     // add Destinations to the map
-                    _updateDestinations(layer.Destinations, georesLayer);
+                    _updateDestinations(pluginId, layer.Destinations);
                 }
 
                 // now register for updates
@@ -404,7 +406,8 @@ hud.plugins.rtmap = (function () {
 
     // the status of a resource has changed. we need to remove it if we're not showing
     // this type of resource
-    var _updateResourceStatus = function (pluginId, layer, item) {
+    var _updateResourceStatus = function (pluginId, item) {
+        var layer = georesLayer[pluginId];
 
         resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
         resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
@@ -416,7 +419,9 @@ hud.plugins.rtmap = (function () {
             _removeExistingFeature(layer, item.FleetNo);
     };
 
-    var _updateResource = function (layer, item) {
+    var _updateResource = function (pluginId, item) {
+        var layer = georesLayer[pluginId];
+
         // for each item construct equiv geojson item
         var geojsonFeature = {
             "type": "Feature",
@@ -437,7 +442,9 @@ hud.plugins.rtmap = (function () {
         layer.addData(geojsonFeature);
     };
 
-    var _updateDestinations = function (destinations, layer) {
+    var _updateDestinations = function (pluginId, destinations) {
+
+        var layer = georesLayer[pluginId];
 
         destinations.forEach(function (item) {
             _removeExistingFeature(layer, item.Id);
@@ -496,21 +503,7 @@ hud.plugins.rtmap = (function () {
 
     var _createResourcesLayer = function (map) {
         try {
-            var useclusters = hud.getStoreAsBool("#use-clusters");
-
-            if (useclusters === true)
-                markersr = new L.MarkerClusterGroup(
-                    {
-                        iconCreateFunction: function (cluster) {
-                            var childCount = cluster.getChildCount();
-                            return new L.DivIcon({ html: "<div><span><b>" + childCount + "</b></span></div>", className: "resourcecluster", iconSize: new L.Point(40, 40) });
-                        }
-                    });
-
-            if (markersr === null || markersr === undefined)
-                markersr = L.layerGroup();
-
-            georesLayer = L.geoJson("", {
+            var georesLayer = L.geoJson("", {
                 style: function () {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
@@ -527,9 +520,9 @@ hud.plugins.rtmap = (function () {
                     });
                 }
             });
+            georesLayer.addTo(map);
 
-            markersr.addLayer(georesLayer);
-            markersr.addTo(map);
+            return georesLayer;
         }
         catch (e) {
             console.log(e.message);
