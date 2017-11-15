@@ -5,6 +5,6 @@ ARG source
 
 WORKDIR /app
 
-COPY ${source:-bin/Release/netcoreapp2.0} .
+ADD ${source:-bin/Release/netcoreapp2.0} .
 
 ENTRYPOINT ["dotnet", "Quest.Core.dll"]
