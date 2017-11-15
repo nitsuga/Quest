@@ -1,17 +1,12 @@
-FROM microsoft/aspnetcore
-ARG source
-WORKDIR /app
-EXPOSE 80
-COPY ${source:-bin/Debug/net461/publish} .
-ENTRYPOINT ["dotnet", "Quest.WebCore.dll"]
-
 FROM microsoft/aspnetcore:2.0
 MAINTAINER GluteusMaximus
 
+## visual studio source directory, by default is bin/Debug if not supplied
 ARG source
 
 WORKDIR /app
 
+# copy binaries
 ADD ${source:-bin/Release/netcoreapp2.0} .
 
 EXPOSE 80

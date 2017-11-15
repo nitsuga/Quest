@@ -9,4 +9,5 @@ WORKDIR /app
 # copy binaries
 ADD ${source:-bin/Release/netcoreapp2.0} .
 
+EXPOSE 80
 ENTRYPOINT ["dotnet", "Quest.Api.dll"]
