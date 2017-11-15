@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Lib", "Quest.Lib\Quest.Lib.csproj", "{68E95B32-4B37-48F3-8560-9E063F527B13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quest.Mobile", "Quest.Mobile\Quest.Mobile.csproj", "{4D840FCE-1B1F-4398-B694-E22D5FA2F617}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tfl.Api.Common", "TfL.Api.Common\Tfl.Api.Common.csproj", "{E7BA1765-E4B7-41A0-90FB-9B6B3AA22976}"
 EndProject
@@ -38,8 +36,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Common", "Quest.Common\Quest.Common.csproj", "{68347B90-90B3-4730-AD25-9F58D3D5DF15}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Lib.Research", "Quest.Lib.Research\Quest.Lib.Research.csproj", "{7161038A-DD63-4732-A0E4-E44FFF57E39D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.Lib.Simulation", "Quest.Lib.Simulation\Quest.Lib.Simulation.csproj", "{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quest.WebCore", "Quest.WebCore\Quest.WebCore.csproj", "{CEF52C71-4844-491E-BAA1-7DCC49D4E0ED}"
 EndProject
@@ -92,29 +88,6 @@ Global
 		{68E95B32-4B37-48F3-8560-9E063F527B13}.Release|x64.ActiveCfg = Release|Any CPU
 		{68E95B32-4B37-48F3-8560-9E063F527B13}.Release|x64.Build.0 = Release|Any CPU
 		{68E95B32-4B37-48F3-8560-9E063F527B13}.Release|x86.ActiveCfg = Release|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|ARM.Build.0 = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|x64.ActiveCfg = Debug|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|x64.Build.0 = Debug|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Debug|x86.Build.0 = Debug|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|Any CPU.ActiveCfg = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|Any CPU.Build.0 = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|ARM.ActiveCfg = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|ARM.Build.0 = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|x64.ActiveCfg = Docker|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|x64.Build.0 = Docker|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|x86.ActiveCfg = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Docker|x86.Build.0 = Docker|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|ARM.ActiveCfg = Release|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|ARM.Build.0 = Release|Any CPU
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|x64.ActiveCfg = Release|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|x64.Build.0 = Release|x64
-		{4D840FCE-1B1F-4398-B694-E22D5FA2F617}.Release|x86.ActiveCfg = Release|Any CPU
 		{E7BA1765-E4B7-41A0-90FB-9B6B3AA22976}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E7BA1765-E4B7-41A0-90FB-9B6B3AA22976}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7BA1765-E4B7-41A0-90FB-9B6B3AA22976}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -211,30 +184,6 @@ Global
 		{7161038A-DD63-4732-A0E4-E44FFF57E39D}.Release|x64.Build.0 = Release|Any CPU
 		{7161038A-DD63-4732-A0E4-E44FFF57E39D}.Release|x86.ActiveCfg = Release|Any CPU
 		{7161038A-DD63-4732-A0E4-E44FFF57E39D}.Release|x86.Build.0 = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|ARM.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|x64.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Debug|x86.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|Any CPU.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|Any CPU.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|ARM.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|ARM.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|x64.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|x64.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|x86.ActiveCfg = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Docker|x86.Build.0 = Debug|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|ARM.ActiveCfg = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|ARM.Build.0 = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|x64.ActiveCfg = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|x64.Build.0 = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|x86.ActiveCfg = Release|Any CPU
-		{80AF6AAC-7C76-4BD6-A023-F060EBDF78EC}.Release|x86.Build.0 = Release|Any CPU
 		{CEF52C71-4844-491E-BAA1-7DCC49D4E0ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CEF52C71-4844-491E-BAA1-7DCC49D4E0ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEF52C71-4844-491E-BAA1-7DCC49D4E0ED}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -368,7 +317,7 @@ Global
 		{15065469-A3E0-436E-9CE1-7ED42EC4E83F} = {62251DB7-1242-4211-A94E-93DD58F94AD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
 		SolutionGuid = {2FCE0D90-767E-40A1-8F14-5D60B23CB532}
+		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45
 	EndGlobalSection
 EndGlobal
