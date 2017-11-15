@@ -140,6 +140,62 @@ hud.plugins.rtmap = (function () {
         });
     };
 
+    var _updateCoverage = function(type, name) {
+        return $.ajax({
+            url: getURL("Home/GetVehicleCoverage"),
+            data: { 'vehtype': type },               // 1=Amb 2=FRU 7=incidents 8=combined 9=holes 10=standby cover 11=standby compliance
+            dataType: "json",
+            success: function (msg) {
+
+                if (msg.Success === true && msg.Map !== null) {
+                    var res = msg.Map;
+                    var data = [];
+                    var i = 0;
+                    if (res.map !== undefined) {
+                        //var raw = window.atob(res.map);
+                        for (var y = 0; y < res.rows; y++)
+                            for (var x = 0; x < res.cols; x++) {
+                                //if (raw.charCodeAt(i) > 0) {
+                                if (res.map[i] > 0) {
+                                    var lat = res.lat + y * res.latBlocksize;
+                                    var lon = res.lon + x * res.lonBlocksize;
+                                    var newpoint = [lat, lon];
+                                    data.push(newpoint);
+                                }
+
+                                i++;
+                            }
+                        var nheatmap;
+                        switch (res.vehtype) {
+                            case 1:     // AEU
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "lime", 0.2: "lime", 0.3: "lime", 0.4: "lime" } });
+                                break;
+                            case 2:     // FRU
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "green", 0.2: "yellow", 0.3: "yellow", 0.4: "yellow" } });
+                                break;
+                            case 7:     // incident
+                                nheatmap = L.heatLayer(data, { max: 5.0, radius: 50, maxZoom: 11, gradient: { 0.1: "black", 0.2: "black", 0.3: "black", 0.4: "black" } });
+                                break;
+                            case 8:     // combined coverage
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, gradient: { 0.1: "purple", 0.2: "lime", 0.3: "yellow", 0.4: "purple" } });
+                                break;
+                            case 9:     // resource holes
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "orange", 0.2: "lime", 0.3: "yellow", 0.4: "red" } });
+                                break;
+                        }
+
+                        if (nheatmap !== undefined) {
+                            nheatmap.opacity = 0.3;
+                            nheatmap.id = name;
+                            undoCoverage(name);
+                            covlayer.addLayer(nheatmap);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // show search results on the map
     var _showSearchResults = function (map, pluginId, data) {
 
@@ -306,12 +362,18 @@ hud.plugins.rtmap = (function () {
     // handle actions from button push
     var _handleAction = function (pluginId, action) {
         switch (action) {
+            case "select-aeuc":
+            case "select-fruc":
+                break;
+
             case "select-overlay":
                 var isOn = hud.toggleButton(pluginId, 'select-overlay', action);
                 _selectLayer(pluginId, action, isOn);
                 break;
+
             case "lock-map":
                 break;
+
             default:
                 hud.toggleButton(pluginId, 'select-action', action);
                 _updateMap(pluginId);
@@ -419,6 +481,7 @@ hud.plugins.rtmap = (function () {
             _removeExistingFeature(layer, item.FleetNo);
     };
 
+    // update layer with resources
     var _updateResource = function (pluginId, item) {
         var layer = georesLayer[pluginId];
 
@@ -442,6 +505,7 @@ hud.plugins.rtmap = (function () {
         layer.addData(geojsonFeature);
     };
 
+    // update layer with destinations
     var _updateDestinations = function (pluginId, destinations) {
 
         var layer = georesLayer[pluginId];
@@ -501,6 +565,7 @@ hud.plugins.rtmap = (function () {
         });
     };
 
+    // create a layer for resources, incidents and other features to live in
     var _createResourcesLayer = function (map) {
         try {
             var georesLayer = L.geoJson("", {
