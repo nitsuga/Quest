@@ -7,11 +7,9 @@
   <PropertyGroup>
     <!--<TargetFramework>net461</TargetFramework>-->
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-win+net45+wp8+win81+wpa8</PackageTargetFallback>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
