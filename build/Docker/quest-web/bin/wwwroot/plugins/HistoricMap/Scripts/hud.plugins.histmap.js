@@ -2,10 +2,12 @@
 
 hud.plugins = hud.plugins || {}
 
-hud.plugins.histmap = (function() {
-    var _initialize = function() {
+hud.plugins.histmap = (function () {
+
+    var _init = function (panelId, pluginId) {
     };
+
     return {
-        initialize: _initialize
+        init: _init
     }
 })();

@@ -11,6 +11,8 @@ using Quest.Lib.Utils;
 using Quest.Lib.Data;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Resource;
+using Quest.Common.Messages.Resource;
 
 namespace Quest.Lib.Routing
 {
@@ -29,9 +31,9 @@ namespace Quest.Lib.Routing
         public IDatabaseFactory dbFactory;
         public string Name;
 
-        public CoverageMap GetCoverage(IRouteEngine routingEngine)
+        public CoverageMap GetCoverage(IRouteEngine routingEngine, IResourceStore resStore)
         {
-            UpdateCoverage(routingEngine);
+            UpdateCoverage(routingEngine, resStore);
             return CombinedMap;
         }
 
@@ -88,14 +90,14 @@ namespace Quest.Lib.Routing
             return null; // nothing changed
         }
 
-        private void UpdateCoverage(IRouteEngine routingEngine)
+        private void UpdateCoverage(IRouteEngine routingEngine, IResourceStore resStore)
         {
             if (Definition.VehicleCodes != null)
             {
                 var vehicleCodes = Definition.VehicleCodes.Split(',');
 
                 // get a list of vehicles and there positions from the database that match the criteria
-                var resources = GetAvailableResources(vehicleCodes);
+                var resources = resStore.GetResources(0, vehicleCodes);
 
                 // mark each cache entry as invalid.. will be used later to remove unwanted coverage maps.
                 _cache.Values.ToList().ForEach(x => x.Valid = false);
@@ -152,7 +154,8 @@ namespace Quest.Lib.Routing
                     DistanceMax = 16000,
                     DurationMax = 60*(int) Definition.MinuteLimit,
                     SearchType = RouteSearchType.Quickest,
-                    RoadSpeedCalculator = "ConstantSpeedCalculator"
+                    RoadSpeedCalculator = "ConstantSpeedCalculator",
+                    TileSize = 500
                 };
 
                 // calculate the coverage map
@@ -206,7 +209,7 @@ namespace Quest.Lib.Routing
                 _cache.Remove(callsign);
         }
 
-        private void UpdateCacheLocations(List<DataModel.Resource> resources)
+        private void UpdateCacheLocations(List<QuestResource> resources)
         {
             // cycle through resources updating the cache if the resource is
             foreach (var res in resources)
@@ -219,28 +222,34 @@ namespace Quest.Lib.Routing
                     if (res.Callsign == null)
                         continue;
 
-                    if (!_cache.ContainsKey(res.Callsign.Callsign1))
+                    if (res.Position == null)
+                        continue;
+
+                    if (res.Position.Latitude == 0 || res.Position.Longitude==0)
+                        continue;
+
+                    if (!_cache.ContainsKey(res.Callsign))
                     {
                         // create a new cache entry as this one doesn't exist
                         updatedRoutingPoint = new Coordinate
                         {
-                            X = res.Longitude ?? 0,
-                            Y = res.Latitude ?? 0
+                            X = res.Position.Longitude,
+                            Y = res.Position.Latitude
                         };
 
-                        entry = new CacheEntry {Callsign = res.Callsign.Callsign1, CurLocation = updatedRoutingPoint, Map = null};
-                        _cache.Add(res.Callsign.Callsign1, entry);
+                        entry = new CacheEntry {Callsign = res.Callsign, CurLocation = updatedRoutingPoint, Map = null};
+                        _cache.Add(res.Callsign, entry);
                     }
                     else
-                        entry = _cache[res.Callsign.Callsign1];
+                        entry = _cache[res.Callsign];
 
                     // entry is now either a new or existing cache entry
 
                     if (updatedRoutingPoint == null) // i.e. not overriden or new, take new position from the record
                         updatedRoutingPoint = new Coordinate
                         {
-                            X = res.Longitude ?? 0,
-                            Y = res.Latitude ?? 0
+                            X = res.Position.Longitude,
+                            Y = res.Position.Latitude
                         };
 
                     entry.CurLocation = updatedRoutingPoint;
@@ -252,24 +261,6 @@ namespace Quest.Lib.Routing
                         "Vehicle Coverage Tracker");
                 }
             }
-        }
-
-        private List<DataModel.Resource> GetAvailableResources(string[] vehicleCodes)
-        {
-            List<DataModel.Resource> resources = null;
-
-            // calculate available 
-            return dbFactory.Execute<QuestContext, List<DataModel.Resource>>((db) =>
-            {
-                var results = from result in db.Resource
-                                where
-                                    result.ResourceStatus.Available == true
-                                    //                            && vehicleCodes.Contains(result.ResourceType)
-                                    && result.Latitude != null
-                                select result;
-                resources = results.ToList();
-                return resources;
-            });
         }
 
         private class CacheEntry

@@ -28,6 +28,7 @@
       "Panel": 1,
       "Plugin": "GazetteerPlugin",
       "Style": "col-md-3 half-height bottom-border",
+      "ExpandedStyle": "col-md-3 full-height",
       "Actions": [
         {
           "Target": 0,
@@ -37,7 +38,7 @@
           "Icon": "glyphicon-triangle-left"
         },
         {
-          "Target": 3,
+          "Target": 2,
           "Position": "panel-btn-bottom",
           "Action": "expand",
           "Label": null,
@@ -56,16 +57,17 @@
       "Panel": 2,
       "Plugin": "PropertiesPlugin",
       "Style": "col-md-3 half-height ",
+      "ExpandedStyle": "col-md-3 full-height",
       "Actions": [
         {
-          "Target": 4,
+          "Target": 1,
           "Position": "panel-btn-top",
           "Action": "expand",
           "Label": null,
           "Icon": "glyphicon-triangle-top"
         },
         {
-          "Target": 1,
+          "Target": 0,
           "Position": "panel-btn-left",
           "Action": "swap",
           "Label": null,

@@ -15,6 +15,7 @@ namespace Quest.Lib.Resource
     public class ResourceStoreMssql : IResourceStore
     {
         IDatabaseFactory _dbFactory;
+        
 
         public ResourceStoreMssql(IDatabaseFactory dbFactory)
         {

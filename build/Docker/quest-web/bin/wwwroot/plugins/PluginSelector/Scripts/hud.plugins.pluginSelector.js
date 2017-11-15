@@ -4,27 +4,21 @@ hud.plugins = hud.plugins || {};
 
 hud.plugins.pluginSelector = (function() {
 
-    var _initialized = false;
-
     // Hook up to button click events that will load a selected plugin into the parent panel
-    var _initialize = function() {
-
-        if(_initialized === true) return;
+    var _init = function (panelId, pluginId) {
 
         $(document).on('click', 'button[data-role="plugin-selector"]',
             function(e) {
                 e.preventDefault();
 
+                var id = hud.getPluginPanelId(pluginId);
                 var pluginName = $(this).attr('data-plugin-name');
-                var containerPanel = $(this).closest('div[data-role="panel"]');
-
-                hud.loadPanel(pluginName, containerPanel.attr('data-panel-role'));
+                hud.loadPanel(pluginName, id);
             });
 
-        _initialized = true;
     };
 
     return {
-        initialize: _initialize
+        init: _init
     }
 })();

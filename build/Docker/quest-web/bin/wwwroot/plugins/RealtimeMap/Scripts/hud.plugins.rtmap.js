@@ -2,8 +2,15 @@ var hud = hud || {};
 
 hud.plugins = hud.plugins || {};
 
-// keep track of map objects belonging to different panels
+// keep track of map objects belonging to different map plugins
 var rtmap_maps = {};
+
+var georesLayer = {};
+
+// keep track of coverage layers
+var covlayer = {};
+
+var searchlayer = {};
 
 // set of base map layers
 var rtmap_baseLayers;
@@ -16,9 +23,8 @@ var rtmap_settings;
 
 hud.plugins.rtmap = (function () {
 
-    var markersi, markersr, markersd, georesLayer;
+    var _init = function (panelId, pluginId) {
 
-    var _initMap = function (panel) {
         L_PREFER_CANVAS = true;
 
         $.get(hud.getURL("RTM/GetSettings"), function (data) {
@@ -70,7 +76,9 @@ hud.plugins.rtmap = (function () {
                 "Stations": stations
             };
 
-            var mapdiv = 'map' + panel;
+            // change the map div to be unique for this plugin
+            var mapdiv = 'map' + pluginId;
+            $('#mapdivplaceholder').attr('id', mapdiv);            
 
             var map = new L.Map(mapdiv, {
                 center: new L.LatLng(rtmap_settings.latitude, rtmap_settings.longitude),
@@ -84,23 +92,26 @@ hud.plugins.rtmap = (function () {
 
             L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
 
-            // add a search layer onto the maps and remember it
-            var searchlayer = new L.featureGroup();
-            map.addLayer(searchlayer);
-
             // save the map object in a dictionary so it can be accessed later
-            rtmap_maps[panel] = map;
+            rtmap_maps[pluginId] = map;
+
+            // create geo overlay
+            georesLayer[pluginId] = _createResourcesLayer(map);
+
+            // add a search layer onto the maps and remember it
+            searchlayer[pluginId] = new L.featureGroup();
+            map.addLayer(searchlayer[pluginId]);
 
             // select the primary menu
-            hud.selectPanelMenu(panel, 0);
+            hud.selectMenu(pluginId, 0);
 
             // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
             // are handled automatically by hud.js
-            _registerButtons(panel);
+            _registerButtons(pluginId);
 
             // listen for hub messages on these groups
             $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
-                _handleMessage(panel, group, georesLayer, msg);
+                _handleMessage(pluginId, group, msg);
             });
 
             // listen for local hub messages 
@@ -114,8 +125,9 @@ hud.plugins.rtmap = (function () {
             });
 
             // listen for panel actions
-            $('[data-panel-role=' + panel + ']').on("action", function (evt, action) {
-                _handleAction(panel, action);
+            var selector = hud.pluginSelector(pluginId);
+            $(selector).on("action", function (evt, action) {
+                _handleAction(pluginId, action);
             });
 
             // send a MapBounds event if the map changes in any way
@@ -125,16 +137,152 @@ hud.plugins.rtmap = (function () {
 
             // listen for local hub messages  
             $("#sys_hub").on("SearchResults", function (evt, data) {
-                _showSearchResults(map, panel, searchlayer, data);
+                _showSearchResults(map, pluginId, data);
             });
             
         });
     };
 
-    // show search results on the map
-    var _showSearchResults = function (map, panel, searchlayer, data) {
+    // handle actions from button push
+    var _handleAction = function (pluginId, action) {
+        switch (action.action) {
+            case "select-cov":
+                hud.toggleButton(pluginId, action);
+                _updateMap(pluginId);
+                break;
 
-        searchlayer.clearLayers();
+            case "select-ovl":
+                var isOn = hud.toggleButton(pluginId, action);
+                _selectLayer(pluginId, action.data, isOn);
+                break;
+
+            case "select-inc":
+                hud.toggleButton(pluginId, action);
+                _updateMap(pluginId);
+                break;
+
+            case "select-res":
+                hud.toggleButton(pluginId, action);
+                _updateMap(pluginId);
+                break;
+
+            case "select-des":
+                hud.toggleButton(pluginId, action);
+                _updateMap(pluginId);
+                break;
+
+            case "select-lock":
+                hud.toggleButton(pluginId, action);
+                break;
+
+            default:
+        }
+    };
+
+    // attach click handlers to all the panel buttons
+    var _registerButtons = function (pluginId) {
+        var selector = hud.pluginSelector(pluginId);
+        $(selector + ' a[data-role="select-map"]').on('click', function (e) {
+            e.preventDefault();
+            selected_map = $(e.currentTarget).attr('data-action');
+            _selectBaseLayer(pluginId, selected_map);
+        });
+    };
+
+    // handle message from service bus
+    var _handleMessage = function (pluginId, group, msg) {
+        switch (msg.$type) {
+            case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
+                _updateResource(pluginId, msg.Item);
+                break;
+            case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
+                _updateResourceStatus(pluginId, msg);
+                break;
+        }
+    };
+
+    var _setupCoverage = function (pluginId) {
+    }
+
+
+    var _getCoverage = function (pluginId, type, name) {
+        var layer = covlayer[pluginId];
+
+        var hospitals = hud.getButtonState(pluginId, "select-action", "select-aeuc");
+
+        hud.joinLeaveGroup("Coverage.AEU", pluginId, resourcesBusy);
+
+        return $.ajax({
+            url: hud.getURL("RTM/GetVehicleCoverage"),
+            data: { 'vehtype': type },               // 1=Amb 2=FRU 7=incidents 8=combined 9=holes 10=standby cover 11=standby compliance
+            dataType: "json",
+            success: function (msg) {
+
+                if (msg.Success === true && msg.Map !== null) {
+                    var res = msg.Map;
+                    var data = [];
+                    var i = 0;
+                    if (res.map !== undefined) {
+                        //var raw = window.atob(res.map);
+                        for (var y = 0; y < res.rows; y++)
+                            for (var x = 0; x < res.cols; x++) {
+                                //if (raw.charCodeAt(i) > 0) {
+                                if (res.map[i] > 0) {
+                                    var lat = res.lat + y * res.latBlocksize;
+                                    var lon = res.lon + x * res.lonBlocksize;
+                                    var newpoint = [lat, lon];
+                                    data.push(newpoint);
+                                }
+
+                                i++;
+                            }
+                        var nheatmap;
+                        switch (res.vehtype) {
+                            case 1:     // AEU
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "lime", 0.2: "lime", 0.3: "lime", 0.4: "lime" } });
+                                break;
+                            case 2:     // FRU
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "green", 0.2: "yellow", 0.3: "yellow", 0.4: "yellow" } });
+                                break;
+                            case 7:     // incident
+                                nheatmap = L.heatLayer(data, { max: 5.0, radius: 50, maxZoom: 11, gradient: { 0.1: "black", 0.2: "black", 0.3: "black", 0.4: "black" } });
+                                break;
+                            case 8:     // combined coverage
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, gradient: { 0.1: "purple", 0.2: "lime", 0.3: "yellow", 0.4: "purple" } });
+                                break;
+                            case 9:     // resource holes
+                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "orange", 0.2: "lime", 0.3: "yellow", 0.4: "red" } });
+                                break;
+                        }
+
+                        if (nheatmap !== undefined) {
+                            nheatmap.opacity = 0.3;
+                            nheatmap.id = name;
+                            undoCoverage(name);
+                            layer.addLayer(nheatmap);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // remove coverge from the map
+    var _undoCoverage = function (pluginId, name) {
+        var layer = covlayer[pluginId];
+        layer.eachLayer(function (layer) {
+            if (layer.id === name) {
+                layer.removeLayer(layer);
+                return;
+            }
+        });
+    }
+
+    // show search results on the map
+    var _showSearchResults = function (map, pluginId, data) {
+
+        var layer = searchlayer[pluginId];
+        layer.clearLayers();
 
         for (docindex = 0; docindex < data.Documents.length; docindex++) {
             doc = data.Documents[docindex];
@@ -142,8 +290,7 @@ hud.plugins.rtmap = (function () {
             if (doc.l !== undefined && doc.l !== null) {
                 latlng = new L.LatLng(doc.l.lat, doc.l.lon);
                 feature = _getFeature(doc, latlng);
-
-                searchlayer.addLayer(feature);
+                layer.addLayer(feature);
             }
         }
 
@@ -151,10 +298,11 @@ hud.plugins.rtmap = (function () {
         //_addPolygon(searchlayer, coords);
 
         // zoom in..
-        var isLocked = hud.getButtonState(panel, 'data-action', 'lock-map');
+
+        var isLocked = hud.getButtonState(pluginId, 'data-action', 'lock-map');
 
         if (!isLocked && data.Documents.length > 0) {
-            var bounds = searchlayer.getBounds();
+            var bounds = layer.getBounds();
             if (bounds.isValid())
                 map.fitBounds(bounds, { maxZoom: 18 });//works!    
         }
@@ -281,59 +429,22 @@ hud.plugins.rtmap = (function () {
         return feature;
     }
 
-    // handle message from service bus
-    var _handleMessage = function (panel, group, georesLayer, msg) {
-        switch (msg.$type) {
-            case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
-                _updateResource(georesLayer, msg.Item);
-                break;
-            case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
-                _updateResourceStatus(panel, georesLayer, msg);
-                break;
-        }
-    };
-
-    // handle actions from button push
-    var _handleAction = function (panel, action) {
-        switch (action) {
-            case "select-overlay":
-                var isOn = hud.toggleButton(panel, 'select-overlay', action);
-                _selectLayer(panel, action, isOn);
-                break;
-            case "lock-map":
-                break;
-            default:
-                hud.toggleButton(panel, 'select-action', action);
-                _updateMap(panel);
-        }
-    };
-
-
-    // attach click handlers to all the panel buttons
-    var _registerButtons = function (panel) {
-        $('[data-panel-role=' + panel + '] a[data-role="select-map"]').on('click', function (e) {
-            e.preventDefault();
-            selected_map = $(e.currentTarget).attr('data-action');
-            _selectBaseLayer(panel, selected_map);
-        });
-    };
-
-    var _updateMap = function (panel) {
+    var _updateMap = function (pluginId) {
 
         //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
 
-        var map = rtmap_maps[panel];
+        var map = rtmap_maps[pluginId];
 
-        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
-        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
-        incidentsImmediate = hud.getButtonState(panel, "select-action", "select-c1");
-        incidentsOther = false;
-        hospitals = hud.getButtonState(panel, "select-action", "select-hos");
-        standby = hud.getButtonState(panel, "select-action", "select-sbp");
-        stations = hud.getButtonState(panel, "select-action",  "select-stn");
-        aeu = hud.getButtonState(panel, "select-action", "select-aeu");
-        fru = hud.getButtonState(panel, "select-action", "select-fru");
-        oth = hud.getButtonState(panel, "select-action", "select-oth");
+        var resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
+        var resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
+        var incidentsImmediate = hud.getButtonState(pluginId, "select-action", "select-c1");
+        var incidentsOther = false;
+        var hospitals = hud.getButtonState(pluginId, "select-action", "select-hos");
+        var standby = hud.getButtonState(pluginId, "select-action", "select-sbp");
+        var stations = hud.getButtonState(pluginId, "select-action",  "select-stn");
+        var aeu = hud.getButtonState(pluginId, "select-action", "select-aeu");
+        var fru = hud.getButtonState(pluginId, "select-action", "select-fru");
+        var oth = hud.getButtonState(pluginId, "select-action", "select-oth");
 
         //TODO: get these from the controller
         var resourceGroups = [];
@@ -361,10 +472,6 @@ hud.plugins.rtmap = (function () {
             },
             dataType: "json",
             success: function (layer) {
-                //Create a new empty resources layer and add to map
-                if (markersr !== undefined) markersr.clearLayers();
-
-                _createResourcesLayer(map);
 
                 if (layer.error !== undefined) {
                     $("#message").html(layer.error);
@@ -378,19 +485,19 @@ hud.plugins.rtmap = (function () {
                 // add resources to the map
                 if (layer.Resources !== undefined) {
                     layer.Resources.forEach(function (item) {
-                        _updateResource(georesLayer, item);
+                        _updateResource(pluginId, item);
                     });
                 }
 
                 if (layer.Destinations !== undefined) {
                     // add Destinations to the map
-                    _updateDestinations(layer.Destinations, georesLayer);
+                    _updateDestinations(pluginId, layer.Destinations);
                 }
 
                 // now register for updates
-                hud.joinLeaveGroup("Resource.Available", panel, resourcesAvailable);
-                hud.joinLeaveGroup("Resource.Busy", panel, resourcesBusy);
-                hud.joinLeaveGroup("Resource.Enroute", panel, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Available", pluginId, resourcesAvailable);
+                hud.joinLeaveGroup("Resource.Busy", pluginId, resourcesBusy);
+                hud.joinLeaveGroup("Resource.Enroute", pluginId, resourcesBusy);
 
             } // success
             //$("*").css("cursor", "default");
@@ -399,10 +506,10 @@ hud.plugins.rtmap = (function () {
 
     // the status of a resource has changed. we need to remove it if we're not showing
     // this type of resource
-    var _updateResourceStatus = function (panel, layer, item) {
-
-        resourcesAvailable = hud.getButtonState(panel, "select-action", "select-avail");
-        resourcesBusy = hud.getButtonState(panel, "select-action", "select-busy");
+    var _updateResourceStatus = function (pluginId, item) {
+        var layer = georesLayer[pluginId];
+        var resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
+        var resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
 
         if (resourcesAvailable === false && item.NewStatusCategory !== "Available")
             _removeExistingFeature(layer, item.FleetNo);
@@ -411,7 +518,10 @@ hud.plugins.rtmap = (function () {
             _removeExistingFeature(layer, item.FleetNo);
     };
 
-    var _updateResource = function (layer, item) {
+    // update layer with resources
+    var _updateResource = function (pluginId, item) {
+        var layer = georesLayer[pluginId];
+
         // for each item construct equiv geojson item
         var geojsonFeature = {
             "type": "Feature",
@@ -432,7 +542,10 @@ hud.plugins.rtmap = (function () {
         layer.addData(geojsonFeature);
     };
 
-    var _updateDestinations = function (destinations, layer) {
+    // update layer with destinations
+    var _updateDestinations = function (pluginId, destinations) {
+
+        var layer = georesLayer[pluginId];
 
         destinations.forEach(function (item) {
             _removeExistingFeature(layer, item.Id);
@@ -489,23 +602,10 @@ hud.plugins.rtmap = (function () {
         });
     };
 
+    // create a layer for resources, incidents and other features to live in
     var _createResourcesLayer = function (map) {
         try {
-            var useclusters = hud.getStoreAsBool("#use-clusters");
-
-            if (useclusters === true)
-                markersr = new L.MarkerClusterGroup(
-                    {
-                        iconCreateFunction: function (cluster) {
-                            var childCount = cluster.getChildCount();
-                            return new L.DivIcon({ html: "<div><span><b>" + childCount + "</b></span></div>", className: "resourcecluster", iconSize: new L.Point(40, 40) });
-                        }
-                    });
-
-            if (markersr === null || markersr === undefined)
-                markersr = L.layerGroup();
-
-            georesLayer = L.geoJson("", {
+            var georesLayer = L.geoJson("", {
                 style: function () {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
@@ -522,9 +622,9 @@ hud.plugins.rtmap = (function () {
                     });
                 }
             });
+            georesLayer.addTo(map);
 
-            markersr.addLayer(georesLayer);
-            markersr.addTo(map);
+            return georesLayer;
         }
         catch (e) {
             console.log(e.message);
@@ -534,20 +634,20 @@ hud.plugins.rtmap = (function () {
     /// <summary>
     /// Re-centre the maps to new co-ordinates
     /// </summary
-    var _panTo = function (panel, lat, lng) {
-        var map = rtmap_maps[panel];
+    var _panTo = function (pluginId, lat, lng) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _panAndMarkLocation = function (panel, locationName, lat, lng) {
-        var map = rtmap_maps[panel];
+    var _panAndMarkLocation = function (pluginId, locationName, lat, lng) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _setZoomLevel = function (panel, z) {
-        var map = rtmap_maps[panel];
+    var _setZoomLevel = function (pluginId, z) {
+        var map = rtmap_maps[pluginId];
     };
 
-    var _selectBaseLayer = function (panel, layerName) {
-        var map = rtmap_maps[panel];
+    var _selectBaseLayer = function (pluginId, layerName) {
+        var map = rtmap_maps[pluginId];
         for (var layer in rtmap_baseLayers) {
             if (map.hasLayer(rtmap_baseLayers[layer]))
                 map.removeLayer(rtmap_baseLayers[layer]);
@@ -555,8 +655,8 @@ hud.plugins.rtmap = (function () {
         map.addLayer(rtmap_baseLayers[layerName]);
     };
 
-    var _selectLayer = function (panel, layerName, on) {
-        var map = rtmap_maps[panel];
+    var _selectLayer = function (pluginId, layerName, on) {
+        var map = rtmap_maps[pluginId];
 
         if (on)
             map.addLayer(rtmap_overlayLayers[layerName]);
@@ -566,12 +666,12 @@ hud.plugins.rtmap = (function () {
 
     };
 
-    var _lockMap = function (panel, mode) {
-        hud.setButtonState(panel, "select-action", "lock-map", mode);
+    var _lockMap = function (pluginId, mode) {
+        hud.setButtonState(pluginId, "select-action", "lock-map", mode);
     };
 
     return {
-        initMap: _initMap,
+        init: _init,
         selectBaseLayer: _selectBaseLayer,
         lockMap: _lockMap,
         setZoom: _setZoomLevel,

@@ -2,9 +2,12 @@
 using Newtonsoft.Json;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;
+using Quest.Common.Messages.Routing;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
 using System;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Quest.WebCore.Plugins.RealtimeMap
@@ -65,6 +68,44 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             }
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetVehicleCoverage(int vehtype)
+        {
+            var builder = new StringBuilder();
+            var writer = new StringWriter(builder);
+            var ser = new JsonSerializer();
+            GetCoverageResponse map;
+            try
+            {
+                GetCoverageRequest request = new GetCoverageRequest { vehtype = vehtype };
+
+                map = await _messageCache.SendAndWaitAsync<GetCoverageResponse>(request, new TimeSpan(0, 0, 30));
+
+                if (map == null)
+                    map = new GetCoverageResponse() { Message = "no vehicle coverage available", Success = false };
+
+                var js = JsonConvert.SerializeObject(map);
+                var result = new ContentResult
+                {
+                    Content = js,
+                    ContentType = "application/json"
+                };
+
+                return result;
+            }
+            catch (Exception)
+            {
+                var errorMsg = "ERROR: Cannot get coverage";
+                ser.Serialize(writer, errorMsg);
+                var error = new ContentResult
+                {
+                    Content = builder.ToString(),
+                    ContentType = "application/json"
+                };
+
+                return error;
+            }
+        }
         [HttpPost]
         public ActionResult AssignResource(ResourceAssign request)
         {

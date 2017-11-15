@@ -89,6 +89,9 @@ namespace Quest.Lib.Device
                 {
                     //oldrec = new DataModel.Devices();
                     //db.Devices.Add(oldrec);
+                    oldrec = new DataModel.Devices
+                    {                        
+                    };
                 }
                 else
                 {

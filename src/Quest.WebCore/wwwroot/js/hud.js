@@ -420,8 +420,8 @@
             $(plugin + ' a[data-role="select-menu"]').on('click',
                 function (e) {
                     e.preventDefault();
-                    btn_role = $(e.currentTarget).attr('data-role');
-                    btn_action = $(e.currentTarget).attr('data-action');
+                    var btn_role = $(e.currentTarget).attr('data-role');
+                    var btn_action = $(e.currentTarget).attr('data-action');
                     btn_action = parseInt(btn_action);
                     _selectMenu(pluginId, btn_action);
                 });
@@ -430,9 +430,10 @@
             $(plugin + ' a[data-role="select-action"]').on('click',
                 function (e) {
                     e.preventDefault();
-                    btn_role = $(e.currentTarget).attr('data-role');
-                    btn_action = $(e.currentTarget).attr('data-action');
-                    $(plugin).trigger("action", btn_action);
+                    var btn_role = $(e.currentTarget).attr('data-role');
+                    var btn_action = $(e.currentTarget).attr('data-action');
+                    var btn_data = $(e.currentTarget).attr('data-data');
+                    $(plugin).trigger("action", { "action": btn_action, "data": btn_data });
                 });
         }
     };
@@ -495,9 +496,9 @@
     };
 
     // set panel button state
-    var _setButtonState = function (pluginId, role, action, state) {
-        console.log('setButtonState %d %s %s %s', pluginId, role, action, state);
-        var selector = _pluginSelector(pluginId) + " [data-role='" + role + "'][data-action='" + action + "'] ";
+    var _setButtonState = function (pluginId, action, state) {
+        console.log('setButtonState %d %s %s', pluginId, action, state);
+        var selector = _pluginSelector(pluginId) + " [data-action='" + action.action + "'][data-data='" + action.data + "']";
 
         if (state) {
             $(selector).removeClass("panel-btn-off");
@@ -510,18 +511,16 @@
         return state;
     };
 
-    var _getButtonState = function (pluginId, role, action) {
-        
-        var selector = _pluginSelector(pluginId) + " [data-role='" + role + "'][data-action='" + action + "'] ";
-        console.log('getButtonState %d %s %s found %d', pluginId, role, action, $(selector).length);
+    var _getButtonState = function (pluginId, action) {        
+        var selector = _pluginSelector(pluginId) + " [data-action='" + action.action + "'][data-data='" + action.data + "']";
+        console.log('getButtonState %d %s found %d', pluginId, action, $(selector).length);
         return $(selector).hasClass("panel-btn-on");
     };
 
-    var _toggleButton = function (pluginId, role, action) {
-        
-        console.log('toggleButtonState Menu %d %s %s', pluginId, role, action);
-        ison = _getButtonState(pluginId, role, action);
-        return _setButtonState(pluginId, role, action, !ison);
+    var _toggleButton = function (pluginId, action) {        
+        console.log('toggleButtonState Menu %d %s', pluginId, action);
+        ison = _getButtonState(pluginId, action);
+        return _setButtonState(pluginId, action, !ison);
     };
         
     var _initLocalStorage = function () {

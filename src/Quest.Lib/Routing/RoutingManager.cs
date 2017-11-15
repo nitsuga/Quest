@@ -17,6 +17,7 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Routing;
 using Quest.Common.Messages.Visual;
+using Quest.Lib.Resource;
 
 namespace Quest.Lib.Routing
 {
@@ -75,6 +76,8 @@ namespace Quest.Lib.Routing
         private IDatabaseFactory _dbFactory;
         private EtaCalculator _etaCalculator;
         private CoverageMapManager _coverageMap;
+        private IResourceStore _resStore;
+
         #endregion
 
         #region public Methods
@@ -84,6 +87,7 @@ namespace Quest.Lib.Routing
             IDatabaseFactory dbFactory,
             EtaCalculator etaCalculator,
             RoutingData routingdata,
+            IResourceStore resStore,
             IServiceBusClient serviceBusClient,
             TimedEventQueue eventQueue,
             CoverageMapManager coverageMap,
@@ -94,6 +98,7 @@ namespace Quest.Lib.Routing
             _dbFactory = dbFactory;
             _coverageMap = coverageMap;
             _etaCalculator = etaCalculator;
+            _resStore = resStore;
         }
 
         protected override void OnPrepare()
@@ -462,7 +467,7 @@ namespace Quest.Lib.Routing
             {
                 if (!_stopping)
                 {
-                    var map = vt.GetCoverage(routingEngine);
+                    var map = vt.GetCoverage(routingEngine, _resStore);
 
                     if (map != null)
                     {

@@ -11,7 +11,7 @@
     ],
     "languageVersion": "",
     "platform": "AnyCPU",
-    "allowUnsafe": false,
+    "allowUnsafe": true,
     "warningsAsErrors": false,
     "optimize": false,
     "keyFile": "",

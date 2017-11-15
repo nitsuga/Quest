@@ -37,17 +37,33 @@ namespace Quest.UnitTests
 
             serviceBusClient.Initialise("Test");
 
+            //LoginRequest request = new LoginRequest()
+            //{
+            //    Username = "fred",
+            //    DeviceIdentity = "unknown-000000000000000-a02f167ca32d28a9",
+            //    DeviceMake = "samsung",
+            //    DeviceModel = "GT-N8010",
+            //    FleetNo = "1000",
+            //    Locale = "en-GB",
+            //    NotificationId = "APA91bFaO1_1hIwgVo_R3qFD9QWmj6ZsTDUl0lzfAMnxK16XP0-Asdm7ELeuP2PvaD9ZDONKzrfXC9asOxDC8NQmH6DbNPpOHxYeXpSba6gDAI25TU6QrO75sZrUfzB_8aNtgzWsDand",
+            //    NotificationTypeId = "GCM",
+            //    OSVersion = "",
+            //    QuestApi = 1,
+            //    RequestId = "",
+            //    SessionId = "",
+            //};
+
             LoginRequest request = new LoginRequest()
             {
-                Username = "fred",
-                DeviceIdentity = "unknown-000000000000000-a02f167ca32d28a9",
-                DeviceMake = "samsung",
-                DeviceModel = "GT-N8010",
-                FleetNo = "1000",
+                Username = null,
+                DeviceIdentity = "031603e207913602",
+                DeviceMake = "Unknown",
+                DeviceModel = "SM-G920F",
+                FleetNo = null,
                 Locale = "en-GB",
-                NotificationId = "APA91bFaO1_1hIwgVo_R3qFD9QWmj6ZsTDUl0lzfAMnxK16XP0-Asdm7ELeuP2PvaD9ZDONKzrfXC9asOxDC8NQmH6DbNPpOHxYeXpSba6gDAI25TU6QrO75sZrUfzB_8aNtgzWsDand",
-                NotificationTypeId = "GCM",
-                OSVersion = "",
+                NotificationId = "dtBtKZd1q3M:APA91bGZkpF_8iZH5iCQ3pWUGqfdMZkJaZkolJaDZ6CVM1XFk1wd190EyZ65ufvA0ZCaqMOxZc28F9WoGwCrOZw6Ty2f0Rad5EY5fSWOn9gWW57jJFtoiKgC0BMi0-GZNWZRDcHSuNhF",
+                NotificationTypeId = "2",
+                OSVersion = "7.0",
                 QuestApi = 1,
                 RequestId = "",
                 SessionId = "",

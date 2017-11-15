@@ -102,7 +102,8 @@ services:
       - ActiveMQ=activemq:tcp://activemq:61616
       - Session=Alpha
 #      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
-      - Modules=SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager
+#      - Modules=SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager
+      - Modules=SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
