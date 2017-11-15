@@ -39,7 +39,7 @@ namespace Quest.WebCore.Plugins.Lib
 
         public virtual string MenuText { get; set; }
 
-        public virtual bool IsMenuItem { get; set; }
+        public virtual bool IsMenuItem { get; set; } = true;
 
         public virtual string RenderHtml()
         {
