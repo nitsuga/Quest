@@ -4,7 +4,7 @@
       "commandName": "Project",
       "workingDirectory": "bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager",
+        "Modules": "EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager",
         "Session": "Dev"
       }
     }

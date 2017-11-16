@@ -189,30 +189,6 @@ namespace Quest.Lib.Device
             };
         }
 
-        public GetStatusCodesResponse GetStatusCodes(GetStatusCodesRequest request)
-        {
-            var resrecord = _devStore.GetByToken(request.SessionId);
-            if (resrecord == null)
-                return new GetStatusCodesResponse
-                    {
-                        RequestId = request.RequestId,
-                        Items = new List<StatusCode>(),
-                        Success = false,
-                        Message = "unknown device"
-                    };
-
-            //TODO: get from resource handler
-            List<StatusCode> results = new List<StatusCode>();
-
-            return new GetStatusCodesResponse
-            {
-                RequestId = request.RequestId,
-                Items = results,
-                Success = true,
-                Message = "successful"
-            };
-        }
-
         /// <summary>
         ///     Status request by device
         /// </summary>
@@ -432,38 +408,6 @@ namespace Quest.Lib.Device
                 RequestId = request.RequestId,
                 Success = false,
                 Message = "Not Implemented"
-            };
-        }
-
-        public GetEntityTypesResponse GetEntityTypes(GetEntityTypesRequest request)
-        {
-            // check the timestamp
-            var failedTimecheck = ValidateTime<GetEntityTypesResponse>(request);
-            if (failedTimecheck != null)
-                return failedTimecheck;
-            var timestamp = Time.UnixTime(request.Timestamp);
-
-            QuestDevice deviceRecord = _devStore.GetByToken(request.SessionId);
-
-            if (deviceRecord == null)
-                return new GetEntityTypesResponse
-                {
-                    RequestId = request.RequestId,
-                    Success = false,
-                    Message = "unknown device"
-                };
-
-            var layers = new[]
-            {
-                    "Stations", "Hospitals (non-A&E)", "Hospital (A&E)", "Hospitals (Maternity)", "Fuel", "A-Z Grid", "CCG",
-                    "Atoms"
-                };
-            return new GetEntityTypesResponse
-            {
-                RequestId = request.RequestId,
-                Items = layers.ToList(),
-                Success = true,
-                Message = "successful"
             };
         }
 

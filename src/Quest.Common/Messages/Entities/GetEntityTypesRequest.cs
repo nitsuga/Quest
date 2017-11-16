@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Quest.Common.Messages.Device
+namespace Quest.Common.Messages.Entities
 {
     /// <summary>
     ///     Request a list of entity types. This are items such as:

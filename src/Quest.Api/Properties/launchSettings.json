@@ -21,7 +21,7 @@
       "launchBrowser": true,
       "launchUrl": "Swagger",
       "environmentVariables": {
-        "Session": "Mjp",
+        "Session": "Dev",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:8126/"

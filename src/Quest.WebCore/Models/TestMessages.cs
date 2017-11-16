@@ -36,8 +36,6 @@ namespace Quest.WebCore.Services
         public PatientDetailsRequest PatientDetailsRequest { get; set; }
         public AckAssignedEventRequest AckAssignedEventRequest { get; set; }
         public SetStatusRequest SetStatusRequest { get; set; }
-        public GetStatusCodesRequest GetStatusCodesRequest { get; set; }
-        public GetEntityTypesRequest GetEntityTypesRequest { get; set; }
         public GetHistoryRequest GetHistoryRequest { get; set; }
         public CallEvent CallEvent { get; set; }
         public CallLookupRequest CallDetails { get; set; }
@@ -57,8 +55,6 @@ namespace Quest.WebCore.Services
             PatientDetailsRequest = new PatientDetailsRequest();
             AckAssignedEventRequest = new AckAssignedEventRequest();
             SetStatusRequest = new SetStatusRequest();
-            GetStatusCodesRequest = new GetStatusCodesRequest();
-            GetEntityTypesRequest = new GetEntityTypesRequest();
             GetHistoryRequest = new GetHistoryRequest();
         }
 

@@ -5,6 +5,7 @@ using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
 using Quest.Common.Messages.Device;
 using Quest.Common.Messages.GIS;
+using Quest.Common.Messages.Entities;
 
 namespace Quest.Api.Controllers
 {
@@ -203,23 +204,6 @@ namespace Quest.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// get a list of valid status codes
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("GetStatusCodes")]
-        public async Task<GetStatusCodesResponse> GetStatusCodes([FromBody]GetStatusCodesRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<GetStatusCodesResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new GetStatusCodesResponse() { Success = false, Message = ex.Message };
-            }
-        }
 
         [HttpPost("GetEntityTypes")]
         public async Task<GetEntityTypesResponse> GetEntityTypes([FromBody]GetEntityTypesRequest request)
@@ -234,6 +218,35 @@ namespace Quest.Api.Controllers
 
             }
         }
+
+        [HttpPost("GetEntities")]
+        public async Task<GetEntitiesResponse> GetEntityTypes([FromBody]GetEntitiesRequest request)
+        {
+            try
+            {
+                return await _messageCache.SendAndWaitAsync<GetEntitiesResponse>(request, new TimeSpan(0, 0, 10));
+            }
+            catch (Exception ex)
+            {
+                return new GetEntitiesResponse() { Success = false, Message = ex.Message };
+
+            }
+        }
+
+        [HttpPost("GetEntity")]
+        public async Task<GetEntityResponse> GetEntityTypes([FromBody]GetEntityRequest request)
+        {
+            try
+            {
+                return await _messageCache.SendAndWaitAsync<GetEntityResponse>(request, new TimeSpan(0, 0, 10));
+            }
+            catch (Exception ex)
+            {
+                return new GetEntityResponse() { Success = false, Message = ex.Message };
+
+            }
+        }
+
 
         [HttpPost("GetMapItems")]
         [HttpPost]

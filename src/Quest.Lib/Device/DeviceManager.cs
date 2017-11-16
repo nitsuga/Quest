@@ -37,9 +37,7 @@ namespace Quest.Lib.Device
             MsgHandler.AddHandler<LogoutRequest>(LogoutRequestHandler);
             MsgHandler.AddHandler<AckAssignedEventRequest>(AckAssignedEventRequestHandler);
             MsgHandler.AddHandler<RefreshStateRequest>(RefreshStateHandler);
-            MsgHandler.AddHandler<GetEntityTypesRequest>(GetEntityTypesRequestHandler);
             MsgHandler.AddHandler<GetHistoryRequest>(GetHistoryRequestHandler);
-            MsgHandler.AddHandler<GetStatusCodesRequest>(GetStatusCodesRequestHandler);
             MsgHandler.AddHandler<MakePatientObservationRequest>(MakePatientObservationRequestHandler);
             MsgHandler.AddHandler<PatientDetailsRequest>(PatientDetailsRequestHandler);
             MsgHandler.AddHandler<PositionUpdateRequest>(PositionUpdateRequestHandler);
@@ -100,32 +98,12 @@ namespace Quest.Lib.Device
             return null;
         }
 
-        private Response GetEntityTypesRequestHandler(NewMessageArgs t)
-        {
-            var request = t.Payload as GetEntityTypesRequest;
-            if (request != null)
-            {
-                return _deviceHandler.GetEntityTypes(request);
-            }
-            return null;
-        }
-
         private Response GetHistoryRequestHandler(NewMessageArgs t)
         {
             var request = t.Payload as GetHistoryRequest;
             if (request != null)
             {
                 return _deviceHandler.GetHistory(request);
-            }
-            return null;
-        }
-
-        private Response GetStatusCodesRequestHandler(NewMessageArgs t)
-        {
-            var request = t.Payload as GetStatusCodesRequest;
-            if (request != null)
-            {
-                return _deviceHandler.GetStatusCodes(request);
             }
             return null;
         }
