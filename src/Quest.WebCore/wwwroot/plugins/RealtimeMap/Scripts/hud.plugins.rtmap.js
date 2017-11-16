@@ -5,11 +5,13 @@ hud.plugins = hud.plugins || {};
 // keep track of map objects belonging to different map plugins
 var rtmap_maps = {};
 
+// keep track of res/inc/des items for each map
 var georesLayer = {};
 
-// keep track of coverage layers
+// keep track of coverage layers for each map
 var covlayer = {};
 
+// keep track of searched items for each map
 var searchlayer = {};
 
 // set of base map layers
@@ -32,7 +34,8 @@ hud.plugins.rtmap = (function () {
 
             var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
             var osmAttrib = "Map data © OpenStreetMap contributors";
-            var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+            var osm = new L.TileLayer(osmUrl);
+            //var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
             var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
                 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                 'Imagery © <a href="http://mapbox.com">Mapbox</a>',
