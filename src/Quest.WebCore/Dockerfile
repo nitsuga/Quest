@@ -7,7 +7,7 @@ ARG source
 WORKDIR /app
 
 # copy binaries
-ADD ${source:-bin\Debug\netcoreapp2.0\publish\} .
+ADD ${source:-bin/Debug/netcoreapp2.0/publish} .
 
 EXPOSE 80
 ENTRYPOINT ["dotnet", "Quest.WebCore.dll"]
