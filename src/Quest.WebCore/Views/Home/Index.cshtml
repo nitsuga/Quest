@@ -9,15 +9,14 @@
     <title>Index</title>
     <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
     <link href="~/css/site.css" rel="stylesheet" />
-
-    <div id="swap" class="hidden"></div>
-
     @foreach (var f in Model.Styles)
     {
         <link href="@f" rel="stylesheet" />
     }
 </head>
 <body>
+
+    <div id="swap" class="hidden"></div>
 
     @*<div id="sys_username" data-value="@User.Identity.Name"></div>*@
     <div id="sys_username" data-username="marcus.poulton"></div>

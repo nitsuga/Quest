@@ -139,16 +139,13 @@
             connection.on('setusersonline', function (users) {
                 console.log("SetUsersOnline:" + users);
             });
-            
-        })
-        .then(function (connection) {
-            console.log('connection started');
 
-            //startStreaming(connection);
         })
-        .catch(error => {
-            console.error(error.message);
-        });
+            .then(function (connection) {
+                console.log('connection started');
+
+                //startStreaming(connection);
+            })
     };
 
     // load the specific layout into the div id

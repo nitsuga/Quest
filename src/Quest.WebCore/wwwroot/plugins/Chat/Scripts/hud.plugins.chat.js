@@ -104,9 +104,6 @@ hud.plugins.chat = (function() {
                     $(messageTextbox).val('').focus();
                 });
             })
-            .catch(error => {
-                console.error(error.message);
-            });
     };
 
     return {
