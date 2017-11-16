@@ -5,11 +5,13 @@ hud.plugins = hud.plugins || {};
 // keep track of map objects belonging to different map plugins
 var rtmap_maps = {};
 
+// keep track of res/inc/des items for each map
 var georesLayer = {};
 
-// keep track of coverage layers
+// keep track of coverage layers for each map
 var covlayer = {};
 
+// keep track of searched items for each map
 var searchlayer = {};
 
 // set of base map layers
@@ -32,7 +34,8 @@ hud.plugins.rtmap = (function () {
 
             var osmUrl = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
             var osmAttrib = "Map data © OpenStreetMap contributors";
-            var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+            var osm = new L.TileLayer(osmUrl);
+            //var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
             var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
                 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                 'Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -92,6 +95,12 @@ hud.plugins.rtmap = (function () {
 
             L.control.layers(rtmap_maps, rtmap_overlayLayers).addTo(map);
 
+            var clayer = L.layerGroup();
+            clayer.id = "coverage";
+            clayer.opacity = 0.3;
+            clayer.addTo(map);
+            covlayer[pluginId] = clayer;
+
             // save the map object in a dictionary so it can be accessed later
             rtmap_maps[pluginId] = map;
 
@@ -147,8 +156,7 @@ hud.plugins.rtmap = (function () {
     var _handleAction = function (pluginId, action) {
         switch (action.action) {
             case "select-cov":
-                hud.toggleButton(pluginId, action);
-                _updateMap(pluginId);
+                _updateCoverage(pluginId, action);
                 break;
 
             case "select-ovl":
@@ -201,22 +209,59 @@ hud.plugins.rtmap = (function () {
         }
     };
 
-    var _setupCoverage = function (pluginId) {
+    // call whenever one of the menu selectors for coverage has changed
+    var _updateCoverage = function (pluginId, action) {
+
+        var isOn = hud.toggleButton(pluginId, action);
+
+        var map = rtmap_maps[pluginId];
+
+        // get id of coverage layer as an integer
+        var id = action.data;
+        if (typeof id === "string")
+            id = parseInt(id);
+
+        if (isOn) {
+            _getCoverage(pluginId, id);
+        }
+        else {
+            _undoCoverage(pluginId, id);
+        }
     }
 
+    var _base64DecToArr = function(sBase64, nBlocksSize) {
 
-    var _getCoverage = function (pluginId, type, name) {
+        var
+            sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, ""), nInLen = sB64Enc.length,
+            nOutLen = nBlocksSize ? Math.ceil((nInLen * 3 + 1 >> 2) / nBlocksSize) * nBlocksSize : nInLen * 3 + 1 >> 2, taBytes = new Uint8Array(nOutLen);
+
+        for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+            nMod4 = nInIdx & 3;
+            nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
+            if (nMod4 === 3 || nInLen - nInIdx === 1) {
+                for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++ , nOutIdx++) {
+                    taBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
+                }
+                nUint24 = 0;
+
+            }
+        }
+
+        return taBytes;
+    }
+
+    var _getCoverage = function (pluginId, id) {
+
         var layer = covlayer[pluginId];
 
-        var hospitals = hud.getButtonState(pluginId, "select-action", "select-aeuc");
-
-        hud.joinLeaveGroup("Coverage.AEU", pluginId, resourcesBusy);
+        hud.joinLeaveGroup("Coverage."+id, pluginId, true);
 
         return $.ajax({
             url: hud.getURL("RTM/GetVehicleCoverage"),
-            data: { 'vehtype': type },               // 1=Amb 2=FRU 7=incidents 8=combined 9=holes 10=standby cover 11=standby compliance
+            data: { 'vehtype': id },               // 1=Amb 2=FRU 7=incidents 8=combined 9=holes 10=standby cover 11=standby compliance
             dataType: "json",
             success: function (msg) {
+                console.log("got GetVehicleCoverage pluginId=" + pluginId + " type=" + id);
 
                 if (msg.Success === true && msg.Map !== null) {
                     var res = msg.Map;
@@ -227,7 +272,17 @@ hud.plugins.rtmap = (function () {
                         for (var y = 0; y < res.rows; y++)
                             for (var x = 0; x < res.cols; x++) {
                                 //if (raw.charCodeAt(i) > 0) {
-                                if (res.map[i] > 0) {
+                                var byteArr = window.atob(res.map);
+
+                                //var l = res.map.length;
+                                //var c = res.map[i];
+                                //var c1 = res.map.charCodeAt(i);
+
+                                var l = byteArr.length;
+                                //var c = byteArr[i];
+                                var c = byteArr.charCodeAt(i);
+
+                                if (c > 0) {
                                     var lat = res.lat + y * res.latBlocksize;
                                     var lon = res.lon + x * res.lonBlocksize;
                                     var newpoint = [lat, lon];
@@ -257,8 +312,8 @@ hud.plugins.rtmap = (function () {
 
                         if (nheatmap !== undefined) {
                             nheatmap.opacity = 0.3;
-                            nheatmap.id = name;
-                            undoCoverage(name);
+                            nheatmap.id = id;
+                            _undoCoverage(pluginId, id);
                             layer.addLayer(nheatmap);
                         }
                     }
@@ -268,11 +323,11 @@ hud.plugins.rtmap = (function () {
     }
 
     // remove coverge from the map
-    var _undoCoverage = function (pluginId, name) {
+    var _undoCoverage = function (pluginId, id) {
         var layer = covlayer[pluginId];
-        layer.eachLayer(function (layer) {
-            if (layer.id === name) {
-                layer.removeLayer(layer);
+        layer.eachLayer(function (sublayer) {
+            if (sublayer.id === id) {
+                layer.removeLayer(sublayer);
                 return;
             }
         });
@@ -435,16 +490,17 @@ hud.plugins.rtmap = (function () {
 
         var map = rtmap_maps[pluginId];
 
-        var resourcesAvailable = hud.getButtonState(pluginId, "select-action", "select-avail");
-        var resourcesBusy = hud.getButtonState(pluginId, "select-action", "select-busy");
-        var incidentsImmediate = hud.getButtonState(pluginId, "select-action", "select-c1");
+        var resourcesAvailable = hud.getButtonState(pluginId, { "action": "select-res", "data": "avail" } );
+        var resourcesBusy = hud.getButtonState(pluginId, { "action": "select-res", "data": "busy" });
+        var incidentsImmediate = hud.getButtonState(pluginId, "select-action", { "action": "select-inc", "data": "c1" });
         var incidentsOther = false;
-        var hospitals = hud.getButtonState(pluginId, "select-action", "select-hos");
-        var standby = hud.getButtonState(pluginId, "select-action", "select-sbp");
-        var stations = hud.getButtonState(pluginId, "select-action",  "select-stn");
-        var aeu = hud.getButtonState(pluginId, "select-action", "select-aeu");
-        var fru = hud.getButtonState(pluginId, "select-action", "select-fru");
-        var oth = hud.getButtonState(pluginId, "select-action", "select-oth");
+        var hospitals = hud.getButtonState(pluginId, { "action": "select-des", "data": "hos" });
+        var standby = hud.getButtonState(pluginId, { "action": "select-des", "data": "sbp" });
+        var stations = hud.getButtonState(pluginId, { "action": "select-des", "data": "std" });
+
+        var aeu = hud.getButtonState(pluginId, { "action": "select-res", "data": "aeu" });
+        var fru = hud.getButtonState(pluginId, { "action": "select-res", "data": "fru" });
+        var oth = hud.getButtonState(pluginId, { "action": "select-res", "data": "oth" });
 
         //TODO: get these from the controller
         var resourceGroups = [];
