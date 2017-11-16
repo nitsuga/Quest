@@ -7,6 +7,6 @@ ARG source
 WORKDIR /app
 
 # copy binaries
-ADD ${source:-bin/Release/netcoreapp2.0} .
+ADD ${source:-bin\Debug\netcoreapp2.0\publish\} .
 
 ENTRYPOINT ["dotnet", "Quest.Core.dll"]
