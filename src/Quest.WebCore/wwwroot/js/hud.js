@@ -508,6 +508,22 @@
         return state;
     };
 
+    // set multiple panel button states based on just the action
+    var _setActionState = function (pluginId, action, state) {
+        console.log('setButtonState %d %s %s', pluginId, action, state);
+        var selector = _pluginSelector(pluginId) + " [data-action='" + action + "']";
+
+        if (state) {
+            $(selector).removeClass("panel-btn-off");
+            $(selector).addClass("panel-btn-on");
+        }
+        else {
+            $(selector).removeClass("panel-btn-on");
+            $(selector).addClass("panel-btn-off");
+        }
+        return state;
+    };
+
     var _getButtonState = function (pluginId, action) {        
         var selector = _pluginSelector(pluginId) + " [data-action='" + action.action + "'][data-data='" + action.data + "']";
         console.log('getButtonState %d %s found %d', pluginId, action, $(selector).length);
@@ -616,6 +632,7 @@
         getStore: _getStore,
         setStore: _setStore,
         setButtonState: _setButtonState,
+        setActionState: _setActionState,
         getButtonState: _getButtonState,
         toggleButton: _toggleButton,
         selectMenu: _selectMenu,

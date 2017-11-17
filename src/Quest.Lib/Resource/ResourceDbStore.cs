@@ -251,12 +251,13 @@ namespace Quest.Lib.Resource
 
         public List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail = false, bool busy = false)
         {
-            return _dbFactory.Execute<QuestContext, List<QuestResource>>((db) =>
+            return _dbFactory.ExecuteNoTracking<QuestContext, List<QuestResource>>((db) =>
             {
                 if (resourceGroups == null)
                     resourceGroups = new string[] { };
                 // get all *current* resources
                 var resources = db.Resource
+                        .AsNoTracking()
                         .Include(x => x.Callsign)
                         .Include(x => x.ResourceStatus)
                         .Include(x => x.ResourceType)

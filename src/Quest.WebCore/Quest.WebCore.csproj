@@ -115,6 +115,30 @@
     <Content Update="components.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\js\signalr-client-1.0.0-alpha2-final.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-client-1.0.0-alpha2-final.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-clientES5-1.0.0-alpha2-final.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-clientES5-1.0.0-alpha2-final.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-msgpackprotocol-1.0.0-alpha2-final.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-msgpackprotocol-1.0.0-alpha2-final.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-msgpackprotocolES5-1.0.0-alpha2-final.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\signalr-msgpackprotocolES5-1.0.0-alpha2-final.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\lib\jQuery\dist\core.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

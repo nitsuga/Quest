@@ -38,7 +38,20 @@
     <script src="~/lib/jQuery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
     <script src="~/lib/underscore/underscore.js"></script>
-    <script src="~/js/signalr-client-1.0.0-alpha2-final.js"></script>
+
+    <script type="text/javascript">
+    if (typeof Promise === 'undefined') {
+        document.write(
+            '<script type="text/javascript" src="js/signalr-clientES5-1.0.0-alpha2-final.js"><\/script>' +
+            '<script type="text/javascript" src="js/signalr-msgpackprotocolES5-1.0.0-alpha2-final.js"><\/script>');
+    }
+    else {
+        document.write(
+            '<script type="text/javascript" src="js/signalr-client-1.0.0-alpha2-final.js"><\/script>' +
+            '<script type="text/javascript" src="js/signalr-msgpackprotocol-1.0.0-alpha2-final.js"><\/script>');
+    }
+    </script>
+    
 
     <!-- The core hud library -->
     <script type="text/javascript" src="~/js/hud.js"></script>

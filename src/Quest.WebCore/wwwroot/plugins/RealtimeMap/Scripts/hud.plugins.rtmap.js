@@ -14,6 +14,9 @@ var covlayer = {};
 // keep track of searched items for each map
 var searchlayer = {};
 
+// keep track of select item for each map
+var searchItem = {};
+
 // set of base map layers
 var rtmap_baseLayers;
 
@@ -114,10 +117,6 @@ hud.plugins.rtmap = (function () {
             // select the primary menu
             hud.selectMenu(pluginId, 0);
 
-            // attach handlers for remaining buttons, i.e. not selectmenu or select-action as these
-            // are handled automatically by hud.js
-            _registerButtons(pluginId);
-
             // listen for hub messages on these groups
             $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
                 _handleMessage(pluginId, group, msg);
@@ -148,6 +147,16 @@ hud.plugins.rtmap = (function () {
             $("#sys_hub").on("SearchResults", function (evt, data) {
                 _showSearchResults(map, pluginId, data);
             });
+
+            // listen for local hub messages  
+            $("#sys_hub").on("SelectSearchResult", function (evt, data) {
+                _selectSearchResult(pluginId, data);
+            });
+
+            // listen for local hub messages
+            $("#sys_hub").on("PanZoom", function (evt, data) {
+                _panZoom(pluginId, data.lat, data.lon, data.zoom);
+            });            
             
         });
     };
@@ -183,25 +192,24 @@ hud.plugins.rtmap = (function () {
                 hud.toggleButton(pluginId, action);
                 break;
 
+            case "select-map":
+                // turn off all other map buttons
+                hud.setActionState(pluginId, action.action);
+                // turn on this map button
+                hud.toggleButton(pluginId, action);
+                _selectBaseLayer(pluginId, action.data);
+                break;
+
             default:
         }
     };
 
-    // attach click handlers to all the panel buttons
-    var _registerButtons = function (pluginId) {
-        var selector = hud.pluginSelector(pluginId);
-        $(selector + ' a[data-role="select-map"]').on('click', function (e) {
-            e.preventDefault();
-            selected_map = $(e.currentTarget).attr('data-action');
-            _selectBaseLayer(pluginId, selected_map);
-        });
-    };
-
     // handle message from service bus
     var _handleMessage = function (pluginId, group, msg) {
+        var layer = georesLayer[pluginId];
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
-                _updateResource(pluginId, msg.Item);
+                _updateResource(layer, msg.Item);
                 break;
             case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
                 _updateResourceStatus(pluginId, msg);
@@ -333,6 +341,39 @@ hud.plugins.rtmap = (function () {
         });
     }
 
+    var _unselectSearchResult = function (pluginId, data) {
+        if (data === undefined)
+            return;
+        var layer = searchlayer[pluginId];
+        layer.eachLayer(function (sublayer) {
+            if (sublayer.id === data.address.ID) {
+                layer.removeLayer(sublayer);
+                var latlng = new L.LatLng(data.address.l.lat, data.address.l.lon);
+                var feature = _getFeature(data.address, latlng, false);
+                layer.addLayer(feature);
+                return;
+            }
+        });
+    }
+
+    var _selectSearchResult = function (pluginId, data) {
+
+        _unselectSearchResult(pluginId, searchItem[pluginId]);
+
+        var layer = searchlayer[pluginId];
+        layer.eachLayer(function (sublayer) {
+            if (sublayer.id === data.address.ID) {
+                layer.removeLayer(sublayer);
+                var latlng = new L.LatLng(data.address.l.lat, data.address.l.lon);
+                var feature = _getFeature(data.address, latlng, true);
+                layer.addLayer(feature);
+                searchItem[pluginId] = data;
+                return;
+            }
+        });
+    }
+
+
     // show search results on the map
     var _showSearchResults = function (map, pluginId, data) {
 
@@ -344,7 +385,7 @@ hud.plugins.rtmap = (function () {
             score = doc.s;
             if (doc.l !== undefined && doc.l !== null) {
                 latlng = new L.LatLng(doc.l.lat, doc.l.lon);
-                feature = _getFeature(doc, latlng);
+                feature = _getFeature(doc, latlng, false);
                 layer.addLayer(feature);
             }
         }
@@ -392,44 +433,14 @@ hud.plugins.rtmap = (function () {
     }
     
     // return a single feature for this address
-    var _getFeature = function(address, latlng) {
+    var _getFeature = function (address, latlng, highlight) {
         var latLongParms = {
             lng: address.l.lon,
             lat: address.l.lat
         };
 
         var latLongString = JSON.stringify(latLongParms);
-
         var feature;
-        var content = "";
-
-        var customOptions =
-            {
-                'maxWidth': "500",
-                'minWidth': "300",
-                keepInView: false
-            }
-
-        content += "<h4>" + address.d + "</h4>";
-        if (address.st !== undefined && address.st !== "Active" && address.st !== null) {
-            content += "<p>" + address.st + "</p>";
-        }
-        content += "<input type='hidden' id='latLong' value='" + latLongString + "'>";
-        if (address.url !== undefined && address.url !== "" && address.url !== null) {
-            content += "<a target=\"_blank\" href='" + address.url + "'>" + address.url + "</a>";
-        }
-
-        if (address.v !== undefined && address.v !== "" && address.v !== null) {
-            content += "<video controls autoplay name=\"media\"><source src=" + address.v + " type=\"video/mp4\"></video>";
-        } else {
-            if (address.i !== undefined && address.i !== "" && address.i !== null) {
-                content += "<image src='" + address.i + "'/>";
-            }
-        }
-
-        if (address.c !== undefined && address.c !== "" && address.c !== null) {
-            content += address.c;
-        }
 
         var polylineCoordinates = [];
 
@@ -472,7 +483,7 @@ hud.plugins.rtmap = (function () {
             }
             else {
                 // normal location
-                feature = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: "loc", s: address.t });
+                feature = L.userMarker(latlng, { pulsing: highlight, accuracy: 0, m: "loc", s: address.t });
 
                 feature.on("click",
                     function () {
@@ -481,6 +492,8 @@ hud.plugins.rtmap = (function () {
                         //InformationSearch(latlng.lng, latlng.lat);
                     });
             }
+
+        feature.id = address.ID
         return feature;
     }
 
@@ -527,27 +540,34 @@ hud.plugins.rtmap = (function () {
                 Stations: stations
             },
             dataType: "json",
-            success: function (layer) {
+            success: function (mapdata) {
+                if (mapdata === null) {
+                    $("#message").text('failed to get a response from the server');
+                    return;
+                }
 
-                if (layer.error !== undefined) {
-                    $("#message").html(layer.error);
+                var layer = georesLayer[pluginId];
+                layer.clearLayers();
+
+                if (mapdata.error !== undefined) {
+                    $("#message").html(mapdata.error);
                     $("#message").show();
                     return;
                 }
 
-                if (layer.Result === null)
+                if (mapdata.Result === null)
                     return;
 
                 // add resources to the map
-                if (layer.Resources !== undefined) {
-                    layer.Resources.forEach(function (item) {
-                        _updateResource(pluginId, item);
+                if (mapdata.Resources !== undefined) {
+                    mapdata.Resources.forEach(function (item) {
+                        _updateResource(layer, item);
                     });
                 }
 
-                if (layer.Destinations !== undefined) {
+                if (mapdata.Destinations !== undefined) {
                     // add Destinations to the map
-                    _updateDestinations(pluginId, layer.Destinations);
+                    _updateDestinations(layer, mapdata.Destinations);
                 }
 
                 // now register for updates
@@ -575,8 +595,7 @@ hud.plugins.rtmap = (function () {
     };
 
     // update layer with resources
-    var _updateResource = function (pluginId, item) {
-        var layer = georesLayer[pluginId];
+    var _updateResource = function (layer, item) {
 
         // for each item construct equiv geojson item
         var geojsonFeature = {
@@ -599,9 +618,7 @@ hud.plugins.rtmap = (function () {
     };
 
     // update layer with destinations
-    var _updateDestinations = function (pluginId, destinations) {
-
-        var layer = georesLayer[pluginId];
+    var _updateDestinations = function (layer, destinations) {
 
         destinations.forEach(function (item) {
             _removeExistingFeature(layer, item.Id);
@@ -687,19 +704,10 @@ hud.plugins.rtmap = (function () {
         }
     };
         
-    /// <summary>
-    /// Re-centre the maps to new co-ordinates
-    /// </summary
-    var _panTo = function (pluginId, lat, lng) {
+    var _panZoom = function (pluginId, lat, lon, zoom) {
         var map = rtmap_maps[pluginId];
-    };
-
-    var _panAndMarkLocation = function (pluginId, locationName, lat, lng) {
-        var map = rtmap_maps[pluginId];
-    };
-
-    var _setZoomLevel = function (pluginId, z) {
-        var map = rtmap_maps[pluginId];
+        latlng = new L.LatLng(lat, lon);
+        map.setView(latlng, zoom);
     };
 
     var _selectBaseLayer = function (pluginId, layerName) {
@@ -730,9 +738,7 @@ hud.plugins.rtmap = (function () {
         init: _init,
         selectBaseLayer: _selectBaseLayer,
         lockMap: _lockMap,
-        setZoom: _setZoomLevel,
-        panTo: _panTo,
-        panAndMarkLocation: _panAndMarkLocation
+        panZoom: _panZoom,
     };
 
 })();

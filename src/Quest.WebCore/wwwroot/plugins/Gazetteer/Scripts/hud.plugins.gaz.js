@@ -122,6 +122,9 @@ hud.plugins.gaz = (function() {
         _clrSearchItems(pluginId);
         _showGroupedSearchItems(pluginId, json);
     }
+    var _setFinalAddress = function (doc, latlng)
+    {
+    }
 
     var _showGroupedSearchItems = function (pluginId, items) {
 
@@ -152,7 +155,7 @@ hud.plugins.gaz = (function() {
                     _addSingleFeatureToResultsList(pluginId, selector + " #grouped-results-list", doc, feature, score, latlng);
 
                     if (docindex === 0)
-                        SetFinalAddress(doc.d, latlng, 0);
+                        _setFinalAddress(doc.d, latlng);
                 }
             }
         }
@@ -204,9 +207,12 @@ hud.plugins.gaz = (function() {
 
         $(containerId).append($("<a>").attr("class", "list-group-item").attr("href", "#")
             .on("click", function () {
-                //SetFinalAddress(address.d, latlng, 0);
+                _setFinalAddress(address.d, latlng);
+                hud.sendLocal("PanZoom", { 'lat': address.l.lat, 'lon': address.l.lon, 'zoom': 20 });
+                hud.sendLocal("ObjectSelected", { "Type": "SearchItem", "Value": address });
+                hud.sendLocal("SelectSearchResult", { "address": address });
             })
-            .append($("<span>").addClass("glyphicon glyphicon-map-marker text-muted c-info c-info-icon")
+            .append($("<span>").addClass("text-muted c-info c-info-icon")
                 .attr("title", "go to ")
                 .attr("data-toggle", "tooltip")
                 .on("click", function () {
