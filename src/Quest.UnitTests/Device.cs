@@ -2,6 +2,7 @@ using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Quest.Common.Messages;
 using Quest.Common.Messages.Device;
+using Quest.Common.Messages.Entities;
 using Quest.Common.Messages.GIS;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Device;
@@ -182,32 +183,6 @@ namespace Quest.UnitTests
         }
 
 
-        [TestMethod]
-        public void Device_05_GetEntityTypesRequest()
-        {
-            var sessionid = Login();
-
-            Assert.IsNotNull(sessionid);
-
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            //var scope = Common.ApplicationContainer.BeginLifetimeScope();
-            var deviceHandler = Common.ApplicationContainer.Resolve<DeviceHandler>();
-            var serviceBusClient = Common.ApplicationContainer.Resolve<IServiceBusClient>();
-
-            serviceBusClient.Initialise("Test");
-
-            GetEntityTypesRequest request = new GetEntityTypesRequest()
-            {
-                RequestId = "",
-                SessionId = sessionid,
-            };
-
-            var result = deviceHandler.GetEntityTypes(request);
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.Success);
-        }
-
         [TestMethod]        
         public void Device_06_GetHistoryRequest()
         {
@@ -234,31 +209,7 @@ namespace Quest.UnitTests
             Assert.IsTrue(result.Success);
         }
 
-        [TestMethod]
-        public void Device_07_GetStatusCodesRequest()
-        {
-            var sessionid = Login();
 
-            Assert.IsNotNull(sessionid);
-
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            //var scope = Common.ApplicationContainer.BeginLifetimeScope();
-            var deviceHandler = Common.ApplicationContainer.Resolve<DeviceHandler>();
-            var serviceBusClient = Common.ApplicationContainer.Resolve<IServiceBusClient>();
-
-            serviceBusClient.Initialise("Test");
-
-            GetStatusCodesRequest request = new GetStatusCodesRequest()
-            {
-                RequestId = "",
-                SessionId = sessionid,
-            };
-
-            var result = deviceHandler.GetStatusCodes(request);
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.Success);
-        }
 
         [TestMethod]
         public void Device_08_MakePatientObservationRequest()
