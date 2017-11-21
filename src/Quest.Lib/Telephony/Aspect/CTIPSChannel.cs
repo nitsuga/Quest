@@ -4,7 +4,6 @@ using www.aspect.com.unifiedip.edk.ctipsapi._2009._08;
 using www.aspect.com.unifiedip.edk.commondata._2009._08;
 using System.Timers;
 using Quest.Lib.Trace;
-using Quest.Common.Messages;
 using System.ServiceModel;
 using Quest.Common.Messages.Telephony;
 

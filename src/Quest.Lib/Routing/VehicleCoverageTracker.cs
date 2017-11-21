@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Transactions;
 using GeoAPI.Geometries;
-using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
-using Quest.Lib.Utils;
 using Quest.Lib.Data;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;

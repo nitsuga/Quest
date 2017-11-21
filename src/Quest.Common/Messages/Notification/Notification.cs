@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Quest.Common.Messages.Notification
+﻿namespace Quest.Common.Messages.Notification
 {
 
     public class Notification : Request

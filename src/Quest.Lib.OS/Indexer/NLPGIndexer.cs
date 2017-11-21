@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using Nest;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Lib.OS.DataModelNLPG;
 using Quest.Lib.Data;

@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Configuration;
-using Quest.Common.Messages;
 using Quest.Common.Messages.System;
 using Quest.Lib.Processor;
 using Quest.Lib.Trace;

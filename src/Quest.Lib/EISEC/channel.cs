@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Quest.Common.Messages;
 using Quest.Lib.Net;
 using Quest.Common.Messages.Telephony;
 

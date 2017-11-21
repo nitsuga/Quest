@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Nest;
 using NetTopologySuite.IO;
 using GeoAPI.Geometries;

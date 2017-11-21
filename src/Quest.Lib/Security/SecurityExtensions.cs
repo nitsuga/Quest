@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Security;
 
 namespace Quest.Lib.Security

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Quest.Common.Messages.Gazetteer;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Routing;
@@ -110,6 +111,13 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         public ActionResult AssignResource(ResourceAssign request)
         {
             return null;
+        }
+
+        [HttpGet]
+        public async Task<SearchResponse> InfoSearch(InfoSearchRequest request)
+        {
+            var result = await _messageCache.SendAndWaitAsync<SearchResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
         }
     }
 

@@ -8,7 +8,6 @@ using System.Threading;
 using Quest.Lib.MapMatching;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
-using Quest.Common.Messages;
 using NetTopologySuite.Operation.Distance;
 using System.Dynamic;
 using Quest.Lib.Processor;

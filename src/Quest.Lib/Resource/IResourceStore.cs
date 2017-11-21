@@ -1,6 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.CAD;
-using Quest.Common.Messages.Resource;
+﻿using Quest.Common.Messages.Resource;
 using System.Collections.Generic;
 
 namespace Quest.Lib.Resource

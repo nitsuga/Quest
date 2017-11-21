@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages.GIS;
-using System;
+﻿using System;
 
 namespace Quest.Common.Messages.Incident
 {

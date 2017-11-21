@@ -1,12 +1,7 @@
 ﻿#define NO_APPLE
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Quest.Common.Messages;
-using Quest.Lib.DataModel;
-using Quest.Lib.Utils;
 using Quest.Lib.Incident;
 using Quest.Lib.Resource;
 using Quest.Lib.Data;
@@ -15,10 +10,7 @@ using Quest.Lib.Search.Elastic;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Device;
 using Quest.Common.Messages.GIS;
-using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;
-using Quest.Common.Messages.Destination;
-using Quest.Common.Messages.Incident;
 
 namespace Quest.Lib.Device
 {

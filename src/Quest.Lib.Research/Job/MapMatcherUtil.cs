@@ -20,7 +20,6 @@ using Quest.Lib.MapMatching;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Autofac;
 using Quest.Lib.Utils;

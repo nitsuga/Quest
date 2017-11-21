@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.GIS;
+﻿using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.MapMatching
 {

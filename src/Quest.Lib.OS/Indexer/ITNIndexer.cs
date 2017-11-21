@@ -5,7 +5,6 @@ using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Quest.Lib.OS.DataModelOS;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Gazetteer;

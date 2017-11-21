@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Quest.Common.Messages.GIS;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
 using System;
@@ -10,25 +9,15 @@ namespace Quest.WebCore.Plugins.RealtimeMap
     public class AACController : Controller
     {
         private AsyncMessageCache _messageCache;
-        private IncidentService _incidentService;
-        private DestinationService _destinationService;
-        private TelephonyService _telephonyService;
         private SecurityService _securityService;
         private readonly IPluginService _pluginService;
 
         public AACController(AsyncMessageCache messageCache,
                 IPluginService pluginFactory,
-                IncidentService incidentService,
-                DestinationService destinationService,
-                TelephonyService telephonyService,
-                VisualisationService visualisationService,
                 SecurityService securityService
             )
         {
             _messageCache = messageCache;
-            _incidentService = incidentService;
-            _destinationService = destinationService;
-            _telephonyService = telephonyService;
             _securityService = securityService;
             _pluginService = pluginFactory;
         }

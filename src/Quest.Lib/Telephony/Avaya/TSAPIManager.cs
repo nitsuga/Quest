@@ -3,9 +3,6 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Quest.Lib.Telephony.Avaya
 {

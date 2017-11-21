@@ -11,7 +11,6 @@ using NetTopologySuite.Index.Quadtree;
 using NetTopologySuite.IO;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Operation.Distance;
-using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Utils;

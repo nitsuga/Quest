@@ -5,7 +5,6 @@ using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
 using Quest.WebCore.Plugins.Lib;
 using Quest.WebCore.Services;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;

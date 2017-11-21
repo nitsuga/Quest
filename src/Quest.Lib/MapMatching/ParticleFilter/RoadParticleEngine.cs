@@ -6,7 +6,6 @@ using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Operation.Distance;
-using Quest.Common.Messages;
 using Quest.Lib.Constants;
 using Quest.Lib.Maths;
 using Quest.Lib.Routing;

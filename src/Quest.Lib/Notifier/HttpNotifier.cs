@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Quest.Lib.Trace;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Notifier

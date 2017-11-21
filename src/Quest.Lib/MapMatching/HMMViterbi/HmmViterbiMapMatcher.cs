@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Quest.Common.Messages;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Routing;
 using Quest.Common.Messages.Routing;

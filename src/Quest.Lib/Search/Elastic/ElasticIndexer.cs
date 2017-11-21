@@ -8,7 +8,6 @@ using System.Text;
 using Nest;
 using Newtonsoft.Json;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Common.Messages.Gazetteer;
 

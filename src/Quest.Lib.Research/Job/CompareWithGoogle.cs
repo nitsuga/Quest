@@ -14,7 +14,6 @@ using Quest.Lib.Google.DistanceMatrix;
 using System.Diagnostics;
 using System.Threading;
 using Quest.Lib.Routing.Speeds;
-using Quest.Common.Messages.GIS;
 using NetTopologySuite.Geometries;
 using GeoAPI.Geometries;
 using Quest.Lib.Research.DataModelResearch;

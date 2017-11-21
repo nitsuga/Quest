@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Nest;
 using Quest.Lib.Trace;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Gazetteer;
 
 namespace Quest.Lib.Search.Elastic

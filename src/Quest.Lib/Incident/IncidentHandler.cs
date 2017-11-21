@@ -1,6 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.CAD;
-using Quest.Common.Messages.GIS;
+﻿using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Incident;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Notifier;

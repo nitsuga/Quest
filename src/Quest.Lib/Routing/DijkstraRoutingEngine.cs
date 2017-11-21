@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
-using Quest.Common.Messages;
 using Quest.Lib.Routing.Speeds;
 using Quest.Lib.Utils;
 using Quest.Lib.Trace;

@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.GIS;
+﻿using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Utils;
 using Quest.Lib.Data;

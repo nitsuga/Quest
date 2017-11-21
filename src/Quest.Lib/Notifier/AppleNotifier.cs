@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using Quest.Lib.Trace;
-using PushSharp.Apple;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Notifier

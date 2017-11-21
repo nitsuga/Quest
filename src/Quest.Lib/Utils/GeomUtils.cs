@@ -12,7 +12,6 @@ using NetTopologySuite.Utilities;
 //using ProjNet.CoordinateSystems;
 //using ProjNet.CoordinateSystems.Transformations;
 using Quest.Lib.Coords;
-using Quest.Common.Messages;
 using ProjNet.CoordinateSystems.Transformations;
 using ProjNet.CoordinateSystems;
 //using GeoAPI.Geometries;

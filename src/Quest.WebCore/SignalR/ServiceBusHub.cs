@@ -1,12 +1,10 @@
 ﻿using Quest.Common.ServiceBus;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SignalR;
-using System.Collections.Generic;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Incident;
 using Quest.Lib.Trace;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Quest.WebCore.SignalR
 {

@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Routing;
+﻿using Quest.Common.Messages.Routing;
 
 namespace Quest.Lib.MapMatching.RouteMatcher
 {

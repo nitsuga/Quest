@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;

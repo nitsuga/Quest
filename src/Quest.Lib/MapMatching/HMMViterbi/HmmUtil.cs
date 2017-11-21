@@ -9,7 +9,6 @@ using NetTopologySuite.Operation.Distance;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Maths;
 using Quest.Lib.Routing;
-using Quest.Common.Messages;
 using Quest.Lib.Utils;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;

@@ -1,7 +1,6 @@
 ﻿#pragma warning disable 0169,649
 using System;
 using System.Collections.Generic;
-using Quest.Common.Messages;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Common.Messages.Routing;
 

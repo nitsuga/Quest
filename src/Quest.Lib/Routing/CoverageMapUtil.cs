@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using Quest.Common.Messages;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;
 using Quest.Lib.Data;

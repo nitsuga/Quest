@@ -1,2 +1,3 @@
-/opt/mssql/bin/sqlservr & /usr/src/app/attach-data.sh
+/usr/src/app/attachdata.sh &
+/opt/mssql/bin/sqlservr
 sleep infinity

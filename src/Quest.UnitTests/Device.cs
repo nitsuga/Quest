@@ -1,13 +1,9 @@
 using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Device;
-using Quest.Common.Messages.Entities;
 using Quest.Common.Messages.GIS;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Device;
-using Quest.Lib.Resource;
-using System;
 using System.Text;
 
 namespace Quest.UnitTests

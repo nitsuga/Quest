@@ -39,8 +39,8 @@ services:
 
   searchdatabase:
     build: 
-      context: ./elasticsearch-phonetic
-    image: gluteusmaximus/quest-elastic:latest
+      context: ./quest-search
+    image: gluteusmaximus/quest-search:latest
     ports:
       - "9200:9200"
     volumes:

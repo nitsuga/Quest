@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Quest.Lib.MapMatching;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Autofac;
 using Quest.Lib.DependencyInjection;
 using Quest.Common.Messages.GIS;

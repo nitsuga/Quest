@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using GeoAPI.Geometries;
-using Quest.Common.Messages;
 using Quest.Lib.Constants;
 using Quest.Lib.Maths;
 using Quest.Lib.Routing;

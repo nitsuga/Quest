@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
 using Quest.WebCore.Plugins.Lib;
-using System.Collections.Generic;
 
 namespace Quest.WebCore.Plugins.Visuals
 {

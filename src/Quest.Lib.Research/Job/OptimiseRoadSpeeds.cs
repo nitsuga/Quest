@@ -5,7 +5,6 @@ using Quest.Common.ServiceBus;
 using Quest.Common.Utils;
 using Quest.Lib.Data;
 using Quest.Lib.DependencyInjection;
-using Quest.Lib.MapMatching;
 using Quest.Lib.Optimiser;
 using Quest.Lib.Optimiser.NelderMead;
 using Quest.Lib.Processor;
@@ -19,7 +18,6 @@ using Quest.Lib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using NetTopologySuite.Geometries;
 

@@ -5,7 +5,6 @@ using Nest;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Tfl.Api.Presentation.Entities;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using Quest.Common.Messages.Gazetteer;
 

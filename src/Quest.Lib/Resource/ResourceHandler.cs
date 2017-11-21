@@ -7,10 +7,8 @@
 using System;
 using System.Linq;
 using Nest;
-using Quest.Common.Messages;
 using Quest.Lib.Search.Elastic;
 using Quest.Common.ServiceBus;
-using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Lib.Data;
 using Quest.Lib.Trace;
@@ -19,7 +17,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using Quest.Lib.Device;
 using Quest.Common.Messages.CAD;
-using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Gazetteer;
 using Quest.Common.Messages.Device;
 using Quest.Common.Messages.Incident;

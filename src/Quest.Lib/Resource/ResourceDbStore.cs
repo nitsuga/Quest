@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Quest.Common.Messages;
-using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Destination;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;

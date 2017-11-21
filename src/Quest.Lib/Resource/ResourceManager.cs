@@ -6,7 +6,6 @@ using Quest.Common.Messages;
 using Quest.Lib.Processor;
 using Quest.Lib.Trace;
 using Quest.Common.ServiceBus;
-using Quest.Lib.Notifier;
 using Quest.Lib.Incident;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;

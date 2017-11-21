@@ -1,14 +1,10 @@
 ﻿
 using System;
-using System.Linq;
-using Quest.Lib.DataModel;
-using Quest.Common.Messages;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Lib.Data;
-using Quest.Common.Messages.Telephony;
 using System.Threading;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.GIS;

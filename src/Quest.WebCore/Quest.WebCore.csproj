@@ -59,11 +59,15 @@
     <Compile Remove="Plugins\Chat\Chat.cs" />
     <Compile Remove="Plugins\Chat\ChatHub.cs" />
     <Compile Remove="Services\ClientConnectionService.cs" />
+    <Compile Remove="Services\DestinationsService.cs" />
+    <Compile Remove="Services\IncidentService.cs" />
     <Compile Remove="Services\ResourceService.cs" />
     <Compile Remove="Services\RouteInfo.cs" />
     <Compile Remove="Services\RouteJob.cs" />
     <Compile Remove="Services\RouteService.cs" />
     <Compile Remove="Services\SearchService.cs" />
+    <Compile Remove="Services\TelephonyService.cs" />
+    <Compile Remove="Services\VisualisationService.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using Quest.Common.Messages;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Routing;
 using Quest.Lib.Trace;

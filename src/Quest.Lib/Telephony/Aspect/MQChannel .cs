@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Telephony;
+﻿using Quest.Common.Messages.Telephony;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Trace;
 using System.Collections.Generic;

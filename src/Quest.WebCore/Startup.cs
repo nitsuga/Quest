@@ -74,10 +74,6 @@ namespace Quest.WebCore
             builder.RegisterModule(new Modules.PluginModule());
 
             // Add application services.
-            services.AddSingleton<IncidentService>();
-            services.AddSingleton<DestinationService>();
-            services.AddSingleton<TelephonyService>();
-            services.AddSingleton<VisualisationService>();
             services.AddSingleton<SecurityService>();
             services.AddSingleton<ServiceBusHub>();
 

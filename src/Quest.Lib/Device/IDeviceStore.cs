@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Device;
+﻿using Quest.Common.Messages.Device;
 using System;
 using System.Collections.Generic;
 

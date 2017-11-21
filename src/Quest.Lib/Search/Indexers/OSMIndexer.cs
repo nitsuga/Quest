@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Quest.Lib.Search.Elastic;
+﻿using Quest.Lib.Search.Elastic;
 
 namespace Quest.Lib.Search.Indexers
 {

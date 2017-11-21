@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using System.IO;
 using Quest.Lib.Csv;
 using Quest.Common.Messages.Gazetteer;

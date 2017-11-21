@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Quest.Common.Messages;
 using Quest.Lib.Visuals;
 using FeatureCollection = GeoJSON.Net.Feature.FeatureCollection;
 using Autofac;

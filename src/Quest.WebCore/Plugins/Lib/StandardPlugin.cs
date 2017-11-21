@@ -1,11 +1,8 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Quest.WebCore.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Quest.WebCore.Plugins.Lib
 {

@@ -7,7 +7,6 @@ using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Utilities;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Gazetteer;
 using Nest;
 

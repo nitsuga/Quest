@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Quest.Lib.Csv
+﻿namespace Quest.Lib.Csv
 {
     /// <summary>
     /// Represents a single data line inside a csv file.

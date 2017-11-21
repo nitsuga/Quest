@@ -28,6 +28,7 @@ namespace Quest.WebCore.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet()]
+        [ResponseCache(NoStore = true)]
         public HudLayout GetLayout(string id)
         {
             var model = _pluginService.GetLayout(id);
@@ -39,6 +40,7 @@ namespace Quest.WebCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet()]
+        [ResponseCache(NoStore = true)]
         public List<HudLayout> GetLayouts()
         {
             var model = _pluginService.GetLayouts();
@@ -52,6 +54,7 @@ namespace Quest.WebCore.Controllers
         /// <param name="panelId">target role</param>
         /// <returns></returns>
         [HttpGet()]
+        [ResponseCache(NoStore = true)]
         public HudPluginModel CreatePlugin(string id)
         {
             // Create the plugin object
@@ -76,6 +79,7 @@ namespace Quest.WebCore.Controllers
         /// <param name="role"></param>
         /// <returns></returns>
         [HttpPost]
+        [ResponseCache(NoStore = true)]
         public ActionResult RenderPanel([FromBody] HudPanel model)
         {
             // render it
@@ -89,6 +93,7 @@ namespace Quest.WebCore.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
+        [ResponseCache(NoStore = true)]
         public ActionResult RenderLayout([FromBody] HudLayout model)
         {
             // render it
@@ -97,6 +102,7 @@ namespace Quest.WebCore.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(NoStore = true)]
         public ActionResult RenderLayoutByName(string id)
         {
             HudLayout layout = GetLayout(id);

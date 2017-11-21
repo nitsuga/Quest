@@ -4,7 +4,6 @@ using System.Diagnostics;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Trace;
-using Quest.Common.Messages;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Common.Messages.Gazetteer;

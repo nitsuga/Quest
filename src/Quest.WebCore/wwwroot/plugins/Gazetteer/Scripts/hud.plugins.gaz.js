@@ -44,6 +44,8 @@ hud.plugins.gaz = (function() {
         // bind plugin dependent events
         _bindPanel(pluginId);
 
+        // select the primary menu
+        hud.selectMenu(pluginId, 0);
 
     };
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using GeoAPI.Geometries;
-using Quest.Common.Messages;
 using Quest.Common.Messages.Resource;
 
 namespace Quest.Common.Simulation

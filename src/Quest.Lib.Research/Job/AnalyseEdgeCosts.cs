@@ -8,7 +8,6 @@ using Quest.Lib.MapMatching;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Routing;
 using Quest.Lib.Routing.Speeds;
-using Quest.Common.Messages;
 using Quest.Lib.Trace;
 using System.IO;
 using Autofac;
@@ -19,7 +18,6 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
-using System.Data.SqlClient;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;
 

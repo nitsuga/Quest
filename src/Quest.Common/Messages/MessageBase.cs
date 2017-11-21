@@ -1,6 +1,5 @@
 ﻿using Quest.Common.ServiceBus;
 using Quest.Common.Utils;
-using System;
 
 namespace Quest.Common.Messages
 {

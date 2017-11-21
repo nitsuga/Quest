@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Quest.Lib.DependencyInjection;
 using Quest.WebCore.Interfaces;
-using System.Collections.Generic;
-using System;
 using Quest.WebCore.Plugins.Lib;
 
 namespace Quest.WebCore.Plugins.Routing

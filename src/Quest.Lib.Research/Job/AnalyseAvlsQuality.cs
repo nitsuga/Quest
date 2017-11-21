@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Quest.Common.Messages;
 using Quest.Lib.MapMatching;
 using Quest.Lib.Research.Utils;
 using Quest.Lib.Trace;

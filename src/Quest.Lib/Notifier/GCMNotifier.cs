@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Quest.Lib.Trace;
 using PushSharp.Google;
-using Quest.Common.Messages;
 using System.Collections.Generic;
 using PushSharp.Common;
 using Quest.Common.Messages.Notification;

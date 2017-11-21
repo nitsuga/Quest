@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Notification;
+﻿using Quest.Common.Messages.Notification;
 
 namespace Quest.Lib.Notifier
 {

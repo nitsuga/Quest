@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Quest.Common.Messages;
 using Quest.Lib.Constants;
 using Quest.Lib.DataModel;
 using Quest.Lib.Trace;

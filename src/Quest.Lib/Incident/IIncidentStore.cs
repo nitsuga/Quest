@@ -1,5 +1,4 @@
-﻿using Quest.Common.Messages;
-using Quest.Common.Messages.Incident;
+﻿using Quest.Common.Messages.Incident;
 using System.Collections.Generic;
 
 namespace Quest.Lib.Incident

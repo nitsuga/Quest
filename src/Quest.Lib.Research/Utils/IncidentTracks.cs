@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Quest.Lib.MapMatching;
 using Quest.Lib.Utils;
-using Quest.Common.Messages;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
 using Quest.Lib.DependencyInjection;

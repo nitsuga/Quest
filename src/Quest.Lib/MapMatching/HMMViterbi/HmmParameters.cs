@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Quest.Common.Messages;
 using Quest.Lib.MapMatching.RouteMatcher;
 using Quest.Lib.Maths;
 using Quest.Lib.Routing;

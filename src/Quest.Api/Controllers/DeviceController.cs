@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using Quest.Common.Messages;
 using Quest.Lib.ServiceBus;
 using System.Threading.Tasks;
 using Quest.Common.Messages.Device;
