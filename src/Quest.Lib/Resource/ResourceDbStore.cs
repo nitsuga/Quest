@@ -322,7 +322,8 @@ namespace Quest.Lib.Resource
                 Sector = newres.Sector,
                 Status = newres.ResourceStatus?.Status,
                 Comment = newres.Comment,
-                LastUpdated = newres.StartDate,
+                StartDate = newres.StartDate,
+                EndDate = newres.EndDate,
                 StatusCategory = GetStatusDescription(newres.ResourceStatus)
             };
         }

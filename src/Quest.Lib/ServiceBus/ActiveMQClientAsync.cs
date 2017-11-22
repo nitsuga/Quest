@@ -351,7 +351,7 @@ namespace Quest.Lib.ServiceBus
                 var textmessage = receivedMsg as ITextMessage;
                 if (textmessage != null)
                 {
-                    Debug.WriteLine(textmessage.Text);
+                    //Debug.WriteLine(textmessage.Text);
                     JsonSerializerSettings settings = new JsonSerializerSettings()
                     {
                         MaxDepth = 1000,

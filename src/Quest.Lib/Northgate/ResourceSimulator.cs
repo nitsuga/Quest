@@ -72,13 +72,13 @@ namespace Quest.Lib.Trackers
 
                 var i = (int)(r.NextDouble() * (double)num);
 
-                var x = (r.NextDouble() - 0.5) * 0.002;
-                var y = (r.NextDouble() - 0.5) * 0.002;
+                var x = (r.NextDouble() - 0.5) * 0.02;
+                var y = (r.NextDouble() - 0.5) * 0.02;
 
                 var v = vehicles[i];
-                v.StatusCategory = status[counter % 5]; 
-                v.Status = statuscode[counter % 5];
-                v.Position = new LatLongCoord { Longitude = v.Position.Longitude + x, Latitude = v.Position.Latitude + x };
+                //v.StatusCategory = status[counter % 5]; 
+                //v.Status = statuscode[counter % 5];
+                v.Position = new LatLongCoord { Longitude = v.Position.Longitude + x, Latitude = v.Position.Latitude + y };
 
                 ServiceBusClient.Broadcast(new ResourceUpdateRequest()
                 {

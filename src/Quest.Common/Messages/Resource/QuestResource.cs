@@ -53,7 +53,12 @@ namespace Quest.Common.Messages.Resource
         /// <summary>
         /// valid as of
         /// </summary>
-        public DateTime? LastUpdated;
+        public DateTime? StartDate;
+
+        /// <summary>
+        /// valid until
+        /// </summary>
+        public DateTime? EndDate;
 
         /// <summary>
         /// vehicle number if appropriate
