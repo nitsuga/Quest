@@ -1,0 +1,79 @@
+.mapmarker-dark-loc {
+    display: block;
+    border: 1pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 25%;
+    -webkit-border-radius: 25%;
+    border-radius: 25%;
+    /* multiply the shadows, inside and outside the circle */
+    -moz-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    -webkit-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    box-shadow: 5px 5px 15px;
+    /* set the ring's new dimension and re-center it */
+    height: 16px !important;
+    margin: 0px 0 0 0px;
+    width: 16px !important;
+}
+
+.loc-standard {
+    background: blue;
+}
+
+.loc-Address {
+    background: lightblue;
+}
+
+.loc-Junction {
+    background: lightyellow;
+}
+
+.loc-POI {
+    background: orange;
+}
+
+.loc-OSM {
+    background: yellow;
+}
+
+.loc-BUS {
+    background: red;
+}
+
+.loc-Bike {
+    background: green;
+}
+
+.loc-StopPoint {
+    background: green;
+}
+
+.loc-LocalName {
+    background: lightgreen;
+}
+
+.loc-MarkerPost {
+    background: blue;
+    border: 1pt solid white;
+}
+
+.loc-Mobile {
+    background: Black;
+    border: 1pt solid white;
+}
+
+.loc-Point {
+    background: grey;
+    border: 1pt solid white;
+}
+
+
+.loc-Camera {
+    background: darkred;
+    border: 1pt solid white;
+}
+
+.loc-Defib {
+    background: red;
+    border: 1pt solid white;
+}

@@ -360,7 +360,7 @@
 
     };
 
-    // show menu in the panel
+    // show menu in the panel - normally triggered by the burger
     var _showmenu = function (panelId) {
         if (typeof panelRole === "string")
             panelRole = parseInt(panelId);

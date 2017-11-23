@@ -20,13 +20,14 @@
         options: {
             pulsing: false,
             accuracy: 0,
-            m: '',              // marker type
-            s: ''               // status
+            m: '',                  // marker type
+            s: '',                  // status
+            t: 'mapmarker-norm'     // theme
         },
 
         initialize: function(latlng, options) {
             options = L.Util.setOptions(this, options);            
-            this.setMarker(this.options.m, this.options.s, this.options.pulsing);
+            this.setMarker(this.options.m, this.options.s, this.options.pulsing, this.options.t);
 
             if (this.options.accuracy>0)
                 this._accMarker = L.circle(latlng, this.options.accuracy, circleStyle);
@@ -37,17 +38,18 @@
             this.on("move", function () {
                 if (this._accMarker != null)
                     this._accMarker.setLatLng(this.getLatLng());
+
             }).on("remove", function () {
                 if (this._accMarker != null)
                     this._map.removeLayer(this._accMarker);
             });
         },
 
-        setMarker: function(m,s, pulsing)
+        setMarker: function(m,s, pulsing, theme)
         {            
             this._m = m;
             icon = L.divIcon({
-                className: "leaflet-usermarker-" + this.options.m + " " + this.options.m + "-" + s + " " + (pulsing?"pulsate":""),
+                className: theme + "-" + this.options.m + " " + this.options.m + "-" + s + " " + (pulsing?"pulsate":""),
                 iconSize: [24, 24],
                 iconAnchor: [12, 12],
                 popupAnchor: [0, -10],

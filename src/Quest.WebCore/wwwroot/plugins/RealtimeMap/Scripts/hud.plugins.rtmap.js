@@ -14,6 +14,9 @@ var georesLayer = {};
 // display res trails for each map
 var georestrailLayer = {};
 
+// which theme to use for markers
+var markertheme = {};
+
 // keep track of res items for each map
 var reshistory = {};
 
@@ -116,13 +119,16 @@ hud.plugins.rtmap = (function () {
             // save the map object in a dictionary so it can be accessed later
             rtmap_maps[pluginId] = map;
 
+            // select the normal marker theme
+            var theme = "mapmarker-dark";
+            markertheme[pluginId] = theme;
+
             // create geo overlay
-            georesLayer[pluginId] = _createResourcesLayer(map);
+            georesLayer[pluginId] = _createResourcesLayer(map, theme);
 
             reshistory[pluginId] = {};
             georestrailLayer[pluginId] = L.layerGroup();
             georestrailLayer[pluginId].addTo(map);
-            
 
             // add a search layer onto the maps and remember it
             searchlayer[pluginId] = new L.featureGroup();
@@ -206,17 +212,31 @@ hud.plugins.rtmap = (function () {
                 hud.toggleButton(pluginId, action);
                 break;
 
+            case "select-theme":
+                _changeTheme(pluginId, action.data)
+                break;
+
             case "select-map":
                 // turn off all other map buttons
                 hud.setActionState(pluginId, action.action);
+
                 // turn on this map button
                 hud.toggleButton(pluginId, action);
+
                 _selectBaseLayer(pluginId, action.data);
                 break;
 
             default:
         }
     };
+
+    var _changeTheme = function(pluginId, theme)
+    {
+        var curtheme = markertheme[pluginId];
+        markertheme[pluginId] = theme;
+        $("." + curtheme).addClass(theme);
+        $("." + curtheme).removeClass(curtheme);
+    }
 
     // handle message from service bus
     var _handleMessage = function (pluginId, group, msg) {
@@ -226,7 +246,7 @@ hud.plugins.rtmap = (function () {
 
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
-                _updateResource(traillayer, layer, history, msg.Item);
+                _updateResource(pluginId, traillayer, layer, history, msg.Item);
                 break;
             case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
                 _updateResourceStatus(pluginId, msg);
@@ -364,11 +384,12 @@ hud.plugins.rtmap = (function () {
         if (data === undefined)
             return;
         var layer = searchlayer[pluginId];
+        var theme = markertheme[pluginId];
         layer.eachLayer(function (sublayer) {
             if (sublayer.id === data.address.ID) {
                 layer.removeLayer(sublayer);
                 var latlng = new L.LatLng(data.address.l.lat, data.address.l.lon);
-                var feature = _getFeature(data.address, latlng, false);
+                var feature = _getFeature(data.address, latlng, false, theme);
                 layer.addLayer(feature);
                 return;
             }
@@ -380,11 +401,12 @@ hud.plugins.rtmap = (function () {
         _unselectSearchResult(pluginId, searchItem[pluginId]);
 
         var layer = searchlayer[pluginId];
+        var theme = markertheme[pluginId];
         layer.eachLayer(function (sublayer) {
             if (sublayer.id === data.address.ID) {
                 layer.removeLayer(sublayer);
                 var latlng = new L.LatLng(data.address.l.lat, data.address.l.lon);
-                var feature = _getFeature(data.address, latlng, true);
+                var feature = _getFeature(data.address, latlng, true, theme);
                 layer.addLayer(feature);
                 searchItem[pluginId] = data;
                 return;
@@ -398,13 +420,13 @@ hud.plugins.rtmap = (function () {
 
         var layer = searchlayer[pluginId];
         layer.clearLayers();
-
+        var theme = markertheme[pluginId];
         for (docindex = 0; docindex < data.Documents.length; docindex++) {
             doc = data.Documents[docindex];
             score = doc.s;
             if (doc.l !== undefined && doc.l !== null) {
                 latlng = new L.LatLng(doc.l.lat, doc.l.lon);
-                feature = _getFeature(doc, latlng, false);
+                feature = _getFeature(doc, latlng, false, theme);
                 layer.addLayer(feature);
             }
         }
@@ -452,7 +474,7 @@ hud.plugins.rtmap = (function () {
     }
     
     // return a single feature for this address
-    var _getFeature = function (address, latlng, highlight) {
+    var _getFeature = function (address, latlng, highlight, theme) {
         var latLongParms = {
             lng: address.l.lon,
             lat: address.l.lat
@@ -502,7 +524,7 @@ hud.plugins.rtmap = (function () {
             }
             else {
                 // normal location
-                feature = L.userMarker(latlng, { pulsing: highlight, accuracy: 0, m: "loc", s: address.t });
+                feature = L.userMarker(latlng, { pulsing: highlight, accuracy: 0, m: "loc", s: address.t, t: theme });
 
                 feature.on("click",
                     function () {
@@ -584,7 +606,7 @@ hud.plugins.rtmap = (function () {
                 // add resources to the map
                 if (mapdata.Resources !== undefined) {
                     mapdata.Resources.forEach(function (item) {
-                        _updateResource(traillayer, layer, history, item);
+                        _updateResource(pluginId, traillayer, layer, history, item);
                     });
                 }
 
@@ -628,7 +650,7 @@ hud.plugins.rtmap = (function () {
     }
 
     // add resource into the history. The history is a dictionary of resource lists, keyed by fleetno.
-    var _addToTrail = function (traillayer, history, resource) {
+    var _addToTrail = function (pluginId, traillayer, history, resource) {
         var hisrec = history[resource.FleetNo];
         if (hisrec !== undefined) {
             hisrec.unshift(resource); // push this resource to the HEAD of the list, i.e. most recent record
@@ -653,27 +675,37 @@ hud.plugins.rtmap = (function () {
                 coords.push(ll);
             });
 
-            var polylineOptions = {
-                color: 'blue',
-                weight: 2,
-                opacity: 0.9
-            };
+            var curtheme = markertheme[pluginId];
+            var hotlineOptions;
+            switch (curtheme)
+            {
+                case "mapmarker-dark":
+                    hotlineOptions = {
+                        palette: {
+                            0.0: '#FFFFFF',
+                            0.5: '#808080',
+                            1.0: '#000000'
+                        },
+                        weight: 3,
+                        outlineWidth: 0,
+                        min: 0,
+                        max: MAX_TRAIL_ITEMS
+                    };
+                    break;
+                default:
+                    hotlineOptions = {
+                        palette: {
+                            0.0: '#000000',
+                            0.5: '#808080',
+                            1.0: '#FFFFFF'
+                        },
+                        weight: 3,
+                        outlineWidth: 0,
+                        min: 0,
+                        max: MAX_TRAIL_ITEMS
+                    };
+            }
 
-            var hotlineOptions = {
-                palette: {
-                    0.0: '#000000',
-                    0.5: '#808080',
-                    1.0: '#FFFFFF'
-                },
-                weight: 3,
-                outlineWidth: 0,
-                min: 0,
-                max: MAX_TRAIL_ITEMS
-            };
-
-            
-
-            //var line = L.polyline(coords, polylineOptions);
             var line = L.hotline(coords, hotlineOptions);
 
             line.id = resource.FleetNo;
@@ -692,9 +724,9 @@ hud.plugins.rtmap = (function () {
     // layer: geojson leaflet layer
     // trail: stack of historic messages
     // item: QuestResource
-    var _updateResource = function (traillayer, layer, history, item) {
+    var _updateResource = function (pluginId, traillayer, layer, history, item) {
 
-        _addToTrail(traillayer, history, item);
+        _addToTrail(pluginId, traillayer, history, item);
 
         // for each item construct equiv geojson item
         var geojsonFeature = {
@@ -775,14 +807,14 @@ hud.plugins.rtmap = (function () {
     };
 
     // create a layer for resources, incidents and other features to live in
-    var _createResourcesLayer = function (map) {
+    var _createResourcesLayer = function (map, theme) {
         try {
             var georesLayer = L.geoJson("", {
                 style: function () {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
                 pointToLayer: function (feature, latlng) {
-                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus });
+                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus, t: theme });
                     marker.title = feature.properties.Callsign;
                     return marker;
                 },

@@ -1,0 +1,272 @@
+.mapmarker-dark-inc {
+    display: block;
+    border: 1pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 10%;
+    -webkit-border-radius: 10%;
+    border-radius: 10%;
+    /* set the ring's new dimension and re-center it */
+    height: 24px !important;
+    margin: 0px 0 0 0px;
+    width: 24px !important;
+}
+
+.inc-WAI-UN {
+    background: black;
+    border: 2pt solid black;
+}
+
+.inc-DUP-UN {
+    background: black;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-R1 {
+    background: red;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-R2 {
+    background: red;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-R3 {
+    background: red;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-C1 {
+    background: purple;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-C2 {
+    background: purple;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-C3 {
+    background: purple;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-C4 {
+    background: green;
+    border: 2pt solid gray;
+}
+
+.inc-DUP-NE {
+    background: lightblue;
+    border: 2pt solid gray;
+}
+
+
+
+.inc-ONS-R1 {
+    background: red;
+    border: 2pt solid red;
+}
+
+.inc-ONS-R2 {
+    background: orange;
+    border: 2pt solid red;
+}
+
+.inc-ONS-R3 {
+    background: red;
+    border: 2pt solid red;
+}
+
+.inc-ONS-C1 {
+    background: purple;
+    border: 2pt solid red;
+}
+
+.inc-ONS-C2 {
+    background: purple;
+    border: 2pt solid red;
+}
+
+.inc-ONS-C3 {
+    background: purple;
+    border: 2pt solid red;
+}
+
+.inc-ONS-C4 {
+    background: green;
+    border: 2pt solid red;
+}
+
+.inc-ONS-NE {
+    background: lightblue;
+    border: 2pt solid red;
+}
+
+
+
+.inc-ENR-R1 {
+    background: red;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-R2 {
+    background: red;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-R3 {
+    background: red;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-C1 {
+    background: purple;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-C2 {
+    background: purple;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-C3 {
+    background: purple;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-C4 {
+    background: green;
+    border: 2pt solid blue;
+}
+
+.inc-ENR-NE {
+    background: lightblue;
+    border: 2pt solid blue;
+}
+
+
+.inc-WAI-R1 {
+    background: red;
+    border: 4pt solid black;
+}
+
+.inc-WAI-R2 {
+    background: red;
+    border: 4pt solid black;
+}
+
+.inc-WAI-R3 {
+    background: red;
+    border: 4pt solid black;
+}
+
+.inc-WAI-C1 {
+    background: purple;
+    border: 4pt solid black;
+}
+
+.inc-WAI-C2 {
+    background: purple;
+    border: 4pt solid black;
+}
+
+.inc-WAI-C3 {
+    background: purple;
+    border: 4pt solid black;
+}
+
+.inc-WAI-C4 {
+    background: green;
+    border: 4pt solid black;
+}
+
+.inc-WAI-NE {
+    background: lightblue;
+    border: 4pt solid black;
+}
+
+
+
+.inc-DSP-R1 {
+    background: red;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-R2 {
+    background: red;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-R3 {
+    background: red;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-C1 {
+    background: purple;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-C2 {
+    background: purple;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-C3 {
+    background: purple;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-C4 {
+    background: green;
+    border: 4pt solid blue;
+}
+
+.inc-DSP-NE {
+    background: lightblue;
+    border: 4pt solid blue;
+}
+
+
+
+.inc-TRN-R1 {
+    background: red;
+    border: 4pt solid red;
+}
+
+.inc-TRN-R2 {
+    background: red;
+    border: 4pt solid red;
+}
+
+.inc-TRN-R3 {
+    background: red;
+    border: 4pt solid red;
+}
+
+.inc-TRN-C1 {
+    background: purple;
+    border: 4pt solid red;
+}
+
+.inc-TRN-C2 {
+    background: purple;
+    border: 4pt solid red;
+}
+
+.inc-TRN-C3 {
+    background: purple;
+    border: 4pt solid red;
+}
+
+.inc-TRN-C4 {
+    background: green;
+    border: 4pt solid red;
+}
+
+.inc-TRN-NE {
+    background: lightblue;
+    border: 4pt solid red;
+}

@@ -33,3 +33,75 @@
         filter: alpha(opacity=0);
     }
 }
+
+.pulsate {
+    -webkit-box-shadow: 0px 0px 33px 10px rgba(222,194,9,1);
+    -moz-box-shadow: 0px 0px 33px 10px rgba(222,194,9,1);
+    box-shadow: 0px 0px 33px 10px rgba(222,194,9,1);
+}
+
+
+@-moz-keyframes
+
+.mapmarker-dark-pulsate {
+    from
+
+{
+    -moz-transform: scale(0.5);
+    opacity: 1.0;
+}
+
+95% {
+    -moz-transform: scale(1.3);
+    opacity: 0;
+}
+
+to {
+    -moz-transform: scale(0.7);
+    opacity: 0;
+}
+
+}
+
+@-webkit-keyframes
+
+.mapmarker-dark-pulsate {
+    from
+
+{
+    -webkit-transform: scale(0.5);
+    opacity: 1.0;
+}
+
+95% {
+    -webkit-transform: scale(1.3);
+    opacity: 0;
+}
+
+to {
+    -webkit-transform: scale(0.7);
+    opacity: 0;
+}
+
+}
+
+@keyframes
+
+.mapmarker-dark-pulsate {
+    from
+
+{
+    transform: scale(0.5);
+    opacity: 1.0;
+}
+
+95% {
+    transform: scale(1.3);
+    opacity: 0;
+}
+
+to {
+    transform: scale(0.7);
+    opacity: 0;
+}
+}
