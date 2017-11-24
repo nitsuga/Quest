@@ -149,9 +149,6 @@
     <Content Update="wwwroot\lib\jQuery\dist\jquery.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\plugins\RealtimeMap\Scripts\leaflet.draw.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
     <Content Update="wwwroot\plugins\RealtimeMap\Scripts\leaflet.heat.js">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

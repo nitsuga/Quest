@@ -1,11 +1,11 @@
 ﻿{
   "Name": "AAC-2",
-  "Image": "AAC",
+  "Image": "",
   "Selectable": true,
   "Panels": [
     {
       "Panel": 0,
-      "Plugin": "AACPlugin",
+      "Plugin": "RealtimeMapPlugin",
       "Style": "col-md-6 full-height right-border",
       "Actions": [
         {
@@ -26,14 +26,15 @@
     },
     {
       "Panel": 1,
-      "Plugin": "RealtimeMapPlugin",
+      "Plugin": "AACPlugin",
       "Style": "col-md-6 half-height bottom-border",
+      "ExpandedStyle": "col-md-6 full-height",
       "Actions": [
         {
           "Target": 0,
           "Position": "panel-btn-left",
           "Action": "swap",
-          "Label": "Swap",
+          "Label": null,
           "Icon": "glyphicon-triangle-left"
         },
         {
@@ -56,6 +57,7 @@
       "Panel": 2,
       "Plugin": "PropertiesPlugin",
       "Style": "col-md-6 half-height ",
+      "ExpandedStyle": "col-md-6 full-height",
       "Actions": [
         {
           "Target": 1,

@@ -30,16 +30,20 @@
     width: 24px !important;
 }
 
+.mapmarker-dark-AMB.AMB-Available {
+    background: #0aff00;
+}
+
+.mapmarker-norm-AMB.AMB-Available {
+    background: #4cd016;
+}
+
 .AMB-Enroute {
     background: blue;
 }
 
 .AMB-Busy {
     background: red;
-}
-
-.AMB-Available {
-    background: #4cd016;
 }
 
 .AMB-Offroad {

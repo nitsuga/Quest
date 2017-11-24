@@ -1,5 +1,4 @@
 ﻿leaflet.js
-leaflet.draw.js
 leaflet.heat.js
 leaflet.usermarker.js
 leaflet.hotline.min.js

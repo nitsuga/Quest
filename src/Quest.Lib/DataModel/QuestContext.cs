@@ -31,6 +31,8 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<SecuredItems> SecuredItems { get; set; }
         public virtual DbSet<StationCatchment> StationCatchment { get; set; }
         public virtual DbSet<Vehicle> Vehicle { get; set; }
+        public virtual DbSet<ResourceAssignment> ResourceAssignment { get; set; }
+        
 
         public QuestContext(DbContextOptions<QuestContext> options) : base(options)
         {
@@ -38,6 +40,44 @@ namespace Quest.Lib.DataModel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+
+            modelBuilder.Entity<ResourceAssignment>(entity =>
+            {
+                entity.HasKey(e => e.ResourceAssignmentId);
+
+                entity.Property(e => e.Notes)
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FleetNo)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .IsRequired();
+
+                entity.Property(e => e.Callsign)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .IsRequired();
+
+                entity.Property(e => e.Assigned).HasColumnType("datetime").IsRequired(); 
+
+                entity.Property(e => e.Eta).HasColumnType("datetime");
+
+                entity.Property(e => e.OriginalEta).HasColumnType("datetime");
+
+                entity.Property(e => e.CancelledAt).HasColumnType("datetime");
+
+                entity.Property(e => e.ArrivedAt).HasColumnType("datetime");
+
+                entity.Property(e => e.LeftAt).HasColumnType("datetime");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime").IsRequired();
+
+            });
+
 
             modelBuilder.Entity<Call>(entity =>
             {

@@ -34,27 +34,44 @@ END
 #
 
 LAYER
-        NAME Stations
-        TYPE POLYGON
-        DATA data/misc/Stations
-        STATUS ON
+    NAME Stations
+    TYPE POLYGON
+    DATA misc/Stations
+    STATUS ON
 	CLASS
 	 STYLE
 	  COLOR 0 0 0 #fill
 	  OPACITY 0
 	 END
 	 STYLE
-	  OUTLINECOLOR 0 0 0 #stroke
-	  WIDTH 3
+	  OUTLINECOLOR 0 64 0 #stroke
+	  WIDTH 1
 	 END     
 	END
 END
 
 LAYER
-        NAME AZsmall
-        TYPE POLYGON
-        DATA data/misc/AZsmall
-        STATUS ON
+    NAME CCG
+    TYPE POLYGON
+    DATA misc/CCG
+    STATUS ON
+	CLASS
+	 STYLE
+	  COLOR 0 0 0 #fill
+	  OPACITY 0
+	 END
+	 STYLE
+	  OUTLINECOLOR 0 80 80 #stroke
+	  WIDTH 1
+	 END     
+	END
+END
+
+LAYER
+    NAME AZsmall
+    TYPE POLYGON
+    DATA misc/AZsmall
+    STATUS ON
 	CLASS
 	 STYLE
 	  COLOR 0 0 0 #fill

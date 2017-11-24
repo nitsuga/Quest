@@ -3,6 +3,7 @@ using System;
 
 namespace Quest.Common.Messages.Resource
 {
+
     /// <summary>
     /// holds information about a specific assignment and its current progress.
     /// The system tracks progress toward the target and sets a warning status 
@@ -10,34 +11,40 @@ namespace Quest.Common.Messages.Resource
     /// </summary>
     public class ResourceAssignmentStatus
     {
-        enum Status
+        public enum StatusCode
         {
             InProgress,
             Warning,
             Cancelled,
             Arrived,
         }
+
+        public StatusCode Status;
+
         public string FleetNo;
+
+        public string Callsign;
 
         public DateTime Assigned;
 
-        public DateTime OriginalEta;
+        public DateTime? OriginalEta;
 
-        public DateTime CurrentEta;
+        public DateTime? CurrentEta;
 
-        public DateTime ArrivedAt;
+        public DateTime? ArrivedAt;
 
-        public DateTime CancelledAt;
+        public DateTime? LeftAt;
+
+        public DateTime? CancelledAt;
 
         public string Notes;
 
         public string Destination;
 
-        public LatLongCoord DestinationPosition;
+        public string DestinationCode;
 
-        public LatLongCoord OriginalPosition;
+        public LatLongCoord StartPosition;
 
-        public LatLongCoord CurrentPosition;
-
+        public LatLongCoord DestPosition;
     }
 }

@@ -9,6 +9,7 @@ using Quest.Common.ServiceBus;
 using Quest.Lib.Incident;
 using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Resource;
+using System;
 
 namespace Quest.Lib.Resource
 {
@@ -40,7 +41,23 @@ namespace Quest.Lib.Resource
             MsgHandler.AddHandler<DeleteResource>(DeleteResourceHandler);
             MsgHandler.AddHandler<ResourceLogon>(ResourceLogonHandler);
             MsgHandler.AddHandler<ResourceUpdateRequest>(ResourceUpdateHandler);
+            MsgHandler.AddHandler<GetResourceAssignmentsRequest>(GetResourceAssignmentsRequestHandler);            
             MsgHandler.AddHandler<BeginDump>(BeginDumpHandler);
+        }
+
+        private Response ResourceAssignRequestHandler(NewMessageArgs arg)
+        {
+            var resassign = arg.Payload as ResourceAssignRequest;
+
+            if (resassign != null)
+                _resourceHandler.ResourceAssign(resassign, ServiceBusClient, _config);
+
+            return null;
+        }
+
+        private Response GetResourceAssignmentsRequestHandler(NewMessageArgs arg)
+        {
+            return _resourceHandler.GetAssignmentStatus();
         }
 
         protected override void OnStart()

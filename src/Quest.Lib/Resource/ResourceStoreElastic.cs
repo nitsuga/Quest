@@ -54,5 +54,15 @@ namespace Quest.Lib.Resource
         {
             throw new System.NotImplementedException();
         }
+
+        public ResourceAssignments GetAssignmentStatus()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public ResourceAssignmentStatus UpdateResourceAssign(ResourceAssignmentStatus item)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

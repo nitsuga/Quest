@@ -95,6 +95,61 @@ namespace Quest.Lib.Resource
         }
 
         /// <summary>
+        /// create or update a resource to Destination (not incident) assignment
+        /// </summary>
+        /// <param name="resassign"></param>
+        /// <param name="serviceBusClient"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        internal ResourceAssignResponse ResourceAssign(ResourceAssignRequest resassign, IServiceBusClient serviceBusClient, BuildIndexSettings config)
+        {
+            var res = _resStore.GetByCallsign(resassign.Callsign);
+            if (res!=null)
+            {
+                ResourceAssignmentStatus request = new ResourceAssignmentStatus
+                {
+                    FleetNo = resassign.Callsign,
+                    Assigned = DateTime.UtcNow,
+                    StartPosition = res.Position,
+                    Status = ResourceAssignmentStatus.StatusCode.InProgress
+                };
+
+                var result = _resStore.UpdateResourceAssign(request);
+                ResourceAssignResponse response = new ResourceAssignResponse
+                {
+                    Item = result,
+                    Success=true,
+                };
+
+                var msg = new ResourceAssignmentChanged
+                {
+                    Items = _resStore.GetAssignmentStatus()
+                };
+
+                serviceBusClient.Broadcast(msg);
+
+                return response;
+            }
+            else
+            {
+                return new ResourceAssignResponse { Success = false, Message = "Resource does not exist" };
+            }            
+        }
+
+        /// <summary>
+        /// get a list of resource assignments
+        /// </summary>
+        /// <returns></returns>
+        internal GetResourceAssignmentsResponse GetAssignmentStatus()
+        {
+            var result = new GetResourceAssignmentsResponse
+            {
+                Items = _resStore.GetAssignmentStatus()
+            };
+            return result;
+        }
+
+        /// <summary>
         /// Update Elastic store with the latest resource details
         /// </summary>
         /// <param name="config"></param>

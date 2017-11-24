@@ -107,10 +107,12 @@ namespace Quest.WebCore.Plugins.RealtimeMap
                 return error;
             }
         }
+
         [HttpPost]
-        public ActionResult AssignResource(ResourceAssign request)
+        public async Task<ResourceAssignResponse> AssignResource(ResourceAssignRequest request)
         {
-            return null;
+            var result = await _messageCache.SendAndWaitAsync<ResourceAssignResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
         }
 
         [HttpGet]

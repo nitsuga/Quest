@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Quest.Common.Messages.Resource;
 using Quest.Lib.ServiceBus;
 using Quest.WebCore.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Quest.WebCore.Plugins.RealtimeMap
 {
@@ -22,37 +24,21 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             _pluginService = pluginFactory;
         }
 
-        /// <summary>
-        /// Get selected map items to display
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public ActionResult GetAssignmentStatus()
+        [HttpPost]
+        public async Task<ResourceAssignResponse> AssignResource(ResourceAssignRequest request)
         {
-            try
-            {
-                //var r1 = _resourceService.GetMapItems(request);
-                //var js = JsonConvert.SerializeObject(r1);
-                var result = new ContentResult
-                {
-                //    Content = js,
-                    ContentType = "application/json"
-                };
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                var js = JsonConvert.SerializeObject(new { error = ex.Message });
-                var result = new ContentResult
-                {
-                    Content = js,
-                    ContentType = "application/json"
-                };
-                return result;
-
-            }
+            var result = await _messageCache.SendAndWaitAsync<ResourceAssignResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
         }
+
+
+        [HttpGet]
+        public async Task<GetResourceAssignmentsResponse> GetAssignmentStatus()
+        {
+            GetResourceAssignmentsRequest request = new GetResourceAssignmentsRequest();
+            var result = await _messageCache.SendAndWaitAsync<GetResourceAssignmentsResponse>(request, new TimeSpan(0, 0, 10));
+            return result;
+        }
+
     }
 }

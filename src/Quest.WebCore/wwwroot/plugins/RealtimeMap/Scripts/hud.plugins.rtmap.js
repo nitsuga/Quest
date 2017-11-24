@@ -120,7 +120,7 @@ hud.plugins.rtmap = (function () {
             rtmap_maps[pluginId] = map;
 
             // select the normal marker theme
-            var theme = "mapmarker-dark";
+            var theme = "mapmarker-norm";
             markertheme[pluginId] = theme;
 
             // create geo overlay
@@ -213,7 +213,7 @@ hud.plugins.rtmap = (function () {
                 break;
 
             case "select-theme":
-                _changeTheme(pluginId, action.data)
+                _changeTheme(pluginId, action.data);
                 break;
 
             case "select-map":
@@ -232,10 +232,22 @@ hud.plugins.rtmap = (function () {
 
     var _changeTheme = function(pluginId, theme)
     {
+        console.log("_changeTheme ", pluginId, theme);
+        // clear out existing layer
+        var layer = georesLayer[pluginId];
+        var map = rtmap_maps[pluginId];
+
+        layer.clearLayers();
+
+        // save new theme
         var curtheme = markertheme[pluginId];
         markertheme[pluginId] = theme;
-        $("." + curtheme).addClass(theme);
-        $("." + curtheme).removeClass(curtheme);
+
+        // and recreate the layer so the theme gets picked up
+        layer = _createResourcesLayer(map, theme);
+        georesLayer[pluginId] = layer;
+
+        _updateMap(pluginId);
     }
 
     // handle message from service bus
@@ -258,6 +270,7 @@ hud.plugins.rtmap = (function () {
 
     // call whenever one of the menu selectors for coverage has changed
     var _updateCoverage = function (pluginId, action) {
+        console.log("_updateCoverage ", pluginId, action.data);
 
         var isOn = hud.toggleButton(pluginId, action);
 
@@ -397,7 +410,7 @@ hud.plugins.rtmap = (function () {
     }
 
     var _selectSearchResult = function (pluginId, data) {
-
+        console.log("_selectSearchResult", pluginId);
         _unselectSearchResult(pluginId, searchItem[pluginId]);
 
         var layer = searchlayer[pluginId];
@@ -413,7 +426,6 @@ hud.plugins.rtmap = (function () {
             }
         });
     }
-
 
     // show search results on the map
     var _showSearchResults = function (map, pluginId, data) {
@@ -539,7 +551,6 @@ hud.plugins.rtmap = (function () {
     }
 
     var _updateMap = function (pluginId) {
-
         //$("*").css("cursor", "wait"); // this call or handling of results by leaflet my take some time 
 
         var map = rtmap_maps[pluginId];
@@ -566,6 +577,7 @@ hud.plugins.rtmap = (function () {
             resourceGroups.push("HELI");
         }
 
+        console.log("Updating map resg=", resourceGroups, "res-avl=", resourcesAvailable, "res-bsy=", resourcesBusy, "inc-imm=", incidentsImmediate, "inc-oth=", incidentsOther, "hos=", hospitals, "sbp=", standby, "stn=", stations);
         //Make a new request for the new selection
         $.ajax({
             url: hud.getURL("RTM/GetMapItems"),
@@ -814,8 +826,22 @@ hud.plugins.rtmap = (function () {
                     return { color: "#0f0", opacity: 1, fillOpacity: 0.5 };
                 },
                 pointToLayer: function (feature, latlng) {
-                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus, t: theme });
+                    var draggable = false;
+
+                    switch (feature.properties.MarkerType) {
+                        case "AMB":
+                            draggable = true;
+                            break;
+                        case "FRU":
+                            draggable = true;
+                            break;
+                    }
+
+                    var marker = L.userMarker(latlng, { pulsing: false, accuracy: 0, m: feature.properties.MarkerType, s: feature.properties.MarkerStatus, t: theme, draggable: draggable });
                     marker.title = feature.properties.Callsign;
+
+
+
                     return marker;
                 },
                 onEachFeature: function (feature, layer) {
@@ -823,6 +849,16 @@ hud.plugins.rtmap = (function () {
 
                         // trigger local event to broadcast this object
                         hud.sendLocal("ObjectSelected", { "Type": feature.properties.Type, "Value": feature.properties.Value });
+                    });
+
+                    layer.on('dragstart', function () {
+                        // trigger local event to broadcast this object
+                        hud.sendLocal("dragstart", { "Type": feature.properties.Type, "Value": feature.properties.Value });
+                    });
+
+                    layer.on('dragend', function () {
+                        // trigger local event to broadcast this object
+                        hud.sendLocal("dragend", { "Type": feature.properties.Type, "Value": feature.properties.Value });
                     });
                 }
             });
@@ -842,6 +878,7 @@ hud.plugins.rtmap = (function () {
     };
 
     var _selectBaseLayer = function (pluginId, layerName) {
+        console.log("_selectBaseLayer ", pluginId, layerName);
         var map = rtmap_maps[pluginId];
         for (var layer in rtmap_baseLayers) {
             if (map.hasLayer(rtmap_baseLayers[layer]))
@@ -851,6 +888,8 @@ hud.plugins.rtmap = (function () {
     };
 
     var _selectLayer = function (pluginId, layerName, on) {
+        console.log("_selectLayer ", pluginId, layerName, on);
+
         var map = rtmap_maps[pluginId];
 
         if (on)

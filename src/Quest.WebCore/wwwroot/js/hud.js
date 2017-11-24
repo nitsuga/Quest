@@ -29,7 +29,7 @@
 
     // join or leave a group
     var _joinLeaveGroup = function (group, pluginId, join) {
-        console.log('Join group leave ${group} ${pluginId} ${join}');
+        //console.log('Join group leave ${group} ${pluginId} ${join}');
         if (join)
             _joinGroup(group, pluginId);
         else
@@ -38,7 +38,7 @@
 
     // join a plugin to the message group
     var _joinGroup = function (group, pluginId) {
-        console.log('Join group ${group} ${pluginId}');
+        console.log("Join group ", group, " ", pluginId);
         var group_list = groups[group];
         if (group_list === undefined) {
             group_list = [];
@@ -55,7 +55,7 @@
 
     // leave a message group.
     var _leaveGroup = function (group, pluginId) {
-        console.log('Leave group ${group} ${pluginId}');
+        console.log("Leave group ", group, " ", pluginId);
         var group_list = groups[group];
         if (group_list === undefined)
             return; // already unsubscribed
@@ -167,7 +167,6 @@
             }
         });
 
-
     };
 
     var _populatePlugins = function(layoutName)
@@ -245,6 +244,10 @@
                 if (json.onInit.length > 0) {
                     eval(json.onInit);
                 }
+
+                var pluginSelector = _pluginSelector(pluginId);
+                $(pluginSelector).trigger("action", { "action": "select-res", "data": "avail" });
+
             },
             error: function (result) {
                 alert('error from hud.plugins.pluginSelector._initialize \r\n' + result.responseText);

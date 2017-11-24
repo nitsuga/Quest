@@ -5,6 +5,7 @@ using Quest.Common.Messages.Resource;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +19,100 @@ namespace Quest.Lib.Resource
         public ResourceStoreMssql(IDatabaseFactory dbFactory)
         {
             _dbFactory = dbFactory;
+        }
+
+        /// <summary>
+        /// get all current valid resource assignments
+        /// </summary>
+        /// <returns></returns>
+        public ResourceAssignments GetAssignmentStatus()
+        {
+            return _dbFactory.Execute<QuestContext, ResourceAssignments>((db) =>
+            {
+                // find the most up-to-date resource record;
+                var list = db.ResourceAssignment
+                    .Include(x => x.Destination)
+                    .Where(x => x.EndDate == null)
+                    .ToList();
+
+                var assignments = new ResourceAssignments();
+                assignments.AddRange(FromDatabase(list));
+                return assignments;
+            });
+        }
+
+        /// <summary>
+        /// update a resource assignment
+        /// </summary>
+        /// <param name="item">assignment details</param>
+        /// <returns></returns>
+        public ResourceAssignmentStatus UpdateResourceAssign(ResourceAssignmentStatus item)
+        {
+            return _dbFactory.Execute<QuestContext, ResourceAssignmentStatus>((db) =>
+            {
+                // fleetno is the primary key
+                if (item.FleetNo == null)
+                    return null;
+
+                // find the most up-to-date resource record;
+                var resource = db.Resource.AsNoTracking()
+                    .Include(x => x.Callsign)
+                    .Where(x => x.FleetNo == item.FleetNo && x.EndDate == null)
+                    .FirstOrDefault();
+
+                if (resource == null)
+                    return null;
+
+                // find the most up-to-date resource assignment record;
+                var oldres_list = db.ResourceAssignment
+                    .Include(x => x.Destination)
+                    .OrderBy(x => x.Destination.Shortcode)
+                    .Where(x => x.FleetNo == item.FleetNo && x.EndDate == null)
+                    .ToList();
+
+                if (oldres_list != null && oldres_list.Count() > 0)
+                {
+                    // mark records as old
+                    foreach (var v in oldres_list)
+                        v.EndDate = DateTime.UtcNow;
+                    db.SaveChanges();
+                }
+
+                var dest = db.Destinations.FirstOrDefault(x => x.Destination == item.DestinationCode);
+                var point = GeomUtils.GetPointFromWkt(dest.Wkt);
+                var latlng = LatLongConverter.OSRefToWGS84(point.X, point.Y);
+
+                //create a new record for this moving dimension
+                // merge in previous values if null is supplied
+                var resassign = new ResourceAssignment
+                {
+                    Callsign = resource.Callsign.Callsign1,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = null,
+                    ArrivedAt = item.ArrivedAt,
+                    Assigned = item.Assigned,
+                    CancelledAt = item.CancelledAt,
+                    DestinationId = dest.DestinationId,
+                    Eta = item.CurrentEta,
+                    FleetNo = item.FleetNo,
+                    LeftAt = item.LeftAt,
+                    Notes = item.Notes,
+                    OriginalEta = item.OriginalEta,
+                    DestLatitude = (float)latlng.Latitude,
+                    DestLongitude = (float)latlng.Longitude,
+                    StartLatitude = (float)item.StartPosition.Latitude,
+                    StartLongitude= (float)item.StartPosition.Longitude,
+                    Status = (int)item.Status
+                };
+
+                db.ResourceAssignment.Add(resassign);
+
+                // save the old and new records
+                db.SaveChanges();
+
+                return FromDatabase(resassign);
+
+            });
         }
 
         public bool FleetNoExists(string fleetno)
@@ -295,9 +390,34 @@ namespace Quest.Lib.Resource
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
 
+
+        private IEnumerable<ResourceAssignmentStatus> FromDatabase(IEnumerable<ResourceAssignment> items)
+        {
+            foreach (var r in items)
+                yield return FromDatabase(r);
+        }
+
+        private ResourceAssignmentStatus FromDatabase(ResourceAssignment item)
+        {
+            return new ResourceAssignmentStatus {
+                Callsign = item.Callsign,
+                ArrivedAt = item.ArrivedAt,
+                Assigned =item.Assigned,
+                CancelledAt = item.CancelledAt,
+                DestinationCode = item.Destination.Shortcode,
+                Destination = item.Destination.Destination,
+                CurrentEta = item.Eta, FleetNo=item.FleetNo,
+                LeftAt = item.LeftAt,
+                Notes =item.Notes,
+                OriginalEta =item.OriginalEta,
+                StartPosition = new LatLongCoord(item.StartLongitude, item.StartLatitude),
+                DestPosition = new LatLongCoord(item.DestLongitude, item.DestLatitude)
+            };        
+        }
+
         private IEnumerable<QuestResource> FromDatabase(IEnumerable<DataModel.Resource> resources)
         {
-            foreach(var r in resources)
+            foreach (var r in resources)
                 yield return FromDatabase(r);
         }
 

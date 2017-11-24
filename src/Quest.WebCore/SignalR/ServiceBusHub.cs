@@ -123,6 +123,11 @@ namespace Quest.WebCore.SignalR
                     var priority = $"Resource.{incident.Item.Priority}";
                     _connection.InvokeAsync("groupmessage", "ServiceBusHub", priority, incident);
                     break;
+
+                case "ResourceAssignmentChanged":
+                    var assignments = e.Payload as ResourceAssignmentChanged;
+                    _connection.InvokeAsync("groupmessage", "ServiceBusHub", "ResourceAssignments", assignments.Items);
+                    break;
             }
         }
     }

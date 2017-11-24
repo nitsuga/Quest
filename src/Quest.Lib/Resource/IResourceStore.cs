@@ -13,5 +13,7 @@ namespace Quest.Lib.Resource
         int GetOffroadStatusId();
         ResourceUpdateResult Update(ResourceUpdateRequest item);
         void Clear();
-    }    
+        ResourceAssignments GetAssignmentStatus();
+        ResourceAssignmentStatus UpdateResourceAssign(ResourceAssignmentStatus item);
+    }
 }

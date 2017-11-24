@@ -9,7 +9,7 @@ hud.plugins.aac = (function () {
         hud.selectMenu(pluginId, 0);
 
         // listen for hub messages on these groups
-        $("#sys_hub").on("Resource.Available Resource.Busy Resource.Enroute", function (group, msg) {
+        $("#sys_hub").on("ResourceAssignments", function (group, msg) {
             _handleMessage(pluginId, group, msg);
         });
 
@@ -18,6 +18,8 @@ hud.plugins.aac = (function () {
         $(selector).on("action", function (evt, action) {
             _handleAction(pluginId, action);
         });
+
+        _getAssignments();
     };
 
     // handle message from service bus
@@ -67,6 +69,18 @@ hud.plugins.aac = (function () {
         }
         return state;
     };
+
+    var _getAssignments = function () {
+        return $.ajax({
+            url: hud.getURL("AAC/GetAssignmentStatus"),
+            dataType: "json",
+            success: function (msg) {
+                console.log("got GetAssignmentStatus pluginId=" + pluginId + " type=" + id);
+
+            }
+        });
+
+    }
 
     return {
         init: _init,
