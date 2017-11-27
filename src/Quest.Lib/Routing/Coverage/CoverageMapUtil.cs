@@ -1,113 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
-using Quest.Lib.DataModel;
-using Quest.Lib.Trace;
-using Quest.Lib.Data;
-using Quest.Lib.DependencyInjection;
 using Quest.Common.Messages.Routing;
 
-namespace Quest.Lib.Routing
+namespace Quest.Lib.Routing.Coverage
 {
-    [Injection]
-    public class CoverageMapManager
-    {
-        private CoverageMap _standardCoverage;
-        private IGeometry _standardGeometry;
-        private IDatabaseFactory _dbFactory;
-
-        public CoverageMapManager(IDatabaseFactory dbFactory)
-        {
-            _dbFactory = dbFactory;
-        }
-
-        public IGeometry GetStandardGeometry()
-        {
-            if (_standardGeometry == null)
-                _standardGeometry = GetOperationalAreaInternal();
-            return _standardGeometry;
-        }
-
-        public CoverageMap GetStandardMap(int tilesize)
-        {
-            if (_standardCoverage == null)
-            {
-                _standardGeometry = GetStandardGeometry();
-                if (_standardGeometry != null)
-                    _standardCoverage = MapFromGeometry("standard", _standardGeometry, tilesize);
-            }
-            return _standardCoverage;
-        }
-
-        public IGeometry GetOperationalAreaInternal()
-        {
-            Logger.Write("Calculating operational area", TraceEventType.Information, "CoverageMapUtil");
-            for (var i = 1; i < 5; i++)
-            {
-                try
-                {
-                    return _dbFactory.Execute<QuestContext, IGeometry>((db) =>
-                    {
-                        // add in programmable ones.
-                        var area = db.GetOperationalArea(2000);
-                        // convert
-                        var reader = new WKTReader();
-                        var geoms = reader.Read(area.ToString());
-                        Logger.Write($"Operational area is {geoms.Area} sq m", TraceEventType.Information, "CoverageMapUtil");
-                        return geoms;
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Logger.Write($"Failed to calculate operational area: {ex.ToString()}", TraceEventType.Error, "CoverageMapUtil");
-                }
-            }
-            return null;
-        }
-
-        public CoverageMap GetOperationalArea(int tilesize)
-        {
-            try
-            {
-                var map = GetStandardMap(tilesize);
-                if (map != null)
-                    return map.CalcCoverage(GetStandardGeometry());
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"Failed to calculate operational area: {ex}", TraceEventType.Error, "CoverageMapUtil");
-            }
-            return null;
-        }
-
-        public CoverageMap MapFromGeometry(string name, IGeometry geom, int tilesize)
-        {
-            var map = new CoverageMap();
-
-            var e = new Envelope(
-                Math.Floor(geom.EnvelopeInternal.MinX / 1000) * 1000,
-                Math.Ceiling(geom.EnvelopeInternal.MaxX / 1000) * 1000,
-                Math.Floor(geom.EnvelopeInternal.MinY / 1000) * 1000,
-                Math.Ceiling(geom.EnvelopeInternal.MaxY / 1000) * 1000
-                );
-
-            map.SetExtent(name, e, tilesize);
-            return map;
-        }
-    }
 
     public static class CoverageMapUtil
-    { 
+    {
         /// <summary>
         ///     Creates a coverage map from a DBgeometry shape using a line-scan technique
         /// </summary>
         /// <param name="map">target map to update</param>
         /// <param name="geom">the source geometry</param>
         /// <returns></returns>
-    public static CoverageMap CalcCoverage(this CoverageMap map, IGeometry geom)
+        public static CoverageMap CalcCoverage(this CoverageMap map, IGeometry geom)
         {
             try
             {
@@ -195,14 +103,13 @@ namespace Quest.Lib.Routing
             BufferUtil.MergeMin(basemap.Data, mergemap.Data);
         }
 
-
         /// <summary>
         ///     take a base map and remove any entries where mapToSubtract > 0
         /// </summary>
         /// <param name="basemap"></param>
         /// <param name="mapTosubtract"></param>
         /// <returns></returns>
-        public static CoverageMap DifferenceCoverage(CoverageMap basemap, CoverageMap mapTosubtract)
+        public static CoverageMap DifferenceCoverage(this CoverageMap basemap, CoverageMap mapTosubtract)
         {
             if (mapTosubtract == null)
                 return null;
@@ -220,10 +127,15 @@ namespace Quest.Lib.Routing
             return basemap;
         }
 
-
         public static CoverageMap Name(this CoverageMap c, string name)
         {
             c.Name = name;
+            return c;
+        }
+
+        public static CoverageMap Code(this CoverageMap c, string code)
+        {
+            c.Code = code;
             return c;
         }
 
@@ -241,6 +153,7 @@ namespace Quest.Lib.Routing
                 copy.OffsetY = c.OffsetY;
                 copy.Blocksize = c.Blocksize;
                 copy.Name = c.Name;
+                copy.Code = c.Code;
                 copy.Percent = c.Percent;
             }
             return copy;
@@ -250,7 +163,6 @@ namespace Quest.Lib.Routing
         {
             return BufferUtil.CountNonZero(source.Data);
         }
-
 
         public static double Coverage(this CoverageMap source)
         {
@@ -399,7 +311,6 @@ namespace Quest.Lib.Routing
             BufferUtil.Clear(a.Data);
             return a;
         }
-
 
         /// <summary>
         ///     output the coverage map in ArgGrid format

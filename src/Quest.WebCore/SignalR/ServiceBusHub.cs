@@ -5,6 +5,7 @@ using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Incident;
 using Quest.Lib.Trace;
 using Newtonsoft.Json;
+using Quest.Common.Messages.Visual;
 
 namespace Quest.WebCore.SignalR
 {
@@ -80,7 +81,16 @@ namespace Quest.WebCore.SignalR
 
             switch( e.Metadata.MsgType)
             {
-                // dispatch messages to users
+                case "HeatmapUpdate":
+                    var heatmap = e.Payload as HeatmapUpdate;
+
+                    var js = JsonConvert.SerializeObject(heatmap);
+
+                    var hgroup = $"Coverage.{heatmap.Item.Code}";
+                    _connection.InvokeAsync("groupmessage", "ServiceBusHub", hgroup, js);
+                    break;
+
+                    // dispatch messages to users
                 // look up message type in 
                 case "ResourceUpdate":
                     var resource = e.Payload as ResourceUpdate;

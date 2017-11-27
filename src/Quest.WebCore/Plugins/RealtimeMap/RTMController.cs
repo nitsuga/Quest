@@ -70,7 +70,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetVehicleCoverage(int vehtype)
+        public async Task<ActionResult> GetVehicleCoverage(string code)
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -78,7 +78,7 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             GetCoverageResponse map;
             try
             {
-                GetCoverageRequest request = new GetCoverageRequest { vehtype = vehtype };
+                GetCoverageRequest request = new GetCoverageRequest { Code = code };
 
                 map = await _messageCache.SendAndWaitAsync<GetCoverageResponse>(request, new TimeSpan(0, 0, 30));
 

@@ -38,8 +38,8 @@ namespace Quest.Lib.Trackers
         protected override void OnStart()
         {
             var counter = 0;
-            var lat = 51.5;
-            var lon = -0.2;
+            var lat = 51.5074;
+            var lon = -0.1277;
             var num = 10;
 
             List<QuestResource> vehicles = new List<QuestResource>();
@@ -48,8 +48,8 @@ namespace Quest.Lib.Trackers
             for (int i = 0; i < num; i++)
             {
 
-                var x = r.NextDouble() - 0.5;
-                var y = r.NextDouble() - 0.5;
+                var x = (r.NextDouble() - 0.5) * 0.5;
+                var y = (r.NextDouble() - 0.5) * 0.3;
 
                 var veh = new QuestResource
                 {

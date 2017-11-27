@@ -14,13 +14,8 @@ namespace Quest.WebCore.Plugins.HeldCalls
     public class HeldCallsPlugin : StandardPlugin
     {
         public HeldCallsPlugin(ILifetimeScope scope, IHostingEnvironment env)
-            : base("HeldCallsPlugin", "HLD", string.Empty, string.Empty, scope, env)
+            : base("HeldCallsPlugin", "HLD", "hud.plugins.heldcalls.init(panelId, pluginId)", "/plugins/HeldCalls/Lib", scope, env)
         {
-        }
-
-        public override string DrawContainer()
-        {
-            return "<div>held calls</div>";
         }
     }
 }

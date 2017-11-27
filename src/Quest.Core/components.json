@@ -580,14 +580,28 @@
       "instanceScope": "single-instance",
       "properties": {
         "defaultengine": "DijkstraRoutingEngine",
-        "doCoverage": "true",
+        "roadSpeedCalculator": "VariableSpeedHoD"
+      }
+    },
+    {
+      "type": "Quest.Lib.Routing.Coverage.CoverageManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "CoverageManager"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "defaultengine": "DijkstraRoutingEngine",
         "doEta": "true",
         "tilesize": 500,
         "roadSpeedCalculator": "VariableSpeedHoD",
         "enrFrequencySeconds": 10,
         "resFrequencySeconds": 10,
         "incFrequencySeconds": 60,
-        "coverageExportDirectory": ""
+        "resRange": 450
       }
     },
     //{

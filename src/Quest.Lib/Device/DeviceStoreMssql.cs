@@ -88,7 +88,7 @@ namespace Quest.Lib.Device
                 {
                     //oldrec = new DataModel.Devices();
                     //db.Devices.Add(oldrec);
-                    oldrec = new DataModel.Devices
+                    oldrec = new Devices
                     {                        
                     };
                 }
@@ -98,9 +98,7 @@ namespace Quest.Lib.Device
                     db.SaveChanges();
                 }
 
-                var status = db.ResourceStatus.FirstOrDefault(x => x.Offroad == true);
-
-                var newres = new DataModel.Devices
+                var newres = new Devices
                 {
                     DeviceIdentity = device.DeviceIdentity,
                     OwnerId = device.OwnerId??oldrec.OwnerId,

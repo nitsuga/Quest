@@ -142,7 +142,11 @@ hud.plugins.rtmap = (function () {
                 _handleMessage(pluginId, group, msg);
             });
 
-            // listen for local hub messages 
+            $("#sys_hub").on("Coverage.AMB Coverage.HOL Coverage.FRU Coverage.INC Coverage.COV", function (group, msg) {
+                _renderCoverage(pluginId, msg.Item);
+            });
+
+            // listen for local hub messages
             $("#sys_hub").on("AddDocument", function (evt, data) {
                 _boundingbox = data;
             });
@@ -255,7 +259,7 @@ hud.plugins.rtmap = (function () {
         var layer = georesLayer[pluginId];
         var history = reshistory[pluginId];
         var traillayer = georestrailLayer[pluginId];     
-
+        console.log(msg.$type);
         switch (msg.$type) {
             case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
                 _updateResource(pluginId, traillayer, layer, history, msg.Item);
@@ -278,8 +282,6 @@ hud.plugins.rtmap = (function () {
 
         // get id of coverage layer as an integer
         var id = action.data;
-        if (typeof id === "string")
-            id = parseInt(id);
 
         if (isOn) {
             _getCoverage(pluginId, id);
@@ -318,68 +320,63 @@ hud.plugins.rtmap = (function () {
 
         return $.ajax({
             url: hud.getURL("RTM/GetVehicleCoverage"),
-            data: { 'vehtype': id },               // 1=Amb 2=FRU 7=incidents 8=combined 9=holes 10=standby cover 11=standby compliance
+            data: { 'code': id },
             dataType: "json",
             success: function (msg) {
-                console.log("got GetVehicleCoverage pluginId=" + pluginId + " type=" + id);
-
                 if (msg.Success === true && msg.Map !== null) {
-                    var res = msg.Map;
-                    var data = [];
-                    var i = 0;
-                    if (res.map !== undefined) {
-                        //var raw = window.atob(res.map);
-                        for (var y = 0; y < res.rows; y++)
-                            for (var x = 0; x < res.cols; x++) {
-                                //if (raw.charCodeAt(i) > 0) {
-                                var byteArr = window.atob(res.map);
-
-                                //var l = res.map.length;
-                                //var c = res.map[i];
-                                //var c1 = res.map.charCodeAt(i);
-
-                                var l = byteArr.length;
-                                //var c = byteArr[i];
-                                var c = byteArr.charCodeAt(i);
-
-                                if (c > 0) {
-                                    var lat = res.lat + y * res.latBlocksize;
-                                    var lon = res.lon + x * res.lonBlocksize;
-                                    var newpoint = [lat, lon];
-                                    data.push(newpoint);
-                                }
-
-                                i++;
-                            }
-                        var nheatmap;
-                        switch (res.vehtype) {
-                            case 1:     // AEU
-                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "lime", 0.2: "lime", 0.3: "lime", 0.4: "lime" } });
-                                break;
-                            case 2:     // FRU
-                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "green", 0.2: "yellow", 0.3: "yellow", 0.4: "yellow" } });
-                                break;
-                            case 7:     // incident
-                                nheatmap = L.heatLayer(data, { max: 5.0, radius: 50, maxZoom: 11, gradient: { 0.1: "black", 0.2: "black", 0.3: "black", 0.4: "black" } });
-                                break;
-                            case 8:     // combined coverage
-                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, gradient: { 0.1: "purple", 0.2: "lime", 0.3: "yellow", 0.4: "purple" } });
-                                break;
-                            case 9:     // resource holes
-                                nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "orange", 0.2: "lime", 0.3: "yellow", 0.4: "red" } });
-                                break;
-                        }
-
-                        if (nheatmap !== undefined) {
-                            nheatmap.opacity = 0.3;
-                            nheatmap.id = id;
-                            _undoCoverage(pluginId, id);
-                            layer.addLayer(nheatmap);
-                        }
-                    }
+                    _renderCoverage(pluginId, msg.Map);
                 }
             }
         });
+    }
+
+    var _renderCoverage = function (pluginId, msg) {
+        console.log("got GetVehicleCoverage pluginId=" + pluginId + " type=" + msg.Code);
+        var layer = covlayer[pluginId];
+        var data = [];
+        var i = 0;
+        if (msg.map !== undefined) {
+            //var raw = window.atob(res.map);
+            for (var y = 0; y < msg.rows; y++)
+                for (var x = 0; x < msg.cols; x++) {
+                    var byteArr = window.atob(msg.map);
+                    var l = byteArr.length;
+                    var c = byteArr.charCodeAt(i);
+
+                    if (c > 0) {
+                        var lat = msg.lat + y * msg.latBlocksize;
+                        var lon = msg.lon + x * msg.lonBlocksize;
+                        var newpoint = [lat, lon];
+                        data.push(newpoint);
+                    }
+                    i++;
+                }
+            var nheatmap;
+            switch (msg.Code) {
+                case "AMB":     // AEU
+                    nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "lime", 0.2: "lime", 0.3: "lime", 0.4: "lime" } });
+                    break;
+                case "FRU":     // FRU
+                    nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "green", 0.2: "yellow", 0.3: "yellow", 0.4: "yellow" } });
+                    break;
+                case "INC":     // incident
+                    nheatmap = L.heatLayer(data, { max: 5.0, radius: 50, maxZoom: 11, gradient: { 0.1: "black", 0.2: "black", 0.3: "black", 0.4: "black" } });
+                    break;
+                case "COV":     // combined coverage
+                    nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, gradient: { 0.1: "purple", 0.2: "lime", 0.3: "yellow", 0.4: "purple" } });
+                    break;
+                case "HOL":     // resource holes
+                    nheatmap = L.heatLayer(data, { max: 1.0, radius: 50, maxZoom: 15, gradient: { 0.1: "orange", 0.2: "lime", 0.3: "yellow", 0.4: "red" } });
+                    break;
+            }
+
+            if (nheatmap !== undefined) {
+                nheatmap.opacity = 0.3;
+                nheatmap.id = msg.code;
+                _undoCoverage(pluginId, msg.code);
+                layer.addLayer(nheatmap);
+            }
+        }
     }
 
     // remove coverge from the map

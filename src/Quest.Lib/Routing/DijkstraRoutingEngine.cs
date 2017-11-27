@@ -13,6 +13,7 @@ using Quest.Lib.Routing.Speeds;
 using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Routing.Coverage;
 
 namespace Quest.Lib.Routing
 {
@@ -29,15 +30,13 @@ namespace Quest.Lib.Routing
         /// </summary>
         private RoutingData _data;
         private ILifetimeScope _scope;
-        private CoverageMapManager _coverageMap;
 
         public List<int> IgnoreRoadTypes { get; set; }
 
-        public DijkstraRoutingEngine(RoutingData data, ILifetimeScope scope, CoverageMapManager coverageMap)
+        public DijkstraRoutingEngine(RoutingData data, ILifetimeScope scope)
         {
             _data = data;
             _scope = scope;
-            _coverageMap = coverageMap;
         }
 
         public RoutingData Data => _data;
@@ -364,54 +363,6 @@ namespace Quest.Lib.Routing
             var finalLine = liL.ExtractLine(startIndex, endIndex);
             return finalLine as LineString;
         }
-
-        /// <summary>
-        ///     calculate a coverage report for a given set of vehicles
-        /// </summary>
-        /// <returns></returns>
-        public CoverageMap CalculateCoverage(RouteRequestCoverage request)
-        {
-
-            var map = _coverageMap.GetStandardMap(request.TileSize)
-                .Clone()
-                .ClearData()
-                .Name(request.Name);
-
-            foreach (var p in request.StartPoints)
-            {
-                var start = _data.GetEdgeFromPoint(p, request.epsg);
-
-                var routerequest = new RouteRequestMultiple
-                {
-                    StartLocation = start,
-                    EndLocations = null,
-                    DistanceMax = request.DistanceMax,
-                    DurationMax = request.DurationMax,
-                    InstanceMax = 0,
-                    VehicleType = request.VehicleType,
-                    SearchType = request.SearchType,
-                    HourOfWeek = request.HourOfWeek,
-                    Map = map,
-                    RoadSpeedCalculator = request.RoadSpeedCalculator
-                };
-
-                CalculateRouteMultiple(routerequest);
-            }
-
-            return map;
-        }
-
-        //private void StartdataLoader()
-        //{
-        //    //Logger.Write("Waiting for routing data to be loaded", TraceEventType.Information, GetType().Name);
-        //    while (!_data.IsInitialised)
-        //    {
-        //        Thread.Sleep(1000);
-        //    }
-        //    IsInitialised = true;
-        //    //Logger.Write("Ready", TraceEventType.Information, GetType().Name);
-        //}
-
 
         /// <summary>
         ///     Initialise

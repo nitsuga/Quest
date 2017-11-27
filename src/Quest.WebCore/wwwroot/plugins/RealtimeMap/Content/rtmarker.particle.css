@@ -1,4 +1,19 @@
 /* --------- particles -------------*/
+.mapmarker-norm-particle {
+    display: block;
+    border: 1pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    /* set the ring's new dimension and re-center it */
+    margin: 0px 0 0 0px;
+    height: 8px !important;
+    width: 8px !important;
+}
+
+/* --------- particles -------------*/
 .mapmarker-dark-particle {
     display: block;
     border: 1pt solid black;

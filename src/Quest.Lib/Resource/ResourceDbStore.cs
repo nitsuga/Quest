@@ -14,7 +14,6 @@ namespace Quest.Lib.Resource
     public class ResourceStoreMssql : IResourceStore
     {
         IDatabaseFactory _dbFactory;
-        
 
         public ResourceStoreMssql(IDatabaseFactory dbFactory)
         {
@@ -29,6 +28,8 @@ namespace Quest.Lib.Resource
         {
             return _dbFactory.Execute<QuestContext, ResourceAssignments>((db) =>
             {
+                db.Database.ExecuteSqlCommand("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;");
+
                 // find the most up-to-date resource record;
                 var list = db.ResourceAssignment
                     .Include(x => x.Destination)
@@ -115,6 +116,11 @@ namespace Quest.Lib.Resource
             });
         }
 
+        /// <summary>
+        /// check if a vehicle exists
+        /// </summary>
+        /// <param name="fleetno"></param>
+        /// <returns></returns>
         public bool FleetNoExists(string fleetno)
         {
             return _dbFactory.Execute<QuestContext, bool>((db) =>
@@ -123,6 +129,11 @@ namespace Quest.Lib.Resource
             });
         }
 
+        /// <summary>
+        /// get a resource by fleet number
+        /// </summary>
+        /// <param name="fleetno"></param>
+        /// <returns></returns>
         public QuestResource GetByFleetNo(string fleetno)
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
@@ -140,6 +151,11 @@ namespace Quest.Lib.Resource
             });
         }
 
+        /// <summary>
+        /// get a resource by callsign
+        /// </summary>
+        /// <param name="callsign"></param>
+        /// <returns></returns>
         public QuestResource GetByCallsign(string callsign)
         {
             return _dbFactory.Execute<QuestContext, QuestResource>((db) =>
@@ -155,6 +171,10 @@ namespace Quest.Lib.Resource
             });
         }
 
+        /// <summary>
+        /// get the status code for offroad
+        /// </summary>
+        /// <returns></returns>
         public int GetOffroadStatusId()
         {
             return _dbFactory.Execute<QuestContext, int>((db) =>
@@ -342,20 +362,32 @@ namespace Quest.Lib.Resource
             });
         }
 
-        public List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail = false, bool busy = false)
+        /// <summary>
+        /// get all resources 
+        /// </summary>
+        /// <param name="revision"></param>
+        /// <param name="resourceGroups"></param>
+        /// <param name="avail"></param>
+        /// <param name="busy"></param>
+        /// <returns></returns>
+        public List<QuestResource> GetResources(long revision, string[] resourceGroups, bool avail, bool busy)
         {
             return _dbFactory.ExecuteNoTracking<QuestContext, List<QuestResource>>((db) =>
             {
                 if (resourceGroups == null)
                     resourceGroups = new string[] { };
+
+                db.Database.ExecuteSqlCommand("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;");
+
                 // get all *current* resources
                 var resources = db.Resource
-                        .AsNoTracking()
-                        .Include(x => x.Callsign)
-                        .Include(x => x.ResourceStatus)
-                        .Include(x => x.ResourceType)
-                        .Where(x => (x.EndDate == null) && (x.Revision > revision)).ToList();
-                        //.Where(x => resourceGroups.Length == 0 || (resourceGroups.Length > 0 && resourceGroups.Contains(x.ResourceType.ResourceTypeGroup)));
+                            .AsNoTracking()
+                            .Include(x => x.Callsign)
+                            .Include(x => x.ResourceStatus)
+                            .Include(x => x.ResourceType)
+                            .Where(x => (x.EndDate == null) && (x.Revision > revision))
+                            .Where(x => resourceGroups==null || resourceGroups.Length == 0 || (resourceGroups.Length > 0 && resourceGroups.Contains(x.ResourceType.ResourceTypeGroup)))
+                            .ToList();
 
                 if (avail && busy)
                     return FromDatabase(resources).ToList();
@@ -366,7 +398,7 @@ namespace Quest.Lib.Resource
                 if (busy)
                     return FromDatabase(resources.Where(x => x.ResourceStatus.Busy == true)).ToList();
 
-                return FromDatabase(resources.Where(x => x.ResourceStatus.Busy == false && x.ResourceStatus.Available==false)).ToList();
+                return FromDatabase(resources.Where(x => x.ResourceStatus.Busy == false && x.ResourceStatus.Available == false)).ToList();
             });
         }
 
@@ -389,7 +421,6 @@ namespace Quest.Lib.Resource
                 return "???";
             return GetStatusDescription(status.Available ?? false, status.Busy ?? false, status.BusyEnroute ?? false, status.Rest ?? false);
         }
-
 
         private IEnumerable<ResourceAssignmentStatus> FromDatabase(IEnumerable<ResourceAssignment> items)
         {

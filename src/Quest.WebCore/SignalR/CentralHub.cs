@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Quest.Lib.DependencyInjection;
 using Quest.Lib.Trace;
@@ -66,23 +65,5 @@ namespace Quest.WebCore.SignalR
             Logger.Write($"JoinGroup {user}->{group}");
         }
 
-    }
-
-    public interface IHubMessage
-    {
-        string UserId { get; set; }
-        string PluginName { get; set; }
-        string PluginInstanceName { get; set; }
-        string EventRaised { get; set; }
-        Dictionary<string, string> EventParameters { get; set; }
-    }
-
-    public class HubMessage : IHubMessage
-    {
-        public string UserId { get; set; }
-        public string PluginName { get; set; }
-        public string PluginInstanceName { get; set; }
-        public string EventRaised { get; set; }
-        public Dictionary<string, string> EventParameters { get; set; }
     }
 }

@@ -12,6 +12,20 @@
     width: 24px !important;
 }
 
+.mapmarker-norm-inc {
+    display: block;
+    border: 1pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 10%;
+    -webkit-border-radius: 10%;
+    border-radius: 10%;
+    /* set the ring's new dimension and re-center it */
+    height: 24px !important;
+    margin: 0px 0 0 0px;
+    width: 24px !important;
+}
+
 .inc-WAI-UN {
     background: black;
     border: 2pt solid black;

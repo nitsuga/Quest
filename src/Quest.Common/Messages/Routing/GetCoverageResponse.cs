@@ -11,5 +11,6 @@ namespace Quest.Common.Messages.Routing
     public class GetCoverageResponse : Response
     {
         public Heatmap Map;
+        public string StyleCode;
     }
 }

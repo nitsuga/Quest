@@ -47,6 +47,7 @@
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="Properties\Settings.Designer.cs" />
     <Compile Remove="Routing\CoverageStats.cs" />
+    <Compile Remove="Routing\Coverage\StandbyCoverage.cs" />
     <Compile Remove="Routing\Speeds\VariableSpeedByEdge.cs" />
     <Compile Remove="Routing\Speeds\VariableSpeedHoWd.cs" />
     <Compile Remove="Routing\StandbyCoverage.cs" />
@@ -104,6 +105,10 @@
     <PackageReference Include="System.ServiceModel.Http" Version="4.4.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.4.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
+    <PackageReference Include="Trigger.NET" Version="1.0.3" />
+    <PackageReference Include="Trigger.NET.Autofac" Version="1.0.3" />
+    <PackageReference Include="Trigger.NET.Configuration" Version="1.0.3" />
+    <PackageReference Include="Trigger.NET.Cron" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>

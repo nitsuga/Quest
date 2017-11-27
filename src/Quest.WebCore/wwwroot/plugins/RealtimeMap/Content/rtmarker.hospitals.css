@@ -8,6 +8,16 @@
     border-bottom: 16px solid yellow;
 }
 
+/* --------- Hospital -------------*/
+.mapmarker-norm-HOS {
+    display: block;
+    fill: transparent;
+    width: 8px;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
+}
+
 .HOS-undefined {
     border-bottom: 10px solid purple;
 }

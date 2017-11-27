@@ -59,58 +59,12 @@ namespace Quest.Lib.DataModel
             return null;
         }
 
-        public virtual int CleanCoverage()
-        {
-            using (var dbc = this.Database.GetDbConnection())
-            {
-                dbc.Open();
-                using (var sqlcmd = dbc.CreateCommand())
-                {
-                    sqlcmd.LoadStoredProc("CleanCoverage");
-                    sqlcmd.ExecuteNonQuery();
-                }
-            }
-            return 0;
-        }
-
-        public virtual IList<GetVehicleCoverage_Result> GetVehicleCoverage(int vehtype)
-        {
-            using (var dbc = this.Database.GetDbConnection())
-            {
-                dbc.Open();
-                using (var sqlcmd = dbc.CreateCommand())
-                {
-                    sqlcmd.LoadStoredProc("GetVehicleCoverage")
-                        .WithSqlParam("@vehtype", vehtype);
-
-                    using (var reader = sqlcmd.ExecuteReader())
-                    {
-                        var result = reader.MapToList<GetVehicleCoverage_Result>();
-                        return result;
-                    }
-                }
-            }
-        }
 
     }
     public partial class GetClaims_Result
     {
         public string SecuredItemName { get; set; }
         public string SecuredValue { get; set; }
-    }
-
-    public partial class GetVehicleCoverage_Result
-    {
-        public int TypeId { get; set; }
-        public string Name { get; set; }
-        public byte[] Data { get; set; }
-        public int OffsetX { get; set; }
-        public int OffsetY { get; set; }
-        public int Blocksize { get; set; }
-        public int Rows { get; set; }
-        public int Columns { get; set; }
-        public Nullable<double> Percent { get; set; }
-        public Nullable<System.DateTime> tstamp { get; set; }
     }
 
 }

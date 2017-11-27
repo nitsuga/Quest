@@ -3,6 +3,13 @@
 namespace Quest.Common.Messages.Visual
 {
     [Serializable]
+    public class HeatmapUpdate: MessageBase
+    {
+        public Heatmap Item;
+        public DateTime ValidFrom;
+    }
+
+    [Serializable]
     public class Heatmap
     {
         public int cols;
@@ -10,10 +17,10 @@ namespace Quest.Common.Messages.Visual
         public double latBlocksize;
         public double lon;
         public double lonBlocksize;
-        //public string map;
         public byte[] map;
         public int rows;
-        public int vehtype;
+        public string Name;
+        public string Code;
     }
 
 }

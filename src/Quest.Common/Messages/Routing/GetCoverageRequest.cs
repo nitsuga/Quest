@@ -8,12 +8,12 @@ namespace Quest.Common.Messages.Routing
     ///     will be sent to the device and the AuthToken will be unauthorised. Subsequent messages
     ///     that contain the devices AuthToken will be responded to with an authorisation failure
     /// </summary>
-
     [Serializable]
     public class GetCoverageRequest : Request
     {
-        public int vehtype;
-    }
-
-    
+        /// <summary>
+        /// name of the coverage layer to get
+        /// </summary>
+        public string Code;
+    }    
 }

@@ -6,7 +6,6 @@ namespace Quest.Common.Messages.Routing
     [Serializable]
     public class RouteRequestCoverage : Request, IRouteRequest
     {
-
         public int TileSize = 250;
 
         public double DistanceMax;
@@ -17,6 +16,8 @@ namespace Quest.Common.Messages.Routing
 
         public string Name;
 
+        public string Code;
+
         public string RoadSpeedCalculator;
 
         public RouteSearchType SearchType;
@@ -25,6 +26,6 @@ namespace Quest.Common.Messages.Routing
 
         public string VehicleType;
 
-        public int epsg=27700;
+        public int Epsg=27700;
     }
 }

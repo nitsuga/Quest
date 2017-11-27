@@ -7,7 +7,6 @@ namespace Quest.Lib.DataModel
         public virtual DbSet<Call> Call { get; set; }
         public virtual DbSet<Callsign> Callsign { get; set; }
         public virtual DbSet<CoverageMapDefinition> CoverageMapDefinition { get; set; }
-        public virtual DbSet<CoverageMapStore> CoverageMapStore { get; set; }
         public virtual DbSet<Destinations> Destinations { get; set; }
         public virtual DbSet<DeviceRole> DeviceRole { get; set; }
         public virtual DbSet<Devices> Devices { get; set; }
@@ -153,9 +152,9 @@ namespace Quest.Lib.DataModel
 
                 entity.Property(e => e.RoutingResource).HasMaxLength(50);
 
-                entity.Property(e => e.StyleCode).HasMaxLength(50);
-
                 entity.Property(e => e.VehicleCodes).HasMaxLength(250);
+
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(16);
             });
 
             modelBuilder.Entity<CoverageMapStore>(entity =>

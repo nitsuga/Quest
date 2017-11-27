@@ -6,12 +6,6 @@ using Newtonsoft.Json;
 
 namespace Quest.Common.Messages.Routing
 {
-    [Serializable]
-    public class RoadEdgeWithVector
-    {
-        public RoadEdge Edge;
-        public RoadVector Vector;
-    }
 
     [Serializable]
     public class RoadEdge
