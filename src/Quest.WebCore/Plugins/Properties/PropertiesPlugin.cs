@@ -13,9 +13,6 @@ namespace Quest.WebCore.Plugins.Properties
     [Injection("PropertiesPlugin", typeof(IHudPlugin), Lifetime.PerDependency)]
     public class PropertiesPlugin : StandardPlugin
     {
-        ILifetimeScope _scope;
-        private IHostingEnvironment _env;
-
         public PropertiesPlugin(ILifetimeScope scope, IHostingEnvironment env)
             : base("PropertiesPlugin", "PROP", "hud.plugins.properties.init(panelId, pluginId)", "/plugins/Properties/Lib", scope, env)
         {

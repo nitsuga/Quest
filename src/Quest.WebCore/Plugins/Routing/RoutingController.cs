@@ -14,7 +14,6 @@ namespace Quest.WebCore.Plugins.Routing
     public class RoutingController : Controller
     {
         private AsyncMessageCache _messageCache;
-        private readonly IPluginService _pluginService;
         RoutingPlugin _plugin;
 
         public RoutingController(
@@ -23,6 +22,7 @@ namespace Quest.WebCore.Plugins.Routing
                 IPluginService pluginFactory
             )
         {
+            _messageCache = messageCache;
             _plugin = plugin;
         }
 

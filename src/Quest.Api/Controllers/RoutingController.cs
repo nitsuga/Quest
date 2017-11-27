@@ -25,6 +25,7 @@ namespace Quest.Api.Controllers
         /// <param name="method">The method to send the message via : e.g. GCM, ANS, Win, Email, SMS, HTTP</param>
         /// <param name="address">Target address specific to the method being used</param>
         /// <param name="subject">Subject line, might not used in all methods</param>
+        /// <param name="silent"></param>
         /// <returns></returns>
         [HttpPost("Send")]
         [AllowAnonymous]
@@ -130,7 +131,6 @@ namespace Quest.Api.Controllers
         [AllowAnonymous]
         public async Task<NotificationResponse> SendEventNotification([FromBody] EventNotification message, [FromQuery] string method, [FromQuery]string address, [FromQuery]string subject)
         {
-            NotificationResponse result;
             try
             {
                 Notification n = new Notification { Address = address, Body = message, Method = method, Subject = subject };

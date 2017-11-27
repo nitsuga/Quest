@@ -51,7 +51,6 @@ namespace Quest.Lib.Routing
         public string roadSpeedCalculator { get; set; }
 
         private IDatabaseFactory _dbFactory;
-        private bool _stopping;
         private readonly RoutingData _routingdata;
         private readonly ILifetimeScope _scope;
 
@@ -85,7 +84,6 @@ namespace Quest.Lib.Routing
 
         protected override void OnStop()
         {
-            _stopping=true;
         }
 
         /// <summary>
@@ -93,15 +91,12 @@ namespace Quest.Lib.Routing
         /// </summary>
         private void Initialise()
         {
-            _stopping = false;
-
             Logger.Write($"Loading default routing engine {defaultengine}", TraceEventType.Information, "Routing Manager");
             var engine = _scope.ResolveNamed<IRouteEngine>(defaultengine);
 
             Logger.Write($"Waiting routing engine to load", TraceEventType.Information, "Routing Manager");
             WaitForEngineReady(engine);
 
-            _stopping = false;
         }
 
         private void WaitForEngineReady(IRouteEngine engine)
