@@ -101,7 +101,7 @@ services:
       - Session=Alpha
 #      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
 #      - Modules=SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager
-      - Modules=EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager;RoutingManager                
+      - Modules=CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager;RoutingManager                
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
