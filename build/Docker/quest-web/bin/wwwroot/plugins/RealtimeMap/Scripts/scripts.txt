@@ -1,5 +1,0 @@
-﻿leaflet.js
-leaflet.draw.js
-leaflet.heat.js
-leaflet.usermarker.js
-hud.plugins.rtmap.js

@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 
 services:
 
@@ -19,15 +19,6 @@ services:
       -  ACCEPT_EULA=Y
       -  SA_PASSWORD=M3Gurdy*
       -  Session=Alpha
-# requires version 3      
-#    deploy:
-#        mode: global
-#        restart_policy:
-#            condition: on-failure
-#            delay: 5s
-#            max_attempts: 3
-#            window: 120s
-#            condition: on-failure
             
   activemq:
     image: webcenter/activemq
@@ -99,8 +90,6 @@ services:
       - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
       - Session=Alpha
-#      - Modules=DeviceManager;SecurityManager;NotificationManager;SearchManager;VisualsManager;MapMatcherManager;IndexerManager;EisecServer;EisecSimulator;CallTracker;RoutingManager
-#      - Modules=SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager
       - Modules=CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager;RoutingManager                
       - ElasticUser=elastic
       - ElasticPwd=changeme
