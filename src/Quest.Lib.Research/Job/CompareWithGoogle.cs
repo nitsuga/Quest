@@ -36,6 +36,7 @@ namespace Quest.Lib.Research.Job
         private TrackLoader _trackLoader;
 
         public CompareWithGoogle(
+            VariableSpeedByEdge edgeCalculator,
             ILifetimeScope scope,
             RoutingData data,
             TrackLoader trackLoader,
@@ -43,6 +44,7 @@ namespace Quest.Lib.Research.Job
             DijkstraRoutingEngine selectedRouteEngine,
             TimedEventQueue eventQueue) : base(eventQueue)
         {
+            _edgeCalculator = edgeCalculator;
             _dbFactory = dbFactory;
             _selectedRouteEngine = selectedRouteEngine;
             _data = data;

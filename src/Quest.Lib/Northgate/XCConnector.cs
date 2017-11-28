@@ -24,19 +24,6 @@ using Quest.Common.Messages.System;
 
 namespace Quest.Lib.Northgate
 {
-    public interface IXCMessageParser
-    {
-        List<string> GetGenericSubscriptions(string subtype);
-        List<string> GetGenericDeletions(string subtype);
-    }
-
-    public interface IGenericSubscription
-    {
-        string wksta { get; set; }
-        string subtype { get; set; }
-        double e { get; set; }
-        double n { get; set; }
-    }
 
     public class XCConnector : ServiceBusProcessor, IXCMessageParser
     {
@@ -59,7 +46,6 @@ namespace Quest.Lib.Northgate
         public string Lvm { get; set; } = "";
         public string DrFormat { get; set; } = "";
         public string RscFormat { get; set; } = "";
-        public string BackupFor { get; set; } = "";
         public int HBTReceiveDelay { get; set; } = 60;
         public int HBTSendDelay { get; set; } = 30;
         public string Connection { get; set; } = "";
@@ -88,31 +74,20 @@ namespace Quest.Lib.Northgate
         private String _subscriptions = "";
 
         private DataChannel _channel;
-        private bool _isPrimary = false;
         private ManualResetEvent _quiting = new ManualResetEvent(false);
-        private ElasticSettings _elastic;
-        private DeviceHandler _deviceHandler;
-        private IDeviceStore _devStore;
-        private IResourceStore _resStore;
-        private IIncidentStore _incStore;
         private NotificationSettings _notificationSettings = new NotificationSettings();
 
+        /// <summary>
+        /// is this channel connected to the remote end?
+        /// </summary>
+        private StatusCode _connStatus;
+
         public XCConnector(
-            IDeviceStore devStore,
-            IResourceStore resStore,
-            IIncidentStore incStore,
-            DeviceHandler deviceHandler,
-            ElasticSettings elastic,
             NotificationSettings notificationSettings,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
-            _devStore = devStore;
-            _resStore = resStore;
-            _incStore = incStore;
-            _elastic = elastic;
-            _deviceHandler = deviceHandler;
             _notificationSettings = notificationSettings;
         }
 
@@ -230,7 +205,7 @@ namespace Quest.Lib.Northgate
                 worker.Abort();
                 worker.Join();
 
-                Status = XCConnector.StatusCode.Disconnected;
+                _connStatus = XCConnector.StatusCode.Disconnected;
 
             }
             catch 
@@ -238,20 +213,6 @@ namespace Quest.Lib.Northgate
             }
         }
 
-        /// <summary>
-        /// is this channel connected to the remote end?
-        /// </summary>
-        public StatusCode Status
-        {
-            get
-            {
-                return _status;
-            }
-            private set
-            {
-                _status = value;
-            }
-        }
 
         /// <summary>
         /// connect to remote data source
@@ -302,15 +263,14 @@ namespace Quest.Lib.Northgate
                         if (_quiting.WaitOne(2000))
                             return;
 
-                        _isPrimary = (BackupFor == null || BackupFor.Length == 0);
                         XCConnector primary = null;
 
-                        if (Enabled == false && Status == StatusCode.Disconnected)
+                        if (Enabled == false && _connStatus == StatusCode.Disconnected)
                         {
                             continue;
                         }
 
-                        if (Enabled == false && Status != StatusCode.Disabled)
+                        if (Enabled == false && _connStatus != StatusCode.Disabled)
                         {
                             String msg = string.Format("Disabled. Disconnecting");
                             ChangeStatus(msg, StatusCode.Disabled);
@@ -319,20 +279,8 @@ namespace Quest.Lib.Northgate
                         }
 
                         if (_channel == null)
-                            Status = StatusCode.Disconnected;
+                            _connStatus = StatusCode.Disconnected;
 
-                        // get backup details.
-                        if (!_isPrimary)
-                        {
-                            // get the status of the primary from the parent                            
-                            //TODO: 
-                            //_parent.Channels.TryGetValue(backupFor, out primary);
-                            //if (primary == null)
-                            //{
-                            //    Logger.Write(string.Format("Warning: No primary channel found called {0} that {1} is to act as backup for.", backupFor, Name), TraceEventType.Information, "Quest Channel " + Name);
-                            //    continue;
-                            //}
-                        }
 
                         // did we get disconnected?
                         if (_channel != null && _channel.IsConnected == false)
@@ -341,7 +289,7 @@ namespace Quest.Lib.Northgate
                             ChangeStatus("Disconnected", StatusCode.Disconnected);
                         }
 
-                        switch (Status)
+                        switch (_connStatus)
                         {
                             case StatusCode.Disabled:
                                 if (Enabled == true)
@@ -356,19 +304,11 @@ namespace Quest.Lib.Northgate
                                 {
                                     if (Connect())
                                     {
-                                        if (_isPrimary)
-                                        {
-                                            String msg = string.Format("Primary {0} channel now ACTIVE", Name);
-                                            ChangeStatus(msg, StatusCode.Active);
-                                        }
-                                        else
-                                        {
-                                            String msg = string.Format("Secondary {0} channel now PASSIVE", Name);
-                                            ChangeStatus(msg, StatusCode.Connected);
-                                        }
+                                        String msg = string.Format("Primary {0} channel now ACTIVE", Name);
+                                        ChangeStatus(msg, StatusCode.Active);
                                     }
                                     else
-                                        Status = StatusCode.Disconnected;
+                                        _connStatus = StatusCode.Disconnected;
                                 }
                                 break;
 
@@ -392,7 +332,7 @@ namespace Quest.Lib.Northgate
                                 }
 
                                 // secondary channel check - should we take over?
-                                if (primary != null && primary.Status != StatusCode.Active)
+                                if (primary != null && primary._connStatus != StatusCode.Active)
                                 {
                                     String msg = string.Format("Primary channel {0} is not recieving valid data, channel {1} taking over.", primary.Name, Name);
                                     ChangeStatus(msg, StatusCode.Active);
@@ -417,7 +357,7 @@ namespace Quest.Lib.Northgate
                                 }
 
                                 // secondary channel check, should we relinquish?
-                                if (primary != null && primary.Status == StatusCode.Active)
+                                if (primary != null && primary._connStatus == StatusCode.Active)
                                 {
                                     String msg = string.Format("Primary channel {0} is not recieving valid data, channel {1} taking over.", primary.Name, Name);
                                     ChangeStatus(msg, StatusCode.ValidData);
@@ -427,7 +367,7 @@ namespace Quest.Lib.Northgate
                         }
 
                         // send heartbeats
-                        if (_channel != null && Status >= StatusCode.Connected && DateTime.Now.Subtract(_lastHeartbeatSent).TotalSeconds > _HBTSendDelay)
+                        if (_channel != null && _connStatus >= StatusCode.Connected && DateTime.Now.Subtract(_lastHeartbeatSent).TotalSeconds > _HBTSendDelay)
                         {
                             try
                             {
@@ -440,12 +380,9 @@ namespace Quest.Lib.Northgate
                             catch
                             {
                                 Disconnect();
-                                Status = StatusCode.Disconnected;
+                                _connStatus = StatusCode.Disconnected;
                             }
                         }
-
-
-
                     }
                     catch 
                     {
@@ -460,8 +397,8 @@ namespace Quest.Lib.Northgate
         void ChangeStatus(String reason, StatusCode newStatus)
         {
             Logger.Write(reason, TraceEventType.Information, "Quest Channel " + Name);
-            Status = newStatus;
-            ServiceStatus status = new ServiceStatus() { Instance = Name, ServiceName = "Quest", Status = Status.ToString(), Reason = reason, Server = System.Net.Dns.GetHostName() };
+            _connStatus = newStatus;
+            ServiceStatus status = new ServiceStatus() { Instance = Name, ServiceName = "Quest", Status = _connStatus.ToString(), Reason = reason, Server = System.Net.Dns.GetHostName() };
             base.ServiceBusClient.Broadcast(status);
         }
 
@@ -469,7 +406,7 @@ namespace Quest.Lib.Northgate
         {
             Logger.Write(string.Format("Got disconnected"), TraceEventType.Information, "Quest Channel " + Name);
             Disconnect();
-            Status = StatusCode.Disconnected;
+            _connStatus = StatusCode.Disconnected;
         }
 
         /// <summary>
@@ -481,7 +418,7 @@ namespace Quest.Lib.Northgate
         {
             Debug.Print(e.Data);
             ///reflect data if this channel is active
-            if (IncomingData != null && Status == StatusCode.Active && _isPrimary == true)
+            if (IncomingData != null && _connStatus == StatusCode.Active && _isPrimary == true)
                 IncomingData(this, e);
 
             ParseMessage(e.Data);
@@ -522,14 +459,14 @@ namespace Quest.Lib.Northgate
                     _lastDataReceived = DateTime.Now;
                 }
 
-                if (Status != StatusCode.Active)
+                if (_connStatus != StatusCode.Active)
                 {
-                    Logger.Write(string.Format("{0} (ignored): {1}", Status, message), TraceEventType.Information, "Quest Channel " + Name);
+                    Logger.Write(string.Format("{0} (ignored): {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + Name);
                     return;
                 }
                 else
                 {
-                    Logger.Write(string.Format("{0} : {1}", Status, message), TraceEventType.Information, "Quest Channel " + Name);
+                    Logger.Write(string.Format("{0} : {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + Name);
                 }
 
                 if (f != null)
@@ -647,7 +584,7 @@ namespace Quest.Lib.Northgate
             ResourceUpdateRequest update = new ResourceUpdateRequest()
             {
                 Resource = new QuestResource()
-                {
+                { 
                     Callsign = GetValueString("Callsign", _resformat, parts),
                     ResourceType = GetValueString("ResourceType", _resformat, parts),
                     Status = GetValueString("Status", _resformat, parts),

@@ -20,7 +20,6 @@ namespace Quest.Lib.Geo
     public class GeoHandler
     {
         private ElasticSettings _elastic;
-        private BuildIndexSettings _config;
         private IResourceStore _resStore;
         private IIncidentStore _incStore;
         private ResourceHandler _resHandler;
