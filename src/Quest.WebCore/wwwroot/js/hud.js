@@ -17,6 +17,22 @@
     // remember which message group are being subscribed to
     var groups = {};
 
+    _loadjscssfile = function (filename, filetype) {
+        if (filetype == "js") { //if filename is a external JavaScript file
+            var fileref = document.createElement('script')
+            fileref.setAttribute("type", "text/javascript")
+            fileref.setAttribute("src", filename)
+        }
+        else if (filetype == "css") { //if filename is an external CSS file
+            var fileref = document.createElement("link")
+            fileref.setAttribute("rel", "stylesheet")
+            fileref.setAttribute("type", "text/css")
+            fileref.setAttribute("href", filename)
+        }
+        if (typeof fileref != "undefined")
+            document.getElementsByTagName("head")[0].appendChild(fileref)
+    }
+
     // send a message locally on this session. These messages are NOT sent to the hub
     var _sendLocal = function (event, msg) {
         $("#sys_hub").trigger(event, msg);
@@ -162,6 +178,9 @@
                 // 
                 $(id).empty();
                 $(id).append(json);
+
+                if (json.theme !== undefined && json.theme.length>0)
+                    _loadjscssfile(json.theme, "css") ////dynamically load and add this .css file
 
                 _populatePlugins( layoutName );
             }

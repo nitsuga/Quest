@@ -1,0 +1,47 @@
+﻿html, body, .container-fluid {
+    height: 100%;
+    background-color:darkolivegreen;
+}
+
+.right-border {
+    border-right: 1px solid #92c229;
+}
+.left-border {
+    border-left: 1px solid #92c229;
+}
+
+.top-border {
+    border-top: 1px solid #92c229;
+}
+
+.bottom-border {
+    border-bottom: 1px solid #92c229;
+}
+
+#main-panel-wrapper-left {
+    border-right: 1px solid #92c229;
+    border-bottom: 1px solid #92c229;
+}
+
+#main-panel-wrapper-right {
+    border-bottom: 1px solid #92c229;
+}
+
+a.panel-btn {
+    color: #4cff00;
+    background:  #010c00;
+    text-align:center;
+}
+
+.panel-btn-on {
+    border: solid 3px;
+    padding: 0px;
+    color: yellow !important;
+}
+
+.panel-btn-off {
+    padding: 3px;
+    border: none;
+    color: #4cff00 !important;
+}
+

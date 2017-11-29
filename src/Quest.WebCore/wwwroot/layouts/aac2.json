@@ -2,6 +2,7 @@
   "Name": "AAC-2",
   "Image": "",
   "Selectable": true,
+  "Theme": "theme.light.css",
   "Panels": [
     {
       "Panel": 0,

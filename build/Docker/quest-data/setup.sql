@@ -1,5 +1,5 @@
 USE [master]
-GO
+GO 
 if db_id('Quest') is null
 	CREATE DATABASE [Quest] ON 
 	( FILENAME = N'/tmp/data1/Quest.mdf' ),

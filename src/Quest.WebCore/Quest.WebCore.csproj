@@ -72,6 +72,7 @@
 
   <ItemGroup>
     <Content Remove="Views\Home\Index - Copy.cshtml" />
+    <Content Remove="Views\Home\Map.cshtml" />
     <Content Remove="Views\Shared\_HudMainPanel.cshtml" />
     <Content Remove="Views\Shared\_HudMiniPanelBottom.cshtml" />
     <Content Remove="Views\Shared\_HudMiniPanelEmpty.cshtml" />

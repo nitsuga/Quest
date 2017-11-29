@@ -8,9 +8,6 @@ using Quest.Lib.Utils;
 using Quest.Lib.Net;
 using Quest.Lib.Trace;
 using Quest.Lib.Processor;
-using Quest.Lib.Resource;
-using Quest.Lib.Incident;
-using Quest.Lib.Search.Elastic;
 using Quest.Lib.Notifier;
 using Quest.Common.ServiceBus;
 using Quest.Lib.ServiceBus;
@@ -25,7 +22,11 @@ using Quest.Common.Messages.System;
 namespace Quest.Lib.Northgate
 {
 
-    public class XCConnector : ServiceBusProcessor, IXCMessageParser
+    /// <summary>
+    /// Connects to XCConnect and broadcasts inbound XC traffic onto the ESB
+    /// Also listens for XC Outbound ESB messages and sends on to CAD
+    /// </summary>
+    public partial class XCConnector : ServiceBusProcessor, IXCMessageParser
     {
         public enum StatusCode
         {
@@ -49,8 +50,14 @@ namespace Quest.Lib.Northgate
         public int HBTReceiveDelay { get; set; } = 60;
         public int HBTSendDelay { get; set; } = 30;
         public string Connection { get; set; } = "";
+
+        /// <summary>
+        /// channel name XC0 or LVM0
+        /// </summary>
         public string Name { get; set; } = "XC0";
+
         public bool Enabled { get; set; } = true;
+        public bool OutboundEnabled { get; set; } = true;
 
         public event System.EventHandler<DataEventArgs> IncomingData;
 
@@ -159,6 +166,9 @@ namespace Quest.Lib.Northgate
 
         private Response XCOutboundHandler(NewMessageArgs t)
         {
+            if (!OutboundEnabled)
+                return null;
+
             XCOutbound instance1 = t.Payload as XCOutbound;
 
             if (instance1 != null && _channel != null)
@@ -225,8 +235,7 @@ namespace Quest.Lib.Northgate
             _channel = ChannelFactory.MakeTcPchannel(Connection);
             _channel.Data += new EventHandler<DataEventArgs>(connection_Data);
             _channel.ActionOnDisconnect = DisconnectAction.RaiseDisconnectEvent;
-
-            // Host=cad-hq-diba,port=2080,Codec=STXStreamCodec
+            _channel.Disconnected += connection_Disconnected;
 
             _lastDataReceived = DateTime.Now;
             _lastHeartbeatSent = DateTime.Now;
@@ -418,7 +427,7 @@ namespace Quest.Lib.Northgate
         {
             Debug.Print(e.Data);
             ///reflect data if this channel is active
-            if (IncomingData != null && _connStatus == StatusCode.Active && _isPrimary == true)
+            if (IncomingData != null && _connStatus == StatusCode.Active)
                 IncomingData(this, e);
 
             ParseMessage(e.Data);
@@ -886,44 +895,6 @@ namespace Quest.Lib.Northgate
         }
 
         /// <summary>
-        /// holds a single generic subscription
-        /// </summary>
-        /// <remarks></remarks>
-        public class GenericSubscription : IGenericSubscription
-        {
-
-            private string _wksta;
-            private string _subtype;
-            private double _e;
-
-            private double _n;
-
-            public double e
-            {
-                get { return _e; }
-                set { _e = value; }
-            }
-
-            public double n
-            {
-                get { return _n; }
-                set { _n = value; }
-            }
-
-            public string subtype
-            {
-                get { return _subtype; }
-                set { _subtype = value; }
-            }
-
-            public string wksta
-            {
-                get { return _wksta; }
-                set { _wksta = value; }
-            }
-        }
-
-        /// <summary>
         /// Keep a list of registered workstations that want the heatmap
         /// </summary>
         /// <remarks></remarks>
@@ -938,5 +909,3 @@ namespace Quest.Lib.Northgate
 
     }
 }
-
-
