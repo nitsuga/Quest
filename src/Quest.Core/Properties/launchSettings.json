@@ -4,8 +4,9 @@
       "commandName": "Project",
       "workingDirectory": "bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager",
-        "Session": "Dev"
+        "Modules": "XC0;XC1;XCManager",
+        "Session": "Dev",
+        "ComponentsConfig": "components.json"
       }
     }
   }

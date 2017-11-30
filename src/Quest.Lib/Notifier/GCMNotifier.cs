@@ -110,6 +110,7 @@ namespace Quest.Lib.Notifier
 
             Logger.Write($"Sending via {message.Method} to {message.Address} {message.Subject}", TraceEventType.Information, GetType().Name);
 
+            //TODO: is this converting correctly?
             var data = Newtonsoft.Json.Linq.JObject.FromObject(message.Body);            
             _gcmBroker.QueueNotification(new GcmNotification { RegistrationIds = new List<string> { message.Address }, Data = data});
             return new NotificationResponse { Message = $"GCM Message queued", Success = true, RequestId = message.RequestId };

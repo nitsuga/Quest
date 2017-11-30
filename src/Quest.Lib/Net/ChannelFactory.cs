@@ -52,7 +52,7 @@ namespace Quest.Lib.Net
         /// <param name="codecType"></param>
         private static void ParseHostandPort(string text, out string host, out int port, out Type codecType)
         {
-            var parts = text.Split(',');
+            var parts = text.Split(';');
             host = "";
             port = 0;
             codecType = null;

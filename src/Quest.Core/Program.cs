@@ -31,7 +31,7 @@ namespace Quest.Core
         // Set the Modules environment variable to specify which components to run
         //
         // to run the full web stack set Modules environment variable to:
-        // SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager
+        // CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager
 
         // for research, use these
         // MapMatcherAll -args=Workers=8,InProcess=false,MapMatcher='HmmViterbiMapMatcher',MaxRoutes=15,RoadGeometryRange=50,RoadEndpointEnvelope=50,DirectionTolerance=120,RoutingEngine='DijkstraRoutingEngine',RoutingData='Standard',MinSeconds=10,Skip=3,Take=9999,Emission='GpsEmission',EmissionP1=1,EmissionP2=0,Transition='Exponential',TransitionP1=0.0168,TransitionP2=0,SumProbability=false,NormaliseTransition=false,NormaliseEmission=false,GenerateGraphVis=false,MinDistance=25,MaxSpeed=80,MaxCandidates=100 -components=components.json
@@ -164,10 +164,15 @@ namespace Quest.Core
         /// <returns></returns>
         internal static IConfiguration GetConfiguration()
         {
+            List<string> componentsList = new List<string>();
+
             // override config if env variable is set
-            var cfgFile = Environment.GetEnvironmentVariable("ComponentsConfig");
-            if (string.IsNullOrEmpty(cfgFile))
-                cfgFile = "components.json";
+            var components = Environment.GetEnvironmentVariable("ComponentsConfig");
+            if (string.IsNullOrEmpty(components))
+                componentsList.Add("components.json");
+            else
+                componentsList.AddRange(components.Split(";"));
+
 
             // override app config if env variable is set
             var appFile = Environment.GetEnvironmentVariable("ApplicationConfig");
@@ -175,13 +180,15 @@ namespace Quest.Core
                 appFile = "appsettings.json";
 
             Logger.Write($"Using ApplicationConfig={appFile}");
-            Logger.Write($"Using ComponentsConfig={cfgFile}");
+            Logger.Write($"Using ComponentsConfig={string.Join(";", componentsList)}");
 
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables()
-                .AddJsonFile(appFile, false)
-                .AddJsonFile(cfgFile, false);
+                .AddJsonFile(appFile, false);
+
+            foreach (var com in componentsList)
+                configBuilder.AddJsonFile(com, optional: false);
 
             IConfiguration config = configBuilder.Build();
 

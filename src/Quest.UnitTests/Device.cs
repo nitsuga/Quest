@@ -179,7 +179,7 @@ namespace Quest.UnitTests
         }
 
 
-        [TestMethod]        
+        //[TestMethod]        
         public void Device_06_GetHistoryRequest()
         {
             var sessionid = Login();

@@ -18,6 +18,7 @@ using Quest.Common.Messages.CAD;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.System;
+using Autofac;
 
 namespace Quest.Lib.Northgate
 {
@@ -26,40 +27,15 @@ namespace Quest.Lib.Northgate
     /// Connects to XCConnect and broadcasts inbound XC traffic onto the ESB
     /// Also listens for XC Outbound ESB messages and sends on to CAD
     /// </summary>
-    public partial class XCConnector : ServiceBusProcessor, IXCMessageParser
+    public partial class XCConnector : ServiceBusProcessor
     {
-        public enum StatusCode
-        {
-            Disabled,
-            Disconnected,
-            Connected,
-            ValidData,
-            Active
-        }
-
-        public string Commands { get; set; } = "";
-        public string Subscriptions { get; set; } = "";
-        public string CliFormat { get; set; } = "";
-        public string IncFormat { get; set; } = "";
-        public string ResFormat { get; set; } = "";
-        public string SpaFormat { get; set; } = "";
-        public string SpbFormat { get; set; } = "";
-        public string Lvm { get; set; } = "";
-        public string DrFormat { get; set; } = "";
-        public string RscFormat { get; set; } = "";
-        public int HBTReceiveDelay { get; set; } = 60;
-        public int HBTSendDelay { get; set; } = 30;
-        public string Connection { get; set; } = "";
-
         /// <summary>
-        /// channel name XC0 or LVM0
+        /// Name of this channel configuration
         /// </summary>
-        public string Name { get; set; } = "XC0";
+        public string Channel { get; set; }
 
-        public bool Enabled { get; set; } = true;
-        public bool OutboundEnabled { get; set; } = true;
-
-        public event System.EventHandler<DataEventArgs> IncomingData;
+        private XCConfig _config;
+        private ILifetimeScope _scope;
 
         private Dictionary<string, int> _incformat = new Dictionary<string, int>();
         private Dictionary<string, int> _resformat = new Dictionary<string, int>();
@@ -71,37 +47,69 @@ namespace Quest.Lib.Northgate
 
         private delegate void XCMessageHandler(string[] parts);
 
-        private int _HBTReceiveDelay = 60;
-        private int _HBTSendDelay = 30;
         private DateTime _lastDataReceived;
         private DateTime _lastHeartbeatSent;
         private Thread worker;
-        private StatusCode _status = StatusCode.Disconnected;
+        private ChannelStatus _status = ChannelStatus.Disconnected;
         private int _retries = 5;
-        private String _subscriptions = "";
-
-        private DataChannel _channel;
+        private DataChannel _datachannel;
         private ManualResetEvent _quiting = new ManualResetEvent(false);
-        private NotificationSettings _notificationSettings = new NotificationSettings();
 
         /// <summary>
         /// is this channel connected to the remote end?
         /// </summary>
-        private StatusCode _connStatus;
+        private ChannelStatus _connStatus;
 
         public XCConnector(
-            NotificationSettings notificationSettings,
+            ILifetimeScope scope,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
-            _notificationSettings = notificationSettings;
+            _scope = scope;
         }
 
         protected override void OnPrepare()
         {
+            try
+            {
+                Logger.Write($"Loading configuration {Channel}", TraceEventType.Information);
+                // get configuration
+                _config = _scope.ResolveNamed<XCConfig>(Channel);
+            }
+            catch(Exception ex)
+            {
+
+            }
+
             // create a list of actions associated with each object type arriving from the queue
-            MsgHandler.AddHandler("XCOutbound", XCOutboundHandler);
+            MsgHandler.AddHandler<XCChannelControl>(XCChannelControlHandler);
+            MsgHandler.AddHandler<XCOutbound>(XCOutboundHandler);
+
+
+        }
+
+        private Response XCChannelControlHandler(NewMessageArgs arg)
+        {
+            var msg = arg.Payload as XCChannelControl;
+            if (msg!=null)
+            {
+                switch(msg.Action)
+                {
+                    case XCChannelControl.Command.Disable:
+                        _config.ConnectionEnabled = false;
+                        break;
+                    case XCChannelControl.Command.EnableAsPrimary:
+                        _config.ConnectionEnabled = true;
+                        _config.EmitEnabled = true;
+                        break;
+                    case XCChannelControl.Command.EnableAsBackup:
+                        _config.ConnectionEnabled = true;
+                        _config.EmitEnabled = false;
+                        break;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -119,7 +127,7 @@ namespace Quest.Lib.Northgate
 
             StringCollection codes = new StringCollection();
 
-            codes.AddRange(Commands.Split('|'));
+            codes.AddRange(_config.Commands.Split('|'));
 
             if (codes.Contains("CLI"))
                 _handlers.Add("CLI", CLIHandler);
@@ -151,33 +159,41 @@ namespace Quest.Lib.Northgate
             if (codes.Contains("RSC"))
                 _handlers.Add("RSC", RSCHandler);
 
-            SplitOut(ref _cliformat, CliFormat);
-            SplitOut(ref _incformat, IncFormat);
-            SplitOut(ref _resformat, ResFormat);
-            SplitOut(ref _drformat, DrFormat);
-            SplitOut(ref _rscformat, RscFormat);
+            SplitOut(ref _cliformat, _config.CliFormat);
+            SplitOut(ref _incformat, _config.IncFormat);
+            SplitOut(ref _resformat, _config.ResFormat);
+            SplitOut(ref _drformat, _config.DrFormat);
+            SplitOut(ref _rscformat, _config.RscFormat);
 
-            Logger.Write("Inc format is " + IncFormat, TraceEventType.Information, "Quest Channel " + Name);
-            Logger.Write("Res format is " + ResFormat, TraceEventType.Information, "Quest Channel " + Name);
-            Logger.Write("Cli format is " + CliFormat, TraceEventType.Information, "Quest Channel " + Name);
-            Logger.Write("Dr  format is " + DrFormat,  TraceEventType.Information, "Quest Channel " + Name);
-            Logger.Write("Rsc format is " + RscFormat, TraceEventType.Information, "Quest Channel " + Name);
+            Logger.Write("Inc format is " + _config.IncFormat, TraceEventType.Information, "Quest Channel " + _config.Name);
+            Logger.Write("Res format is " + _config.ResFormat, TraceEventType.Information, "Quest Channel " + _config.Name);
+            Logger.Write("Cli format is " + _config.CliFormat, TraceEventType.Information, "Quest Channel " + _config.Name);
+            Logger.Write("Dr  format is " + _config.DrFormat,  TraceEventType.Information, "Quest Channel " + _config.Name);
+            Logger.Write("Rsc format is " + _config.RscFormat, TraceEventType.Information, "Quest Channel " + _config.Name);
         }
 
+        /// <summary>
+        /// process XCOutbound command
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         private Response XCOutboundHandler(NewMessageArgs t)
         {
-            if (!OutboundEnabled)
+            if (!_config.OutboundEnabled)
+                return null;
+
+            if (!_config.EmitEnabled)
                 return null;
 
             XCOutbound instance1 = t.Payload as XCOutbound;
 
-            if (instance1 != null && _channel != null)
+            if (instance1 != null && _datachannel != null)
             {
                 // output to this channel?
-                if (instance1.channel.Split(',').Contains(Name))
+                if (instance1.channel.Split(',').Contains(_config.Name))
                 {
-                    Logger.Write(string.Format("XCOutbound {1} - sent {0}", instance1.command, Name), TraceEventType.Information, "Quest Channel " + Name);
-                    _channel.Send(instance1.command);
+                    Logger.Write($"XCOutbound {instance1.command} - sent {_config.Name}", TraceEventType.Information, "Quest Channel " + _config.Name);
+                    _datachannel.Send(instance1.command);
                 }
             }
             return null;
@@ -191,7 +207,7 @@ namespace Quest.Lib.Northgate
 
             worker = new Thread(new ThreadStart(Work));
             worker.IsBackground = true;
-            worker.Name = "XC Worker - " + Name;
+            worker.Name = $"XC Worker - {_config.Name}";
             worker.Start();
         }
 
@@ -215,14 +231,13 @@ namespace Quest.Lib.Northgate
                 worker.Abort();
                 worker.Join();
 
-                _connStatus = XCConnector.StatusCode.Disconnected;
+                _connStatus = ChannelStatus.Disconnected;
 
             }
             catch 
             {
             }
         }
-
 
         /// <summary>
         /// connect to remote data source
@@ -232,15 +247,15 @@ namespace Quest.Lib.Northgate
         {
             // get connection settings.. these decide whether this is a server or client
 
-            _channel = ChannelFactory.MakeTcPchannel(Connection);
-            _channel.Data += new EventHandler<DataEventArgs>(connection_Data);
-            _channel.ActionOnDisconnect = DisconnectAction.RaiseDisconnectEvent;
-            _channel.Disconnected += connection_Disconnected;
+            _datachannel = ChannelFactory.MakeTcPchannel(_config.Connection);
+            _datachannel.Data += new EventHandler<DataEventArgs>(connection_Data);
+            _datachannel.ActionOnDisconnect = DisconnectAction.RaiseDisconnectEvent;
+            _datachannel.Disconnected += connection_Disconnected;
 
             _lastDataReceived = DateTime.Now;
             _lastHeartbeatSent = DateTime.Now;
 
-            return _channel.IsConnected;
+            return _datachannel.IsConnected;
         }
 
         /// <summary>
@@ -248,12 +263,12 @@ namespace Quest.Lib.Northgate
         /// </summary>
         private void Disconnect()
         {
-            if (_channel != null)
+            if (_datachannel != null)
             {
-                if (_channel.IsConnected)
-                    _channel.CloseChannel();
+                if (_datachannel.IsConnected)
+                    _datachannel.CloseChannel();
                 
-                _channel = null;
+                _datachannel = null;
             }
             _lastDataReceived = DateTime.MinValue;
             _lastHeartbeatSent = DateTime.MinValue;
@@ -272,124 +287,86 @@ namespace Quest.Lib.Northgate
                         if (_quiting.WaitOne(2000))
                             return;
 
-                        XCConnector primary = null;
-
-                        if (Enabled == false && _connStatus == StatusCode.Disconnected)
+                        if (_config.ConnectionEnabled == false)
                         {
-                            continue;
+                            if (_connStatus == ChannelStatus.Disconnected)
+                            {
+                                String msg = string.Format("Disconnected");
+                                ChangeStatus(msg, ChannelStatus.Disconnected);
+                                continue;
+                            }
+
+                            if (_connStatus != ChannelStatus.Disabled)
+                            {
+                                String msg = string.Format("Disabled. Disconnecting");
+                                ChangeStatus(msg, ChannelStatus.Disabled);
+                                Disconnect();
+                                continue;
+                            }
                         }
 
-                        if (Enabled == false && _connStatus != StatusCode.Disabled)
-                        {
-                            String msg = string.Format("Disabled. Disconnecting");
-                            ChangeStatus(msg, StatusCode.Disabled);
-                            Disconnect();
-                            continue;
-                        }
-
-                        if (_channel == null)
-                            _connStatus = StatusCode.Disconnected;
+                        if (_datachannel == null)
+                            _connStatus = ChannelStatus.Disconnected;
 
 
                         // did we get disconnected?
-                        if (_channel != null && _channel.IsConnected == false)
+                        if (_datachannel != null && _datachannel.IsConnected == false)
                         {
                             Disconnect();
-                            ChangeStatus("Disconnected", StatusCode.Disconnected);
+                            ChangeStatus("Disconnected", ChannelStatus.Disconnected);
                         }
+
+                        // channel is enabled..
 
                         switch (_connStatus)
                         {
-                            case StatusCode.Disabled:
-                                if (Enabled == true)
+
+                            case ChannelStatus.Disconnected:
+                                // attempt to connect
+                                if (Connect())
                                 {
-                                    ChangeStatus("Enabled. Connecting..", StatusCode.Disconnected);
+                                    String msg = string.Format("Primary {0} channel now CONNECTED", _config.Name);
+                                    ChangeStatus(msg, ChannelStatus.Connected);
                                 }
+                                else
+                                    _connStatus = ChannelStatus.Disconnected;
                                 break;
 
-                            case StatusCode.Disconnected:
-
-                                if (Enabled)
-                                {
-                                    if (Connect())
-                                    {
-                                        String msg = string.Format("Primary {0} channel now ACTIVE", Name);
-                                        ChangeStatus(msg, StatusCode.Active);
-                                    }
-                                    else
-                                        _connStatus = StatusCode.Disconnected;
-                                }
-                                break;
-
-                            case StatusCode.Connected:
+                            case ChannelStatus.Connected:
                                 // detect proper feed of data
-                                if (DateTime.Now.Subtract(_lastDataReceived).TotalSeconds < _HBTReceiveDelay)
+                                if (DateTime.Now.Subtract(_lastDataReceived).TotalSeconds < _config.HBTReceiveDelay)
                                 {
                                     String msg = string.Format("Receiving data");
-                                    ChangeStatus(msg, StatusCode.ValidData);
+                                    ChangeStatus(msg, ChannelStatus.Active);
                                 }
                                 break;
 
-                            case StatusCode.ValidData:
+                            case ChannelStatus.Active:
                                 // detect loss of proper feed of data
-                                if (DateTime.Now.Subtract(_lastDataReceived).TotalSeconds >= _HBTReceiveDelay)
+                                if (DateTime.Now.Subtract(_lastDataReceived).TotalSeconds >= _config.HBTReceiveDelay)
                                 {
                                     String msg = string.Format("Not receiving data");
-                                    ChangeStatus(msg, StatusCode.Connected);
-                                    break;
-
-                                }
-
-                                // secondary channel check - should we take over?
-                                if (primary != null && primary._connStatus != StatusCode.Active)
-                                {
-                                    String msg = string.Format("Primary channel {0} is not recieving valid data, channel {1} taking over.", primary.Name, Name);
-                                    ChangeStatus(msg, StatusCode.Active);
-                                }
-
-                                // primary channel check - should we take over?
-                                if (primary == null)
-                                {
-                                    String msg = string.Format("Primary channel {0} becoming active.", Name);
-                                    ChangeStatus(msg, StatusCode.Active);
-                                }
-
-                                break;
-
-                            case StatusCode.Active:
-                                // detect loss of proper feed of data
-                                if (DateTime.Now.Subtract(_lastDataReceived).TotalSeconds >= _HBTReceiveDelay)
-                                {
-                                    String msg = string.Format("Not receiving data");
-                                    ChangeStatus(msg, StatusCode.Connected);
+                                    ChangeStatus(msg, ChannelStatus.Connected);
                                     break;
                                 }
-
-                                // secondary channel check, should we relinquish?
-                                if (primary != null && primary._connStatus == StatusCode.Active)
-                                {
-                                    String msg = string.Format("Primary channel {0} is not recieving valid data, channel {1} taking over.", primary.Name, Name);
-                                    ChangeStatus(msg, StatusCode.ValidData);
-                                }
-
                                 break;
                         }
 
                         // send heartbeats
-                        if (_channel != null && _connStatus >= StatusCode.Connected && DateTime.Now.Subtract(_lastHeartbeatSent).TotalSeconds > _HBTSendDelay)
+                        if (_datachannel != null && _connStatus >= ChannelStatus.Connected && DateTime.Now.Subtract(_lastHeartbeatSent).TotalSeconds > _config.HBTSendDelay)
                         {
                             try
                             {
-                                if (_channel.IsConnected)
+                                if (_datachannel.IsConnected)
                                 {
-                                    _channel.Send("0|||HBT|");
+                                    _datachannel.Send("0|||HBT|");
                                     _lastHeartbeatSent = DateTime.Now;
                                 }
                             }
                             catch
                             {
                                 Disconnect();
-                                _connStatus = StatusCode.Disconnected;
+                                _connStatus = ChannelStatus.Disconnected;
                             }
                         }
                     }
@@ -403,19 +380,20 @@ namespace Quest.Lib.Northgate
             }
         }
 
-        void ChangeStatus(String reason, StatusCode newStatus)
+        void ChangeStatus(String reason, ChannelStatus newStatus)
         {
-            Logger.Write(reason, TraceEventType.Information, "Quest Channel " + Name);
+            Logger.Write(reason, TraceEventType.Information, "Quest Channel " + _config.Name);
             _connStatus = newStatus;
-            ServiceStatus status = new ServiceStatus() { Instance = Name, ServiceName = "Quest", Status = _connStatus.ToString(), Reason = reason, Server = System.Net.Dns.GetHostName() };
-            base.ServiceBusClient.Broadcast(status);
+
+            XCChannelStatus xcstatus = new XCChannelStatus() { Channel = _config.Name, Status = _connStatus };
+            ServiceBusClient.Broadcast(xcstatus);
         }
 
         void connection_Disconnected(object sender, DisconnectedEventArgs e)
         {
-            Logger.Write(string.Format("Got disconnected"), TraceEventType.Information, "Quest Channel " + Name);
+            Logger.Write(string.Format("Got disconnected"), TraceEventType.Information, "Quest Channel " + _config.Name);
             Disconnect();
-            _connStatus = StatusCode.Disconnected;
+            _connStatus = ChannelStatus.Disconnected;
         }
 
         /// <summary>
@@ -425,15 +403,12 @@ namespace Quest.Lib.Northgate
         /// <param name="e"></param>
         void connection_Data(object sender, DataEventArgs e)
         {
-            Debug.Print(e.Data);
-            ///reflect data if this channel is active
-            if (IncomingData != null && _connStatus == StatusCode.Active)
-                IncomingData(this, e);
-
             ParseMessage(e.Data);
 
-            XCInbound data = new XCInbound(e.Data, Name);
+            if (!_config.EmitEnabled)
+                return;
 
+            XCInbound data = new XCInbound(e.Data, _config.Name);
             base.ServiceBusClient.Broadcast(data);
         }
 
@@ -468,14 +443,14 @@ namespace Quest.Lib.Northgate
                     _lastDataReceived = DateTime.Now;
                 }
 
-                if (_connStatus != StatusCode.Active)
+                if (_connStatus != ChannelStatus.Active)
                 {
-                    Logger.Write(string.Format("{0} (ignored): {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + Name);
+                    Logger.Write(string.Format("{0} (ignored): {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + _config.Name);
                     return;
                 }
                 else
                 {
-                    Logger.Write(string.Format("{0} : {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + Name);
+                    Logger.Write(string.Format("{0} : {1}", _connStatus, message), TraceEventType.Information, "Quest Channel " + _config.Name);
                 }
 
                 if (f != null)
@@ -486,22 +461,22 @@ namespace Quest.Lib.Northgate
                     {
                         try
                         {
-                            Logger.Write(string.Format("Processing: #{0} {1}", i, message), TraceEventType.Information, "Quest Channel " + Name);
+                            Logger.Write(string.Format("Processing: #{0} {1}", i, message), TraceEventType.Information, "Quest Channel " + _config.Name);
                             f(parts);
                             break;
                         }
                         catch (Exception e)
                         {
-                            Logger.Write(string.Format("#{0} {1}", i, e.ToString()), TraceEventType.Information, "Quest Channel " + Name);
+                            Logger.Write(string.Format("#{0} {1}", i, e.ToString()), TraceEventType.Information, "Quest Channel " + _config.Name);
                             failed = true;
                         }
                     }
                     if (failed)
-                        Logger.Write(string.Format("Exit @ try #{0}/{1}", i, _retries), TraceEventType.Information, "Quest Channel " + Name);
+                        Logger.Write(string.Format("Exit @ try #{0}/{1}", i, _retries), TraceEventType.Information, "Quest Channel " + _config.Name);
 
                 }
                 else
-                    Logger.Write(string.Format("Ignoring  : {0}", message), TraceEventType.Information, "Quest Channel " + Name);
+                    Logger.Write(string.Format("Ignoring  : {0}", message), TraceEventType.Information, "Quest Channel " + _config.Name);
 
             }
             catch 
@@ -522,27 +497,32 @@ namespace Quest.Lib.Northgate
         private void OSBHandler(string[] parts)
         {
             // subscribe to messages
-            Logger.Write(string.Format("Requesting subscription: " + _subscriptions), TraceEventType.Information, "Quest Channel " + Name);
-            _channel.Send("0|||STM|" + _subscriptions);
+            Logger.Write(string.Format("Requesting subscription: " + _config.Subscriptions), TraceEventType.Information, "Quest Channel " + _config.Name);
+            _datachannel.Send("0|||STM|" + _config.Subscriptions);
 
-            Logger.Write(string.Format("Resetting current status"), TraceEventType.Information, "Quest Channel " + Name);
+            Logger.Write(string.Format("Resetting current status"), TraceEventType.Information, "Quest Channel " + _config.Name);
 
-            BeginDump update = new BeginDump();
-            base.ServiceBusClient.Broadcast(update);
+            if (_config.EmitEnabled)
+                ServiceBusClient.Broadcast(new BeginDump());
 
-            Logger.Write(string.Format("Reset complete"), TraceEventType.Information, "Quest Channel " + Name);
+            Logger.Write(string.Format("Reset complete"), TraceEventType.Information, "Quest Channel " + _config.Name);
 
         }
 
-
         private void DRHandler(string[] parts)
         {
+            if (!_config.EmitEnabled)
+                return;
+
             DeleteResource update = new DeleteResource() { Callsign = GetValueString("Callsign", _resformat, parts) };
             base.ServiceBusClient.Broadcast(update);
         }
 
         private void RSCHandler(string[] parts)
         {
+            if (!_config.EmitEnabled)
+                return;
+
             String callsign = GetValueString("Callsign", _rscformat, parts);
             String[] tm = GetValueString("Logoff", _rscformat, parts).Split(':');
             if (tm.Length == 6)
@@ -558,10 +538,11 @@ namespace Quest.Lib.Northgate
             }
         }
 
-        
-
         private void CLIHandler(string[] parts)
         {
+            if (!_config.EmitEnabled)
+                return;
+
             string serial = "";
 
             object o = GetValue("Serial", _cliformat, parts);
@@ -577,6 +558,9 @@ namespace Quest.Lib.Northgate
 
         private void URHandler(string[] parts)
         {
+            if (!_config.EmitEnabled)
+                return;
+
             // "MsgId|Workstation||Callsign|Status|Type|Group|Easting|Northing|Speed|Direction|Skill|LastUpdate|MinsNotMoved|OffDuty|XRay|FleetNo|Sector|Station|Incident"
 
             //  MsgId|Workstation|||Callsign|ResourceType|Status|Easting|Northing||Incident||Speed|Direction|LastUpdate|FleetNo|Skill||Sector|Emergency|Target|Agency|Class|EventType
@@ -624,6 +608,9 @@ namespace Quest.Lib.Northgate
         /// <remarks></remarks>
         private void PIIHandler(string[] parts)
         {
+            if (!_config.EmitEnabled)
+                return;
+
             if (parts.Length < _incformat.Count)
             {
                 return;
@@ -792,7 +779,6 @@ namespace Quest.Lib.Northgate
             }
         }
 
-
         /// <summary>
         /// process generic commands.. toggle by subtype
         /// </summary>
@@ -845,7 +831,7 @@ namespace Quest.Lib.Northgate
         /// <param name="subtype"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public System.Collections.Generic.List<string> GetGenericSubscriptions(string subtype)
+        private System.Collections.Generic.List<string> GetGenericSubscriptions(string subtype)
         {
             List<string> results = new List<string>();
             foreach (GenericSubscription cc in Genericsubscriptions.Values)
@@ -858,7 +844,7 @@ namespace Quest.Lib.Northgate
             return results;
         }
 
-        public List<string> GetGenericDeletions(string subtype)
+        private List<string> GetGenericDeletions(string subtype)
         {
             List<string> results = new List<string>();
             foreach (GenericSubscription cc in GenericDeletions.Values)
@@ -881,7 +867,7 @@ namespace Quest.Lib.Northgate
         /// <param name="subtype"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public IGenericSubscription GetGenericSubscription(string workstation, string subtype)
+        private IGenericSubscription GetGenericSubscription(string workstation, string subtype)
         {
             string key = makeKey(workstation, subtype);
             if (Genericsubscriptions.ContainsKey(key))
