@@ -1,6 +1,7 @@
 using System;
 using Quest.Lib.Coords.Datum;
 using Quest.Lib.Coords.Ellipsoid;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Coords
 {
@@ -315,7 +316,7 @@ namespace Quest.Lib.Coords
         /// </summary>
         /// <param name="ll">The latitude and longitude.</param>
         /// <exception cref="ArgumentException">If the northing or easting are out of range</exception>
-        public OSRef(LatLng ll) : base(OSGB36Datum.Instance)
+        public OSRef(LL ll) : base(OSGB36Datum.Instance)
         {
             ll.ToDatum(OSGB36Datum.Instance);
 
@@ -526,7 +527,7 @@ namespace Quest.Lib.Coords
         ///     A LatLng object representing this OSGB grid reference using the
         ///     OSGB36 datum
         /// </returns>
-        public override LatLng ToLatLng()
+        public override LL ToLatLng()
         {
             var OSGB_F0 = 0.9996012717;
             var N0 = -100000.0;
@@ -584,7 +585,7 @@ namespace Quest.Lib.Coords
             lambda = lambda0 + X*(E - E0) - XI*Math.Pow(E - E0, 3.0)
                      + XII*Math.Pow(E - E0, 5.0) - XIIA*Math.Pow(E - E0, 7.0);
 
-            return new LatLng(Util.ToDegrees(phi), Util.ToDegrees(lambda), 0, Datum);
+            return new LL(Util.ToDegrees(phi), Util.ToDegrees(lambda));
         }
     }
 }

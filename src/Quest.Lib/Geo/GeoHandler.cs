@@ -14,6 +14,7 @@ using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Destination;
 using Quest.Common.Messages.Incident;
+using Quest.Lib.Destinations;
 
 namespace Quest.Lib.Geo
 {
@@ -24,11 +25,12 @@ namespace Quest.Lib.Geo
         private IIncidentStore _incStore;
         private ResourceHandler _resHandler;
         private IDatabaseFactory _dbFactory;
-
+        private IDestinationStore _denStore;
 
     public GeoHandler(IDatabaseFactory dbFactory, ElasticSettings elastic,
             IResourceStore resStore,
             ResourceHandler resHandler,
+            IDestinationStore denStore,
             IIncidentStore incStore)
         {
             _resHandler = resHandler;
@@ -36,7 +38,7 @@ namespace Quest.Lib.Geo
             _incStore = incStore;
             _elastic = elastic;
             _dbFactory = dbFactory;
-
+            _denStore = denStore;
         }
 
         public MapItemsResponse GetMapItems(MapItemsRequest request)
@@ -51,7 +53,7 @@ namespace Quest.Lib.Geo
                 Message = "successful"
             };
 
-            response.Destinations = GetDestinations(request.Hospitals, request.Stations, request.Standby);
+            response.Destinations = _denStore.GetDestinations(request.Hospitals, request.Stations, request.Standby);
 
             if (request.ResourcesAvailable || request.ResourcesBusy)
             {
@@ -86,41 +88,6 @@ namespace Quest.Lib.Geo
         }
 
 
-        private List<QuestDestination> GetDestinations(bool hospitals, bool stations, bool standby)
-        {
-            return _dbFactory.Execute<QuestContext, List<QuestDestination>>((db) =>
-            {
-                var d = db.Destinations
-                    .Where(x => ((hospitals == true && x.IsHospital == true))
-                             || ((stations == true && x.IsStation == true))
-                             || ((standby == true && x.IsStandby == true))
-                              )
-                    .Where(x=>x.EndDate ==null)
-                    .ToList()
-                    .Select(x =>
-                    {
-                        var point = GeomUtils.GetPointFromWkt(x.Wkt);
-                        var latlng = LatLongConverter.OSRefToWGS84(point.X, point.Y);
-                        return new QuestDestination
-                        {
-                            Id = x.DestinationId.ToString(),
-                            IsHospital = x.IsHospital ?? false,
-                            IsAandE = x.IsAandE ?? false,
-                            IsRoad = x.IsRoad ?? false,
-                            IsStandby = x.IsStandby ?? false,
-                            IsStation = x.IsStation ?? false,
-                            Name = x.Destination,
-                            Status=x.Status,
-                            Position = new LatLongCoord(latlng.Longitude, latlng.Latitude)
-                        };
-
-                    }
-                    )
-                    .ToList();
-
-                return d;
-            });
-        }
 
         private string GetStatusDescription(DataModel.ResourceStatus status)
         {

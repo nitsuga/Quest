@@ -3,6 +3,7 @@ using Nest;
 using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Indexers
 {

@@ -57,7 +57,7 @@ namespace Quest.Lib.Coords
         ///     and longitude.
         /// </summary>
         /// <param name="ll">The latitude and longitude.</param>
-        public ECEFRef(LatLng ll) : base(ll.Datum)
+        public ECEFRef(LL ll) : base(ll.Datum)
         {
             var ellipsoid = Datum.ReferenceEllipsoid;
 

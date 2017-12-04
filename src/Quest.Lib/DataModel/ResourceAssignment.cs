@@ -9,7 +9,6 @@ namespace Quest.Lib.DataModel
         }
 
         public int ResourceAssignmentId { get; set; }
-        public string FleetNo { get; set; }
         public string Callsign { get; set; }        
         public int DestinationId { get; set; }
         public int Status { get; set; }
@@ -22,8 +21,6 @@ namespace Quest.Lib.DataModel
         public string Notes { get; set; }
         public float StartLatitude { get; set; }
         public float StartLongitude { get; set; }
-        public float DestLatitude { get; set; }
-        public float DestLongitude { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 

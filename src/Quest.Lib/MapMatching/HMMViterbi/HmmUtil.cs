@@ -14,6 +14,7 @@ using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Visual;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.MapMatching.HMMViterbi
 {

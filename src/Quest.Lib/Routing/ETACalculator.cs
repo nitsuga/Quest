@@ -11,6 +11,7 @@ using Quest.Lib.Data;
 using Microsoft.EntityFrameworkCore;
 using Quest.Common.Utils;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Routing
 {

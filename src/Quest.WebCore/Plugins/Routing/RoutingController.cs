@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Quest.Common.Messages.Gazetteer;
 using Quest.Common.Messages.Gazetteer.Gazetteer;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Coords;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
 using Quest.WebCore.Services;

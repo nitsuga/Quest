@@ -19,6 +19,7 @@ using GeoAPI.Geometries;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Research.Job
 {

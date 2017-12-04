@@ -4,7 +4,7 @@
       "commandName": "Project",
       "workingDirectory": "bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "XC0;XC1;XCManager",
+        "Modules": "SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager",
         "Session": "Dev",
         "ComponentsConfig": "components.json"
       }

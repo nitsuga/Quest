@@ -93,7 +93,7 @@ namespace Quest.Common.Messages.Resource
         /// <summary>
         /// coordinates in lat/lon
         /// </summary>
-        public LatLongCoord Position;
+        public LatLng Position;
 
         /// <summary>
         /// destination e.g. standby, hospital, station etc

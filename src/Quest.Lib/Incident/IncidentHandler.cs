@@ -16,7 +16,7 @@ namespace Quest.Lib.Incident
             //var devices = db.Devices.ToList().Where(x => IsNearbyDeviceOrAssigned(x, inc.Latitude, inc.Longitude, inc.Serial)).ToList();
 
             //SendEventNotification(devices, inc, settings, "Update");
-            msgSource.Broadcast(new IncidentUpdate() { serial = inc.Serial, Item = inc });
+            msgSource.Broadcast(new IncidentUpdate() { serial = inc.EventId, Item = inc });
 
         }
 

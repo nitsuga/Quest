@@ -282,7 +282,7 @@ namespace Quest.UnitTests
                      Altitude=200,
                      Course=45,
                      CaptureMethod="GPS",
-                     HDoP=20, Coord = new LatLongCoord
+                     HDoP=20, Coord = new LatLng
                      {
                          Latitude = 51.15254,
                          Longitude = -0.187382

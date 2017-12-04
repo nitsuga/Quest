@@ -134,9 +134,9 @@ namespace Quest.WebCore.SignalR
                     _connection.InvokeAsync("groupmessage", "ServiceBusHub", priority, incident);
                     break;
 
-                case "ResourceAssignmentChanged":
-                    var assignments = e.Payload as ResourceAssignmentChanged;
-                    _connection.InvokeAsync("groupmessage", "ServiceBusHub", "ResourceAssignments", assignments.Items);
+                case "DestinationStatusChanged":
+                    var assignments = e.Payload as DestinationStatusChanged ;
+                    _connection.InvokeAsync("groupmessage", "ServiceBusHub", "DestinationStatusChanged", assignments.Item);
                     break;
             }
         }

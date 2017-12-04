@@ -1,0 +1,38 @@
+﻿@model Quest.Common.Messages.Resource.DestinationStatus
+
+<div class="row">
+    <div class="col col-sm-1">
+        @if (Model.Status == Quest.Common.Messages.Resource.DestinationStatus.StatusCode.Covered)
+        {
+            <div class="btn btn-success btn-sm"> @Model.Destination.Code </div>
+        }
+        @if (Model.Status == Quest.Common.Messages.Resource.DestinationStatus.StatusCode.Uncovered)
+        {
+            <div class="btn btn-warning btn-sm"> @Model.Destination.Code </div>
+        }
+        @if (Model.Status == Quest.Common.Messages.Resource.DestinationStatus.StatusCode.InProgress)
+        {
+            <div class="btn btn-primary btn-sm"> @Model.Destination.Code </div>
+        }
+
+    </div>
+    <div class="col col-8">
+
+        @foreach (var v in Model.Assignments)
+        {
+            <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="50"
+                 aria-valuemin="0" aria-valuemax="100" style="width: @v.Percent ; vertical-align:middle">
+                @v.TTG
+            </div>
+            <div class="btn btn-warning btn-sm">@v.Resource.Callsign</div><br />
+        }
+    </div>
+    <div class="col col-sm-2">
+        @foreach (var nearby in Model.Nearby)
+        {
+            <div class="btn btn-success btn-sm">@nearby.Callsign</div>
+        }
+    </div>
+</div>
+
+

@@ -1,0 +1,39 @@
+﻿.gaz-container {
+    height: 100%;
+    padding: 35px 10px 10px 10px;
+    color: lightgrey;
+}
+
+    .gaz-container .search {
+        width: 80%;
+        background-color: rgba(1, 12, 0, 1);
+        color: white;
+        border-color: darkgrey;
+    }
+
+    .gaz-container .message-block {
+        padding: 10px;
+    }
+
+    .gaz-container .list-results {
+        height: calc(100% - 100px);
+        overflow-y: auto;
+        list-style-type: none;
+        font-size: 12px;
+    }
+
+    .gaz-container .list-group-item {
+        color: rgba(255, 255, 255, 0.93);
+        border-color: rgba(255, 255, 255, 0.1);
+        padding: 5px 5px;
+        background-color: rgba(1, 12, 0, 1);
+    }
+    
+    .gaz-container .search-controls {
+        width: 80px;
+        height: 30px;
+    }
+
+    .gaz-container .ul.gaz-search-results > li {
+        color: white
+    }

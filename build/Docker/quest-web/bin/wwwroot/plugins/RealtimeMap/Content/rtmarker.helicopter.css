@@ -1,0 +1,51 @@
+.mapmarker-norm-HELI {
+    display: block;
+    border: 2pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    /* multiply the shadows, inside and outside the circle*/
+    -moz-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    -webkit-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    box-shadow: 5px 5px 15px;
+    /* set the ring's new dimension and re-center it */
+    margin: 0px 0 0 0px;
+    height: 24px !important;
+    width: 24px !important;
+}
+
+.mapmarker-dark-HELI {
+    display: block;
+    border: 2pt solid black;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    /* set the ring's new dimension and re-center it */
+    margin: 0px 0 0 0px;
+    height: 24px !important;
+    width: 24px !important;
+}
+
+.HELI-Enroute {
+    background: blue;
+}
+
+.HELI-Busy {
+    background: red;
+}
+
+.HELI-Available {
+    background: green;
+}
+
+.HELI-Offroad {
+    background: gray;
+}
+
+.HELI-Rest {
+    background: orange;
+}

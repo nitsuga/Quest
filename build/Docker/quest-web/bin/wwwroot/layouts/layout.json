@@ -1,0 +1,14 @@
+﻿{
+  "Name": "Layout",
+  "Image": "Layout",
+  "Selectable": false,
+  "Panels": [
+    {
+      "Panel": 0,
+      "Plugin": "LayoutSelector",
+      "Style": "col-md-12 full-height",
+      "Actions": [
+      ]
+    }
+  ]
+}

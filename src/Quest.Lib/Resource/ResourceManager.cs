@@ -47,17 +47,21 @@ namespace Quest.Lib.Resource
 
         private Response ResourceAssignRequestHandler(NewMessageArgs arg)
         {
-            var resassign = arg.Payload as ResourceAssignRequest;
+            var resassign = arg.Payload as AssignToDestinationRequest;
 
             if (resassign != null)
-                _resourceHandler.ResourceAssign(resassign, ServiceBusClient, _config);
+                _resourceHandler.AssignToDestination(resassign, ServiceBusClient, _config);
 
             return null;
         }
 
         private Response GetResourceAssignmentsRequestHandler(NewMessageArgs arg)
         {
-            return _resourceHandler.GetAssignmentStatus();
+            var request = arg.Payload as GetResourceAssignmentsRequest;
+            if (request != null)
+                return _resourceHandler.GetAssignmentStatus(request);
+            else
+                return null;
         }
 
         protected override void OnStart()

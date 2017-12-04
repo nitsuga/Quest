@@ -9,6 +9,7 @@ using Quest.Lib.Trace;
 using Quest.Lib.OS.DataModelNLPG;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.OS.Indexer
 {

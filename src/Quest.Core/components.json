@@ -966,7 +966,9 @@
       "properties": {
         "WatchdogPeriod": 5000,
         "Channels": "XC0,XC1",
-        "SwitchOverDelay":  10000
+        "AssignSbpChannels": "LVM0,LVM1",
+        "AssignCallsignChannels": "XC0,XC1",
+        "SwitchOverDelay": 10000
       },
       "instanceScope": "single-instance"
 

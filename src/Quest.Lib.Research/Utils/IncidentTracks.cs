@@ -7,6 +7,7 @@ using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
 using Quest.Lib.DependencyInjection;
 using Quest.Common.Messages.GIS;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Research.Utils
 {

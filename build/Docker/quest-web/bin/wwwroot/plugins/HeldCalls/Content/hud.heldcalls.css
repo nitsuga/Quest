@@ -1,0 +1,11 @@
+﻿.heldcalls-container {
+    height: 100%;
+    background-color: rgba(0,0,0,0.0);
+    color: aliceblue;
+    padding: 20px;
+}
+
+    .heldcalls-container h4 {
+        color: white;
+    }
+

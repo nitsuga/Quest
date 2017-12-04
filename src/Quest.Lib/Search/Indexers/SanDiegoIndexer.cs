@@ -13,6 +13,7 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Lib.Trace;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Indexers
 {

@@ -33,7 +33,7 @@ namespace Quest.UnitTests
                 {
                     Callsign = $"C1000",
                     FleetNo = $"1000",
-                    Position = new  Quest.Common.Messages.GIS.LatLongCoord(0, 0),
+                    Position = new  Quest.Common.Messages.GIS.LatLng(0, 0),
                     ResourceType = "UNK",
                     Status = "OFF"
                 },

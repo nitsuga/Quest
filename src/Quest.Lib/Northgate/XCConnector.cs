@@ -19,6 +19,7 @@ using Quest.Common.Messages.Incident;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.System;
 using Autofac;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Northgate
 {
@@ -190,10 +191,10 @@ namespace Quest.Lib.Northgate
             if (instance1 != null && _datachannel != null)
             {
                 // output to this channel?
-                if (instance1.channel.Split(',').Contains(_config.Name))
+                if (instance1.Channel.Split(',').Contains(_config.Name))
                 {
-                    Logger.Write($"XCOutbound {instance1.command} - sent {_config.Name}", TraceEventType.Information, "Quest Channel " + _config.Name);
-                    _datachannel.Send(instance1.command);
+                    Logger.Write($"XCOutbound {instance1.Command} - sent {_config.Name}", TraceEventType.Information, "Quest Channel " + _config.Name);
+                    _datachannel.Send(instance1.Command);
                 }
             }
             return null;
@@ -581,7 +582,7 @@ namespace Quest.Lib.Northgate
                     Callsign = GetValueString("Callsign", _resformat, parts),
                     ResourceType = GetValueString("ResourceType", _resformat, parts),
                     Status = GetValueString("Status", _resformat, parts),
-                    Position = new  Common.Messages.GIS.LatLongCoord(pos.Longitude, pos.Latitude),
+                    Position = new  LatLng(pos.Latitude, pos.Longitude),
                     Speed = GetValueInt("Speed", _resformat, parts),
                     Course = GetValueInt("Direction", _resformat, parts),
                     Skill = GetValueString("Skill", _resformat, parts),

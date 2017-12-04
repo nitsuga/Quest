@@ -109,9 +109,9 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         }
 
         [HttpPost]
-        public async Task<ResourceAssignResponse> AssignResource(ResourceAssignRequest request)
+        public async Task<AssignToDestinationResponse> AssignResource(AssignToDestinationRequest request)
         {
-            var result = await _messageCache.SendAndWaitAsync<ResourceAssignResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _messageCache.SendAndWaitAsync<AssignToDestinationResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 

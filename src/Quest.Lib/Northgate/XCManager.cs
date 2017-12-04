@@ -24,33 +24,6 @@ using Quest.Common.Utils;
 namespace Quest.Lib.Northgate
 {
 
-
-    class StatusCollection
-    {
-        // Declare an array to store the data elements.
-        private Dictionary<string, XCChannelStatus> _status = new Dictionary<string, XCChannelStatus>();
-
-        // Define the indexer to allow client code to use [] notation.
-
-        public XCChannelStatus this[string name]
-        {
-            get
-            {
-                if (_status.ContainsKey(name))
-                    return _status[name];
-                else
-                    return null;
-            }
-            set
-            {
-                if (_status.ContainsKey(name))
-                    _status[name] = value;
-                else
-                    _status.Add(name, value);
-            }
-        }
-    }
-
     /// <summary>
     /// Connects to XCConnect and broadcasts inbound XC traffic onto the ESB
     /// Also listens for XC Outbound ESB messages and sends on to CAD
@@ -73,6 +46,10 @@ namespace Quest.Lib.Northgate
         }
 
         public string Channels { get; set; }
+        public string AssignSbpChannels { get; set; }
+        public string AssignCallsignChannels { get; set; }
+        
+
         public int WatchdogPeriod { get; set; }
         public int SwitchOverDelay { get; set; }
         
@@ -81,6 +58,7 @@ namespace Quest.Lib.Northgate
         private ILifetimeScope _scope;
         private List<STMItem> _stateTransitionMatrix;
         private Timer _watchdog;
+        
 
         internal delegate void ChannelAction(XCCluster cluster);
 
@@ -153,6 +131,8 @@ namespace Quest.Lib.Northgate
 
             // listen for channel status reports
             MsgHandler.AddHandler<XCChannelStatus>(XCChannelStatusHandler);
+            MsgHandler.AddHandler<AssignToDestinationRequest>(AssignToDestinationRequestHandler);
+            MsgHandler.AddHandler<AssignCallsign>(AssignCallsignHandler);
 
             try
             {
@@ -166,6 +146,44 @@ namespace Quest.Lib.Northgate
             {
 
             }
+        }
+
+
+        private Response AssignCallsignHandler(NewMessageArgs arg)
+        {
+            var request = arg.Payload as AssignCallsign;
+            if (request == null)
+                return null;
+
+            if (String.IsNullOrEmpty(AssignCallsignChannels))
+                return null;
+
+            base.ServiceBusClient.Broadcast(new XCOutbound
+            {
+                Channel = AssignCallsignChannels,
+                Command = $"0|Quest||PRI|{request.Callsign}|||||||||||{request.FleetNo}||||||||||||"
+            });
+
+            return null;
+        }
+
+
+        private Response AssignToDestinationRequestHandler(NewMessageArgs arg)
+        {
+            var request = arg.Payload as AssignToDestinationRequest;
+            if (request == null)
+                return null;
+
+            if (String.IsNullOrEmpty(AssignSbpChannels))
+                return null;
+
+            base.ServiceBusClient.Broadcast(new XCOutbound
+            {
+                Channel = AssignSbpChannels,
+                Command =$"0|Quest||RRA||{request.DestinationCode}-{request.DestinationCode}-DESCRIPTION|{request.Callsign}"
+            });
+
+            return null;
         }
 
         private Response XCChannelStatusHandler(NewMessageArgs arg)

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Quest.Common.Messages.GIS;
 using Quest.Lib.Coords;
 using Quest.Lib.Google.DistanceMatrix;
 using System;

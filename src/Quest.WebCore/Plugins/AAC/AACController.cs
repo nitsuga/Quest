@@ -25,9 +25,9 @@ namespace Quest.WebCore.Plugins.RealtimeMap
         }
 
         [HttpPost]
-        public async Task<ResourceAssignResponse> AssignResource(ResourceAssignRequest request)
+        public async Task<AssignToDestinationResponse> AssignResource(AssignToDestinationRequest request)
         {
-            var result = await _messageCache.SendAndWaitAsync<ResourceAssignResponse>(request, new TimeSpan(0, 0, 10));
+            var result = await _messageCache.SendAndWaitAsync<AssignToDestinationResponse>(request, new TimeSpan(0, 0, 10));
             return result;
         }
 
@@ -38,6 +38,16 @@ namespace Quest.WebCore.Plugins.RealtimeMap
             GetResourceAssignmentsRequest request = new GetResourceAssignmentsRequest();
             var result = await _messageCache.SendAndWaitAsync<GetResourceAssignmentsResponse>(request, new TimeSpan(0, 0, 10));
             return result;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> RenderAAC()
+        {
+            GetResourceAssignmentsRequest request = new GetResourceAssignmentsRequest();
+            var result = await _messageCache.SendAndWaitAsync<GetResourceAssignmentsResponse>(request, new TimeSpan(0, 0, 10));
+            // render it
+            var view = PartialView($"/Plugins/AAC/Views/AAC.cshtml", result);
+            return view;
         }
 
     }

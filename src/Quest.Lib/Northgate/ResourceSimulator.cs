@@ -58,7 +58,7 @@ namespace Quest.Lib.Trackers
                     Status = "AOR",
                     ResourceType = "AEU",
                     StatusCategory ="Available",
-                    Position = new LatLongCoord { Longitude = lon + x, Latitude = lat + y }
+                    Position = new LatLng { Longitude = lon + x, Latitude = lat + y }
                 };
 
                 vehicles.Add(veh);
@@ -78,7 +78,7 @@ namespace Quest.Lib.Trackers
                 var v = vehicles[i];
                 //v.StatusCategory = status[counter % 5]; 
                 //v.Status = statuscode[counter % 5];
-                v.Position = new LatLongCoord { Longitude = v.Position.Longitude + x, Latitude = v.Position.Latitude + y };
+                v.Position = new LatLng { Longitude = v.Position.Longitude + x, Latitude = v.Position.Latitude + y };
 
                 ServiceBusClient.Broadcast(new ResourceUpdateRequest()
                 {

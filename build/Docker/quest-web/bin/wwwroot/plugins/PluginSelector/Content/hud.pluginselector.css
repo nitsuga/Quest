@@ -1,0 +1,29 @@
+﻿.plugin-selection-grid {
+    /*min-height: 100%; 
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 70%;
+    max-height: 340px;
+    max-width: 600px;
+    vertical-align: central;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20%;
+    background-color: #010c00;*/
+    padding: 32px;
+}
+
+.plugin-selection-grid > .row {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+
+.btn-plugin-selector {
+    background-color: #010c00;
+    color: #1ae008;
+    font-weight: 600;
+    width: 80px
+}
