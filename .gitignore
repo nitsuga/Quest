@@ -51,3 +51,4 @@ src/.vs/Quest/v15/sqlite3/storage.ide
 /src/Quest.UnitTests/obj
 /src/Quest.WebCore.Interfaces/obj
 /src/Quest.WebCore.Interfaces/bin
+.Rproj.user

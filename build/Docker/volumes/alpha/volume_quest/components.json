@@ -932,8 +932,109 @@
       ],
       "injectProperties": true,
       "instanceScope": "single-instance"
-    }
+    },
 
+
+    //////////////////////////////////  XC //////////////////////////////////////
+    {
+      "type": "Quest.Lib.Northgate.XCConfig",
+      "services": [
+        {
+          "type": "Quest.Lib.Northgate.XCConfig",
+          "key": "XC0"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "Name": "XC0",
+        "Enabled": true,
+        "Connection": "host=hq-saturn;port=2080;codec=Quest.Lib.Net.StxStreamCodec,Quest.Lib",
+        "OutboundEnabled": true,
+        "Commands": "CLI|HBT|DI|PII|PRI|UR|DR|CCC|OSB|RSC",
+        "Subscriptions": "GeoTracker|LVM_MESSAGES|DYNAMIC_DATA",
+        "ResFormat": "MsgId|Workstation|||Callsign|ResourceType|Status|Easting|Northing||Incident||Speed|Direction|LastUpdate|FleetNo|Skill||Sector|Emergency|Destination|Agency|Class|EventType",
+        "CliFormat": "MsgId|Workstation|||Serial||Easting|Northing|Time",
+        "IncFormat": "MsgId|Workstation|||Serial|Determinant|Status|Easting|Northing||Location|||Priority|Sector|IncidentType|Complaint|Description||||||",
+        "DrFormat": "MsgId|Workstation|||Callsign",
+        "RscFormat": "MsgId|Workstation|||Callsign|Logoff",
+        "HBTReceiveDelay": 60,
+        "HBTSendDelay": 30
+      }
+    },
+    {
+      "type": "Quest.Lib.Northgate.XCConfig",
+      "services": [
+        {
+          "type": "Quest.Lib.Northgate.XCConfig",
+          "key": "XC1"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "Name": "XC1",
+        "Enabled": true,
+        "Connection": "host=fbc-saturn;port=2080;codec=Quest.Lib.Net.StxStreamCodec,Quest.Lib",
+        "OutboundEnabled": true,
+        "Commands": "CLI|HBT|DI|PII|PRI|UR|DR|CCC|OSB|RSC",
+        "Subscriptions": "GeoTracker|LVM_MESSAGES|DYNAMIC_DATA",
+        "ResFormat": "MsgId|Workstation|||Callsign|ResourceType|Status|Easting|Northing||Incident||Speed|Direction|LastUpdate|FleetNo|Skill||Sector|Emergency|Destination|Agency|Class|EventType",
+        "CliFormat": "MsgId|Workstation|||Serial||Easting|Northing|Time",
+        "IncFormat": "MsgId|Workstation|||Serial|Determinant|Status|Easting|Northing||Location|||Priority|Sector|IncidentType|Complaint|Description||||||",
+        "DrFormat": "MsgId|Workstation|||Callsign",
+        "RscFormat": "MsgId|Workstation|||Callsign|Logoff",
+        "HBTReceiveDelay": 60,
+        "HBTSendDelay": 30
+      }
+    },
+    {
+      "type": "Quest.Lib.Northgate.XCManager",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "XCManager"
+        }
+      ],
+      "injectProperties": true,
+      "properties": {
+        "WatchdogPeriod": 5000,
+        "Channels": "XC0,XC1",
+        "AssignSbpChannels": "LVM0,LVM1",
+        "AssignCallsignChannels": "XC0,XC1",
+        "SwitchOverDelay": 10000
+      },
+      "instanceScope": "single-instance"
+
+    },
+    {
+      "type": "Quest.Lib.Northgate.XCConnector",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "XC0"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "Channel": "XC0"
+      }
+    },
+    {
+      "type": "Quest.Lib.Northgate.XCConnector",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "XC1"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "Channel": "XC1"
+      }
+    }
 
   ]
 }

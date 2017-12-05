@@ -1,0 +1,383 @@
+version: '2'
+
+services:
+
+ ### External components ###
+  database:
+    build: 
+      context: ./quest-data
+    image: gluteusmaximus/quest-database:latest
+    volumes:
+          - ./volumes/alpha/volume_data:/tmp/data1
+          - ./volumes/alpha/volume_os:/tmp/data2
+          - ./volumes/alpha/volume_research:/tmp/data3
+    expose:
+        - "1433"
+    ports:
+      - "999:1433"
+    environment:
+      -  ACCEPT_EULA=Y
+      -  SA_PASSWORD=M3Gurdy*
+      -  Session=Alpha
+            
+  activemq:
+    image: webcenter/activemq
+    expose:
+        - "61616"
+        - "8161"
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+
+  searchdatabase:
+    image: gluteusmaximus/quest-search:latest
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./volumes/alpha/volume_search:/usr/share/elasticsearch/data
+
+  mapserver:
+    build: 
+      context: ./quest-mapserver
+    image: gluteusmaximus/quest-mapserver:latest
+    volumes:
+      - ./volumes/alpha/volume_map:/maps
+    ports: 
+      - "8090:80"
+
+  ########################################
+  web:
+    image: gluteusmaximus/quest.web:latest
+    depends_on:
+      - "backend"
+      - "api"
+      - "mapserver"
+    ports: 
+      - "80:80"
+    environment:
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+      - Session=Alpha
+      - ASPNETCORE_URLS=http://*:80
+       
+    ########################################
+  api:
+    image: gluteusmaximus/quest.api:latest
+    depends_on:
+      - "backend"
+    ports:
+      - "8125:80"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+    volumes:
+      - ./volumes/alpha/volume_api:/app/config
+      
+    
+    
+    ########################################
+  CoverageManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=CoverageManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  XC0:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=XC0
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  XC1:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=XC1
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  XCManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+      - "XC0"
+      - "XC1"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=XCManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  EntityManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=EntityManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  SecurityManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=SecurityManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  DeviceManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=DeviceManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  NotificationManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=NotificationManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  SearchManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=SearchManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  MapMatcherManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=MapMatcherManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  VisualsManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=VisualsManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  IndexerManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=IndexerManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  ResourceManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=ResourceManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  GeoManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=GeoManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
+    ########################################
+  RoutingManager:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=RoutingManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+    
