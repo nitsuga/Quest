@@ -4,9 +4,7 @@ services:
 
  ### External components ###
   database:
-    build: 
-      context: ./quest-data
-    image: gluteusmaximus/quest-database:latest
+    image: gluteusmaximus/quest.database:latest
     volumes:
           - ./volumes/alpha/volume_data:/tmp/data1
           - ./volumes/alpha/volume_os:/tmp/data2
@@ -30,16 +28,14 @@ services:
       - "8161:8161"
 
   searchdatabase:
-    image: gluteusmaximus/quest-search:latest
+    image: gluteusmaximus/quest.search:latest
     ports:
       - "9200:9200"
     volumes:
       - ./volumes/alpha/volume_search:/usr/share/elasticsearch/data
 
   mapserver:
-    build: 
-      context: ./quest-mapserver
-    image: gluteusmaximus/quest-mapserver:latest
+    image: gluteusmaximus/quest.mapserver:latest
     volumes:
       - ./volumes/alpha/volume_map:/maps
     ports: 
@@ -91,7 +87,11 @@ services:
       - ApplicationConfig=config/appsettings.json
       - ActiveMQ=activemq:tcp://activemq:61616
       - Session=Alpha
+<<<<<<< HEAD
+      - Modules=CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager;RoutingManager;ResourceSimulator
+=======
       - Modules=EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceManager;GeoManager;RoutingManager
+>>>>>>> a35b446843c67b246aa5ad7778b96224c2d620bf
       - ElasticUser=elastic
       - ElasticPwd=changeme
       - ElasticUrls=http://searchdatabase:9200
