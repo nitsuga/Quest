@@ -21,6 +21,7 @@ using Quest.Lib.Resource;
 using Trigger.NET;
 using Trigger.NET.Cron;
 using Trigger.NET.FluentAPI;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Routing.Coverage
 {

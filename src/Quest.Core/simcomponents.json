@@ -741,36 +741,6 @@
       "properties": {
       }
     },
-    {
-      "type": "Quest.Lib.Northgate.XCConnector",
-      "services": [
-        {
-          "type": "Quest.Lib.Processor.IProcessor",
-          "key": "XCConnector"
-        }
-      ],
-      "injectProperties": true,
-      "instanceScope": "single-instance",
-      "properties": {
-        "Commands": "DijkstraRoutingEngine",
-        "Subscriptions": "false",
-        "ResFormat": "false",
-        "CliFormat": 500,
-        "IncFormat": "VariableSpeedHoD",
-        "SpaFormat": 10,
-        "SpbFormat": 10,
-        "Lvm": 60,
-        "DrFormat": "",
-        "RscFormat": "",
-        "BackupFor": "",
-        "HBTReceiveDelay": 60,
-        "HBTSendDelay": 30,
-        "Connection": "",
-        "Name": "XC",
-        "Enabled": true
-      }
-    },
-
     /////////////////////////////////////////////////////////////////////
 
     {

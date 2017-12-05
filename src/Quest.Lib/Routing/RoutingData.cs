@@ -16,6 +16,7 @@ using Quest.Lib.Trace;
 using Quest.Lib.Utils;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Routing;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Routing
 {

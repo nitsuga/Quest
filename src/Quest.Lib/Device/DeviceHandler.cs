@@ -331,7 +331,7 @@ namespace Quest.Lib.Device
                     QuestResource resource = new QuestResource
                     {
                         FleetNo = deviceRecord.FleetNo,
-                        Position = new LatLongCoord(request.Vector.Coord.Longitude, request.Vector.Coord.Latitude),
+                        Position = new LatLng(request.Vector.Coord.Latitude, request.Vector.Coord.Longitude),
                         HDoP = (float)request.Vector.HDoP,
                         Speed = (float)request.Vector.Speed,
                         Course = (float)request.Vector.Course

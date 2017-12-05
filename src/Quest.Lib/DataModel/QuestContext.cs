@@ -49,11 +49,6 @@ namespace Quest.Lib.DataModel
                     .HasMaxLength(128)
                     .IsUnicode(false);
 
-                entity.Property(e => e.FleetNo)
-                    .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .IsRequired();
-
                 entity.Property(e => e.Callsign)
                     .HasMaxLength(50)
                     .IsUnicode(false)

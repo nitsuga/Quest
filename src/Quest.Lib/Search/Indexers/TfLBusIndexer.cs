@@ -6,6 +6,7 @@ using Quest.Lib.Utils;
 using System.IO;
 using Quest.Lib.Csv;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Indexers
 {

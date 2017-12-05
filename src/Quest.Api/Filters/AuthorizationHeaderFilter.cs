@@ -9,7 +9,7 @@ namespace Quest.Api.Filters
 {
     public class AuthorizationHeaderFilter : IOperationFilter
     {
-           public void Apply(Swashbuckle.AspNetCore.Swagger.Operation operation, OperationFilterContext context)
+        public void Apply(Operation operation, OperationFilterContext context)
         {
             var filterPipeline = context.ApiDescription.ActionDescriptor.FilterDescriptors;
             var isAuthorized = filterPipeline.Select(filterInfo => filterInfo.Filter).Any(filter => filter is AuthorizeFilter);

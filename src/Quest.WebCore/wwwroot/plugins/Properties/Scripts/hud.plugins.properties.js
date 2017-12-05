@@ -34,7 +34,7 @@ hud.plugins.properties = (function() {
     var _handleAction = function (pluginId, action) {
         switch (action.action) {
             default:
-                hud.toggleButton(pluginId, 'select-action', action);
+                hud.toggleButton(pluginId, action);
         }
     };
 

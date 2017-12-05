@@ -22,6 +22,8 @@ using Quest.Common.Messages.Device;
 using Quest.Common.Messages.Incident;
 using Quest.Common.Messages.Resource;
 using Quest.Common.Messages.Notification;
+using Quest.Lib.Destinations;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Resource
 {
@@ -35,13 +37,15 @@ namespace Quest.Lib.Resource
         private IResourceStore _resStore;
         private IIncidentStore _incStore;
         private IDeviceStore _devStore;
+        private IDestinationStore _denStore;
 
-        public ResourceHandler(IDatabaseFactory dbFactory, IResourceStore resStore, IIncidentStore incStore, IDeviceStore devStore)
+        public ResourceHandler(IDatabaseFactory dbFactory, IResourceStore resStore, IIncidentStore incStore, IDeviceStore devStore, IDestinationStore denStore)
         {
             _dbFactory = dbFactory;
             _resStore = resStore;
             _incStore = incStore;
             _devStore = devStore;
+            _denStore = denStore;
         }
 
         /// <summary>
@@ -101,51 +105,102 @@ namespace Quest.Lib.Resource
         /// <param name="serviceBusClient"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        internal ResourceAssignResponse ResourceAssign(ResourceAssignRequest resassign, IServiceBusClient serviceBusClient, BuildIndexSettings config)
+        internal AssignToDestinationResponse AssignToDestination(AssignToDestinationRequest resassign, IServiceBusClient serviceBusClient, BuildIndexSettings config)
         {
             var res = _resStore.GetByCallsign(resassign.Callsign);
-            if (res!=null)
+            if (res == null)
             {
-                ResourceAssignmentStatus request = new ResourceAssignmentStatus
+                return new AssignToDestinationResponse
                 {
-                    FleetNo = resassign.Callsign,
-                    Assigned = DateTime.UtcNow,
-                    StartPosition = res.Position,
-                    Status = ResourceAssignmentStatus.StatusCode.InProgress
+                    Message=$"Could not find resource '{resassign.Callsign}'",
+                    Success = false,
                 };
-
-                var result = _resStore.UpdateResourceAssign(request);
-                ResourceAssignResponse response = new ResourceAssignResponse
-                {
-                    Item = result,
-                    Success=true,
-                };
-
-                var msg = new ResourceAssignmentChanged
-                {
-                    Items = _resStore.GetAssignmentStatus()
-                };
-
-                serviceBusClient.Broadcast(msg);
-
-                return response;
             }
-            else
+
+            var dest = _denStore.GetDestination(resassign.DestinationCode);
+            if (dest == null)
             {
-                return new ResourceAssignResponse { Success = false, Message = "Resource does not exist" };
-            }            
+                return new AssignToDestinationResponse
+                {
+                    Message = $"Could not find destination '{resassign.DestinationCode}'",
+                    Success = false,
+                };
+            }
+
+            ResourceAssignmentUpdate request = new ResourceAssignmentUpdate
+            {
+                Callsign = resassign.Callsign,
+                Assigned = DateTime.UtcNow,
+                StartPosition = res.Position,
+                Status = ResourceAssignmentUpdate.StatusCode.InProgress
+            };
+
+            var assignment = _resStore.UpdateResourceAssign(request);
+            AssignToDestinationResponse response = new AssignToDestinationResponse
+            {
+                Success=true,
+            };
+
+            var assignments = _resStore.GetAssignmentStatus();
+            var allResources = _resStore.GetResources(0, null, true, false);
+
+            DestinationStatus status = new DestinationStatus
+            {
+                Destination = dest,
+                Nearby = allResources.Where(x => x.Position.Distance(dest.Position) < resassign.NearbyDistance).ToList(),
+                Assignments = assignments.Where(x => x.DestinationCode == dest.Code).ToList()
+            };
+
+            var msg = new DestinationStatusChanged 
+            {
+                Item = status
+            };
+
+            serviceBusClient.Broadcast(msg);
+
+            return response;
+        
         }
 
         /// <summary>
         /// get a list of resource assignments
         /// </summary>
         /// <returns></returns>
-        internal GetResourceAssignmentsResponse GetAssignmentStatus()
+        internal GetResourceAssignmentsResponse GetAssignmentStatus(GetResourceAssignmentsRequest request)
         {
+            var destinations = _denStore.GetDestinations(false, false, true);
+            var assignments = _resStore.GetAssignmentStatus();
+            var allResources = _resStore.GetResources(0, null, true, false);
+
             var result = new GetResourceAssignmentsResponse
             {
-                Items = _resStore.GetAssignmentStatus()
+                Destinations = new List<DestinationStatus>()
             };
+
+            foreach(var dest in destinations)
+            {
+                var myassignments = assignments.Where(x => x.DestinationCode == dest.Code).ToList();
+                DestinationStatus.StatusCode status = DestinationStatus.StatusCode.Uncovered;
+
+                if (myassignments.Any(x => x.Status == ResourceAssignmentStatus.StatusCode.InProgress || x.Status == ResourceAssignmentStatus.StatusCode.Warning ))
+                    status = DestinationStatus.StatusCode.InProgress;
+
+                if (myassignments.Any(x => x.Status == ResourceAssignmentStatus.StatusCode.Arrived))
+                    status = DestinationStatus.StatusCode.Covered;
+
+                DestinationStatus desstatus = new DestinationStatus {
+                    Status = status,
+                    Destination = dest,
+                    Nearby = allResources.Where(x => x.Position.Distance(dest.Position) < request.NearbyDistance)
+                                .OrderBy(x => x.Position.Distance(dest.Position))
+                                .ToList(),
+                    Assignments = myassignments
+                };
+
+                result.Destinations.Add(desstatus);
+                result.History = new List<DestinationHistory>();
+
+            }
             return result;
         }
 
@@ -260,7 +315,7 @@ namespace Quest.Lib.Resource
                         Priority = inc.Priority ?? "",
                         PatientAge = inc.PatientAge,
                         Determinant = inc.DeterminantDescription ?? inc.Determinant,
-                        EventId = inc.Serial,
+                        EventId = inc.EventId,
                         Latitude = (float)inc.Latitude,
                         Longitude = (float)inc.Longitude,
                         Sex = inc.PatientSex ?? "",
@@ -269,7 +324,7 @@ namespace Quest.Lib.Resource
                         Updated = DateTime.Now.ToString(CultureInfo.InvariantCulture)
                     };
 
-                    Logger.Write($"Sending incident {inc.Serial} ", TraceEventType.Information, "ResourceHandler");
+                    Logger.Write($"Sending incident {inc.EventId} ", TraceEventType.Information, "ResourceHandler");
 
                     NotifyDevices(devices, request, reason, serviceBusClient);
                 }

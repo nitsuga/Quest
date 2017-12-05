@@ -1,0 +1,50 @@
+/* --------- destinations -------------*/
+.mapmarker-dark-DES {
+    display: block;
+    fill: transparent;
+    width: 8px;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
+}
+
+.mapmarker-norm-DES {
+    display: block;
+    fill: transparent;
+    width: 6px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 12px solid yellow;
+}
+
+.DES-RD {
+    border-bottom: 10px solid yellow;
+}
+
+.DES-SBP {
+    fill: blue;
+}
+
+.DES-SBP0 {
+    border-bottom: 14px solid gray;
+}
+
+.DES-SBP1 {
+    border-bottom: 14px solid orange;
+}
+
+.DES-SBP2 {
+    border-bottom: 14px solid red;
+}
+
+.DES-STA {
+    border-bottom: 14px solid green;
+}
+
+.DES-HOS {
+    border-bottom: 14px solid purple;
+}
+
+.DES-AE {
+    border-bottom: 14px solid blue;
+}

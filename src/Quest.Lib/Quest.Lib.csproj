@@ -44,6 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Coords\ECEFRef.cs" />
+    <Compile Remove="Coords\IrishRef.cs" />
+    <Compile Remove="Coords\LatLng.cs" />
+    <Compile Remove="Coords\MGRSRef.cs" />
+    <Compile Remove="Coords\NotDefinedOnUTMGridException.cs" />
+    <Compile Remove="Coords\UTMRef.cs" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="Properties\Settings.Designer.cs" />
     <Compile Remove="Routing\CoverageStats.cs" />

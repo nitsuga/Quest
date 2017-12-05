@@ -1,4 +1,5 @@
-﻿using Quest.Lib.Data;
+﻿using Quest.Lib.Coords;
+using Quest.Lib.Data;
 using Quest.Lib.Utils;
 
 namespace Quest.Lib.Research.Loader

@@ -1,0 +1,21 @@
+/* --------- standby points -------------*/
+.mapmarker-dark-SBP {
+    display: block;
+    fill: transparent;
+    width: 8px;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 16px solid yellow;
+}
+
+.SBP-Uncovered {
+    border-bottom: 16px solid red;
+}
+
+.SBP-Covered {
+    border-bottom: 16px solid green;
+}
+
+.SBP-Actioned {
+    border-bottom: 16px solid #1112d6;
+}

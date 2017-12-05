@@ -23,4 +23,5 @@ namespace Quest.Common.Messages.CAD
             return $"XCInbound {Channel} {Data}";
         }
     }
+
 }

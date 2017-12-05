@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Quest.Lib.Utils;
 using Quest.Common.Messages.Telephony;
+using Quest.Lib.Coords;
 
 // All request types are transferred as strings. Each request and response is handled by a class that
 // can make a request packet or can interpret a request packet.

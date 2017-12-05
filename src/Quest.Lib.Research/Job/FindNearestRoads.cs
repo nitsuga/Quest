@@ -20,6 +20,7 @@ using Quest.Lib.ServiceBus;
 using Quest.Common.ServiceBus;
 using Quest.Lib.Research.DataModelResearch;
 using Quest.Lib.Data;
+using Quest.Common.Messages.GIS;
 
 namespace Quest.Lib.Research.Job
 {

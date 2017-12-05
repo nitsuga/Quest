@@ -7,6 +7,7 @@ using Quest.Lib.Search.Elastic;
 using Quest.Lib.Utils;
 using Quest.Lib.Csv;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Indexers
 {

@@ -11,6 +11,7 @@ using NetTopologySuite.IO;
 using Quest.Lib.Trace;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Indexers
 {

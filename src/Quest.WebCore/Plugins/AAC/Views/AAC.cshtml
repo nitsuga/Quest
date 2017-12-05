@@ -1,0 +1,8 @@
+﻿@model Quest.Common.Messages.Resource.GetResourceAssignmentsResponse
+
+<div class="container full-height" style="overflow-y:auto;overflow-x:hidden;width:100%" >
+    @foreach (var status in Model.Destinations)
+    {
+        @Html.Partial("/Plugins/AAC/Views/AACItem.cshtml", status)
+    }
+</div>

@@ -8,7 +8,7 @@ namespace Quest.Common.Messages.GIS
     [Serializable]
     public class LocationVector
     {
-        public LatLongCoord Coord { get; set; }
+        public LatLng Coord { get; set; }
         public double VDoP { get; set; }
         public double HDoP { get; set; }
         public double Altitude { get; set; }
@@ -23,16 +23,21 @@ namespace Quest.Common.Messages.GIS
     }
 
     [Serializable]
-    public class LatLongCoord
+    public class LatLng
     {
-        public LatLongCoord()
+        public LatLng()
         {
         }
 
-        public LatLongCoord(double longitude, double latitude)
+        public LatLng(double latitude, double longitude)
         {
             Longitude = longitude;
             Latitude = latitude;
+        }
+        public LatLng(LatLng ll)
+        {
+            Longitude = ll.Longitude;
+            Latitude = ll.Latitude;
         }
 
         public double Latitude { get; set; }

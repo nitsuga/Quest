@@ -6,6 +6,7 @@ using Quest.Lib.Utils;
 using Quest.Lib.OS.DataModelOS;
 using Quest.Lib.Data;
 using Quest.Common.Messages.Gazetteer;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.OS.Indexer
 {

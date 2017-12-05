@@ -83,65 +83,6 @@ namespace Quest.Lib.Coords
         }
 
         /// <summary>
-        ///     Create an IrishRef object from the given latitude and longitude.
-        /// </summary>
-        /// <param name="ll">The latitude and longitude.</param>
-        public IrishRef(LatLng ll) : base(Ireland1965Datum.Instance)
-        {
-            ll.ToDatum(Ireland1965Datum.Instance);
-
-            var ellipsoid = Datum.ReferenceEllipsoid;
-            var N0 = FALSE_ORIGIN_NORTHING;
-            var E0 = FALSE_ORIGIN_EASTING;
-            var phi0 = Util.ToRadians(FALSE_ORIGIN_LATITUDE);
-            var lambda0 = Util.ToRadians(FALSE_ORIGIN_LONGITUDE);
-            var a = ellipsoid.SemiMajorAxis*SCALE_FACTOR;
-            var b = ellipsoid.SemiMinorAxis*SCALE_FACTOR;
-            var eSquared = ellipsoid.EccentricitySquared;
-            var phi = Util.ToRadians(ll.Latitude);
-            var lambda = Util.ToRadians(ll.Longitude);
-            var E = 0.0;
-            var N = 0.0;
-            var n = (a - b)/(a + b);
-            var v = a
-                    *Math.Pow(1.0 - eSquared*Util.sinSquared(phi), -0.5);
-            var rho = a*(1.0 - eSquared)
-                      *Math.Pow(1.0 - eSquared*Util.sinSquared(phi), -1.5);
-            var etaSquared = v/rho - 1.0;
-            var M = b
-                    *((1 + n + 5.0/4.0*n*n + 5.0/4.0*n*n*n)*(phi - phi0)
-                      - (3*n + 3*n*n + 21.0/8.0*n*n*n)
-                      *Math.Sin(phi - phi0)*Math.Cos(phi + phi0)
-                      + (15.0/8.0*n*n + 15.0/8.0*n*n*n)
-                      *Math.Sin(2.0*(phi - phi0))*Math.Cos(2.0*(phi + phi0)) - 35.0/24.0
-                      *n*n*n
-                      *Math.Sin(3.0*(phi - phi0))*Math.Cos(3.0*(phi + phi0)));
-            var I = M + N0;
-            var II = v/2.0*Math.Sin(phi)*Math.Cos(phi);
-            var III = v/24.0*Math.Sin(phi)*Math.Pow(Math.Cos(phi), 3.0)
-                      *(5.0 - Util.tanSquared(phi) + 9.0*etaSquared);
-            var IIIA = v/720.0*Math.Sin(phi)*Math.Pow(Math.Cos(phi), 5.0)
-                       *(61.0 - 58.0*Util.tanSquared(phi) + Math.Pow(Math.Tan(phi), 4.0));
-            var IV = v*Math.Cos(phi);
-            var V = v/6.0*Math.Pow(Math.Cos(phi), 3.0)
-                    *(v/rho - Util.tanSquared(phi));
-            var VI = v/120.0
-                     *Math.Pow(Math.Cos(phi), 5.0)
-                     *(5.0 - 18.0*Util.tanSquared(phi) + Math.Pow(Math.Tan(phi), 4.0)
-                       + 14*etaSquared - 58*Util.tanSquared(phi)*etaSquared);
-
-            N = I + II*Math.Pow(lambda - lambda0, 2.0)
-                + III*Math.Pow(lambda - lambda0, 4.0)
-                + IIIA*Math.Pow(lambda - lambda0, 6.0);
-            E = E0 + IV*(lambda - lambda0) + V*Math.Pow(lambda - lambda0, 3.0)
-                + VI*Math.Pow(lambda - lambda0, 5.0);
-
-            Easting = E;
-            Northing = N;
-        }
-
-
-        /// <summary>
         ///     Gets or sets the easting in metres relative to the origin of the Irish Grid.
         /// </summary>
         /// <value>The easting.</value>

@@ -26,6 +26,6 @@ namespace Quest.Lib.Coords
         ///     reference ellipsoid.
         /// </summary>
         /// <returns>A LatLng representation of a point in a co-ordinate system.</returns>
-        public abstract LatLng ToLatLng();
+        public abstract LL ToLatLng();
     }
 }

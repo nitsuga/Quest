@@ -10,15 +10,25 @@ namespace Quest.Common.Messages.Destination
     public class QuestDestination
     {
         public string Id;
+
         public string Name;
-        public string Group;
+
+        public string Code;
+
         public bool IsEnabled;
+
         public bool IsHospital;
+
         public bool IsAandE;
+
         public bool IsRoad;
+
         public bool IsStation;
+
         public bool IsStandby;
+
         public string Status;
-        public LatLongCoord Position;
+
+        public LatLng Position;
     }
 }

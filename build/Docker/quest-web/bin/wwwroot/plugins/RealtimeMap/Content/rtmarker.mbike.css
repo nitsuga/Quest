@@ -1,0 +1,51 @@
+.mapmarker-dark-MBIKE {
+    display: block;
+    border: 2pt solid cyan;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    /* set the ring's new dimension and re-center it */
+    margin: 0px 0 0 0px;
+    height: 20px !important;
+    width: 20px !important;
+}
+
+.mapmarker-norm-MBIKE {
+    display: block;
+    border: 2pt solid cyan;
+    fill: black;
+    /* make a circle */
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    /* multiply the shadows, inside and outside the circle*/
+    -moz-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    -webkit-box-shadow: inset 0 0 5px gray, inset 0 0 5px gray, inset 0 0 5px gray, 0 0 5px gray, 0 0 5px gray, 0 0 5px gray;
+    box-shadow: 5px 5px 15px;
+    /* set the ring's new dimension and re-center it */
+    margin: 0px 0 0 0px;
+    height: 20px !important;
+    width: 20px !important;
+}
+
+.MBIKE-Enroute {
+    background: blue;
+}
+
+.MBIKE-Busy {
+    background: red;
+}
+
+.MBIKE-Available {
+    background: green;
+}
+
+.MBIKE-Offroad {
+    background: gray;
+}
+
+.MBIKE-Rest {
+    background: orange;
+}

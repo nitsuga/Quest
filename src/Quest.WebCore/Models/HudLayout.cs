@@ -18,6 +18,11 @@ namespace Quest.WebCore.Models
         public string ImagePath;
 
         /// <summary>
+        /// CSS theme to use for the hud
+        /// </summary>
+        public string Theme;
+
+        /// <summary>
         /// is the layout available from the LayoutPlugin?
         /// </summary>
         public bool Selectable;

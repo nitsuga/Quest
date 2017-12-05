@@ -20,7 +20,7 @@ namespace Quest.WebCore.Plugins.PropertiesPlugin
             var value = obj["Value"];
 
             // render it
-            var view = PartialView($"/Views/Shared/Plugins/Properties/{type}.cshtml", value);
+            var view = PartialView($"/plugins/Properties/Views/{type}.cshtml", value);
             return view;
         }
     }

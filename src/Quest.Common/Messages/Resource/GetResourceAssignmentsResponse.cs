@@ -1,7 +1,13 @@
-﻿namespace Quest.Common.Messages.Resource
+﻿using System.Collections.Generic;
+
+namespace Quest.Common.Messages.Resource
 {
     public class GetResourceAssignmentsResponse : Response
     {
-        public ResourceAssignments Items;
+        public List<DestinationStatus> Destinations;
+
+        public List<DestinationHistory> History;
+
+
     }
 }

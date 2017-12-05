@@ -1,0 +1,8 @@
+{
+  "name": "Quest",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@aspnet/signalr-client": "^1.0.0-alpha2-final",
+    "leaflet-hotline": "^0.4.0"
+  }
+}

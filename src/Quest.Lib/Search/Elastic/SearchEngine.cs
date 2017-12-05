@@ -9,6 +9,7 @@ using NetTopologySuite.Utilities;
 using Quest.Lib.Utils;
 using Quest.Common.Messages.Gazetteer;
 using Nest;
+using Quest.Lib.Coords;
 
 namespace Quest.Lib.Search.Elastic
 {

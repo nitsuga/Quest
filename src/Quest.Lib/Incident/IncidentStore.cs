@@ -52,7 +52,7 @@ namespace Quest.Lib.Incident
                             var incsFeature = new QuestIncident
                             {
                                 Id = inc.IncidentId.ToString(),
-                                Serial = inc.Serial,
+                                EventId = inc.Serial,
                                 Determinant = inc.Determinant,
                                 Priority = inc.Priority,
                                 Status = inc.Status,
@@ -62,7 +62,7 @@ namespace Quest.Lib.Incident
                                 PatientAge = inc.PatientAge,
                                 PatientSex = inc.PatientSex,
                                 ProblemDescription = inc.ProblemDescription,
-                                Position = new LatLongCoord(inc.Longitude ?? 0, inc.Latitude ?? 0),
+                                Position = new LatLng(inc.Latitude ?? 0, inc.Longitude?? 0),
                             };
 
                             features.Add(incsFeature);

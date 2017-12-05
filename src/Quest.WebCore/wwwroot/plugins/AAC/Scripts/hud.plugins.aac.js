@@ -9,7 +9,7 @@ hud.plugins.aac = (function () {
         hud.selectMenu(pluginId, 0);
 
         // listen for hub messages on these groups
-        $("#sys_hub").on("ResourceAssignments", function (group, msg) {
+        $("#sys_hub").on("DestinationStatusChanged", function (group, msg) {
             _handleMessage(pluginId, group, msg);
         });
 
@@ -19,34 +19,40 @@ hud.plugins.aac = (function () {
             _handleAction(pluginId, action);
         });
 
-        _getAssignments();
+        //_getAssignments(pluginId);
+
+        _renderAssignments(pluginId);
     };
 
     // handle message from service bus
     var _handleMessage = function (pluginId, group, msg) {
         switch (msg.$type) {
-            case "Quest.Common.Messages.Resource.ResourceUpdate, Quest.Common":
-                break;
-            case "Quest.Common.Messages.Resource.ResourceStatusChange, Quest.Common":
+            case "Quest.Common.Messages.Resource.DestinationStatusChanged, Quest.Common":
+                _processDestination(msg.item, pluginId);
                 break;
         }
     };
 
     // handle actions from button push
     var _handleAction = function (pluginId, action) {
-        switch (action) {
-            case "select-aac-details":
-                var selected = hud.toggleButton(pluginId, 'select-action', action);
-                if (selected)
-                {
-                    _selectPane(pluginId, "#panel1", false);
-                    _selectPane(pluginId, "#panel2", true);
-                }
-                else
-                {
-                    _selectPane(pluginId, "#panel1", true);
-                    _selectPane(pluginId, "#panel2", false);
-                }
+        switch (action.action) {
+            case "select-aac-list":
+                _selectPane(pluginId, "#panel1", true);
+                _selectPane(pluginId, "#panel2", false);
+                _selectPane(pluginId, "#panel3", false);
+                break;
+            case "select-aac-history":
+                _selectPane(pluginId, "#panel1", false);
+                _selectPane(pluginId, "#panel2", true);
+                _selectPane(pluginId, "#panel3", false);
+                break;
+            case "select-aac-assign":
+                _selectPane(pluginId, "#panel1", false);
+                _selectPane(pluginId, "#panel2", false);
+                _selectPane(pluginId, "#panel3", true);
+                break;
+            case "select-aac-auto":
+                hud.toggleButton(pluginId, action);
                 break;
             default:
                 break;
@@ -70,17 +76,43 @@ hud.plugins.aac = (function () {
         return state;
     };
 
-    var _getAssignments = function () {
+    var _getAssignments = function (pluginId) {
         return $.ajax({
             url: hud.getURL("AAC/GetAssignmentStatus"),
             dataType: "json",
             success: function (msg) {
-                console.log("got GetAssignmentStatus pluginId=" + pluginId + " type=" + id);
-
+                console.log("got GetAssignmentStatus pluginId=" + pluginId);
+                msg.destinations.forEach(function (dest) {
+                    _processDestination(dest, pluginId);
+                });
             }
         });
 
     }
+
+    var _renderAssignments = function (pluginId) {
+
+        var selector = hud.pluginSelector(pluginId) + " [data-role='AAC-placeholder']";
+
+        $.ajax({
+            url: hud.getURL("AAC/RenderAAC"),
+            type: 'POST',
+            dataType: "html",
+            contentType: "application/json; charset=utf-8",
+            success: function (html) {
+                $(selector).html(html);
+            },
+            error: function (result) {
+                alert('error from hud.plugins.AAC\r\n' + result.responseText);
+            }
+        });
+    }
+
+    var _processDestination = function (dest, pluginId)
+    {
+
+    }
+
 
     return {
         init: _init,

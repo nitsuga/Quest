@@ -2,6 +2,7 @@
 using Quest.Common.Messages.Destination;
 using Quest.Common.Messages.GIS;
 using Quest.Common.Messages.Resource;
+using Quest.Lib.Coords;
 using Quest.Lib.Data;
 using Quest.Lib.DataModel;
 using Quest.Lib.Utils;
@@ -24,9 +25,9 @@ namespace Quest.Lib.Resource
         /// get all current valid resource assignments
         /// </summary>
         /// <returns></returns>
-        public ResourceAssignments GetAssignmentStatus()
+        public List<ResourceAssignmentStatus> GetAssignmentStatus()
         {
-            return _dbFactory.Execute<QuestContext, ResourceAssignments>((db) =>
+            return _dbFactory.Execute<QuestContext, List<ResourceAssignmentStatus>>((db) =>
             {
                 db.Database.ExecuteSqlCommand("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;");
 
@@ -36,9 +37,7 @@ namespace Quest.Lib.Resource
                     .Where(x => x.EndDate == null)
                     .ToList();
 
-                var assignments = new ResourceAssignments();
-                assignments.AddRange(FromDatabase(list));
-                return assignments;
+                return FromDatabase(list).ToList();
             });
         }
 
@@ -47,18 +46,18 @@ namespace Quest.Lib.Resource
         /// </summary>
         /// <param name="item">assignment details</param>
         /// <returns></returns>
-        public ResourceAssignmentStatus UpdateResourceAssign(ResourceAssignmentStatus item)
+        public ResourceAssignmentStatus UpdateResourceAssign(ResourceAssignmentUpdate item)
         {
             return _dbFactory.Execute<QuestContext, ResourceAssignmentStatus>((db) =>
             {
                 // fleetno is the primary key
-                if (item.FleetNo == null)
+                if (item.Callsign == null)
                     return null;
 
                 // find the most up-to-date resource record;
                 var resource = db.Resource.AsNoTracking()
                     .Include(x => x.Callsign)
-                    .Where(x => x.FleetNo == item.FleetNo && x.EndDate == null)
+                    .Where(x => x.Callsign.Callsign1 == item.Callsign && x.EndDate == null)
                     .FirstOrDefault();
 
                 if (resource == null)
@@ -68,7 +67,7 @@ namespace Quest.Lib.Resource
                 var oldres_list = db.ResourceAssignment
                     .Include(x => x.Destination)
                     .OrderBy(x => x.Destination.Shortcode)
-                    .Where(x => x.FleetNo == item.FleetNo && x.EndDate == null)
+                    .Where(x => x.Callsign == item.Callsign && x.EndDate == null)
                     .ToList();
 
                 if (oldres_list != null && oldres_list.Count() > 0)
@@ -79,7 +78,7 @@ namespace Quest.Lib.Resource
                     db.SaveChanges();
                 }
 
-                var dest = db.Destinations.FirstOrDefault(x => x.Destination == item.DestinationCode);
+                var dest =  db.Destinations.FirstOrDefault(x => x.Destination == item.DestinationCode);
                 var point = GeomUtils.GetPointFromWkt(dest.Wkt);
                 var latlng = LatLongConverter.OSRefToWGS84(point.X, point.Y);
 
@@ -95,12 +94,9 @@ namespace Quest.Lib.Resource
                     CancelledAt = item.CancelledAt,
                     DestinationId = dest.DestinationId,
                     Eta = item.CurrentEta,
-                    FleetNo = item.FleetNo,
                     LeftAt = item.LeftAt,
                     Notes = item.Notes,
                     OriginalEta = item.OriginalEta,
-                    DestLatitude = (float)latlng.Latitude,
-                    DestLongitude = (float)latlng.Longitude,
                     StartLatitude = (float)item.StartPosition.Latitude,
                     StartLongitude= (float)item.StartPosition.Longitude,
                     Status = (int)item.Status
@@ -146,8 +142,8 @@ namespace Quest.Lib.Resource
 
                 if (dbinc == null)
                     return null;
-                var res = Cloner.CloneJson<QuestResource>(dbinc);
-                return res;
+
+                return FromDatabase(dbinc);
             });
         }
 
@@ -166,8 +162,7 @@ namespace Quest.Lib.Resource
                     .Include(x => x.ResourceType).FirstOrDefault(x => x.Callsign.Callsign1 == callsign && x.EndDate == null);
                 if (dbinc == null)
                     return null;
-                var res = Cloner.CloneJson<QuestResource>(dbinc);
-                return res;
+                return FromDatabase(dbinc);
             });
         }
 
@@ -431,18 +426,22 @@ namespace Quest.Lib.Resource
         private ResourceAssignmentStatus FromDatabase(ResourceAssignment item)
         {
             return new ResourceAssignmentStatus {
-                Callsign = item.Callsign,
+
+                //TODO: 
+                Percent="50%",
+                Status = ResourceAssignmentStatus.StatusCode.InProgress,
+                TTG = "7m",
+
+                Resource = GetByCallsign(item.Callsign),
                 ArrivedAt = item.ArrivedAt,
                 Assigned =item.Assigned,
                 CancelledAt = item.CancelledAt,
                 DestinationCode = item.Destination.Shortcode,
-                Destination = item.Destination.Destination,
-                CurrentEta = item.Eta, FleetNo=item.FleetNo,
+                CurrentEta = item.Eta,
                 LeftAt = item.LeftAt,
                 Notes =item.Notes,
                 OriginalEta =item.OriginalEta,
-                StartPosition = new LatLongCoord(item.StartLongitude, item.StartLatitude),
-                DestPosition = new LatLongCoord(item.DestLongitude, item.DestLatitude)
+                StartPosition = new LatLng(item.StartLatitude, item.StartLongitude),
             };        
         }
 
@@ -463,7 +462,7 @@ namespace Quest.Lib.Resource
                 Eta = newres.Eta,
                 EventType = newres.EventType,
                 FleetNo = newres.FleetNo,
-                Position = new LatLongCoord(newres.Longitude ?? 0, newres.Latitude ?? 0),
+                Position = new LatLng(newres.Latitude ?? 0, newres.Longitude ?? 0),
                 EventId = newres.EventId,
                 Speed = newres.Speed,
                 ResourceType = newres.ResourceType?.ResourceType1,
