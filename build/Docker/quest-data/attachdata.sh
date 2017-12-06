@@ -1,6 +1,6 @@
 #wait for the SQL Server to come up
 
-echo waiting for 30 secondsleep
+echo waiting for 30 seconds
 sleep 30
 echo running attach script
 

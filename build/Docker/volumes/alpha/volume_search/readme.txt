@@ -1,1 +1,0 @@
-Place your Elasticsearch license.json file in this directory
