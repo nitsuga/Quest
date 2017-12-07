@@ -664,7 +664,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\marcus.poulton\\.nuget\\packages\\": {},
+    "C:\\Users\\Marcus\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
@@ -673,17 +673,17 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "C:\\Quest\\src\\Quest.ExpressQ\\Quest.ExpressQ.csproj",
+      "projectUniqueName": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.ExpressQ\\Quest.ExpressQ.csproj",
       "projectName": "Quest.ExpressQ",
-      "projectPath": "C:\\Quest\\src\\Quest.ExpressQ\\Quest.ExpressQ.csproj",
-      "packagesPath": "C:\\Users\\marcus.poulton\\.nuget\\packages\\",
-      "outputPath": "C:\\Quest\\src\\Quest.ExpressQ\\obj\\",
+      "projectPath": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.ExpressQ\\Quest.ExpressQ.csproj",
+      "packagesPath": "C:\\Users\\Marcus\\.nuget\\packages\\",
+      "outputPath": "E:\\Dropbox\\Quest\\Git\\Quest\\src\\Quest.ExpressQ\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\marcus.poulton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Marcus\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -709,7 +709,7 @@
         "dependencies": {
           "Microsoft.NETCore.App": {
             "target": "Package",
-            "version": "2.0.0",
+            "version": "2.0",
             "autoReferenced": true
           }
         },

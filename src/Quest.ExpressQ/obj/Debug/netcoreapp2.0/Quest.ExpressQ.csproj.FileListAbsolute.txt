@@ -1,0 +1,11 @@
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\bin\Debug\netcoreapp2.0\Quest.ExpressQ.deps.json
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\bin\Debug\netcoreapp2.0\Quest.ExpressQ.runtimeconfig.json
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\bin\Debug\netcoreapp2.0\Quest.ExpressQ.runtimeconfig.dev.json
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\bin\Debug\netcoreapp2.0\Quest.ExpressQ.dll
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\bin\Debug\netcoreapp2.0\Quest.ExpressQ.pdb
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.csprojResolveAssemblyReference.cache
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.csproj.CoreCompileInputs.cache
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.AssemblyInfoInputs.cache
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.AssemblyInfo.cs
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.dll
+E:\Dropbox\Quest\Git\Quest\src\Quest.ExpressQ\obj\Debug\netcoreapp2.0\Quest.ExpressQ.pdb
