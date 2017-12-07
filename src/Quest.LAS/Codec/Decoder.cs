@@ -8,12 +8,11 @@ using System.Text;
 
 namespace Quest.LAS.Codec
 {
+    /// <summary>
+    /// CadOutboundRawMessage --> CadMessage
+    /// </summary>
     public class Decoder
     {
-        public int AgedMessages { get; set; }
-        public int DuplicateMessages { get; set; }
-        public long LastRcvdSequenceNumber { get; set; }
-
         private Dictionary<CadMessageCodecTypeEnum, Func<byte[], ICadMessage>> decoders;
 
         public Decoder()
@@ -33,31 +32,65 @@ namespace Quest.LAS.Codec
             decoders.Add(CadMessageCodecTypeEnum.EngineeringMessage, Decoder.DecodeEngineeringMessage);
         }
 
-        public ICadMessage DecodeCadMessage(CadMessage msg)
+        public CadMessage DecodeCadMessage(CadOutboundRawMessage msg)
         {
-            if (LastRcvdSequenceNumber == msg.SequenceNumber)
-                DuplicateMessages++;
-
-            if (LastRcvdSequenceNumber < msg.SequenceNumber)
-                AgedMessages++;
-
-            LastRcvdSequenceNumber = msg.SequenceNumber;
-
-            return Parse(msg.MessageText, msg.SequenceNumber, msg.MdtTimestamp, msg.CadTimestamp, msg.RxQueueSize);
-        }
-
-        private ICadMessage Parse(byte[] messageText, long sequenceNumber, DateTime mdtTimeStamp, DateTime cadTimeStamp, int rxQueueSize)
-        {
-            var result = Decoder.DecodeInboundMessage(messageText);
+            var result = Decoder.DecodeInboundMessage(msg.MessageText);
 
             Func<byte[], ICadMessage> handler = null;
             decoders.TryGetValue(result, out handler);
 
             if (handler != null)
-                return handler(messageText);
+            {
+                CadMessage decodedMessage = new CadMessage
+                {
+                    Message = handler(msg.MessageText),
+                    Metadata = Makeheader(msg)
+                };
 
-            return null;
+                return decodedMessage;
+            }
+            else
+                return null; 
         }
+
+        private MessageHeader Makeheader(CadOutboundRawMessage msg)
+        {
+            var result = new MessageHeader
+            {
+                Destination = GetValue(msg.Headers, "TO"),
+                Opt = GetValue(msg.Headers, "OPT"),
+                Source = GetValue(msg.Headers, "FROM"),
+                Lifetime = GetInt(msg.Headers, "LIFETIME", 60),
+                Priority = GetInt(msg.Headers, "PRT", 5)
+            };
+
+            return result;
+        }
+
+        string GetValue(Dictionary<string, string> headers, string key)
+        {
+            string v = "";
+            headers.TryGetValue(key, out v);
+            return v;
+        }
+        int GetInt(Dictionary<string, string> headers, string key, int defaultValue)
+        {
+            string v = "";
+            headers.TryGetValue(key, out v);
+            int.TryParse(v, out defaultValue);
+            return defaultValue;
+        }
+
+        public static string EncodeOutboundMid(int signalStrength0, int signalStrength1, string messageTypeId, int outboundSequenceNumber)
+        {
+            var sb = new StringBuilder();
+            sb.Append(signalStrength0.ToString("0"));
+            sb.Append(signalStrength1.ToString("0"));
+            sb.Append(messageTypeId.Length > 0 ? messageTypeId.Substring(0, 1) : "U");
+            sb.Append(outboundSequenceNumber.ToString("000000000"));
+            return sb.ToString();
+        }
+
 
         public static CadMessageCodecTypeEnum DecodeInboundMessage(byte[] data)
         {
@@ -524,6 +557,7 @@ namespace Quest.LAS.Codec
         {
             return null;
         }
+
         public static ICadMessage DecodeSetDestination(byte[] data)
         {
             return null;

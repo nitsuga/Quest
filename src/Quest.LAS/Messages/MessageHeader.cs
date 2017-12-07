@@ -1,6 +1,6 @@
-﻿namespace Quest.LAS.Codec
+﻿namespace Quest.LAS.Messages
 {
-    public class EqMessageSettings
+    public class MessageHeader
     {
         public string Destination;
         public string Source;
@@ -10,6 +10,5 @@
         public string Opt = "N";
         public int S1 = 9;
         public int S2 = 9;
-        public int OutboundTimestampDelta;
     }
 }

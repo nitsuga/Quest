@@ -8,6 +8,9 @@ using System.Text;
 
 namespace Quest.LAS.Codec
 {
+    /// <summary>
+    /// DeviceMessage --> CadInboundRawMessage
+    /// </summary>
     public class Encoder
     {
         private class Handler
@@ -50,31 +53,41 @@ namespace Quest.LAS.Codec
         /// <param name="msg"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public string Encode(IDeviceMessage msg, EqMessageSettings settings)
+        public CadInboundRawMessage Encode(DeviceMessage msg)
         {
             Handler handler = null;
             encoders.TryGetValue(msg.GetType(), out handler);
 
             if (handler != null)
             {
-                var bytes= handler.Method(msg);
+                var bytes= handler.Method(msg.Message);
 
                 if (bytes != null)
-                    return MakeMessage(bytes, handler.MessageType, settings);
+                    return MakeMessage(bytes, handler.MessageType, msg.Metadata);
             }
             return null;
         }
 
-        private string MakeMessage(byte[] messageText, string messageType, EqMessageSettings settings)
+        private CadInboundRawMessage MakeMessage(byte[] messageText, string messageType, MessageHeader settings)
         {
-            messageText = messageText.Concat(DateTime.UtcNow.AddSeconds(settings.OutboundTimestampDelta).GetUnixBytes()).ToArray();
+            messageText = messageText.Concat(DateTime.UtcNow.GetUnixBytes()).ToArray();
 
             // Todo - Read signal strength from provider
             var mid = EncodeOutboundMid(settings.S1, settings.S2, messageType, settings.Sequence);
 
-            var textMessage = $"PRT:{settings.Priority}\nLIFETIME:{settings.Lifetime}\nOPT:{settings.Opt}\nMID:{mid}\nFROM:{settings.Source}\nTO:{settings.Destination}\n\n{messageText}";
-
-            return textMessage;
+            CadInboundRawMessage msg = new CadInboundRawMessage
+            {
+                MessageText = messageText,
+                Headers = new Dictionary<string, string>() {
+                    { "PRT", settings.Priority.ToString() },
+                    { "LIFETIME", settings.Lifetime.ToString() },
+                    { "OPT", settings.Opt },
+                    { "MID", mid },
+                    { "FROM", settings.Source },
+                    { "TO", settings.Destination }
+                }
+            };
+            return msg;
         }
 
         public static string EncodeOutboundMid(int signalStrength0, int signalStrength1, string messageTypeId, int outboundSequenceNumber)

@@ -1,8 +1,12 @@
 ﻿using Autofac;
+using Quest.Common.Messages;
 using Quest.Common.ServiceBus;
+using Quest.LAS.Codec;
+using Quest.LAS.Messages;
 using Quest.Lib.Processor;
 using Quest.Lib.ServiceBus;
 using Quest.Lib.Utils;
+using System;
 
 namespace Quest.LAS.Processor
 {
@@ -13,6 +17,7 @@ namespace Quest.LAS.Processor
     {
         #region Private Fields
         private ILifetimeScope _scope;
+        private Encoder _encoder;
         #endregion
 
         public ExpressQEncoder(
@@ -22,19 +27,35 @@ namespace Quest.LAS.Processor
             TimedEventQueue eventQueue) : base(eventQueue, serviceBusClient, msgHandler)
         {
             _scope = scope;
+            _encoder = new Codec.Encoder();
         }
 
         protected override void OnPrepare()
         {
+            MsgHandler.AddHandler<DeviceMessage>(MessageHandler);
         }
 
         protected override void OnStart()
         {
-            Run();
         }
 
-        public void Run()
+        public Response MessageHandler(NewMessageArgs msg)
         {
+            try
+            {
+                var message = msg.Payload as DeviceMessage;
+                if (message != null)
+                {
+                    var eqmsg = _encoder.Encode(message);
+                    if (eqmsg != null)
+                        ServiceBusClient.Broadcast(eqmsg);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
         }
     }
 }

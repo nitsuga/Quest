@@ -28,14 +28,7 @@ namespace Quest.LAS.Processor
 
         protected override void OnPrepare()
         {
-            MsgHandler.AddHandler<AdminMessage>(AdminMessageHandler);
-            MsgHandler.AddHandler<IncidentCancellation>(AdminMessageHandler);
-            MsgHandler.AddHandler<IncidentUpdate>(AdminMessageHandler);
-            MsgHandler.AddHandler<SetStatus>(AdminMessageHandler);
-            MsgHandler.AddHandler<GeneralMessage>(AdminMessageHandler);
-            MsgHandler.AddHandler<CallsignUpdate>(AdminMessageHandler);
-            MsgHandler.AddHandler<AdminMessage>(AdminMessageHandler);
-            MsgHandler.AddHandler<AdminMessage>(AdminMessageHandler);
+            MsgHandler.AddHandler<DeviceMessage>(MessageHandler);
 
         }
 
@@ -43,12 +36,14 @@ namespace Quest.LAS.Processor
         {
         }
 
-        private Response AdminMessageHandler(NewMessageArgs arg)
+        private Response MessageHandler(NewMessageArgs arg)
         {
-            var msg = arg.Payload as AdminMessage;
+            var msg = arg.Payload as DeviceMessage;
 
             if (msg != null)
             {
+                // hold messages in a cache
+
             }
             return null;
         }
