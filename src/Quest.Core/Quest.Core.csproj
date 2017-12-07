@@ -52,6 +52,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.las.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="simcomponents.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

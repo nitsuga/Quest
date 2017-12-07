@@ -6,7 +6,7 @@
       "environmentVariables": {
         "Modules": "SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager",
         "Session": "Dev",
-        "ComponentsConfig": "components.json"
+        "ComponentsConfig": "components.json;components-dev.json"
       }
     }
   }
