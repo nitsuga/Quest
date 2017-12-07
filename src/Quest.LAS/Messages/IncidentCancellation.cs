@@ -2,7 +2,7 @@
 
 namespace Quest.LAS.Messages
 {
-    public class IncidentCancellation
+    public class IncidentCancellation: ICadMessage
     {
         public int IncidentNumber { get; set; }
         public DateTime IncidentDateTime { get; set; }

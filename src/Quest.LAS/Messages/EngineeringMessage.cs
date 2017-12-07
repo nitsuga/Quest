@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Quest.LAS.Codec
+namespace Quest.LAS.Messages
 {
-    public class EngineeringMessageArgs : EventArgs
+    public class EngineeringMessage : ICadMessage
     {
         public InboundESMessageTypeEnum InboundEsMessageType { get; set; }
         public DateTime CadTimestamp { get; set; }

@@ -8,6 +8,8 @@ namespace Quest.LAS.Processor
 {
     /// <summary>
     /// Read and write files in ExpressQ directories
+    /// Emits CadInboundMessage
+    /// Listens for 
     /// </summary>
     public class ExpressQGateway : ServiceBusProcessor
     {

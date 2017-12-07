@@ -1,4 +1,4 @@
-﻿namespace Quest.LAS.Codec
+﻿namespace Quest.LAS.Messages
 {
     public enum InboundCadMessageTypeEnum
     {

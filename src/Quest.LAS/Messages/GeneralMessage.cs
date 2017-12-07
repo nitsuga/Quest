@@ -1,6 +1,6 @@
 ﻿namespace Quest.LAS.Messages
 {
-    public class GeneralMessageParam
+    public class GeneralMessage: ICadMessage
     {
         public MdtCadMessageTypeEnum MessageType { get; set; }
         public int MsgPriority { get; set; }

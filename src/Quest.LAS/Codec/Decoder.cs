@@ -10,7 +10,56 @@ namespace Quest.LAS.Codec
 {
     public class Decoder
     {
-        public CadMessageCodecTypeEnum DecodeInboundMessage(byte[] data)
+        public int AgedMessages { get; set; }
+        public int DuplicateMessages { get; set; }
+        public long LastRcvdSequenceNumber { get; set; }
+
+        private Dictionary<CadMessageCodecTypeEnum, Func<byte[], ICadMessage>> decoders;
+
+        public Decoder()
+        {
+            decoders = new Dictionary<CadMessageCodecTypeEnum, Func<byte[], ICadMessage>>();
+
+            decoders.Add(CadMessageCodecTypeEnum.CallsignUpdate, Decoder.DecodeAdminMessage);
+            decoders.Add(CadMessageCodecTypeEnum.GeneralMessage, Decoder.DecodeGeneralMessage);
+            decoders.Add(CadMessageCodecTypeEnum.ParameterUpdate, Decoder.DecodeParameters);
+            decoders.Add(CadMessageCodecTypeEnum.CadLogin, Decoder.DecodeCadLogin);
+            decoders.Add(CadMessageCodecTypeEnum.NotAvailable, Decoder.DecodeAdminMessage);
+            decoders.Add(CadMessageCodecTypeEnum.CancelIncident, Decoder.DecodeIncidentCancellation);
+            decoders.Add(CadMessageCodecTypeEnum.IncidentUpdate, Decoder.DecodeIncidentUpdate);
+            decoders.Add(CadMessageCodecTypeEnum.AdminMessage, Decoder.DecodeAdminMessage);
+            decoders.Add(CadMessageCodecTypeEnum.StatusUpdate, Decoder.DecodeStatusUpdate);
+            decoders.Add(CadMessageCodecTypeEnum.SetDestination, Decoder.DecodeSetDestination);
+            decoders.Add(CadMessageCodecTypeEnum.EngineeringMessage, Decoder.DecodeEngineeringMessage);
+        }
+
+        public ICadMessage DecodeCadMessage(CadMessage msg)
+        {
+            if (LastRcvdSequenceNumber == msg.SequenceNumber)
+                DuplicateMessages++;
+
+            if (LastRcvdSequenceNumber < msg.SequenceNumber)
+                AgedMessages++;
+
+            LastRcvdSequenceNumber = msg.SequenceNumber;
+
+            return Parse(msg.MessageText, msg.SequenceNumber, msg.MdtTimestamp, msg.CadTimestamp, msg.RxQueueSize);
+        }
+
+        private ICadMessage Parse(byte[] messageText, long sequenceNumber, DateTime mdtTimeStamp, DateTime cadTimeStamp, int rxQueueSize)
+        {
+            var result = Decoder.DecodeInboundMessage(messageText);
+
+            Func<byte[], ICadMessage> handler = null;
+            decoders.TryGetValue(result, out handler);
+
+            if (handler != null)
+                return handler(messageText);
+
+            return null;
+        }
+
+        public static CadMessageCodecTypeEnum DecodeInboundMessage(byte[] data)
         {
             if ((InboundCadMessageTypeEnum)data[0] == InboundCadMessageTypeEnum.InboundMessageIdentifier)
             {
@@ -47,18 +96,19 @@ namespace Quest.LAS.Codec
             return CadMessageCodecTypeEnum.NotAvailable;
         }
 
-        public CallsignParam DecodeCallsignParameter(byte[] data, int dataLength)
+        public static CallsignUpdate DecodeCallsignUpdate(byte[] data)
         {
+            var csLength = Convert.ToInt16(data[2]);
+
             var pointer = 3;
-            var csData = UtilityFunctions.ExtractEncodedData(data, pointer, dataLength);
-            CallsignParam cs = UtilityFunctions.SplitCallSignParams(csData);
+            var csData = UtilityFunctions.ExtractEncodedData(data, pointer, csLength);
+            CallsignUpdate cs = UtilityFunctions.SplitCallSignParams(csData);
 
-
-            if (data.Length > dataLength + 3)
+            if (data.Length > csLength + 3)
             {
                 if ((InboundCadMessageTypeEnum)data[0] == InboundCadMessageTypeEnum.InboundMessageIdentifier)
                 {
-                    pointer = pointer + dataLength;
+                    pointer = pointer + csLength;
 
                     while (pointer < data.Length)
                     {
@@ -73,7 +123,7 @@ namespace Quest.LAS.Codec
 
                             if (statusValue >= 1)
                             {
-                                cs.StatusUpdate = new StatusUpdate
+                                cs.StatusUpdate = new SetStatus
                                 {
                                     ExternalStatusId = statusValue,
                                     StatusOrigin = (CadStatusOrigin)statusIndicatorType
@@ -99,7 +149,7 @@ namespace Quest.LAS.Codec
                             {
                                 var incidentData = new byte[incidentDataLength];
                                 Array.Copy(data, pointer, incidentData, 0, incidentDataLength);
-                                var incident = DecodeCallsignIncidentParameter(incidentData, incidentDataLength);
+                                var incident = DecodeIncidentUpdate(incidentData);
                                 if (incident != null)
                                 {
                                     cs.IncidentUpdate = incident;
@@ -119,16 +169,12 @@ namespace Quest.LAS.Codec
 
                         //pointer++;
                     }
-
-
-
                 }
-
             }
 
             if (cs.StatusUpdate == null)
             {
-                cs.StatusUpdate = new StatusUpdate
+                cs.StatusUpdate = new SetStatus
                 {
                     ExternalStatusId = 0,
                     StatusOrigin = CadStatusOrigin.J
@@ -138,7 +184,7 @@ namespace Quest.LAS.Codec
             return cs;
         }
 
-        public IncidentUpdate DecodeCallsignIncidentParameter(byte[] data, int dataLength)
+        public static IncidentUpdate DecodeIncidentUpdate(byte[] data)
         {
             IncidentUpdate incident = new IncidentUpdate();
 
@@ -313,9 +359,9 @@ namespace Quest.LAS.Codec
             return incident;
         }
 
-        public GeneralMessageParam DecodeGeneralMessage(byte[] data)
+        public static GeneralMessage DecodeGeneralMessage(byte[] data)
         {
-            GeneralMessageParam generalMessageParam = new GeneralMessageParam();
+            GeneralMessage generalMessageParam = new GeneralMessage();
 
             switch ((InboundCadMessageTypeEnum)data[0])
             {
@@ -341,9 +387,10 @@ namespace Quest.LAS.Codec
             return generalMessageParam;
         }
 
-        public List<MdtParameter> DecodeParameters(byte[] data)
+        public static MdtParameters DecodeParameters(byte[] data)
         {
-            var retParms = new List<MdtParameter>();
+
+            var retParms = new MdtParameters { Items = new List<MdtParameter>() };
             var pointer = 1;
 
             while (pointer < data.Length)
@@ -363,7 +410,7 @@ namespace Quest.LAS.Codec
                     result = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixDate);
                 }
 
-                retParms.Add(
+                retParms.Items.Add(
                     new MdtParameter
                     {
                         Identifier = identifier,
@@ -379,7 +426,7 @@ namespace Quest.LAS.Codec
             return retParms;
         }
 
-        public IncidentCancellation DecodeCancelIncident(byte[] data)
+        public static IncidentCancellation DecodeIncidentCancellation(byte[] data)
         {
             IncidentCancellation cancellation = new IncidentCancellation();
             var pointer = 1;
@@ -413,7 +460,7 @@ namespace Quest.LAS.Codec
             return cancellation;
         }
 
-        public AdminMessage DecodeAdminMessage(byte[] data)
+        public static AdminMessage DecodeAdminMessage(byte[] data)
         {
             AdminMessage adm = new AdminMessage();
 
@@ -446,9 +493,9 @@ namespace Quest.LAS.Codec
             return adm;
         }
 
-        public EngineeringMessageArgs DecodeEngineeringMessage(byte[] data)
+        public static EngineeringMessage DecodeEngineeringMessage(byte[] data)
         {
-            EngineeringMessageArgs engMessage = new EngineeringMessageArgs();
+            EngineeringMessage engMessage = new EngineeringMessage();
 
             var messageText = Encoding.ASCII.GetString(data);
             if (messageText.StartsWith("Z"))
@@ -460,5 +507,28 @@ namespace Quest.LAS.Codec
             return engMessage;
         }
 
+        public static SetStatus DecodeStatusUpdate(byte[] data)
+        {
+            var statusIndicatorType = (CadStatusOrigin)data[0];
+            var statusValue = data[2];
+
+            return new SetStatus
+            {
+                StatusOrigin = statusIndicatorType,
+                StatusValue = statusValue,
+                IsCallsignUpdate = false
+            };
+        }
+
+        public static ICadMessage DecodeCadLogin(byte[] data)
+        {
+            return null;
+        }
+        public static ICadMessage DecodeSetDestination(byte[] data)
+        {
+            return null;
+        }
+
+        
     }
 }

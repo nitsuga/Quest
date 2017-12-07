@@ -1,10 +1,10 @@
-﻿using Quest.LAS.Messages;
-using System;
+﻿using System;
 
-namespace Quest.LAS.Codec
+namespace Quest.LAS.Messages
 {
-    public class StatusUpdateEventArgs : EventArgs
+    public class SetStatus : ICadMessage
     {
+        public int ExternalStatusId { get; set; }        
         public CadStatusOrigin StatusOrigin { get; set; }
         public int StatusValue { get; set; }
         public long SequenceNumber { get; set; }

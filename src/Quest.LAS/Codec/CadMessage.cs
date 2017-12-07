@@ -2,7 +2,7 @@
 
 namespace Quest.LAS.Codec
 {
-    public class CadInboundMessage
+    public class CadMessage
     {
         public byte[] MessageText { get; set; }
         public long SequenceNumber { get; set; }

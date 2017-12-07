@@ -1,5 +1,12 @@
-﻿namespace Quest.LAS.Messages
+﻿using System.Collections.Generic;
+
+namespace Quest.LAS.Messages
 {
+    public class MdtParameters : ICadMessage
+    {
+        public List<MdtParameter> Items;
+    }
+
     public class MdtParameter
     {
         public int Identifier { get; set; }

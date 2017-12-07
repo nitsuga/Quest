@@ -12,11 +12,11 @@ namespace Quest.LAS.Extensions
         private const int MinEasting = 498732;
         private const int MinNorthing = 145232;
 
-        public static CallsignParam SplitCallSignParams(string csData)
+        public static CallsignUpdate SplitCallSignParams(string csData)
         {
             //sample data: EC46.#|9909
 
-            var csParams = new CallsignParam();
+            var csParams = new CallsignUpdate();
 
             var parts = csData.Split('|');
 
