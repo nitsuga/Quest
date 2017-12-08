@@ -61,70 +61,6 @@ namespace Quest.Api.Controllers
         }
 
         /// <summary>
-        /// Request a callsign change. If the device is being managed by Quest then
-        /// the request is always granted. If the device is being managed by a CAD then
-        /// the request is forwarded on to the CAD for processing.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("CallsignChange")]
-        public async Task<CallsignChangeResponse> CallsignChange([FromBody]CallsignChangeRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<CallsignChangeResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new CallsignChangeResponse() { Success = false, Message = ex.Message };
-            }
-        }
-
-        /// <summary>
-        /// Get the status of the device. can be used at startup of the device so it has the right details.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("RefreshState")]
-        public async Task<RefreshStateResponse> RefreshState([FromBody]RefreshStateRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<RefreshStateResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new RefreshStateResponse() { Success = false, Message = ex.Message };
-
-            }
-            finally
-            {
-            }
-        }
-
-        /// <summary>
-        /// Acknowledge event assignment
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("AckAssignedEvent")]
-        public async Task<AckAssignedEventResponse> AckAssignedEvent([FromBody]AckAssignedEventRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<AckAssignedEventResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new AckAssignedEventResponse() { Success = false, Message = ex.Message };
-
-            }
-            finally
-            {
-            }
-        }
-
-        /// <summary>
         /// send location update to the CAD/Quest
         /// </summary>
         /// <param name="request"></param>
@@ -143,45 +79,6 @@ namespace Quest.Api.Controllers
             }
             finally
             {
-            }
-        }
-
-        /// <summary>
-        /// Make a paient observation
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("MakePatientObservation")]
-        public async Task<MakePatientObservationResponse> MakePatientObservation([FromBody]MakePatientObservationRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<MakePatientObservationResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new MakePatientObservationResponse() { Success = false, Message = ex.Message };
-            }
-            finally
-            {
-            }
-        }
-
-        /// <summary>
-        /// Request patient details
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("PatientDetails")]
-        public async Task<PatientDetailsResponse> PatientDetails([FromBody]PatientDetailsRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<PatientDetailsResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new PatientDetailsResponse() { Success = false, Message = ex.Message };
             }
         }
 
@@ -264,21 +161,5 @@ namespace Quest.Api.Controllers
             }
         }
 
-        [HttpPost("GetHistory")]
-        public async Task<GetHistoryResponse> GetHistory([FromBody]GetHistoryRequest request)
-        {
-            try
-            {
-                return await _messageCache.SendAndWaitAsync<GetHistoryResponse>(request, new TimeSpan(0, 0, 10));
-            }
-            catch (Exception ex)
-            {
-                return new GetHistoryResponse() { Success = false, Message = ex.Message };
-
-            }
-            finally
-            {
-            }
-        }
     }
 }
