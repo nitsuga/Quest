@@ -1000,6 +1000,59 @@
       "properties": {
         "Channel": "XC1"
       }
+    },
+    {
+      "type": "Quest.LAS.Processor.MdtToQuestConverter, Quest.LAS",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "MdtToQuestConverter"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
+    {
+      "type": "Quest.LAS.Processor.ExpressQDecoder, Quest.LAS",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "ExpressQDecoder"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
+    {
+      "type": "Quest.LAS.Processor.ExpressQEncoder, Quest.LAS",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "ExpressQEncoder"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+      }
+    },
+    {
+      "type": "Quest.LAS.Processor.ExpressQGateway, Quest.LAS",
+      "services": [
+        {
+          "type": "Quest.Lib.Processor.IProcessor",
+          "key": "ExpressQGateway"
+        }
+      ],
+      "injectProperties": true,
+      "instanceScope": "single-instance",
+      "properties": {
+        "UserPath": "c:\\temp"
+      }
     }
 
 

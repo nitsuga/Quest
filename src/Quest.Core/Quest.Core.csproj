@@ -196,6 +196,7 @@
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <Private>true</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Quest.LAS\Quest.LAS.csproj" />
     <ProjectReference Include="..\Quest.Lib.OS\Quest.Lib.OS.csproj">
       <Private>true</Private>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>

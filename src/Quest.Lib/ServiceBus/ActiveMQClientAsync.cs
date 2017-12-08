@@ -25,7 +25,22 @@ namespace Quest.Lib.ServiceBus
         /// use a shared (static) unerlying service bus engine
         /// </summary>
         private ServiceStatus _status;
-        private readonly AutoResetEvent _semaphore = new AutoResetEvent(false);
+
+        /// <summary>
+        /// flag indicates that a message is ready to be sent by the writer
+        /// </summary>
+        private readonly AutoResetEvent _writeSemaphore = new AutoResetEvent(false);
+
+        /// <summary>
+        /// flag indicates a fault on the listeners or write
+        /// </summary>
+        private readonly AutoResetEvent _errorSemaphore = new AutoResetEvent(false);
+
+        /// <summary>
+        /// flag to signal listeners and writer to quit
+        /// </summary>
+        private readonly ManualResetEvent _quitTasksSemaphore = new ManualResetEvent(false);
+
         private readonly Queue<MessageQueueItem> _outputQueue = new Queue<MessageQueueItem>(32768);
         public string format { get; set; } = "json";
         public string topic { get; set; } = "quest.common";
@@ -101,7 +116,7 @@ namespace Quest.Lib.ServiceBus
                     using (IConnection connection = amqfactory.CreateConnection())
                     using (ISession qsess = connection.CreateSession( AcknowledgementMode.ClientAcknowledge ))
                     {
-                        Logger.Write($"Connected successfully to ActiveMq topic {topic} on {server}", GetType().Name);
+                        Logger.Write($"Connected successfully to {server}", GetType().Name);
 
                         // Start the connection so that messages will be processed.
                         connection.Start();
@@ -117,8 +132,18 @@ namespace Quest.Lib.ServiceBus
                         //writer..
                         tasks.Add(Writer(qsess, receiveTimeout, topic));
 
+                        int index = WaitHandle.WaitAny(new WaitHandle[] { _quitTasksSemaphore, _errorSemaphore });
+
+                        // tell others to stop
+                        _quitTasksSemaphore.Set();
+
                         // wait for tasks to complete
                         Task.WaitAll(tasks.ToArray());
+
+                        _quitTasksSemaphore.Reset();
+
+                        // 
+                        Logger.Write($"Listeners and write task stopped on ActiveMq topic {topic} on {server}", GetType().Name);
                     }
                 }
                 catch (Exception ex)
@@ -130,17 +155,71 @@ namespace Quest.Lib.ServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
+        private Task Writer(ISession session, TimeSpan receiveTimeout, string topic)
+        {
+            var t2 = Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        int index = WaitHandle.WaitAny(new WaitHandle[] { _quitTasksSemaphore, _writeSemaphore });
+
+                        // got a quit signal
+                        if (index == 0)
+                            return;
+
+                        while (_outputQueue.Count > 0)
+                        {
+                            var objectToSend = _outputQueue.Dequeue();
+                            if (objectToSend == null)
+                            {
+                                Logger.Write("Object is NULL", TraceEventType.Error, GetType().Name);
+                            }
+
+                            SendMessage(objectToSend, session, receiveTimeout, topic);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq::Writer");
+                        _errorSemaphore.Set();
+                        break;
+                    }
+                }
+            });
+
+            return t2;
+        }
+
+
         private Task ListenOnTopic(ISession qsess)
         {
             var t = Task.Factory.StartNew(() =>
             {
-                IDestination destination = qsess.GetTopic(topic);
-                // Create a consumer and producer
-                using (IMessageConsumer topic_consumer = qsess.CreateConsumer(destination))
+                try
                 {
-                    topic_consumer.Listener += OnTopicMessage;
-                    while (true)
-                        Thread.Sleep(10000);
+                    IDestination destination = qsess.GetTopic(topic);
+                    // Create a consumer and producer
+                    using (IMessageConsumer topic_consumer = qsess.CreateConsumer(destination))
+                    {
+                        Logger.Write($"Listening for messages on {topic}", GetType().Name);
+
+                        // dispatch waiting messages
+                        IMessage msg = null;
+                        while ((msg = topic_consumer.ReceiveNoWait()) != null)
+                            OnTopicMessage(msg);
+
+                        topic_consumer.Listener += OnTopicMessage;
+
+                        _quitTasksSemaphore.WaitOne();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq::ListenOnTopic");
+                    _errorSemaphore.Set();
+                    return;
                 }
             });
 
@@ -206,16 +285,30 @@ namespace Quest.Lib.ServiceBus
         {
             var t2 = Task.Factory.StartNew(() =>
             {
-                var queue = new ActiveMQQueue(QueueName);
-                // Create a consumer and producer
-                using (IMessageConsumer queue_consumer = qsess.CreateConsumer(queue))
+                try
                 {
-                    // clear existing messages
-                    while (queue_consumer.ReceiveNoWait() != null) ;
 
-                    queue_consumer.Listener += OnQueueMessage;
-                    while (true)
-                        Thread.Sleep(10000);
+                    var queue = new ActiveMQQueue(QueueName);
+                    // Create a consumer and producer
+                    using (IMessageConsumer queue_consumer = qsess.CreateConsumer(queue))
+                    {
+                        Logger.Write($"Listening for messages on {QueueName}", GetType().Name);
+
+                        // dispatch waiting messages
+                        IMessage msg = null;
+                        while ((msg = queue_consumer.ReceiveNoWait()) != null)
+                            OnQueueMessage(msg);
+
+                        queue_consumer.Listener += OnQueueMessage;
+
+                        _quitTasksSemaphore.WaitOne();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq::ListenOnQueue");
+                    _errorSemaphore.Set();
+                    return;
                 }
             });
 
@@ -224,110 +317,81 @@ namespace Quest.Lib.ServiceBus
 
         private void SendMessage(MessageQueueItem objectToSend, ISession session, TimeSpan receiveTimeout, string topic)
         {
-                IMessage msg = null;
+            IMessage msg = null;
 
-                switch (format)
-                {
-                    case "binary":
-                        var bytes = objectToSend.Message.SerializeBinary();
+            switch (format)
+            {
+                case "binary":
+                    var bytes = objectToSend.Message.SerializeBinary();
 
-                        if (bytes == null)
-                        {
-                            Logger.Write("Object could not be serialised", TraceEventType.Error, GetType().Name);
-                        }
-
-                        // Send a message
-                        msg = session.CreateBytesMessage(bytes);
-                        break;
-                    case "json":
-                        JsonSerializerSettings settings = new JsonSerializerSettings()
-                        {
-                            MaxDepth = 1000,
-                            TypeNameHandling = TypeNameHandling.All,
-                            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                            PreserveReferencesHandling = PreserveReferencesHandling.Objects
-                        };
-
-                        var json = JsonConvert.SerializeObject(objectToSend, settings);
-                        msg = session.CreateTextMessage(json);
-                        break;
-                }
-
-                if (msg != null)
-                {
-                    msg.NMSCorrelationID = objectToSend.Metadata.CorrelationId;
-                    msg.Properties["ReplyTo"] = objectToSend.Metadata.ReplyTo;
-                    msg.Properties["Source"] = objectToSend.Metadata.Source;
-                    msg.Properties["CorrelationId"] = objectToSend.Metadata.CorrelationId;
-                    msg.Properties["RoutingKey"] = objectToSend.Metadata.RoutingKey;
-                    msg.Properties["MessageType"] = objectToSend.Message.GetType().Name;
-
-                    if (string.IsNullOrEmpty(objectToSend.Metadata.Destination))
+                    if (bytes == null)
                     {
-                        Logger.Write($"Sending message {objectToSend.Message.GetType()} to topic {topic}", TraceEventType.Information, GetType().Name);
-
-                        IDestination destination = session.GetTopic(topic);
-                        using (IMessageProducer producer = session.CreateProducer(destination))
-                        {
-                            producer.DeliveryMode = Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
-                            producer.RequestTimeout = receiveTimeout;
-                            producer.TimeToLive = new TimeSpan(0, 0, TTL);
-                            producer.Send(msg);
-                        }
+                        Logger.Write("Object could not be serialised", TraceEventType.Error, GetType().Name);
                     }
-                    else
+
+                    // Send a message
+                    msg = session.CreateBytesMessage(bytes);
+                    break;
+                case "json":
+                    JsonSerializerSettings settings = new JsonSerializerSettings()
                     {
-                        Logger.Write($"Sending message {objectToSend.Message.GetType()} to queue {objectToSend.Metadata.Destination}", TraceEventType.Information, GetType().Name);
-                        var queue = new ActiveMQQueue(objectToSend.Metadata.Destination);
-                        using (IMessageProducer producer = session.CreateProducer(queue))
-                        {
-                            producer.DeliveryMode = Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
-                            producer.RequestTimeout = receiveTimeout;
-                            producer.Send(queue, msg);
-                        }
+                        MaxDepth = 1000,
+                        TypeNameHandling = TypeNameHandling.All,
+                        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                    };
+
+                    var json = JsonConvert.SerializeObject(objectToSend, settings);
+                    msg = session.CreateTextMessage(json);
+                    break;
+            }
+
+            if (msg != null)
+            {
+                msg.NMSCorrelationID = objectToSend.Metadata.CorrelationId;
+                msg.Properties["ReplyTo"] = objectToSend.Metadata.ReplyTo;
+                msg.Properties["Source"] = objectToSend.Metadata.Source;
+                msg.Properties["CorrelationId"] = objectToSend.Metadata.CorrelationId;
+                msg.Properties["RoutingKey"] = objectToSend.Metadata.RoutingKey;
+                msg.Properties["MessageType"] = objectToSend.Message.GetType().Name;
+
+                if (string.IsNullOrEmpty(objectToSend.Metadata.Destination))
+                {
+                    Logger.Write($"Sending message {objectToSend.Message.GetType()} to topic {topic}", TraceEventType.Information, GetType().Name);
+
+                    IDestination destination = session.GetTopic(topic);
+                    using (IMessageProducer producer = session.CreateProducer(destination))
+                    {
+                        producer.DeliveryMode = Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+                        producer.RequestTimeout = receiveTimeout;
+                        producer.TimeToLive = new TimeSpan(0, 0, TTL);
+                        producer.Send(msg);
+                    }
+                }
+                else
+                {
+                    Logger.Write($"Sending message {objectToSend.Message.GetType()} to queue {objectToSend.Metadata.Destination}", TraceEventType.Information, GetType().Name);
+                    var queue = new ActiveMQQueue(objectToSend.Metadata.Destination);
+                    using (IMessageProducer producer = session.CreateProducer(queue))
+                    {
+                        producer.DeliveryMode = Persistent ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+                        producer.RequestTimeout = receiveTimeout;
+                        producer.Send(queue, msg);
                     }
                 }
             }
-       
-        private Task Writer(ISession session, TimeSpan receiveTimeout, string topic)
-        {
-            var t2 = Task.Factory.StartNew(() =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        _semaphore.WaitOne(1);
-
-                        if (_outputQueue.Count > 0)
-                        {
-                            var objectToSend = _outputQueue.Dequeue();
-                            if (objectToSend == null)
-                            {
-                                Logger.Write("Object is NULL", TraceEventType.Error, GetType().Name);
-                            }
-
-                            SendMessage(objectToSend, session, receiveTimeout, topic);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Write($"Message queue error: {ex} ", TraceEventType.Error, "ActiveMq::Writer");
-                        throw ex;
-                    }
-                }
-            });
-
-            return t2;
         }
+       
 
         protected void OnTopicMessage(IMessage receivedMsg)
         {
+            receivedMsg.Acknowledge();
             OnMessage(receivedMsg);
         }
 
         protected void OnQueueMessage(IMessage receivedMsg)
         {
+            receivedMsg.Acknowledge();
             OnMessage(receivedMsg);
         }
 
@@ -337,9 +401,16 @@ namespace Quest.Lib.ServiceBus
         /// <param name="receivedMsg"></param>
         protected void OnMessage(IMessage receivedMsg)
         {
-            var msg = ParseMessage(receivedMsg);
-            if (msg!=null)
+            try
+            {
+                var msg = ParseMessage(receivedMsg);
+                if (msg != null)
                     NewMessage?.Invoke(this, msg);
+            }
+            catch(Exception ex)
+            {
+                Logger.Write($"OnMessage error: {ex} ", TraceEventType.Error, "ActiveMq::OnMessage");
+            }
         }
 
         protected NewMessageArgs ParseMessage(IMessage receivedMsg)
@@ -408,7 +479,7 @@ namespace Quest.Lib.ServiceBus
             // add into local outbound queue
             MessageQueueItem item = new MessageQueueItem() { Message = message, Metadata = metadata };
             _outputQueue.Enqueue(item);
-            _semaphore.Set();
+            _writeSemaphore.Set();
         }
 
         /// <summary>

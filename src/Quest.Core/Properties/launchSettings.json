@@ -4,9 +4,9 @@
       "commandName": "Project",
       "workingDirectory": "bin\\Debug\\netcoreapp2.0",
       "environmentVariables": {
-        "Modules": "SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager",
+        "Modules": "SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager;NotificationManager",
         "Session": "Dev",
-        "ComponentsConfig": "components.json;components-dev.json"
+        "ComponentsConfig": "components.json"
       }
     }
   }

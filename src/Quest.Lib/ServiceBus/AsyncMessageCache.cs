@@ -13,6 +13,7 @@ namespace Quest.Lib.ServiceBus
 
         public AsyncMessageCache(IServiceBusClient msgSource, string queue)
         {
+            Logger.Write($"ctor::AsyncMessageCache {queue}", "Web");
             MsgSource = msgSource;
             MsgSource.Initialise(queue);
         }
@@ -42,12 +43,12 @@ namespace Quest.Lib.ServiceBus
                     ReplyTo = MsgSource.QueueName,
                     RoutingKey = "",
                     Source = MsgSource.QueueName,
-                    Destination = ""
+                    Destination = ""  ,
+                    MsgType = obj.GetType().Name
                 };
 
                 // send the message
                 MsgSource.Broadcast(obj, metadata);
-                Logger.Write($"Broadcase Message Ok", "Web");
 
                 // now wait for the response to arrive (via the anonymous event handler above)
                 foundMessage.WaitOne(timeout);
@@ -61,13 +62,22 @@ namespace Quest.Lib.ServiceBus
 
         private void MsgSourceHandler<T>(object who, NewMessageArgs args, AutoResetEvent foundMessage, Request obj, ref T result) where T : class
         {
-            Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI={args.Metadata.CorrelationId} looking for {obj.RequestId}", "Web");
             // detect our message with the right correlation id and expected type
             if (args.Metadata.CorrelationId == obj.RequestId && args.Payload.GetType() == typeof(T))
             {
+                Logger.Write($"{MsgSource.QueueName} {obj.GetType()} got {args.Payload.GetType()} CI='{args.Metadata.CorrelationId}' looking for '{obj.RequestId}'", "Web");
                 result = args.Payload as T;
                 foundMessage.Set();
             }
+            else
+            {
+                if (args.Metadata.CorrelationId != obj.RequestId)
+                    Logger.Write($"Wrong correlation {MsgSource.QueueName} got '{args.Metadata.CorrelationId}' but was looking for '{obj.RequestId}'", "Web");
+                else
+                    Logger.Write($"Wrong type {MsgSource.QueueName} got {args.Payload.GetType()} but was looking for '{typeof(T)}'", "Web");
+            }
+
+
         }
 
         public void BroadcastMessage(IServiceBusMessage request)

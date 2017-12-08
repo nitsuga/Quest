@@ -93,7 +93,84 @@ services:
       - ElasticUrls=http://searchdatabase:9200
     volumes:
       - ./volumes/alpha/volume_quest:/app/config
-  
+
+
+  coverage:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "searchdatabase"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=CoverageManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+
+      
+    ########################################
+  xc:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=XC0;XC1;XCManager
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+
+          ########################################
+  simulator:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+      - "database"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=ResourceSimulator
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+
+    ########################################
+  mdt:
+    image: gluteusmaximus/quest.core:latest
+    mem_limit: 4096m
+    depends_on:
+      - "activemq"
+    environment:
+      - ComponentsConfig=config/components.json
+      - ApplicationConfig=config/appsettings.json
+      - ActiveMQ=activemq:tcp://activemq:61616
+      - Session=Alpha
+      - Modules=ExpressQDecoder;ExpressQEncoder;ExpressQGateway;MdtToQuestConverter
+      - ElasticUser=elastic
+      - ElasticPwd=changeme
+      - ElasticUrls=http://searchdatabase:9200
+    volumes:
+      - ./volumes/alpha/volume_quest:/app/config
+
+      
 #volumes:
 #  volume_quest:
 #  volume_search:

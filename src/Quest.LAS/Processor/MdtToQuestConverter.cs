@@ -11,13 +11,13 @@ namespace Quest.LAS.Processor
     /// <summary>
     /// Convert MDT messages to Quest Device Messages
     /// </summary>
-    public class QuestConverter : ServiceBusProcessor
+    public class MdtToQuestConverter : ServiceBusProcessor
     {
         #region Private Fields
         private ILifetimeScope _scope;
         #endregion
 
-        public QuestConverter(
+        public MdtToQuestConverter(
             ILifetimeScope scope,
             IServiceBusClient serviceBusClient,
             MessageHandler msgHandler,

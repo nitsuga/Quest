@@ -31,8 +31,8 @@ namespace Quest.Core
         // Set the Modules environment variable to specify which components to run
         //
         // to run the full web stack set Modules environment variable to:
-        // CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager
-        // SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager
+        // CoverageManager;EntityManager;SecurityManager;DeviceManager;NotificationManager;SearchManager;MapMatcherManager;VisualsManager;IndexerManager;ResourceSimulator;ResourceManager;GeoManager;RoutingManager;XC0;XC1;XCManager;ExpressQDecoder;ExpressQEncoder;ExpressQGateway;MdtToQuestConverter
+        // SecurityManager;DeviceManager;ResourceManager;GeoManager;RoutingManager;NotificationManager
         // XC0;XC1;XCManager
 
         // for research, use these
